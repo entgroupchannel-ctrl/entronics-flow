@@ -356,47 +356,6 @@ export default function Quotations() {
                     </div>
                   </div>
                 )}
-
-                {/* Salesperson */}
-                <div>
-                  <Label className="text-sm font-medium">ผู้เสนอราคา</Label>
-                  <div className="flex items-center space-x-2 mt-1">
-                    {isEditingSalesperson ? (
-                      <div className="flex items-center space-x-2 flex-1">
-                        <Input
-                          value={salesperson}
-                          onChange={(e) => setSalesperson(e.target.value)}
-                          className="flex-1"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setIsEditingSalesperson(false)}
-                        >
-                          <Save className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setIsEditingSalesperson(false)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center space-x-2 flex-1">
-                        <span className="flex-1 p-2 border rounded bg-background">{salesperson}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsEditingSalesperson(true)}
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
 
               {/* Right - Quote Info */}
@@ -457,7 +416,7 @@ export default function Quotations() {
                 </div>
 
                 {/* Dates */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-3">
                   <div>
                     <Label className="text-sm">วันที่</Label>
                     <Input
@@ -465,6 +424,15 @@ export default function Quotations() {
                       value={quotation.quotation_date}
                       onChange={(e) => setQuotation(prev => ({ ...prev, quotation_date: e.target.value }))}
                       className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm">เครดิต (วัน)</Label>
+                    <Input
+                      type="number"
+                      defaultValue={15}
+                      className="text-sm"
+                      min="0"
                     />
                   </div>
                   <div>
@@ -476,6 +444,71 @@ export default function Quotations() {
                       className="text-sm"
                     />
                   </div>
+                </div>
+
+                {/* Salesperson */}
+                <div>
+                  <Label className="text-sm font-medium">พนักงานขาย</Label>
+                  <div className="flex items-center space-x-2 mt-1">
+                    {isEditingSalesperson ? (
+                      <div className="flex items-center space-x-2 flex-1">
+                        <Input
+                          value={salesperson}
+                          onChange={(e) => setSalesperson(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsEditingSalesperson(false)}
+                        >
+                          <Save className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsEditingSalesperson(false)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2 flex-1">
+                        <span className="flex-1 p-2 border rounded bg-background text-sm">{salesperson}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditingSalesperson(true)}
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Currency */}
+                <div>
+                  <Label className="text-sm font-medium">สกุลเงิน</Label>
+                  <Textarea
+                    defaultValue="เกียวฟู พาโนซุ
+
+Phimm Phimonphonkun
+
+S.phratrawan 02-045-6104/082-249-79
+
+Adisak Intha 084-046-1315 adisak@entgroup.co.th
+
+Thep Sookcharoen
+
+unthikarn@entgroup.co.th ENTGROUP
+
+Rungarun Jantarakullo (Email : rungarun.janta@entgroup.co.th)
+
+Iyarin@entgroup.co.th Srisuwan"
+                    className="text-sm resize-none"
+                    rows={8}
+                  />
                 </div>
               </div>
             </div>
