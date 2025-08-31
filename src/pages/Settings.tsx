@@ -27,7 +27,17 @@ import {
   Eye,
   AlertTriangle,
   CheckCircle,
-  XCircle
+  XCircle,
+  Bell,
+  Megaphone,
+  Package,
+  Tag,
+  TrendingUp,
+  Star,
+  Edit,
+  Plus,
+  ToggleLeft,
+  ToggleRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -58,6 +68,21 @@ interface AuditLog {
   created_at: string;
 }
 
+interface Announcement {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  priority: 'low' | 'medium' | 'high';
+  target_roles: string[];
+  is_active: boolean;
+  published_at: string;
+  expires_at?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -66,6 +91,7 @@ export default function Settings() {
   const [invitations, setInvitations] = useState<UserInvitation[]>([]);
   const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   
   // Invitation form state
   const [inviteEmail, setInviteEmail] = useState('');
@@ -73,6 +99,17 @@ export default function Settings() {
   const [inviteMessage, setInviteMessage] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
+
+  // Announcement form state
+  const [showAnnouncementDialog, setShowAnnouncementDialog] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [announcementTitle, setAnnouncementTitle] = useState('');
+  const [announcementDescription, setAnnouncementDescription] = useState('');
+  const [announcementType, setAnnouncementType] = useState('general');
+  const [announcementPriority, setAnnouncementPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [announcementTargetRoles, setAnnouncementTargetRoles] = useState<string[]>(['all']);
+  const [announcementExpiresAt, setAnnouncementExpiresAt] = useState('');
+  const [isSubmittingAnnouncement, setIsSubmittingAnnouncement] = useState(false);
 
   const roleLabels = {
     admin: 'ผู้ดูแลระบบ',
@@ -92,7 +129,8 @@ export default function Settings() {
       await Promise.all([
         loadInvitations(),
         loadSystemSettings(),
-        loadAuditLogs()
+        loadAuditLogs(),
+        loadAnnouncements()
       ]);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -154,6 +192,24 @@ export default function Settings() {
     }
 
     setAuditLogs(data || []);
+  };
+
+  const loadAnnouncements = async () => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAnnouncements(data || []);
+    } catch (error: any) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลประกาศได้",
+        variant: "destructive",
+      });
+    }
   };
 
   const sendInvitation = async () => {
@@ -280,10 +336,11 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="users">จัดการผู้ใช้</TabsTrigger>
           <TabsTrigger value="security">ความปลอดภัย</TabsTrigger>
           <TabsTrigger value="company">ข้อมูลบริษัท</TabsTrigger>
+          <TabsTrigger value="announcements">ข่าวสารประกาศ</TabsTrigger>
           <TabsTrigger value="audit">ประวัติการใช้งาน</TabsTrigger>
         </TabsList>
 
@@ -514,6 +571,198 @@ export default function Settings() {
                       <TableCell>{log.resource_type}</TableCell>
                       <TableCell className="max-w-xs truncate">
                         {JSON.stringify(log.details)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Announcements Tab */}
+        <TabsContent value="announcements" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                จัดการข่าวสารและประกาศ
+              </CardTitle>
+              <Dialog open={showAnnouncementDialog} onOpenChange={setShowAnnouncementDialog}>
+                <DialogTrigger asChild>
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    สร้างประกาศใหม่
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingAnnouncement ? 'แก้ไขประกาศ' : 'สร้างประกาศใหม่'}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="title">หัวข้อประกาศ</Label>
+                      <Input
+                        id="title"
+                        placeholder="หัวข้อประกาศ"
+                        value={announcementTitle}
+                        onChange={(e) => setAnnouncementTitle(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="description">รายละเอียด</Label>
+                      <Textarea
+                        id="description"
+                        placeholder="รายละเอียดประกาศ"
+                        rows={4}
+                        value={announcementDescription}
+                        onChange={(e) => setAnnouncementDescription(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="type">ประเภทประกาศ</Label>
+                        <Select value={announcementType} onValueChange={setAnnouncementType}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="เลือกประเภท" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="general">ทั่วไป</SelectItem>
+                            <SelectItem value="new_product">สินค้าใหม่</SelectItem>
+                            <SelectItem value="promotion">โปรโมชั่น</SelectItem>
+                            <SelectItem value="stock_update">อัพเดทสต็อก</SelectItem>
+                            <SelectItem value="maintenance">การบำรุงรักษา</SelectItem>
+                            <SelectItem value="policy">นโยบาย</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="priority">ความสำคัญ</Label>
+                        <Select value={announcementPriority} onValueChange={(value: 'low' | 'medium' | 'high') => setAnnouncementPriority(value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="เลือกความสำคัญ" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">ปกติ</SelectItem>
+                            <SelectItem value="medium">ปานกลาง</SelectItem>
+                            <SelectItem value="high">สำคัญ</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="expires">วันหมดอายุ (ไม่บังคับ)</Label>
+                      <Input
+                        id="expires"
+                        type="datetime-local"
+                        value={announcementExpiresAt}
+                        onChange={(e) => setAnnouncementExpiresAt(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowAnnouncementDialog(false);
+                          setEditingAnnouncement(null);
+                          setAnnouncementTitle('');
+                          setAnnouncementDescription('');
+                          setAnnouncementType('general');
+                          setAnnouncementPriority('medium');
+                          setAnnouncementTargetRoles(['all']);
+                          setAnnouncementExpiresAt('');
+                        }}
+                      >
+                        ยกเลิก
+                      </Button>
+                      <Button
+                        onClick={() => {/* TODO: implement save */}}
+                        disabled={isSubmittingAnnouncement}
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        {isSubmittingAnnouncement ? 'กำลังบันทึก...' : 'บันทึก'}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>หัวข้อ</TableHead>
+                    <TableHead>ประเภท</TableHead>
+                    <TableHead>ความสำคัญ</TableHead>
+                    <TableHead>สถานะ</TableHead>
+                    <TableHead>วันที่สร้าง</TableHead>
+                    <TableHead className="text-center">จัดการ</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {announcements.map((announcement) => (
+                    <TableRow key={announcement.id}>
+                      <TableCell className="font-medium">{announcement.title}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {announcement.type === 'general' && 'ทั่วไป'}
+                          {announcement.type === 'new_product' && 'สินค้าใหม่'}
+                          {announcement.type === 'promotion' && 'โปรโมชั่น'}
+                          {announcement.type === 'stock_update' && 'อัพเดทสต็อก'}
+                          {announcement.type === 'maintenance' && 'การบำรุงรักษา'}
+                          {announcement.type === 'policy' && 'นโยบาย'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={
+                            announcement.priority === 'high' ? 'destructive' : 
+                            announcement.priority === 'medium' ? 'outline' : 'secondary'
+                          }
+                        >
+                          {announcement.priority === 'high' && 'สำคัญ'}
+                          {announcement.priority === 'medium' && 'ปานกลาง'}
+                          {announcement.priority === 'low' && 'ปกติ'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {announcement.is_active ? (
+                            <Badge className="bg-green-100 text-green-800">ใช้งาน</Badge>
+                          ) : (
+                            <Badge className="bg-gray-100 text-gray-800">ปิดใช้งาน</Badge>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {/* TODO: toggle status */}}
+                          >
+                            {announcement.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(announcement.created_at), 'dd/MM/yyyy')}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {/* TODO: implement edit */}}
+                          >
+                            <Edit className="w-4 h-4 text-blue-500" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {/* TODO: implement delete */}}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
