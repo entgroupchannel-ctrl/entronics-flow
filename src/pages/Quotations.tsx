@@ -413,7 +413,7 @@ export default function Quotations() {
 
                 {/* Dates */}
                 <div className="grid grid-cols-1 gap-2">
-                  <div>
+                  <div className="w-[40%]">
                     <Label className="text-sm">วันที่</Label>
                     <Input
                       type="date"
@@ -422,7 +422,7 @@ export default function Quotations() {
                       className="text-sm h-8"
                     />
                   </div>
-                  <div>
+                  <div className="w-[40%]">
                     <Label className="text-sm">เครดิต (วัน)</Label>
                     <Input
                       type="number"
@@ -431,7 +431,7 @@ export default function Quotations() {
                       min="0"
                     />
                   </div>
-                  <div>
+                  <div className="w-[40%]">
                     <Label className="text-sm">ครบกำหนด</Label>
                     <Input
                       type="date"
@@ -443,7 +443,7 @@ export default function Quotations() {
                 </div>
 
                 {/* Salesperson */}
-                <div>
+                <div className="w-[40%]">
                   <Label className="text-sm font-medium">พนักงานขาย</Label>
                   <div className="flex items-center space-x-2 mt-1">
                     {isEditingSalesperson ? (
@@ -481,16 +481,6 @@ export default function Quotations() {
                       </div>
                     )}
                   </div>
-                </div>
-
-                {/* Contact Details */}
-                <div>
-                  <Label className="text-sm">รายละเอียดติดต่อ</Label>
-                  <Textarea
-                    placeholder="สำนักงานใหญ่: 02-123-4567"
-                    className="text-sm resize-none mt-1"
-                    rows={2}
-                  />
                 </div>
               </div>
             </div>
