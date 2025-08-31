@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, format } from 'date-fns';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 interface Customer {
   id: string;
@@ -359,7 +359,7 @@ export default function Quotations() {
         item.line_total.toLocaleString('th-TH')
       ]);
 
-      (doc as any).autoTable({
+      autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: 120,
