@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,90 +23,41 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Product {
   id: string;
   sku: string;
   name: string;
-  category: string;
-  brand: string;
-  model: string;
+  category?: string;
+  brand?: string;
   price: number;
-  cost: number;
   stock: number;
-  minStock: number;
-  status: "active" | "inactive" | "outofstock";
-  description: string;
-  specifications: Record<string, string>;
+  status: "In Stock" | "Low Stock" | "Out of Stock";
+  created_at?: string;
+  updated_at?: string;
 }
 
 const categories = [
-  "Panel PC",
-  "Box PC", 
-  "Embedded PC",
-  "Mini PC",
-  "Industrial Motherboard",
-  "Industrial Monitor",
+  "Computers",
+  "Tablets", 
+  "Monitors",
+  "Components",
   "Accessories"
 ];
 
 const brands = [
-  "Advantech",
-  "AAEON",
-  "NEXCOM",
-  "IEI",
-  "Kontron",
-  "Axiomtek",
+  "TechBrand",
+  "RuggedTech",
+  "DisplayPro",
+  "EmbedTech",
+  "InputTech",
   "Other"
 ];
 
-const sampleProducts: Product[] = [
-  {
-    id: "1",
-    sku: "ADV-PPC-3150",
-    name: "Advantech PPC-3150 15\" Panel PC",
-    category: "Panel PC",
-    brand: "Advantech",
-    model: "PPC-3150",
-    price: 45000,
-    cost: 38000,
-    stock: 12,
-    minStock: 5,
-    status: "active",
-    description: "15\" XGA TFT LCD Panel Computer with Intel Atom processor",
-    specifications: {
-      "CPU": "Intel Atom N2600 1.6GHz",
-      "RAM": "2GB DDR3",
-      "Storage": "32GB SSD",
-      "Display": "15\" XGA 1024x768",
-      "I/O": "2x USB, 2x COM, 1x LAN"
-    }
-  },
-  {
-    id: "2", 
-    sku: "NEX-NISE-3500",
-    name: "NEXCOM NISE 3500 Fanless Box PC",
-    category: "Box PC",
-    brand: "NEXCOM",
-    model: "NISE-3500",
-    price: 32000,
-    cost: 27000,
-    stock: 8,
-    minStock: 3,
-    status: "active",
-    description: "Compact fanless box PC for industrial applications",
-    specifications: {
-      "CPU": "Intel Celeron J1900 2.0GHz",
-      "RAM": "4GB DDR3L",
-      "Storage": "64GB mSATA",
-      "I/O": "4x USB, 2x COM, 2x LAN",
-      "Operating Temp": "-10°C to +60°C"
-    }
-  }
-];
-
 const Inventory = () => {
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -117,78 +68,131 @@ const Inventory = () => {
     name: "",
     category: "",
     brand: "",
-    model: "",
     price: 0,
-    cost: 0,
     stock: 0,
-    minStock: 5,
-    status: "active",
-    description: "",
-    specifications: {}
+    status: "In Stock"
   });
 
-  const handleAddProduct = () => {
-    if (!newProduct.sku || !newProduct.name || !newProduct.category) {
+  // Load products from Supabase
+  const loadProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading products:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถโหลดข้อมูลสินค้าได้",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setProducts((data || []) as Product[]);
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const handleAddProduct = async () => {
+    if (!newProduct.sku || !newProduct.name) {
       toast({
         title: "ข้อมูลไม่ครบถ้วน",
-        description: "กรุณากรอก SKU, ชื่อสินค้า และหมวดหมู่",
+        description: "กรุณากรอก SKU และชื่อสินค้า",
         variant: "destructive"
       });
       return;
     }
 
-    const product: Product = {
-      id: Date.now().toString(),
-      sku: newProduct.sku!,
-      name: newProduct.name!,
-      category: newProduct.category!,
-      brand: newProduct.brand || "",
-      model: newProduct.model || "",
-      price: newProduct.price || 0,
-      cost: newProduct.cost || 0,
-      stock: newProduct.stock || 0,
-      minStock: newProduct.minStock || 5,
-      status: newProduct.status as "active" | "inactive" | "outofstock" || "active",
-      description: newProduct.description || "",
-      specifications: newProduct.specifications || {}
-    };
+    try {
+      // Determine status based on stock
+      let status = "In Stock";
+      if (newProduct.stock === 0) {
+        status = "Out of Stock";
+      } else if (newProduct.stock && newProduct.stock <= 5) {
+        status = "Low Stock";
+      }
 
-    setProducts([...products, product]);
-    setNewProduct({
-      sku: "",
-      name: "",
-      category: "",
-      brand: "",
-      model: "",
-      price: 0,
-      cost: 0,
-      stock: 0,
-      minStock: 5,
-      status: "active",
-      description: "",
-      specifications: {}
-    });
-    setShowAddForm(false);
-    
-    toast({
-      title: "เพิ่มสินค้าสำเร็จ",
-      description: `เพิ่มสินค้า ${product.name} เรียบร้อยแล้ว`
-    });
+      const { data, error } = await supabase
+        .from('products')
+        .insert([{
+          sku: newProduct.sku,
+          name: newProduct.name,
+          category: newProduct.category || null,
+          brand: newProduct.brand || null,
+          price: newProduct.price || 0,
+          stock: newProduct.stock || 0,
+          status: status
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error adding product:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถเพิ่มสินค้าได้",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Reload products to get the updated list
+      await loadProducts();
+      
+      setNewProduct({
+        sku: "",
+        name: "",
+        category: "",
+        brand: "",
+        price: 0,
+        stock: 0,
+        status: "In Stock"
+      });
+      setShowAddForm(false);
+      
+      toast({
+        title: "เพิ่มสินค้าสำเร็จ",
+        description: `เพิ่มสินค้า ${newProduct.name} เรียบร้อยแล้ว`
+      });
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถเพิ่มสินค้าได้",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.brand.toLowerCase().includes(searchTerm.toLowerCase());
+                         (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const getStatusBadge = (status: string, stock: number, minStock: number) => {
-    if (stock <= 0) return <Badge variant="destructive">หมด</Badge>;
-    if (stock <= minStock) return <Badge variant="secondary">ใกล้หมด</Badge>;
-    if (status === "active") return <Badge variant="default">ปกติ</Badge>;
-    return <Badge variant="outline">ไม่ใช้งาน</Badge>;
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "In Stock":
+        return <Badge variant="default">มีสต๊อค</Badge>;
+      case "Low Stock":
+        return <Badge variant="secondary">สต๊อคต่ำ</Badge>;
+      case "Out of Stock":
+        return <Badge variant="destructive">หมดสต๊อค</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   return (
@@ -272,26 +276,23 @@ const Inventory = () => {
                       {filteredProducts.map((product) => (
                         <TableRow key={product.id}>
                           <TableCell className="font-medium">{product.sku}</TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{product.name}</div>
-                              <div className="text-sm text-muted-foreground">{product.model}</div>
-                            </div>
-                          </TableCell>
+                           <TableCell>
+                             <div className="font-medium">{product.name}</div>
+                           </TableCell>
                           <TableCell>{product.category}</TableCell>
                           <TableCell>{product.brand}</TableCell>
                           <TableCell className="text-right">฿{product.price.toLocaleString()}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <span>{product.stock}</span>
-                              {product.stock <= product.minStock && (
-                                <AlertTriangle className="h-4 w-4 text-warning" />
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(product.status, product.stock, product.minStock)}
-                          </TableCell>
+                           <TableCell className="text-right">
+                             <div className="flex items-center justify-end gap-2">
+                               <span>{product.stock}</span>
+                               {product.stock <= 5 && (
+                                 <AlertTriangle className="h-4 w-4 text-warning" />
+                               )}
+                             </div>
+                           </TableCell>
+                           <TableCell>
+                             {getStatusBadge(product.status)}
+                           </TableCell>
                           <TableCell>
                             <div className="flex items-center justify-center gap-2">
                               <Button variant="ghost" size="icon">
@@ -370,15 +371,6 @@ const Inventory = () => {
                           </Select>
                         </div>
 
-                        <div>
-                          <Label htmlFor="model">รุ่น</Label>
-                          <Input
-                            id="model"
-                            value={newProduct.model}
-                            onChange={(e) => setNewProduct({...newProduct, model: e.target.value})}
-                            placeholder="PPC-3150"
-                          />
-                        </div>
                       </div>
 
                       <div className="space-y-4">
@@ -393,64 +385,20 @@ const Inventory = () => {
                           />
                         </div>
 
-                        <div>
-                          <Label htmlFor="cost">ต้นทุน (บาท)</Label>
-                          <Input
-                            id="cost"
-                            type="number"
-                            value={newProduct.cost}
-                            onChange={(e) => setNewProduct({...newProduct, cost: Number(e.target.value)})}
-                            placeholder="38000"
-                          />
-                        </div>
+                         <div>
+                           <Label htmlFor="stock">จำนวนสต๊อค</Label>
+                           <Input
+                             id="stock"
+                             type="number"
+                             value={newProduct.stock}
+                             onChange={(e) => setNewProduct({...newProduct, stock: Number(e.target.value)})}
+                             placeholder="12"
+                           />
+                         </div>
 
-                        <div>
-                          <Label htmlFor="stock">จำนวนสต๊อค</Label>
-                          <Input
-                            id="stock"
-                            type="number"
-                            value={newProduct.stock}
-                            onChange={(e) => setNewProduct({...newProduct, stock: Number(e.target.value)})}
-                            placeholder="12"
-                          />
-                        </div>
-
-                        <div>
-                          <Label htmlFor="minStock">สต๊อคขั้นต่ำ</Label>
-                          <Input
-                            id="minStock"
-                            type="number"
-                            value={newProduct.minStock}
-                            onChange={(e) => setNewProduct({...newProduct, minStock: Number(e.target.value)})}
-                            placeholder="5"
-                          />
-                        </div>
-
-                        <div>
-                          <Label htmlFor="status">สถานะ</Label>
-                          <Select value={newProduct.status} onValueChange={(value) => setNewProduct({...newProduct, status: value as any})}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="เลือกสถานะ" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="active">ใช้งาน</SelectItem>
-                              <SelectItem value="inactive">ไม่ใช้งาน</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
                       </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="description">รายละเอียดสินค้า</Label>
-                      <Textarea
-                        id="description"
-                        value={newProduct.description}
-                        onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
-                        placeholder="15 inch XGA TFT LCD Panel Computer with Intel Atom processor"
-                        rows={3}
-                      />
-                    </div>
 
                     <div className="flex gap-4">
                       <Button onClick={handleAddProduct}>
@@ -527,10 +475,10 @@ const Inventory = () => {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-muted-foreground">มูลค่าสต๊อค</p>
-                        <p className="text-2xl font-bold">
-                          ฿{products.reduce((sum, p) => sum + (p.cost * p.stock), 0).toLocaleString()}
-                        </p>
+                         <p className="text-sm text-muted-foreground">มูลค่าสต๊อค</p>
+                         <p className="text-2xl font-bold">
+                           ฿{products.reduce((sum, p) => sum + (p.price * p.stock), 0).toLocaleString()}
+                         </p>
                       </div>
                       <Package className="h-8 w-8 text-muted-foreground" />
                     </div>
@@ -541,10 +489,10 @@ const Inventory = () => {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-muted-foreground">สินค้าใกล้หมด</p>
-                        <p className="text-2xl font-bold text-warning">
-                          {products.filter(p => p.stock <= p.minStock).length}
-                        </p>
+                         <p className="text-sm text-muted-foreground">สินค้าใกล้หมด</p>
+                         <p className="text-2xl font-bold text-warning">
+                           {products.filter(p => p.stock <= 5).length}
+                         </p>
                       </div>
                       <AlertTriangle className="h-8 w-8 text-warning" />
                     </div>
