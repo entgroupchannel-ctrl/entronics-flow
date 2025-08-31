@@ -25,8 +25,6 @@ interface SidebarProps {
 }
 
 const salesSubMenu = [
-  { title: "เอกสารขาย > แสดงทั้งหมด", href: "/sales-documents" },
-  { title: "เอกสารขาย > สร้างใบเสนอราคา", href: "/quotations" },
   { title: "ใบเสนอราคา", href: "/quotations" },
   { title: "ใบวางบิล/ใบแจ้งหนี้", href: "/invoices" },
   { title: "ใบกำกับภาษี", href: "/tax-invoices" },
