@@ -55,12 +55,6 @@ const menuItems = [
     iconColor: "text-cyan-500"
   },
   {
-    title: "เอกสารขาย / Sales Documents",
-    icon: ShoppingCart,
-    href: "/sales-documents",
-    iconColor: "text-pink-500"
-  },
-  {
     title: "การเงิน / Financial",
     icon: DollarSign,
     href: "/financial",
