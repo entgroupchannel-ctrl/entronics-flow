@@ -408,7 +408,7 @@ const Index = () => {
             ) : (
               announcements.map((announcement) => (
                 <div key={announcement.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer"
-                     onClick={() => setCurrentView('announcements')}>
+                     onClick={() => window.location.href = '/settings'}>
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0">
                       {announcement.type === 'new_product' && <Package className="h-6 w-6 text-blue-500" />}
@@ -438,8 +438,8 @@ const Index = () => {
           </div>
           {announcements.length > 0 && (
             <div className="mt-4 text-center">
-              <Button variant="outline" onClick={() => setCurrentView('announcements')}>
-                ดูประกาศทั้งหมด
+              <Button variant="outline" onClick={() => window.location.href = '/settings'}>
+                จัดการประกาศ
               </Button>
             </div>
           )}
@@ -940,19 +940,12 @@ const Index = () => {
     </>
   );
 
-  // Import and render announcements component
-  const AnnouncementsComponent = React.lazy(() => import('./Announcements'));
-
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
         return renderDashboardView();
       case 'service':
         return renderServiceView();
-      case 'announcements':
-        return <React.Suspense fallback={<div>กำลังโหลด...</div>}>
-          <AnnouncementsComponent />
-        </React.Suspense>;
       default:
         return renderDashboardView();
     }
