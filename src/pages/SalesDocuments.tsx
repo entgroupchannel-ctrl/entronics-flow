@@ -108,7 +108,7 @@ export default function SalesDocuments() {
   };
 
   const createNewQuotation = () => {
-    window.open('/quotations', '_blank');
+    window.location.href = '/quotations';
   };
 
   return (
@@ -172,9 +172,10 @@ export default function SalesDocuments() {
                 </div>
                 <div className="col-span-2">วันที่</div>
                 <div className="col-span-2">เลขที่เอกสาร</div>
-                <div className="col-span-4">ข้อมูลคู่ค้า/ชื่อใบสั่งซื้อ</div>
-                <div className="col-span-2">ยอดความสูญ</div>
-                <div className="col-span-1">สถานะ</div>
+                <div className="col-span-3">ชื่อลูกค้า/ชื่อโปรเจ็ค</div>
+                <div className="col-span-2">ยอดรวมสุทธิ</div>
+                <div className="col-span-2">สถานะ</div>
+                <div className="col-span-1"></div>
               </div>
             </div>
 
@@ -204,7 +205,7 @@ export default function SalesDocuments() {
                       <div className="col-span-2 font-medium">
                         {quotation.quotation_number}
                       </div>
-                      <div className="col-span-4">
+                      <div className="col-span-3">
                         <div className="font-medium">{quotation.customer_name}</div>
                         {quotation.items && quotation.items.length > 0 && (
                           <div className="text-xs text-muted-foreground mt-1">
@@ -218,10 +219,12 @@ export default function SalesDocuments() {
                           maximumFractionDigits: 2
                         })}
                       </div>
-                      <div className="col-span-1 flex items-center justify-between">
+                      <div className="col-span-2">
                         <Badge variant="secondary" className={getStatusColor(quotation.status)}>
                           {getStatusText(quotation.status)}
                         </Badge>
+                      </div>
+                      <div className="col-span-1 flex justify-center">
                         <Button variant="ghost" size="sm">
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
