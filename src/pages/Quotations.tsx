@@ -498,16 +498,16 @@ export default function Quotations() {
               <div className="border rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-primary text-primary-foreground">
-                      <TableHead className="text-center w-16 text-primary-foreground">ลำดับ</TableHead>
-                      <TableHead className="w-80 text-primary-foreground">ชื่อสินค้า</TableHead>
-                      <TableHead className="text-center w-20 text-primary-foreground">จำนวน</TableHead>
-                      <TableHead className="text-center w-20 text-primary-foreground">หน่วย</TableHead>
-                      <TableHead className="text-center w-32 text-primary-foreground">ราคาต่อหน่วย</TableHead>
-                      <TableHead className="text-center w-32 text-primary-foreground">ส่วนลด (฿)</TableHead>
-                      <TableHead className="text-center w-32 text-primary-foreground">ราคารวม</TableHead>
-                      <TableHead className="text-center w-20 text-primary-foreground">Software</TableHead>
-                      <TableHead className="text-center w-16 text-primary-foreground">ลบ</TableHead>
+                    <TableRow className="bg-primary text-primary-foreground hover:bg-primary">
+                      <TableHead className="text-center w-16 text-primary-foreground hover:bg-primary">ลำดับ</TableHead>
+                      <TableHead className="w-80 text-primary-foreground hover:bg-primary">ชื่อสินค้า</TableHead>
+                      <TableHead className="text-center w-20 text-primary-foreground hover:bg-primary">จำนวน</TableHead>
+                      <TableHead className="text-center w-20 text-primary-foreground hover:bg-primary">หน่วย</TableHead>
+                      <TableHead className="text-center w-32 text-primary-foreground hover:bg-primary">ราคาต่อหน่วย</TableHead>
+                      <TableHead className="text-center w-32 text-primary-foreground hover:bg-primary">ส่วนลด (฿)</TableHead>
+                      <TableHead className="text-center w-32 text-primary-foreground hover:bg-primary">ราคารวม</TableHead>
+                      <TableHead className="text-center w-20 text-primary-foreground hover:bg-primary">Software</TableHead>
+                      <TableHead className="text-center w-16 text-primary-foreground hover:bg-primary">ลบ</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
