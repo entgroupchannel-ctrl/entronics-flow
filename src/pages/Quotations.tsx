@@ -253,16 +253,12 @@ export default function Quotations() {
           
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <Share2 className="w-4 h-4 mr-2" />
-              แชร์
+              <X className="w-4 h-4 mr-2" />
+              ปิดหน้าต่าง
             </Button>
-            <Button variant="outline" size="sm">
-              <Printer className="w-4 h-4 mr-2" />
-              พิมพ์
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              ดาวน์โหลด PDF
+            <Button variant="default" size="sm">
+              <Save className="w-4 h-4 mr-2" />
+              บันทึกเอกสาร
             </Button>
           </div>
         </div>
@@ -487,27 +483,13 @@ export default function Quotations() {
                   </div>
                 </div>
 
-                {/* Currency */}
+                {/* Contact Details */}
                 <div>
-                  <Label className="text-sm font-medium">สกุลเงิน</Label>
+                  <Label className="text-sm">รายละเอียดติดต่อ</Label>
                   <Textarea
-                    defaultValue="เกียวฟู พาโนซุ
-
-Phimm Phimonphonkun
-
-S.phratrawan 02-045-6104/082-249-79
-
-Adisak Intha 084-046-1315 adisak@entgroup.co.th
-
-Thep Sookcharoen
-
-unthikarn@entgroup.co.th ENTGROUP
-
-Rungarun Jantarakullo (Email : rungarun.janta@entgroup.co.th)
-
-Iyarin@entgroup.co.th Srisuwan"
+                    placeholder="สำนักงานใหญ่: 02-123-4567"
                     className="text-sm resize-none"
-                    rows={8}
+                    rows={3}
                   />
                 </div>
               </div>
@@ -739,14 +721,31 @@ Iyarin@entgroup.co.th Srisuwan"
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end space-x-3 mt-8">
-              <Button variant="outline">
-                บันทึกร่าง
-              </Button>
-              <Button>
-                บันทึกใบเสนอราคา
-              </Button>
+            {/* Export Options */}
+            <div className="flex justify-between items-center mt-8">
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  แชร์
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Printer className="w-4 h-4 mr-2" />
+                  พิมพ์
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  ดาวน์โหลด PDF
+                </Button>
+              </div>
+              
+              <div className="flex space-x-3">
+                <Button variant="outline">
+                  บันทึกร่าง
+                </Button>
+                <Button>
+                  บันทึกใบเสนอราคา
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
