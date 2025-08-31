@@ -194,6 +194,153 @@ export default function Settings() {
     setAuditLogs(data || []);
   };
 
+  const saveAnnouncement = async () => {
+    if (!announcementTitle.trim() || !announcementDescription.trim()) {
+      toast({
+        title: "ข้อมูลไม่ครบ",
+        description: "กรุณากรอกหัวข้อและรายละเอียดประกาศ",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingAnnouncement(true);
+    try {
+      const announcementData = {
+        title: announcementTitle,
+        description: announcementDescription,
+        type: announcementType,
+        priority: announcementPriority,
+        target_roles: announcementTargetRoles,
+        expires_at: announcementExpiresAt ? new Date(announcementExpiresAt).toISOString() : null,
+        is_active: true,
+        published_at: new Date().toISOString(),
+        created_by: user?.id
+      };
+
+      if (editingAnnouncement) {
+        // Update existing announcement
+        const { error } = await (supabase as any)
+          .from('announcements')
+          .update(announcementData)
+          .eq('id', editingAnnouncement.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "บันทึกสำเร็จ",
+          description: "ประกาศได้รับการอัพเดทแล้ว",
+        });
+      } else {
+        // Create new announcement
+        const { error } = await (supabase as any)
+          .from('announcements')
+          .insert([announcementData]);
+
+        if (error) throw error;
+
+        toast({
+          title: "บันทึกสำเร็จ",
+          description: "สร้างประกาศใหม่เรียบร้อยแล้ว",
+        });
+      }
+
+      // Reset form and reload data
+      setShowAnnouncementDialog(false);
+      setEditingAnnouncement(null);
+      resetAnnouncementForm();
+      await loadAnnouncements();
+
+    } catch (error: any) {
+      console.error('Error saving announcement:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกประกาศได้",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingAnnouncement(false);
+    }
+  };
+
+  const editAnnouncement = (announcement: Announcement) => {
+    setEditingAnnouncement(announcement);
+    setAnnouncementTitle(announcement.title);
+    setAnnouncementDescription(announcement.description);
+    setAnnouncementType(announcement.type);
+    setAnnouncementPriority(announcement.priority);
+    setAnnouncementTargetRoles(announcement.target_roles);
+    setAnnouncementExpiresAt(
+      announcement.expires_at 
+        ? new Date(announcement.expires_at).toISOString().slice(0, 16)
+        : ''
+    );
+    setShowAnnouncementDialog(true);
+  };
+
+  const deleteAnnouncement = async (announcementId: string) => {
+    if (!confirm('คุณต้องการลบประกาศนี้หรือไม่?')) {
+      return;
+    }
+
+    try {
+      const { error } = await (supabase as any)
+        .from('announcements')
+        .delete()
+        .eq('id', announcementId);
+
+      if (error) throw error;
+
+      toast({
+        title: "ลบสำเร็จ",
+        description: "ประกาศถูกลบแล้ว",
+      });
+
+      await loadAnnouncements();
+    } catch (error: any) {
+      console.error('Error deleting announcement:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบประกาศได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleAnnouncementStatus = async (announcementId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await (supabase as any)
+        .from('announcements')
+        .update({ is_active: !currentStatus })
+        .eq('id', announcementId);
+
+      if (error) throw error;
+
+      toast({
+        title: "อัพเดทสำเร็จ",
+        description: `ประกาศได้รับการ${!currentStatus ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}แล้ว`,
+      });
+
+      await loadAnnouncements();
+    } catch (error: any) {
+      console.error('Error toggling announcement status:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถเปลี่ยนสถานะได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const resetAnnouncementForm = () => {
+    setAnnouncementTitle('');
+    setAnnouncementDescription('');
+    setAnnouncementType('general');
+    setAnnouncementPriority('medium');
+    setAnnouncementTargetRoles(['all']);
+    setAnnouncementExpiresAt('');
+  };
+
   const loadAnnouncements = async () => {
     try {
       const { data, error } = await (supabase as any)
@@ -667,18 +814,13 @@ export default function Settings() {
                         onClick={() => {
                           setShowAnnouncementDialog(false);
                           setEditingAnnouncement(null);
-                          setAnnouncementTitle('');
-                          setAnnouncementDescription('');
-                          setAnnouncementType('general');
-                          setAnnouncementPriority('medium');
-                          setAnnouncementTargetRoles(['all']);
-                          setAnnouncementExpiresAt('');
+                          resetAnnouncementForm();
                         }}
                       >
                         ยกเลิก
                       </Button>
                       <Button
-                        onClick={() => {/* TODO: implement save */}}
+                        onClick={saveAnnouncement}
                         disabled={isSubmittingAnnouncement}
                       >
                         <Send className="w-4 h-4 mr-2" />
@@ -737,7 +879,7 @@ export default function Settings() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => {/* TODO: toggle status */}}
+                            onClick={() => toggleAnnouncementStatus(announcement.id, announcement.is_active)}
                           >
                             {announcement.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                           </Button>
@@ -751,14 +893,14 @@ export default function Settings() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => {/* TODO: implement edit */}}
+                            onClick={() => editAnnouncement(announcement)}
                           >
                             <Edit className="w-4 h-4 text-blue-500" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => {/* TODO: implement delete */}}
+                            onClick={() => deleteAnnouncement(announcement.id)}
                           >
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </Button>
