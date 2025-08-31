@@ -1,26 +1,26 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Search, MoreHorizontal, Phone, Mail } from 'lucide-react';
+import { Search, MoreHorizontal, Phone, Mail, MapPin } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { AddCustomerForm } from '@/components/customers/AddCustomerForm';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface Customer {
   id: string;
   name: string;
-  contact_person?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
+  contact_person: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
   customer_type: string;
-  status?: string;
-  notes?: string;
+  status: string | null;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -32,9 +32,9 @@ export default function Customers() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // Fetch customers from database
   const fetchCustomers = async () => {
     try {
-      setLoading(true);
       const { data, error } = await supabase
         .from('customers')
         .select('*')
@@ -70,24 +70,49 @@ export default function Customers() {
     }
     
     // Filter by search term
-    if (searchTerm) {
-      filteredData = filteredData.filter(item => 
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.contact_person && item.contact_person.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-    
-    return filteredData;
+    return filteredData.filter(item => 
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.contact_person && item.contact_person.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
   };
 
-  const getStatusBadge = (status?: string) => {
-    if (!status) return null;
+  const getStatusBadge = (status?: string | null) => {
+    if (!status || status === 'ปกติ') return null;
     return (
       <Badge variant={status === "สำคัญ" ? "default" : "secondary"}>
         {status}
       </Badge>
     );
   };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'ลูกค้า':
+        return 'bg-blue-500';
+      case 'ผู้จำหน่าย':
+        return 'bg-orange-500';
+      case 'ผู้จำหน่าย/ลูกค้า':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="flex">
+          <Sidebar />
+          <div className="flex-1">
+            <Header />
+            <main className="p-6">
+              <div className="text-center py-8">กำลังโหลด...</div>
+            </main>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,15 +155,15 @@ export default function Customers() {
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="customers" className="gap-2">
                         <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        ลูกค้า
+                        ลูกค้า ({customers.filter(c => c.customer_type === 'ลูกค้า').length})
                       </TabsTrigger>
                       <TabsTrigger value="suppliers" className="gap-2">
                         <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                        ผู้จำหน่าย
+                        ผู้จำหน่าย ({customers.filter(c => c.customer_type === 'ผู้จำหน่าย').length})
                       </TabsTrigger>
                       <TabsTrigger value="both" className="gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        ผู้จำหน่าย/ลูกค้า
+                        ผู้จำหน่าย/ลูกค้า ({customers.filter(c => c.customer_type === 'ผู้จำหน่าย/ลูกค้า').length})
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
@@ -156,62 +181,61 @@ export default function Customers() {
 
                   {/* Table Content */}
                   <div className="divide-y divide-border">
-                    {loading ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        กำลังโหลดข้อมูล...
-                      </div>
-                    ) : getFilteredData().length > 0 ? (
-                      getFilteredData().map((item) => (
-                        <div key={item.id} className="grid grid-cols-12 gap-4 p-4 hover:bg-muted/30 transition-colors">
-                          <div className="col-span-3">
-                            <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full ${
-                                item.customer_type === 'ลูกค้า' ? 'bg-blue-500' : 
-                                item.customer_type === 'ผู้จำหน่าย' ? 'bg-orange-500' : 'bg-green-500'
-                              }`}></div>
-                              <div>
-                                <div className="font-medium">{item.name}</div>
-                                {item.status && item.status !== 'ปกติ' && (
-                                  <div className="text-xs text-muted-foreground mt-1">
-                                    {getStatusBadge(item.status)}
-                                  </div>
-                                )}
-                              </div>
+                    {getFilteredData().map((item) => (
+                      <div key={item.id} className="grid grid-cols-12 gap-4 p-4 hover:bg-muted/30 transition-colors">
+                        <div className="col-span-3">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${getTypeColor(item.customer_type)}`}></div>
+                            <div>
+                              <div className="font-medium">{item.name}</div>
+                              {item.status && item.status !== 'ปกติ' && (
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {getStatusBadge(item.status)}
+                                </div>
+                              )}
+                              {item.address && (
+                                <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {item.address.substring(0, 30)}...
+                                </div>
+                              )}
                             </div>
                           </div>
-                          <div className="col-span-2 text-sm">{item.contact_person}</div>
-                          <div className="col-span-2 text-sm">
-                            {item.phone && (
-                              <div className="flex items-center gap-1">
-                                <Phone className="h-3 w-3" />
-                                {item.phone}
-                              </div>
-                            )}
-                          </div>
-                          <div className="col-span-2 text-sm">
-                            {item.email && (
-                              <div className="flex items-center gap-1">
-                                <Mail className="h-3 w-3" />
-                                {item.email}
-                              </div>
-                            )}
-                          </div>
-                          <div className="col-span-2 text-sm">
-                            <Badge variant="outline">{item.customer_type}</Badge>
-                          </div>
-                          <div className="col-span-1 flex justify-end">
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </div>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        ไม่พบข้อมูลที่ค้นหา
+                        <div className="col-span-2 text-sm">{item.contact_person || '-'}</div>
+                        <div className="col-span-2 text-sm">
+                          {item.phone ? (
+                            <div className="flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              {item.phone}
+                            </div>
+                          ) : '-'}
+                        </div>
+                        <div className="col-span-2 text-sm">
+                          {item.email ? (
+                            <div className="flex items-center gap-1">
+                              <Mail className="h-3 w-3" />
+                              {item.email}
+                            </div>
+                          ) : '-'}
+                        </div>
+                        <div className="col-span-2 text-sm">
+                          <Badge variant="outline">{item.customer_type}</Badge>
+                        </div>
+                        <div className="col-span-1 flex justify-end">
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                    )}
+                    ))}
                   </div>
+
+                  {getFilteredData().length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      ไม่พบข้อมูลที่ค้นหา
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

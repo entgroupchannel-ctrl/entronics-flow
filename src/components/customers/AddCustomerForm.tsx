@@ -1,90 +1,66 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Plus } from 'lucide-react';
-
-interface CustomerFormData {
-  name: string;
-  contact_person?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  customer_type: 'ลูกค้า' | 'ผู้จำหน่าย' | 'ผู้จำหน่าย/ลูกค้า';
-  status?: string;
-  notes?: string;
-}
 
 interface AddCustomerFormProps {
   onSuccess: () => void;
 }
 
 export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
-  const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
   const { toast } = useToast();
-  
-  const form = useForm<CustomerFormData>({
-    defaultValues: {
-      name: '',
-      contact_person: '',
-      phone: '',
-      email: '',
-      address: '',
-      customer_type: 'ลูกค้า',
-      status: 'ปกติ',
-      notes: ''
-    }
-  });
+  const { user } = useAuth();
 
-  const onSubmit = async (data: CustomerFormData) => {
-    if (!user) {
-      toast({
-        title: 'ข้อผิดพลาด',
-        description: 'กรุณาเข้าสู่ระบบก่อน',
-        variant: 'destructive',
-      });
-      return;
-    }
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!user) return;
 
     setIsLoading(true);
-    
-    try {
-      const { error } = await supabase
-        .from('customers')
-        .insert([{
-          ...data,
-          created_by: user.id
-        }]);
 
-      if (error) throw error;
+    const formData = new FormData(event.currentTarget);
+    const customerData = {
+      name: formData.get('name') as string,
+      contact_person: formData.get('contact_person') as string || null,
+      phone: formData.get('phone') as string || null,
+      email: formData.get('email') as string || null,
+      address: formData.get('address') as string || null,
+      customer_type: formData.get('customer_type') as string,
+      status: formData.get('status') as string,
+      notes: formData.get('notes') as string || null,
+      created_by: user.id,
+    };
 
-      toast({
-        title: 'สำเร็จ',
-        description: 'เพิ่มข้อมูลลูกค้าเรียบร้อยแล้ว',
-      });
+    const { error } = await supabase
+      .from('customers')
+      .insert([customerData]);
 
-      form.reset();
-      setOpen(false);
-      onSuccess();
-    } catch (error: any) {
+    if (error) {
       toast({
         title: 'เกิดข้อผิดพลาด',
-        description: error.message || 'ไม่สามารถเพิ่มข้อมูลได้',
+        description: error.message,
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
+    } else {
+      toast({
+        title: 'บันทึกสำเร็จ',
+        description: 'เพิ่มข้อมูลลูกค้าเรียบร้อยแล้ว',
+      });
+      setOpen(false);
+      onSuccess();
+      // Reset form
+      (event.target as HTMLFormElement).reset();
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -92,159 +68,115 @@ export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="h-4 w-4" />
-          สร้างใหม่
+          เพิ่มลูกค้าใหม่
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>เพิ่มข้อมูลลูกค้า</DialogTitle>
+          <DialogTitle>เพิ่มลูกค้าใหม่</DialogTitle>
+          <DialogDescription>
+            กรอกข้อมูลลูกค้าหรือผู้จำหน่าย
+          </DialogDescription>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">ชื่อบริษัท/ร้าน *</Label>
+              <Input
+                id="name"
                 name="name"
-                rules={{ required: 'กรุณากรอกชื่อบริษัท/ลูกค้า' }}
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>ชื่อบริษัท/ลูกค้า *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ชื่อบริษัทหรือลูกค้า" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="ชื่อบริษัทหรือร้านค้า"
+                required
               />
+            </div>
 
-              <FormField
-                control={form.control}
+            <div className="space-y-2">
+              <Label htmlFor="customer_type">ประเภท *</Label>
+              <Select name="customer_type" defaultValue="ลูกค้า" required>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกประเภท" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ลูกค้า">ลูกค้า</SelectItem>
+                  <SelectItem value="ผู้จำหน่าย">ผู้จำหน่าย</SelectItem>
+                  <SelectItem value="ผู้จำหน่าย/ลูกค้า">ผู้จำหน่าย/ลูกค้า</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contact_person">ชื่อผู้ติดต่อ</Label>
+              <Input
+                id="contact_person"
                 name="contact_person"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ชื่อผู้ติดต่อ</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ชื่อผู้ติดต่อ" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="ชื่อผู้ติดต่อ"
               />
+            </div>
 
-              <FormField
-                control={form.control}
+            <div className="space-y-2">
+              <Label htmlFor="phone">เบอร์โทรศัพท์</Label>
+              <Input
+                id="phone"
                 name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>เบอร์โทรศัพท์</FormLabel>
-                    <FormControl>
-                      <Input placeholder="เบอร์โทรศัพท์" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="เบอร์โทรศัพท์"
               />
+            </div>
 
-              <FormField
-                control={form.control}
+            <div className="space-y-2">
+              <Label htmlFor="email">อีเมล</Label>
+              <Input
+                id="email"
                 name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>อีเมล</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="อีเมล" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="customer_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ประเภท *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="เลือกประเภท" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="ลูกค้า">ลูกค้า</SelectItem>
-                        <SelectItem value="ผู้จำหน่าย">ผู้จำหน่าย</SelectItem>
-                        <SelectItem value="ผู้จำหน่าย/ลูกค้า">ผู้จำหน่าย/ลูกค้า</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>สถานะ</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="เลือกสถานะ" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="ปกติ">ปกติ</SelectItem>
-                        <SelectItem value="สำคัญ">สำคัญ</SelectItem>
-                        <SelectItem value="ระงับ">ระงับ</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>ที่อยู่</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="ที่อยู่ของลูกค้า" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>หมายเหตุ</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="หมายเหตุเพิ่มเติม" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                type="email"
+                placeholder="อีเมล"
               />
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                ยกเลิก
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'กำลังบันทึก...' : 'บันทึก'}
-              </Button>
+            <div className="space-y-2">
+              <Label htmlFor="status">สถานะ</Label>
+              <Select name="status" defaultValue="ปกติ">
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกสถานะ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ปกติ">ปกติ</SelectItem>
+                  <SelectItem value="สำคัญ">สำคัญ</SelectItem>
+                  <SelectItem value="ระงับ">ระงับ</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </form>
-        </Form>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address">ที่อยู่</Label>
+            <Textarea
+              id="address"
+              name="address"
+              placeholder="ที่อยู่"
+              rows={2}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes">หมายเหตุ</Label>
+            <Textarea
+              id="notes"
+              name="notes"
+              placeholder="หมายเหตุเพิ่มเติม"
+              rows={2}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              ยกเลิก
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'กำลังบันทึก...' : 'บันทึก'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
