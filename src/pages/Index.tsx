@@ -391,7 +391,7 @@ const Index = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">ภาพรวมระบบจัดการงานซ่อม</p>
+          <p className="text-muted-foreground">ภาพรวมระบบ ENT GROUP : Mini PC Factory Outlet</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => window.location.href = '/service-request'}>
