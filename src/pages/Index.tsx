@@ -379,9 +379,12 @@ const Index = () => {
         <div className="w-64">
           <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
         </div>
-        <main className="flex-1 flex items-center justify-center">
-          <div>กำลังโหลด...</div>
-        </main>
+        <div className="flex-1 flex flex-col">
+          <div className="h-16 border-b border-border bg-card" />
+          <main className="flex-1 flex items-center justify-center">
+            <div>กำลังโหลด...</div>
+          </main>
+        </div>
       </div>
     );
   }
@@ -942,9 +945,91 @@ const Index = () => {
         <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
       </div>
       
-      <main className="flex-1 overflow-y-auto p-6 space-y-6">
-        {currentView === 'dashboard' ? renderDashboardView() : renderServiceView()}
-      </main>
+      <div className="flex-1 flex flex-col">
+        {/* Header with Notification Bell */}
+        <div className="h-16 border-b border-border bg-card flex items-center justify-between px-6">
+          <div className="flex items-center space-x-4">
+            <h2 className="text-lg font-semibold text-foreground">
+              {currentView === 'dashboard' ? 'ภาพรวมระบบ' : 'จัดการงานซ่อม'}
+            </h2>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            {/* Notification Bell */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="relative">
+                  <Bell className="h-5 w-5" />
+                  {announcements.length > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">
+                      {announcements.length}
+                    </span>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>ข่าวสารและประกาศองค์กร</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {announcements.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      ไม่มีข่าวสารใหม่
+                    </div>
+                  ) : (
+                    announcements.map((announcement) => (
+                      <div key={announcement.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0">
+                            {announcement.type === 'new_product' && <Package className="h-5 w-5 text-blue-500" />}
+                            {announcement.type === 'promotion' && <Tag className="h-5 w-5 text-green-500" />}
+                            {announcement.type === 'stock_update' && <TrendingUp className="h-5 w-5 text-orange-500" />}
+                            {!['new_product', 'promotion', 'stock_update'].includes(announcement.type) && <Megaphone className="h-5 w-5 text-purple-500" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold text-sm">{announcement.title}</h3>
+                              {announcement.priority === 'high' && <Star className="h-4 w-4 text-yellow-500" />}
+                              {announcement.priority === 'medium' && <AlertCircle className="h-4 w-4 text-orange-500" />}
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {announcement.description}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(announcement.created_at).toLocaleDateString('th-TH', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            {/* User Profile */}
+            <div className="flex items-center space-x-2">
+              <div className="text-right">
+                <p className="text-sm font-medium">Admin User</p>
+                <p className="text-xs text-muted-foreground">admin@entgroup.com</p>
+              </div>
+              <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
+                <User className="h-4 w-4 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+          {currentView === 'dashboard' ? renderDashboardView() : renderServiceView()}
+        </main>
+      </div>
     </div>
   );
 };
