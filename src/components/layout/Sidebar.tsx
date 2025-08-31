@@ -41,6 +41,11 @@ const menuItems = [
     href: "/suppliers"
   },
   {
+    title: "รายชื่อลูกค้า",
+    icon: Users,
+    href: "/customers"
+  },
+  {
     title: "คลังสินค้า",
     icon: Package,
     href: "/inventory",
@@ -89,6 +94,7 @@ export function Sidebar({ className }: SidebarProps) {
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isInventory = item.title === "คลังสินค้า";
+          const isCustomers = item.title === "รายชื่อลูกค้า";
           
           if (isInventory) {
             return (
@@ -102,6 +108,25 @@ export function Sidebar({ className }: SidebarProps) {
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
                 onClick={() => window.open('https://entronics-flow.lovable.app/inventory', '_blank')}
+              >
+                <Icon className="mr-3 h-4 w-4" />
+                {item.title}
+              </Button>
+            );
+          }
+          
+          if (isCustomers) {
+            return (
+              <Button
+                key={item.href}
+                variant={item.active ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start h-10 px-3",
+                  item.active 
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
+                onClick={() => window.location.href = '/customers'}
               >
                 <Icon className="mr-3 h-4 w-4" />
                 {item.title}
