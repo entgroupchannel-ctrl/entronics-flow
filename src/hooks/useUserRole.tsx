@@ -2,62 +2,50 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type UserRole = 'admin' | 'accountant' | 'user';
-
-export const useUserRole = () => {
-  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useUserRole() {
   const { user } = useAuth();
-
-  const fetchUserRoles = async () => {
-    if (!user) {
-      setUserRoles([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Error fetching user roles:', error);
-        setUserRoles([]);
-      } else {
-        setUserRoles((data || []).map(item => item.role as UserRole));
-      }
-    } catch (error) {
-      console.error('Error fetching user roles:', error);
-      setUserRoles([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUserRoles();
+    const fetchUserRole = async () => {
+      if (!user) {
+        setUserRole(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user role:', error);
+          setUserRole('user'); // Default role
+        } else {
+          setUserRole(data?.role || 'user');
+        }
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+        setUserRole('user'); // Default role
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserRole();
   }, [user]);
 
-  const hasRole = (role: UserRole): boolean => {
-    return userRoles.includes(role);
-  };
-
-  const canManageInventory = (): boolean => {
-    return hasRole('admin') || hasRole('accountant');
-  };
-
-  const isAdmin = (): boolean => {
-    return hasRole('admin');
+  const canManageInventory = () => {
+    return userRole === 'admin' || userRole === 'accountant';
   };
 
   return {
-    userRoles,
+    userRole,
     loading,
-    hasRole,
     canManageInventory,
-    isAdmin,
-    refetchRoles: fetchUserRoles
   };
-};
+}
