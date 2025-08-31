@@ -105,6 +105,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
           const isQuotations = item.title.includes("ใบเสนอราคา");
           const isService = item.title.includes("แจ้งซ่อม");
           const isDashboard = item.title.includes("แดชบอร์ด");
+          const isSettings = item.title.includes("ตั้งค่า");
           
           const isActive = (isDashboard && currentView === 'dashboard') || 
                           (isService && currentView === 'service') ||
@@ -196,6 +197,24 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
                 onClick={() => onMenuClick?.('dashboard')}
+              >
+                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
+                {item.title}
+              </Button>
+            );
+          }
+
+          
+          if (isSettings) {
+            return (
+              <Button
+                key={item.href}
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start h-10 px-3",
+                  "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
+                onClick={() => window.location.href = '/settings'}
               >
                 <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}

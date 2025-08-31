@@ -11,6 +11,8 @@ import Inventory from "./pages/Inventory";
 import Customers from "./pages/Customers";
 import Quotations from "./pages/Quotations";
 import QuotationForm from "./pages/QuotationForm";
+import Settings from "./pages/Settings";
+import InvitationAccept from "./pages/InvitationAccept";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ServiceRequest from "./pages/ServiceRequest";
@@ -28,6 +30,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/invitation" element={<InvitationAccept />} />
             <Route path="/" element={
               <ProtectedRoute>
                 <Index />
@@ -61,6 +64,11 @@ const App = () => (
             <Route path="/service-dashboard" element={
               <ProtectedRoute>
                 <ServiceDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             } />
             <Route path="/sales-documents" element={
