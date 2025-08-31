@@ -284,6 +284,149 @@ export type Database = {
         }
         Relationships: []
       }
+      quotation_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          discount_amount: number
+          discount_percentage: number
+          id: string
+          is_software: boolean
+          line_total: number
+          product_id: string | null
+          product_name: string
+          product_sku: string | null
+          quantity: number
+          quotation_id: string | null
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          discount_amount?: number
+          discount_percentage?: number
+          id?: string
+          is_software?: boolean
+          line_total?: number
+          product_id?: string | null
+          product_name: string
+          product_sku?: string | null
+          quantity?: number
+          quotation_id?: string | null
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          discount_amount?: number
+          discount_percentage?: number
+          id?: string
+          is_software?: boolean
+          line_total?: number
+          product_id?: string | null
+          product_name?: string
+          product_sku?: string | null
+          quantity?: number
+          quotation_id?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_items_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_address: string | null
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          discount_amount: number
+          discount_percentage: number
+          id: string
+          notes: string | null
+          quotation_date: string
+          quotation_number: string
+          status: string
+          subtotal: number
+          terms_conditions: string | null
+          total_amount: number
+          updated_at: string
+          valid_until: string | null
+          vat_amount: number
+          withholding_tax_amount: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          discount_amount?: number
+          discount_percentage?: number
+          id?: string
+          notes?: string | null
+          quotation_date?: string
+          quotation_number: string
+          status?: string
+          subtotal?: number
+          terms_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          valid_until?: string | null
+          vat_amount?: number
+          withholding_tax_amount?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          discount_amount?: number
+          discount_percentage?: number
+          id?: string
+          notes?: string | null
+          quotation_date?: string
+          quotation_number?: string
+          status?: string
+          subtotal?: number
+          terms_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          valid_until?: string | null
+          vat_amount?: number
+          withholding_tax_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_images: {
         Row: {
           description: string | null
@@ -587,6 +730,10 @@ export type Database = {
       can_manage_inventory: {
         Args: { _user_id: string }
         Returns: boolean
+      }
+      generate_quotation_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       generate_ticket_number: {
         Args: Record<PropertyKey, never>
