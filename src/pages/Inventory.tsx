@@ -259,57 +259,71 @@ const Inventory = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>SKU</TableHead>
-                        <TableHead>ชื่อสินค้า</TableHead>
-                        <TableHead>หมวดหมู่</TableHead>
-                        <TableHead>ยี่ห้อ</TableHead>
-                        <TableHead className="text-right">ราคาขาย</TableHead>
-                        <TableHead className="text-right">สต๊อค</TableHead>
-                        <TableHead>สถานะ</TableHead>
-                        <TableHead className="text-center">จัดการ</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredProducts.map((product) => (
-                        <TableRow key={product.id}>
-                          <TableCell className="font-medium">{product.sku}</TableCell>
-                           <TableCell>
-                             <div className="font-medium">{product.name}</div>
-                           </TableCell>
-                          <TableCell>{product.category}</TableCell>
-                          <TableCell>{product.brand}</TableCell>
-                          <TableCell className="text-right">฿{product.price.toLocaleString()}</TableCell>
-                           <TableCell className="text-right">
-                             <div className="flex items-center justify-end gap-2">
-                               <span>{product.stock}</span>
-                               {product.stock <= 5 && (
-                                 <AlertTriangle className="h-4 w-4 text-warning" />
-                               )}
-                             </div>
-                           </TableCell>
-                           <TableCell>
-                             {getStatusBadge(product.status)}
-                           </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-center gap-2">
-                              <Button variant="ghost" size="icon">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="text-muted-foreground">กำลังโหลดข้อมูล...</div>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>SKU</TableHead>
+                          <TableHead>ชื่อสินค้า</TableHead>
+                          <TableHead>หมวดหมู่</TableHead>
+                          <TableHead>ยี่ห้อ</TableHead>
+                          <TableHead className="text-right">ราคาขาย</TableHead>
+                          <TableHead className="text-right">สต๊อค</TableHead>
+                          <TableHead>สถานะ</TableHead>
+                          <TableHead className="text-center">จัดการ</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredProducts.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                              {searchTerm || selectedCategory !== "all" ? "ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา" : "ยังไม่มีสินค้าในระบบ"}
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          filteredProducts.map((product) => (
+                            <TableRow key={product.id}>
+                              <TableCell className="font-medium">{product.sku}</TableCell>
+                              <TableCell>
+                                <div className="font-medium">{product.name}</div>
+                              </TableCell>
+                              <TableCell>{product.category || "-"}</TableCell>
+                              <TableCell>{product.brand || "-"}</TableCell>
+                              <TableCell className="text-right">฿{product.price.toLocaleString()}</TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <span>{product.stock}</span>
+                                  {product.stock <= 5 && (
+                                    <AlertTriangle className="h-4 w-4 text-warning" />
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {getStatusBadge(product.status)}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center justify-center gap-2">
+                                  <Button variant="ghost" size="icon">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
