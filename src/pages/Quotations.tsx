@@ -489,10 +489,23 @@ export default function Quotations() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">รายการสินค้า</h3>
-                <Button onClick={addItem} size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  เพิ่มรายการ
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Button onClick={addItem} size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    เพิ่มรายการ
+                  </Button>
+                  {items.length > 0 && (
+                    <Button 
+                      onClick={() => removeItem(items[items.length - 1].id)} 
+                      variant="outline" 
+                      size="sm"
+                      className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      ลบรายการสุดท้าย
+                    </Button>
+                  )}
+                </div>
               </div>
 
               <div className="border rounded-lg overflow-hidden">
@@ -506,8 +519,6 @@ export default function Quotations() {
                       <TableHead className="text-center w-32 text-primary-foreground hover:bg-primary">ราคาต่อหน่วย</TableHead>
                       <TableHead className="text-center w-32 text-primary-foreground hover:bg-primary">ส่วนลด (฿)</TableHead>
                       <TableHead className="text-center w-32 text-primary-foreground hover:bg-primary">ราคารวม</TableHead>
-                      <TableHead className="text-center w-20 text-primary-foreground hover:bg-primary">Software</TableHead>
-                      <TableHead className="text-center w-16 text-primary-foreground hover:bg-primary">ลบ</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -598,24 +609,6 @@ export default function Quotations() {
                               maximumFractionDigits: 2
                             })}
                           </TableCell>
-                          <TableCell className="text-center">
-                            <input
-                              type="checkbox"
-                              checked={item.is_software}
-                              onChange={(e) => updateItem(item.id, 'is_software', e.target.checked)}
-                              className="w-4 h-4"
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeItem(item.id)}
-                              className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell></TableCell>
@@ -631,8 +624,6 @@ export default function Quotations() {
                               />
                             </div>
                           </TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </React.Fragment>
