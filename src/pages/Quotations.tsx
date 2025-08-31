@@ -614,7 +614,7 @@ export default function Quotations() {
                         </TableRow>
                         <TableRow>
                           <TableCell></TableCell>
-                          <TableCell colSpan={8} className="bg-muted/30 p-4">
+                          <TableCell colSpan={5} className="bg-muted/30 p-4">
                             <div className="space-y-2">
                               <Label className="text-sm font-medium">รายละเอียด</Label>
                               <Textarea
@@ -626,6 +626,9 @@ export default function Quotations() {
                               />
                             </div>
                           </TableCell>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
                         </TableRow>
                       </React.Fragment>
                     ))}
