@@ -42,6 +42,12 @@ const menuItems = [
     iconColor: "text-orange-500"
   },
   {
+    title: "ข่าวสารประกาศ / Announcements",
+    icon: Bell,
+    href: "/announcements",
+    iconColor: "text-red-500"
+  },
+  {
     title: "รายชื่อลูกค้า / Customers",
     icon: Users,
     href: "/customers",
@@ -106,10 +112,12 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
           const isService = item.title.includes("แจ้งซ่อม");
           const isDashboard = item.title.includes("แดชบอร์ด");
           const isSettings = item.title.includes("ตั้งค่า");
+          const isAnnouncements = item.title.includes("ข่าวสารประกาศ");
           
           const isActive = (isDashboard && currentView === 'dashboard') || 
                           (isService && currentView === 'service') ||
-                          (!isDashboard && !isService && item.active);
+                          (isAnnouncements && currentView === 'announcements') ||
+                          (!isDashboard && !isService && !isAnnouncements && item.active);
           
           if (isInventory) {
             return (
@@ -178,6 +186,25 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
                 onClick={() => onMenuClick?.('service')}
+              >
+                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
+                {item.title}
+              </Button>
+            );
+          }
+
+          if (isAnnouncements) {
+            return (
+              <Button
+                key={item.href}
+                variant={isActive ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start h-10 px-3",
+                  isActive 
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
+                onClick={() => onMenuClick?.('announcements')}
               >
                 <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}

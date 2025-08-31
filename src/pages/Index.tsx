@@ -149,38 +149,23 @@ const Index = () => {
 
       if (quotationsError) throw quotationsError;
 
-      // Mock announcements data (will be replaced with real data later)
-      const mockAnnouncements = [
-        {
-          id: '1',
-          type: 'new_product',
-          title: 'เปิดตัวสินค้าใหม่ - Industrial Computer Model B',
-          description: 'คอมพิวเตอร์อุตสาหกรรมรุ่นใหม่ พร้อมประสิทธิภาพสูงกว่าเดิม 30%',
-          created_at: new Date().toISOString(),
-          priority: 'high'
-        },
-        {
-          id: '2',
-          type: 'promotion',
-          title: 'โปรโมชั่นพิเศษ - ลด 15% ทุกสินค้าประเภทจอภาพ',
-          description: 'ส่วนลดพิเศษสำหรับลูกค้าทุกท่าน ตั้งแต่วันนี้ - 31 ธันวาคม',
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          priority: 'medium'
-        },
-        {
-          id: '3',
-          type: 'stock_update',
-          title: 'สินค้าเข้าใหม่ - คีย์บอร์ดอุตสาหกรรม 50 ชิ้น',
-          description: 'เพิ่มสต็อกคีย์บอร์ดสำหรับโรงงานอุตสาหกรรม กันน้ำ กันฝุ่น',
-          created_at: new Date(Date.now() - 172800000).toISOString(),
-          priority: 'low'
-        }
-      ];
+      // Fetch announcements  
+      const { data: announcementsData, error: announcementsError } = await (supabase as any)
+        .from('announcements')
+        .select('*')
+        .eq('is_active', true)
+        .lte('published_at', new Date().toISOString())
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+        .order('priority', { ascending: false })
+        .order('published_at', { ascending: false })
+        .limit(6);
+
+      if (announcementsError) throw announcementsError;
 
       setServiceRequests(requests || []);
       setTechnicians(techData || []);
       setQuotations(quotationsData || []);
-      setAnnouncements(mockAnnouncements);
+      setAnnouncements(announcementsData || []);
     } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
@@ -416,32 +401,48 @@ const Index = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {announcements.map((announcement) => (
-              <div key={announcement.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0">
-                    {announcement.type === 'new_product' && <Package className="h-6 w-6 text-blue-500" />}
-                    {announcement.type === 'promotion' && <Tag className="h-6 w-6 text-green-500" />}
-                    {announcement.type === 'stock_update' && <TrendingUp className="h-6 w-6 text-orange-500" />}
-                    {!['new_product', 'promotion', 'stock_update'].includes(announcement.type) && <Megaphone className="h-6 w-6 text-purple-500" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold text-sm line-clamp-2">{announcement.title}</h3>
-                      {announcement.priority === 'high' && <Star className="h-4 w-4 text-yellow-500" />}
-                      {announcement.priority === 'medium' && <AlertCircle className="h-4 w-4 text-orange-500" />}
+            {announcements.length === 0 ? (
+              <div className="col-span-3 text-center py-8 text-muted-foreground">
+                ยังไม่มีประกาศในขณะนี้
+              </div>
+            ) : (
+              announcements.map((announcement) => (
+                <div key={announcement.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer"
+                     onClick={() => setCurrentView('announcements')}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0">
+                      {announcement.type === 'new_product' && <Package className="h-6 w-6 text-blue-500" />}
+                      {announcement.type === 'promotion' && <Tag className="h-6 w-6 text-green-500" />}
+                      {announcement.type === 'stock_update' && <TrendingUp className="h-6 w-6 text-orange-500" />}
+                      {announcement.type === 'maintenance' && <AlertCircle className="h-6 w-6 text-red-500" />}
+                      {announcement.type === 'policy' && <User className="h-6 w-6 text-purple-500" />}
+                      {!['new_product', 'promotion', 'stock_update', 'maintenance', 'policy'].includes(announcement.type) && <Megaphone className="h-6 w-6 text-gray-500" />}
                     </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                      {announcement.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(announcement.created_at).toLocaleDateString('th-TH')}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-sm line-clamp-2">{announcement.title}</h3>
+                        {announcement.priority === 'high' && <Star className="h-4 w-4 text-yellow-500" />}
+                        {announcement.priority === 'medium' && <AlertCircle className="h-4 w-4 text-orange-500" />}
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                        {announcement.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(announcement.published_at || announcement.created_at).toLocaleDateString('th-TH')}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
+          {announcements.length > 0 && (
+            <div className="mt-4 text-center">
+              <Button variant="outline" onClick={() => setCurrentView('announcements')}>
+                ดูประกาศทั้งหมด
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -1027,7 +1028,7 @@ const Index = () => {
         </div>
         
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          {currentView === 'dashboard' ? renderDashboardView() : renderServiceView()}
+          {renderView()}
         </main>
       </div>
     </div>
