@@ -10,6 +10,8 @@ import Inventory from "./pages/Inventory";
 import Customers from "./pages/Customers";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ServiceRequest from "./pages/ServiceRequest";
+import ServiceDashboard from "./pages/ServiceDashboard";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +37,16 @@ const App = () => (
             <Route path="/inventory" element={
               <ProtectedRoute>
                 <Inventory />
+              </ProtectedRoute>
+            } />
+            <Route path="/service-request" element={
+              <ProtectedRoute>
+                <ServiceRequest />
+              </ProtectedRoute>
+            } />
+            <Route path="/service-dashboard" element={
+              <ProtectedRoute>
+                <ServiceDashboard />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

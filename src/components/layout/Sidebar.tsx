@@ -33,7 +33,7 @@ const menuItems = [
   {
     title: "บริการ & ซ่อม",
     icon: Wrench,
-    href: "/service"
+    href: "/service-dashboard"
   },
   {
     title: "จัดการซัพพลายเออร์",
@@ -95,6 +95,7 @@ export function Sidebar({ className }: SidebarProps) {
           const Icon = item.icon;
           const isInventory = item.title === "คลังสินค้า";
           const isCustomers = item.title === "รายชื่อลูกค้า";
+          const isService = item.title === "บริการ & ซ่อม";
           
           if (isInventory) {
             return (
@@ -127,6 +128,25 @@ export function Sidebar({ className }: SidebarProps) {
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
                 onClick={() => window.location.href = '/customers'}
+              >
+                <Icon className="mr-3 h-4 w-4" />
+                {item.title}
+              </Button>
+            );
+          }
+
+          if (isService) {
+            return (
+              <Button
+                key={item.href}
+                variant={item.active ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start h-10 px-3",
+                  item.active 
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
+                onClick={() => window.location.href = '/service-dashboard'}
               >
                 <Icon className="mr-3 h-4 w-4" />
                 {item.title}
