@@ -182,6 +182,276 @@ export type Database = {
         }
         Relationships: []
       }
+      service_images: {
+        Row: {
+          description: string | null
+          google_drive_id: string | null
+          id: string
+          image_url: string
+          service_request_id: string | null
+          uploaded_at: string
+        }
+        Insert: {
+          description?: string | null
+          google_drive_id?: string | null
+          id?: string
+          image_url: string
+          service_request_id?: string | null
+          uploaded_at?: string
+        }
+        Update: {
+          description?: string | null
+          google_drive_id?: string | null
+          id?: string
+          image_url?: string
+          service_request_id?: string | null
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_images_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_parts: {
+        Row: {
+          created_at: string
+          id: string
+          part_name: string
+          part_number: string | null
+          quantity: number
+          service_request_id: string | null
+          supplier: string | null
+          total_cost: number | null
+          unit_cost: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          part_name: string
+          part_number?: string | null
+          quantity?: number
+          service_request_id?: string | null
+          supplier?: string | null
+          total_cost?: number | null
+          unit_cost?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          part_name?: string
+          part_number?: string | null
+          quantity?: number
+          service_request_id?: string | null
+          supplier?: string | null
+          total_cost?: number | null
+          unit_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_parts_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_requests: {
+        Row: {
+          actual_cost: number | null
+          assigned_technician_id: string | null
+          completed_date: string | null
+          created_at: string
+          created_by: string | null
+          customer_address: string
+          customer_email: string
+          customer_feedback: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string
+          customer_satisfaction: number | null
+          device_brand: string | null
+          device_model: string | null
+          device_type: string
+          estimated_cost: number | null
+          id: string
+          internal_notes: string | null
+          labor_cost: number | null
+          parts_cost: number | null
+          priority: Database["public"]["Enums"]["priority_level"] | null
+          problem_description: string
+          scheduled_date: string | null
+          status: Database["public"]["Enums"]["service_status"] | null
+          ticket_number: string
+          updated_at: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          assigned_technician_id?: string | null
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_address: string
+          customer_email: string
+          customer_feedback?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone: string
+          customer_satisfaction?: number | null
+          device_brand?: string | null
+          device_model?: string | null
+          device_type: string
+          estimated_cost?: number | null
+          id?: string
+          internal_notes?: string | null
+          labor_cost?: number | null
+          parts_cost?: number | null
+          priority?: Database["public"]["Enums"]["priority_level"] | null
+          problem_description: string
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["service_status"] | null
+          ticket_number: string
+          updated_at?: string
+        }
+        Update: {
+          actual_cost?: number | null
+          assigned_technician_id?: string | null
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string
+          customer_email?: string
+          customer_feedback?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string
+          customer_satisfaction?: number | null
+          device_brand?: string | null
+          device_model?: string | null
+          device_type?: string
+          estimated_cost?: number | null
+          id?: string
+          internal_notes?: string | null
+          labor_cost?: number | null
+          parts_cost?: number | null
+          priority?: Database["public"]["Enums"]["priority_level"] | null
+          problem_description?: string
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["service_status"] | null
+          ticket_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_status: Database["public"]["Enums"]["service_status"]
+          notes: string | null
+          old_status: Database["public"]["Enums"]["service_status"] | null
+          service_request_id: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status: Database["public"]["Enums"]["service_status"]
+          notes?: string | null
+          old_status?: Database["public"]["Enums"]["service_status"] | null
+          service_request_id?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["service_status"]
+          notes?: string | null
+          old_status?: Database["public"]["Enums"]["service_status"] | null
+          service_request_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_status_history_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technicians: {
+        Row: {
+          created_at: string
+          current_workload: number | null
+          email: string | null
+          id: string
+          is_available: boolean | null
+          name: string
+          phone: string | null
+          rating: number | null
+          specialization:
+            | Database["public"]["Enums"]["tech_specialization"]
+            | null
+          total_jobs: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_workload?: number | null
+          email?: string | null
+          id?: string
+          is_available?: boolean | null
+          name: string
+          phone?: string | null
+          rating?: number | null
+          specialization?:
+            | Database["public"]["Enums"]["tech_specialization"]
+            | null
+          total_jobs?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_workload?: number | null
+          email?: string | null
+          id?: string
+          is_available?: boolean | null
+          name?: string
+          phone?: string | null
+          rating?: number | null
+          specialization?:
+            | Database["public"]["Enums"]["tech_specialization"]
+            | null
+          total_jobs?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -208,9 +478,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_assign_technician: {
+        Args: { request_id: string }
+        Returns: string
+      }
       can_manage_inventory: {
         Args: { _user_id: string }
         Returns: boolean
+      }
+      generate_ticket_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       has_role: {
         Args: {
@@ -226,6 +504,20 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "accountant" | "user"
+      priority_level: "low" | "medium" | "high" | "urgent"
+      service_status:
+        | "pending"
+        | "assigned"
+        | "in_progress"
+        | "waiting_parts"
+        | "completed"
+        | "cancelled"
+      tech_specialization:
+        | "general"
+        | "electrical"
+        | "mechanical"
+        | "software"
+        | "hardware"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -354,6 +646,22 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "accountant", "user"],
+      priority_level: ["low", "medium", "high", "urgent"],
+      service_status: [
+        "pending",
+        "assigned",
+        "in_progress",
+        "waiting_parts",
+        "completed",
+        "cancelled",
+      ],
+      tech_specialization: [
+        "general",
+        "electrical",
+        "mechanical",
+        "software",
+        "hardware",
+      ],
     },
   },
 } as const
