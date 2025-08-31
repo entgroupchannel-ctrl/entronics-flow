@@ -152,7 +152,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                   "w-full justify-start h-10 px-3",
                   "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
-                onClick={() => window.location.href = '/quotations'}
+                onClick={() => window.open('/quotations', '_blank')}
               >
                 <Icon className="mr-3 h-4 w-4" />
                 {item.title}
