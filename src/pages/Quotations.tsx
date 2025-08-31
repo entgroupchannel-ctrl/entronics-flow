@@ -225,8 +225,10 @@ export default function Quotations() {
   };
 
   const updateItem = (id: string, field: keyof QuotationItem, value: any) => {
+    console.log('updateItem called:', { id, field, value });
     setItems(items.map(item => {
       if (item.id === id) {
+        console.log('Updating item:', item.id, 'field:', field, 'new value:', value);
         const updatedItem = { ...item, [field]: value };
         
         // Recalculate line total
@@ -238,6 +240,7 @@ export default function Quotations() {
         }
         
         updatedItem.line_total = subtotal - discountAmount;
+        console.log('Updated item result:', updatedItem);
         
         return updatedItem;
       }
@@ -573,7 +576,10 @@ export default function Quotations() {
                           </TableCell>
                           <TableCell>
                             <div className="space-y-2">
-                              <Select onValueChange={(value) => selectProduct(item.id, value)}>
+                              <Select onValueChange={(value) => {
+                                console.log('Product selected in dropdown:', value);
+                                selectProduct(item.id, value);
+                              }}>
                                 <SelectTrigger className="w-full">
                                   <SelectValue placeholder="เลือกสินค้า" />
                                 </SelectTrigger>
