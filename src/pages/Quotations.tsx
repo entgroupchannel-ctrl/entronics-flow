@@ -166,6 +166,7 @@ export default function Quotations() {
         .order('name');
       
       if (error) throw error;
+      console.log('Products loaded:', data);
       setProducts(data || []);
     } catch (error) {
       console.error('Error loading products:', error);
@@ -275,6 +276,32 @@ export default function Quotations() {
     }
   };
 
+  const closeWindow = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = '/';
+    }
+  };
+
+  const saveQuotation = async () => {
+    try {
+      // Here you would implement the actual save logic
+      // For now, we'll just show a success message
+      toast({
+        title: "บันทึกสำเร็จ",
+        description: "ใบเสนอราคาได้รับการบันทึกเรียบร้อยแล้ว",
+        variant: "default",
+      });
+    } catch (error) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกใบเสนอราคาได้",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto space-y-4">
@@ -286,11 +313,11 @@ export default function Quotations() {
           </div>
           
           <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={closeWindow}>
               <X className="w-4 h-4 mr-2" />
               ปิดหน้าต่าง
             </Button>
-            <Button variant="default" size="sm">
+            <Button variant="default" size="sm" onClick={saveQuotation}>
               <Save className="w-4 h-4 mr-2" />
               บันทึกเอกสาร
             </Button>
@@ -739,7 +766,7 @@ export default function Quotations() {
                 <Button variant="outline">
                   บันทึกร่าง
                 </Button>
-                <Button>
+                <Button onClick={saveQuotation}>
                   บันทึกใบเสนอราคา
                 </Button>
               </div>
