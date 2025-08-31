@@ -161,7 +161,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
           if (isQuotations) {
             return (
               <div key={item.href}>
-                {/* Main sales button that loads sales documents in right panel */}
+                {/* Main sales button that navigates to sales documents */}
                 <Button
                   variant="ghost"
                   className={cn(
@@ -169,11 +169,8 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                     "text-muted-foreground hover:text-foreground hover:bg-accent"
                   )}
                   onClick={() => {
-                    // Load sales documents in the right panel
-                    const iframe = document.querySelector('iframe');
-                    if (iframe) {
-                      iframe.src = 'https://entronics-flow.lovable.app/sales-documents';
-                    }
+                    // Navigate to sales documents page
+                    window.location.href = '/sales-documents';
                     // Toggle submenu
                     setSalesMenuOpen(!salesMenuOpen);
                   }}
@@ -200,10 +197,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                           "text-muted-foreground hover:text-foreground hover:bg-accent"
                         )}
                         onClick={() => {
-                          const iframe = document.querySelector('iframe');
-                          if (iframe) {
-                            iframe.src = `https://entronics-flow.lovable.app${subItem.href}`;
-                          }
+                          window.location.href = subItem.href;
                         }}
                       >
                         {subItem.title}
