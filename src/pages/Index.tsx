@@ -239,17 +239,18 @@ const Index = () => {
   };
 
   const handleUpdateRequest = (requestId: string) => {
+    const technicianId = selectedTechnician === 'none' ? undefined : selectedTechnician;
     updateRequestStatus(
       requestId, 
       selectedStatus, 
-      selectedTechnician || undefined,
+      technicianId,
       sendEmail,
       emailList
     );
   };
 
   const handleDialogOpen = (request: ServiceRequest) => {
-    setSelectedTechnician(request.assigned_technician_id || '');
+    setSelectedTechnician(request.assigned_technician_id || 'none');
     setSelectedStatus(request.status);
     setSendEmail(false);
     setEmailList(request.customer_email);
@@ -669,7 +670,7 @@ const Index = () => {
                                     <SelectValue placeholder="เลือกช่างเทคนิค" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="">ไม่มอบหมาย</SelectItem>
+                                    <SelectItem value="none">ไม่มอบหมาย</SelectItem>
                                     {technicians.filter(tech => tech.is_available).map((tech) => (
                                       <SelectItem key={tech.id} value={tech.id}>
                                         {tech.name} - {tech.specialization} (งาน: {tech.current_workload})
