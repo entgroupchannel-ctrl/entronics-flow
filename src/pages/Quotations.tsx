@@ -242,8 +242,8 @@ export default function Quotations() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-7xl mx-auto space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -265,11 +265,11 @@ export default function Quotations() {
 
         {/* Main Content */}
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             {/* Top Section */}
-            <div className="grid grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-2 gap-6 mb-6">
               {/* Left - Customer Info */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div>
                   <Label className="text-sm font-medium">ชื่อลูกค้า</Label>
                   <div className="flex items-center space-x-2 mt-1">
@@ -297,7 +297,7 @@ export default function Quotations() {
 
                 {/* Customer Details */}
                 {(isEditingCustomer || selectedCustomer) && (
-                  <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
+                  <div className="space-y-2 p-3 border rounded-lg bg-muted/30">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">รายละเอียดลูกค้า</Label>
                       {isEditingCustomer && (
@@ -320,14 +320,14 @@ export default function Quotations() {
                       )}
                     </div>
                     
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 gap-2">
                       <div>
                         <Label className="text-xs">อีเมล</Label>
                         <Input
                           value={quotation.customer_email}
                           onChange={(e) => setQuotation(prev => ({ ...prev, customer_email: e.target.value }))}
                           disabled={!isEditingCustomer}
-                          className="text-sm"
+                          className="text-sm h-8"
                         />
                       </div>
                       <div>
@@ -336,7 +336,7 @@ export default function Quotations() {
                           value={quotation.customer_phone}
                           onChange={(e) => setQuotation(prev => ({ ...prev, customer_phone: e.target.value }))}
                           disabled={!isEditingCustomer}
-                          className="text-sm"
+                          className="text-sm h-8"
                         />
                       </div>
                       <div>
@@ -346,7 +346,7 @@ export default function Quotations() {
                           onChange={(e) => setQuotation(prev => ({ ...prev, customer_address: e.target.value }))}
                           disabled={!isEditingCustomer}
                           className="text-sm resize-none"
-                          rows={3}
+                          rows={2}
                         />
                       </div>
                     </div>
@@ -355,7 +355,7 @@ export default function Quotations() {
               </div>
 
               {/* Right - Quote Info */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Quotation Number */}
                 <div className="text-right">
                   <Label className="text-sm font-medium">หมายเลขใบเสนอราคา</Label>
@@ -365,7 +365,7 @@ export default function Quotations() {
                         <Input
                           value={quotation.quotation_number}
                           onChange={(e) => setQuotation(prev => ({ ...prev, quotation_number: e.target.value }))}
-                          className="text-right font-bold text-lg"
+                          className="text-right font-bold text-lg h-10"
                         />
                         <Button
                           variant="ghost"
@@ -384,7 +384,7 @@ export default function Quotations() {
                       </div>
                     ) : (
                       <div className="flex items-center space-x-2">
-                        <span className="text-2xl font-bold text-primary">
+                        <span className="text-xl font-bold text-primary">
                           {quotation.quotation_number}
                         </span>
                         <Button
@@ -400,9 +400,9 @@ export default function Quotations() {
                 </div>
 
                 {/* Total Amount */}
-                <div className="text-right bg-primary/5 p-4 rounded-lg">
+                <div className="text-right bg-primary/5 p-3 rounded-lg">
                   <Label className="text-sm font-medium">จำนวนเงินรวมทั้งสิ้น</Label>
-                  <div className="text-3xl font-bold text-primary mt-1">
+                  <div className="text-2xl font-bold text-primary mt-1">
                     {quotation.total_amount.toLocaleString('th-TH', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2
@@ -412,14 +412,14 @@ export default function Quotations() {
                 </div>
 
                 {/* Dates */}
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-2">
                   <div>
                     <Label className="text-sm">วันที่</Label>
                     <Input
                       type="date"
                       value={quotation.quotation_date}
                       onChange={(e) => setQuotation(prev => ({ ...prev, quotation_date: e.target.value }))}
-                      className="text-sm"
+                      className="text-sm h-8"
                     />
                   </div>
                   <div>
@@ -427,7 +427,7 @@ export default function Quotations() {
                     <Input
                       type="number"
                       defaultValue={15}
-                      className="text-sm"
+                      className="text-sm h-8"
                       min="0"
                     />
                   </div>
@@ -437,7 +437,7 @@ export default function Quotations() {
                       type="date"
                       value={quotation.valid_until}
                       onChange={(e) => setQuotation(prev => ({ ...prev, valid_until: e.target.value }))}
-                      className="text-sm"
+                      className="text-sm h-8"
                     />
                   </div>
                 </div>
@@ -451,7 +451,7 @@ export default function Quotations() {
                         <Input
                           value={salesperson}
                           onChange={(e) => setSalesperson(e.target.value)}
-                          className="flex-1"
+                          className="flex-1 h-8"
                         />
                         <Button
                           variant="ghost"
@@ -470,7 +470,7 @@ export default function Quotations() {
                       </div>
                     ) : (
                       <div className="flex items-center space-x-2 flex-1">
-                        <span className="flex-1 p-2 border rounded bg-background text-sm">{salesperson}</span>
+                        <span className="flex-1 p-2 border rounded bg-background text-sm h-8 flex items-center">{salesperson}</span>
                         <Button
                           variant="outline"
                           size="sm"
@@ -488,8 +488,8 @@ export default function Quotations() {
                   <Label className="text-sm">รายละเอียดติดต่อ</Label>
                   <Textarea
                     placeholder="สำนักงานใหญ่: 02-123-4567"
-                    className="text-sm resize-none"
-                    rows={3}
+                    className="text-sm resize-none mt-1"
+                    rows={2}
                   />
                 </div>
               </div>
@@ -698,7 +698,7 @@ export default function Quotations() {
             </div>
 
             {/* Notes and Terms */}
-            <div className="grid grid-cols-2 gap-6 mt-8">
+            <div className="grid grid-cols-2 gap-4 mt-6">
               <div>
                 <Label className="text-sm font-medium">หมายเหตุ</Label>
                 <Textarea
@@ -706,7 +706,7 @@ export default function Quotations() {
                   onChange={(e) => setQuotation(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="หมายเหตุเพิ่มเติม"
                   className="mt-1"
-                  rows={4}
+                  rows={3}
                 />
               </div>
               <div>
@@ -716,7 +716,7 @@ export default function Quotations() {
                   onChange={(e) => setQuotation(prev => ({ ...prev, terms_conditions: e.target.value }))}
                   placeholder="เงื่อนไขการชำระเงิน และข้อกำหนดอื่นๆ"
                   className="mt-1"
-                  rows={4}
+                  rows={3}
                 />
               </div>
             </div>
