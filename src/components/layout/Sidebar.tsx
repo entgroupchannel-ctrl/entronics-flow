@@ -1,0 +1,122 @@
+import { cn } from "@/lib/utils";
+import { 
+  LayoutDashboard, 
+  Users, 
+  Package, 
+  ShoppingCart, 
+  Wrench, 
+  DollarSign,
+  Settings,
+  Building2,
+  BarChart3,
+  FileText,
+  Bell
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface SidebarProps {
+  className?: string;
+}
+
+const menuItems = [
+  {
+    title: "Dashboard",
+    icon: LayoutDashboard,
+    href: "/",
+    active: true
+  },
+  {
+    title: "Supplier Management",
+    icon: Building2,
+    href: "/suppliers"
+  },
+  {
+    title: "Inventory",
+    icon: Package,
+    href: "/inventory"
+  },
+  {
+    title: "Sales & Quotation",
+    icon: ShoppingCart,
+    href: "/sales"
+  },
+  {
+    title: "Service & Repair",
+    icon: Wrench,
+    href: "/service"
+  },
+  {
+    title: "Financial",
+    icon: DollarSign,
+    href: "/financial"
+  },
+  {
+    title: "Analytics",
+    icon: BarChart3,
+    href: "/analytics"
+  },
+  {
+    title: "Reports",
+    icon: FileText,
+    href: "/reports"
+  },
+  {
+    title: "Settings",
+    icon: Settings,
+    href: "/settings"
+  }
+];
+
+export function Sidebar({ className }: SidebarProps) {
+  return (
+    <div className={cn("flex h-full w-64 flex-col bg-card border-r border-border", className)}>
+      {/* Logo */}
+      <div className="flex h-16 items-center px-6 border-b border-border">
+        <div className="flex items-center space-x-2">
+          <div className="h-8 w-8 rounded bg-gradient-primary flex items-center justify-center">
+            <Building2 className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-foreground">ENT GROUP</h1>
+            <p className="text-xs text-muted-foreground">Industrial PC ERP</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 p-4">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Button
+              key={item.href}
+              variant={item.active ? "default" : "ghost"}
+              className={cn(
+                "w-full justify-start h-10 px-3",
+                item.active 
+                  ? "bg-primary text-primary-foreground shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              )}
+            >
+              <Icon className="mr-3 h-4 w-4" />
+              {item.title}
+            </Button>
+          );
+        })}
+      </nav>
+
+      {/* User Info */}
+      <div className="border-t border-border p-4">
+        <div className="flex items-center space-x-3">
+          <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
+            <Users className="h-4 w-4 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground truncate">Admin User</p>
+            <p className="text-xs text-muted-foreground truncate">admin@entgroup.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
