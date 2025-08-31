@@ -17,45 +17,96 @@ export type Database = {
       customers: {
         Row: {
           address: string | null
+          bank_account: string | null
+          bank_address: string | null
+          bank_branch: string | null
+          bank_name: string | null
+          citizen_id: string | null
           contact_person: string | null
+          contact_position: string | null
+          contact_type: string | null
           created_at: string
           created_by: string | null
           customer_type: string
+          district: string | null
           email: string | null
+          facebook: string | null
           id: string
+          line_id: string | null
           name: string
           notes: string | null
+          person_type: string | null
           phone: string | null
+          postal_code: string | null
+          province: string | null
           status: string | null
+          sub_district: string | null
+          swift_code: string | null
+          tax_id: string | null
           updated_at: string
+          website: string | null
         }
         Insert: {
           address?: string | null
+          bank_account?: string | null
+          bank_address?: string | null
+          bank_branch?: string | null
+          bank_name?: string | null
+          citizen_id?: string | null
           contact_person?: string | null
+          contact_position?: string | null
+          contact_type?: string | null
           created_at?: string
           created_by?: string | null
           customer_type?: string
+          district?: string | null
           email?: string | null
+          facebook?: string | null
           id?: string
+          line_id?: string | null
           name: string
           notes?: string | null
+          person_type?: string | null
           phone?: string | null
+          postal_code?: string | null
+          province?: string | null
           status?: string | null
+          sub_district?: string | null
+          swift_code?: string | null
+          tax_id?: string | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
           address?: string | null
+          bank_account?: string | null
+          bank_address?: string | null
+          bank_branch?: string | null
+          bank_name?: string | null
+          citizen_id?: string | null
           contact_person?: string | null
+          contact_position?: string | null
+          contact_type?: string | null
           created_at?: string
           created_by?: string | null
           customer_type?: string
+          district?: string | null
           email?: string | null
+          facebook?: string | null
           id?: string
+          line_id?: string | null
           name?: string
           notes?: string | null
+          person_type?: string | null
           phone?: string | null
+          postal_code?: string | null
+          province?: string | null
           status?: string | null
+          sub_district?: string | null
+          swift_code?: string | null
+          tax_id?: string | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
