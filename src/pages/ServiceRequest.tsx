@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -12,21 +12,42 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Camera, X } from "lucide-react";
+import { Upload, X, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const serviceRequestSchema = z.object({
   customerName: z.string().min(1, "กรุณาระบุชื่อ"),
   customerPhone: z.string().min(10, "กรุณาระบุเบอร์โทรศัพท์ที่ถูกต้อง"),
   customerEmail: z.string().email("กรุณาระบุอีเมลที่ถูกต้อง"),
   customerAddress: z.string().min(10, "กรุณาระบุที่อยู่"),
-  deviceType: z.string().min(1, "กรุณาระบุประเภทอุปกรณ์"),
-  deviceBrand: z.string().optional(),
-  deviceModel: z.string().optional(),
+  deviceTypeId: z.string().min(1, "กรุณาเลือกประเภทอุปกรณ์"),
+  deviceBrandId: z.string().min(1, "กรุณาเลือกยี่ห้อ"),
+  deviceModelId: z.string().min(1, "กรุณาเลือกรุ่น"),
   problemDescription: z.string().min(10, "กรุณาอธิบายปัญหาอย่างละเอียด"),
   priority: z.enum(["low", "medium", "high", "urgent"]),
 });
 
 type ServiceRequestForm = z.infer<typeof serviceRequestSchema>;
+
+interface DeviceType {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface DeviceBrand {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface DeviceModel {
+  id: string;
+  name: string;
+  brand_id: string;
+  type_id: string;
+  description?: string;
+}
 
 export default function ServiceRequest() {
   const { user } = useAuth();
@@ -35,6 +56,18 @@ export default function ServiceRequest() {
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [ticketNumber, setTicketNumber] = useState<string>("");
+  
+  // Device options state
+  const [deviceTypes, setDeviceTypes] = useState<DeviceType[]>([]);
+  const [deviceBrands, setDeviceBrands] = useState<DeviceBrand[]>([]);
+  const [deviceModels, setDeviceModels] = useState<DeviceModel[]>([]);
+  const [filteredModels, setFilteredModels] = useState<DeviceModel[]>([]);
+  
+  // Add new item states
+  const [showAddType, setShowAddType] = useState(false);
+  const [showAddBrand, setShowAddBrand] = useState(false);
+  const [showAddModel, setShowAddModel] = useState(false);
+  const [newItemName, setNewItemName] = useState("");
 
   const form = useForm<ServiceRequestForm>({
     resolver: zodResolver(serviceRequestSchema),
@@ -42,6 +75,125 @@ export default function ServiceRequest() {
       priority: "medium",
     },
   });
+
+  const selectedTypeId = form.watch("deviceTypeId");
+  const selectedBrandId = form.watch("deviceBrandId");
+
+  useEffect(() => {
+    fetchDeviceOptions();
+  }, []);
+
+  useEffect(() => {
+    // Filter models based on selected type and brand
+    if (selectedTypeId && selectedBrandId) {
+      const filtered = deviceModels.filter(
+        model => model.type_id === selectedTypeId && model.brand_id === selectedBrandId
+      );
+      setFilteredModels(filtered);
+    } else {
+      setFilteredModels([]);
+    }
+    // Reset model selection when type or brand changes
+    form.setValue("deviceModelId", "");
+  }, [selectedTypeId, selectedBrandId, deviceModels, form]);
+
+  const fetchDeviceOptions = async () => {
+    try {
+      const [typesRes, brandsRes, modelsRes] = await Promise.all([
+        supabase.from('device_types').select('*').eq('is_active', true).order('name'),
+        supabase.from('device_brands').select('*').eq('is_active', true).order('name'),
+        supabase.from('device_models').select('*').eq('is_active', true).order('name')
+      ]);
+
+      if (typesRes.data) setDeviceTypes(typesRes.data);
+      if (brandsRes.data) setDeviceBrands(brandsRes.data);
+      if (modelsRes.data) setDeviceModels(modelsRes.data);
+    } catch (error) {
+      console.error('Error fetching device options:', error);
+    }
+  };
+
+  const addNewDeviceType = async () => {
+    if (!newItemName.trim()) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('device_types')
+        .insert({ name: newItemName.trim() })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setDeviceTypes(prev => [...prev, data]);
+      form.setValue("deviceTypeId", data.id);
+      setNewItemName("");
+      setShowAddType(false);
+      toast({ title: "เพิ่มประเภทอุปกรณ์สำเร็จ" });
+    } catch (error: any) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const addNewDeviceBrand = async () => {
+    if (!newItemName.trim()) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('device_brands')
+        .insert({ name: newItemName.trim() })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setDeviceBrands(prev => [...prev, data]);
+      form.setValue("deviceBrandId", data.id);
+      setNewItemName("");
+      setShowAddBrand(false);
+      toast({ title: "เพิ่มยี่ห้อสำเร็จ" });
+    } catch (error: any) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const addNewDeviceModel = async () => {
+    if (!newItemName.trim() || !selectedTypeId || !selectedBrandId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('device_models')
+        .insert({ 
+          name: newItemName.trim(),
+          type_id: selectedTypeId,
+          brand_id: selectedBrandId
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setDeviceModels(prev => [...prev, data]);
+      form.setValue("deviceModelId", data.id);
+      setNewItemName("");
+      setShowAddModel(false);
+      toast({ title: "เพิ่มรุ่นสำเร็จ" });
+    } catch (error: any) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleImageUpload = (files: FileList | null) => {
     if (!files) return;
@@ -71,6 +223,11 @@ export default function ServiceRequest() {
 
     setIsSubmitting(true);
     try {
+      // Get device details for storage
+      const selectedType = deviceTypes.find(t => t.id === data.deviceTypeId);
+      const selectedBrand = deviceBrands.find(b => b.id === data.deviceBrandId);
+      const selectedModel = deviceModels.find(m => m.id === data.deviceModelId);
+
       // Insert service request
       const { data: serviceRequest, error } = await supabase
         .from('service_requests')
@@ -80,9 +237,9 @@ export default function ServiceRequest() {
           customer_phone: data.customerPhone,
           customer_email: data.customerEmail,
           customer_address: data.customerAddress,
-          device_type: data.deviceType,
-          device_brand: data.deviceBrand || null,
-          device_model: data.deviceModel || null,
+          device_type: selectedType?.name || '',
+          device_brand: selectedBrand?.name || '',
+          device_model: selectedModel?.name || '',
           problem_description: data.problemDescription,
           priority: data.priority,
           created_by: user.id,
@@ -289,13 +446,51 @@ export default function ServiceRequest() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
-                    name="deviceType"
+                    name="deviceTypeId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>ประเภทอุปกรณ์ *</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="เช่น โทรศัพท์, คอมพิวเตอร์" />
-                        </FormControl>
+                        <div className="flex gap-2">
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="เลือกประเภทอุปกรณ์" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {deviceTypes.map((type) => (
+                                <SelectItem key={type.id} value={type.id}>
+                                  {type.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Dialog open={showAddType} onOpenChange={setShowAddType}>
+                            <DialogTrigger asChild>
+                              <Button type="button" variant="outline" size="icon">
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>เพิ่มประเภทอุปกรณ์ใหม่</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <Input
+                                  value={newItemName}
+                                  onChange={(e) => setNewItemName(e.target.value)}
+                                  placeholder="ชื่อประเภทอุปกรณ์"
+                                />
+                                <div className="flex gap-2">
+                                  <Button onClick={addNewDeviceType}>เพิ่ม</Button>
+                                  <Button variant="outline" onClick={() => setShowAddType(false)}>
+                                    ยกเลิก
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -303,13 +498,51 @@ export default function ServiceRequest() {
 
                   <FormField
                     control={form.control}
-                    name="deviceBrand"
+                    name="deviceBrandId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>ยี่ห้อ</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="เช่น Apple, Samsung" />
-                        </FormControl>
+                        <FormLabel>ยี่ห้อ *</FormLabel>
+                        <div className="flex gap-2">
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="เลือกยี่ห้อ" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {deviceBrands.map((brand) => (
+                                <SelectItem key={brand.id} value={brand.id}>
+                                  {brand.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Dialog open={showAddBrand} onOpenChange={setShowAddBrand}>
+                            <DialogTrigger asChild>
+                              <Button type="button" variant="outline" size="icon">
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>เพิ่มยี่ห้อใหม่</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <Input
+                                  value={newItemName}
+                                  onChange={(e) => setNewItemName(e.target.value)}
+                                  placeholder="ชื่อยี่ห้อ"
+                                />
+                                <div className="flex gap-2">
+                                  <Button onClick={addNewDeviceBrand}>เพิ่ม</Button>
+                                  <Button variant="outline" onClick={() => setShowAddBrand(false)}>
+                                    ยกเลิก
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -317,13 +550,60 @@ export default function ServiceRequest() {
 
                   <FormField
                     control={form.control}
-                    name="deviceModel"
+                    name="deviceModelId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>รุ่น</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="เช่น iPhone 14, Galaxy S23" />
-                        </FormControl>
+                        <FormLabel>รุ่น *</FormLabel>
+                        <div className="flex gap-2">
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value}
+                            disabled={!selectedTypeId || !selectedBrandId}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="เลือกรุ่น" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {filteredModels.map((model) => (
+                                <SelectItem key={model.id} value={model.id}>
+                                  {model.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Dialog open={showAddModel} onOpenChange={setShowAddModel}>
+                            <DialogTrigger asChild>
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="icon"
+                                disabled={!selectedTypeId || !selectedBrandId}
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>เพิ่มรุ่นใหม่</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <Input
+                                  value={newItemName}
+                                  onChange={(e) => setNewItemName(e.target.value)}
+                                  placeholder="ชื่อรุ่น"
+                                />
+                                <div className="flex gap-2">
+                                  <Button onClick={addNewDeviceModel}>เพิ่ม</Button>
+                                  <Button variant="outline" onClick={() => setShowAddModel(false)}>
+                                    ยกเลิก
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
