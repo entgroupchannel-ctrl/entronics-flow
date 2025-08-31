@@ -161,14 +161,20 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
           if (isQuotations) {
             return (
               <div key={item.href}>
-                {/* Main sales button that goes to sales documents */}
+                {/* Main sales button that loads sales documents in right panel */}
                 <Button
                   variant="ghost"
                   className={cn(
                     "w-full justify-start h-10 px-3",
                     "text-muted-foreground hover:text-foreground hover:bg-accent"
                   )}
-                  onClick={() => window.location.href = '/sales-documents'}
+                  onClick={() => {
+                    // Load sales documents in the right panel
+                    const iframe = document.querySelector('iframe');
+                    if (iframe) {
+                      iframe.src = 'https://entronics-flow.lovable.app/sales-documents';
+                    }
+                  }}
                 >
                   <Icon className="mr-3 h-4 w-4" />
                   {item.title}
@@ -204,7 +210,10 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                           "text-muted-foreground hover:text-foreground hover:bg-accent"
                         )}
                         onClick={() => {
-                          window.location.href = subItem.href;
+                          const iframe = document.querySelector('iframe');
+                          if (iframe) {
+                            iframe.src = `https://entronics-flow.lovable.app${subItem.href}`;
+                          }
                         }}
                       >
                         {subItem.title}
