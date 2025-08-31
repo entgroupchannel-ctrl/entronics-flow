@@ -25,7 +25,8 @@ interface SidebarProps {
 }
 
 const salesSubMenu = [
-  { title: "เอกสารขาย", href: "/sales-documents" },
+  { title: "เอกสารขาย > แสดงทั้งหมด", href: "/sales-documents" },
+  { title: "เอกสารขาย > สร้างใบเสนอราคา", href: "/quotations" },
   { title: "ใบเสนอราคา", href: "/quotations" },
   { title: "ใบวางบิล/ใบแจ้งหนี้", href: "/invoices" },
   { title: "ใบกำกับภาษี", href: "/tax-invoices" },
@@ -161,47 +162,59 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
 
           if (isQuotations) {
             return (
-              <Collapsible key={item.href} open={salesMenuOpen} onOpenChange={setSalesMenuOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "w-full justify-start h-10 px-3",
-                      "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                  >
-                    <Icon className="mr-3 h-4 w-4" />
-                    {item.title}
-                    {salesMenuOpen ? (
-                      <ChevronDown className="ml-auto h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="ml-auto h-4 w-4" />
-                    )}
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-1 ml-6">
-                  {salesSubMenu.map((subItem) => (
+              <div key={item.href}>
+                {/* Main sales button that goes to sales documents */}
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start h-10 px-3",
+                    "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  )}
+                  onClick={() => window.location.href = '/sales-documents'}
+                >
+                  <Icon className="mr-3 h-4 w-4" />
+                  {item.title}
+                </Button>
+                
+                {/* Collapsible sub-menu */}
+                <Collapsible open={salesMenuOpen} onOpenChange={setSalesMenuOpen}>
+                  <CollapsibleTrigger asChild>
                     <Button
-                      key={subItem.href}
                       variant="ghost"
                       size="sm"
                       className={cn(
-                        "w-full justify-start h-8 px-3 text-sm",
+                        "w-full justify-start h-8 px-6 text-xs",
                         "text-muted-foreground hover:text-foreground hover:bg-accent"
                       )}
-                      onClick={() => {
-                        if (subItem.href === '/sales-documents') {
-                          window.location.href = subItem.href;
-                        } else {
-                          window.open(subItem.href, '_blank');
-                        }
-                      }}
                     >
-                      {subItem.title}
+                      ตัวเลือกอื่นๆ
+                      {salesMenuOpen ? (
+                        <ChevronDown className="ml-auto h-3 w-3" />
+                      ) : (
+                        <ChevronRight className="ml-auto h-3 w-3" />
+                      )}
                     </Button>
-                  ))}
-                </CollapsibleContent>
-              </Collapsible>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-1 ml-6">
+                    {salesSubMenu.map((subItem) => (
+                      <Button
+                        key={subItem.href}
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                          "w-full justify-start h-8 px-3 text-sm",
+                          "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        )}
+                        onClick={() => {
+                          window.location.href = subItem.href;
+                        }}
+                      >
+                        {subItem.title}
+                      </Button>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
             );
           }
 
