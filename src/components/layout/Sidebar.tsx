@@ -43,7 +43,8 @@ const menuItems = [
   {
     title: "คลังสินค้า",
     icon: Package,
-    href: "/inventory"
+    href: "/inventory",
+    active: false
   },
   {
     title: "การเงิน",
