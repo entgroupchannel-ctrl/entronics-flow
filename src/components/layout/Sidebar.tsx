@@ -10,15 +10,30 @@ import {
   Building2,
   BarChart3,
   FileText,
-  Bell
+  Bell,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState } from "react";
 
 interface SidebarProps {
   className?: string;
   onMenuClick?: (view: string) => void;
   currentView?: string;
 }
+
+const salesSubMenu = [
+  { title: "เอกสารขาย", href: "/sales-documents" },
+  { title: "ใบเสนอราคา", href: "/quotations" },
+  { title: "ใบวางบิล/ใบแจ้งหนี้", href: "/invoices" },
+  { title: "ใบกำกับภาษี", href: "/tax-invoices" },
+  { title: "ใบเสร็จรับเงิน", href: "/receipts" },
+  { title: "ขายเงินสด", href: "/cash-sales" },
+  { title: "ใบลดหนี้", href: "/credit-notes" },
+  { title: "ใบเพิ่มหนี้", href: "/debit-notes" }
+];
 
 const menuItems = [
   {
@@ -76,6 +91,7 @@ const menuItems = [
 ];
 
 export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
+  const [salesMenuOpen, setSalesMenuOpen] = useState(false);
   return (
     <div className={cn("flex h-full w-64 flex-col bg-card border-r border-border", className)}>
       {/* Logo */}
@@ -145,18 +161,47 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
 
           if (isQuotations) {
             return (
-              <Button
-                key={item.href}
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start h-10 px-3",
-                  "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                onClick={() => window.open('/quotations', '_blank')}
-              >
-                <Icon className="mr-3 h-4 w-4" />
-                {item.title}
-              </Button>
+              <Collapsible key={item.href} open={salesMenuOpen} onOpenChange={setSalesMenuOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start h-10 px-3",
+                      "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    )}
+                  >
+                    <Icon className="mr-3 h-4 w-4" />
+                    {item.title}
+                    {salesMenuOpen ? (
+                      <ChevronDown className="ml-auto h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="ml-auto h-4 w-4" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-1 ml-6">
+                  {salesSubMenu.map((subItem) => (
+                    <Button
+                      key={subItem.href}
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "w-full justify-start h-8 px-3 text-sm",
+                        "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      )}
+                      onClick={() => {
+                        if (subItem.href === '/sales-documents') {
+                          window.location.href = subItem.href;
+                        } else {
+                          window.open(subItem.href, '_blank');
+                        }
+                      }}
+                    >
+                      {subItem.title}
+                    </Button>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
             );
           }
 
