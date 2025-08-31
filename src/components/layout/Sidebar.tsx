@@ -23,56 +23,66 @@ interface SidebarProps {
 
 const menuItems = [
   {
-    title: "แดชบอร์ด",
+    title: "แดชบอร์ด / Dashboard",
     icon: LayoutDashboard,
     href: "/",
-    active: true
+    active: true,
+    iconColor: "text-blue-500"
   },
   {
-    title: "ใบเสนอราคา",
-    icon: ShoppingCart,
-    href: "/sales-documents"
+    title: "ใบเสนอราคา / Quotation",
+    icon: FileText,
+    href: "/quotations",
+    iconColor: "text-green-500"
   },
   {
-    title: "บริการ & ซ่อม",
+    title: "แจ้งซ่อม / Service Ticket",
     icon: Wrench,
-    href: "/service-dashboard"
+    href: "/service-dashboard",
+    iconColor: "text-orange-500"
   },
   {
-    title: "จัดการซัพพลายเออร์",
-    icon: Building2,
-    href: "/suppliers"
-  },
-  {
-    title: "รายชื่อลูกค้า",
+    title: "รายชื่อลูกค้า / Customers",
     icon: Users,
-    href: "/customers"
+    href: "/customers",
+    iconColor: "text-purple-500"
   },
   {
-    title: "คลังสินค้า",
+    title: "คลังสินค้า / Inventory",
     icon: Package,
     href: "/inventory",
-    active: false
+    active: false,
+    iconColor: "text-cyan-500"
   },
   {
-    title: "การเงิน",
+    title: "เอกสารขาย / Sales Documents",
+    icon: ShoppingCart,
+    href: "/sales-documents",
+    iconColor: "text-pink-500"
+  },
+  {
+    title: "การเงิน / Financial",
     icon: DollarSign,
-    href: "/financial"
+    href: "/financial",
+    iconColor: "text-yellow-500"
   },
   {
-    title: "วิเคราะห์ข้อมูล",
+    title: "วิเคราะห์ข้อมูล / Analytics",
     icon: BarChart3,
-    href: "/analytics"
+    href: "/analytics",
+    iconColor: "text-indigo-500"
   },
   {
-    title: "รายงาน",
+    title: "รายงาน / Reports",
     icon: FileText,
-    href: "/reports"
+    href: "/reports",
+    iconColor: "text-teal-500"
   },
   {
-    title: "ตั้งค่า",
+    title: "ตั้งค่า / Settings",
     icon: Settings,
-    href: "/settings"
+    href: "/settings",
+    iconColor: "text-gray-500"
   }
 ];
 
@@ -96,11 +106,11 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
       <nav className="flex-1 space-y-1 p-4">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isInventory = item.title === "คลังสินค้า";
-          const isCustomers = item.title === "รายชื่อลูกค้า";
-          const isQuotations = item.title === "ใบเสนอราคา";
-          const isService = item.title === "บริการ & ซ่อม";
-          const isDashboard = item.title === "แดชบอร์ด";
+          const isInventory = item.title.includes("คลังสินค้า");
+          const isCustomers = item.title.includes("รายชื่อลูกค้า");
+          const isQuotations = item.title.includes("ใบเสนอราคา");
+          const isService = item.title.includes("แจ้งซ่อม");
+          const isDashboard = item.title.includes("แดชบอร์ด");
           
           const isActive = (isDashboard && currentView === 'dashboard') || 
                           (isService && currentView === 'service') ||
@@ -119,7 +129,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                 )}
                 onClick={() => window.location.href = '/inventory'}
               >
-                <Icon className="mr-3 h-4 w-4" />
+                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}
               </Button>
             );
@@ -138,7 +148,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                 )}
                 onClick={() => window.location.href = '/customers'}
               >
-                <Icon className="mr-3 h-4 w-4" />
+                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}
               </Button>
             );
@@ -153,9 +163,9 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                   "w-full justify-start h-10 px-3",
                   "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
-                onClick={() => window.location.href = '/sales-documents'}
+                onClick={() => window.location.href = '/quotations'}
               >
-                <Icon className="mr-3 h-4 w-4" />
+                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}
               </Button>
             );
@@ -174,7 +184,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                 )}
                 onClick={() => onMenuClick?.('service')}
               >
-                <Icon className="mr-3 h-4 w-4" />
+                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}
               </Button>
             );
@@ -193,7 +203,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                 )}
                 onClick={() => onMenuClick?.('dashboard')}
               >
-                <Icon className="mr-3 h-4 w-4" />
+                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}
               </Button>
             );
@@ -207,10 +217,10 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                 "w-full justify-start h-10 px-3",
                 "text-muted-foreground hover:text-foreground hover:bg-accent"
               )}
-            >
-              <Icon className="mr-3 h-4 w-4" />
-              {item.title}
-            </Button>
+              >
+                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
+                {item.title}
+              </Button>
           );
         })}
       </nav>
