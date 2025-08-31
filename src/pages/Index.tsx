@@ -940,6 +940,24 @@ const Index = () => {
     </>
   );
 
+  // Import and render announcements component
+  const AnnouncementsComponent = React.lazy(() => import('./Announcements'));
+
+  const renderView = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return renderDashboardView();
+      case 'service':
+        return renderServiceView();
+      case 'announcements':
+        return <React.Suspense fallback={<div>กำลังโหลด...</div>}>
+          <AnnouncementsComponent />
+        </React.Suspense>;
+      default:
+        return renderDashboardView();
+    }
+  };
+
   return (
     <div className="flex h-screen bg-background">
       <div className="w-64">
