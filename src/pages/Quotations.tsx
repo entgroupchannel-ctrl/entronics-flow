@@ -251,6 +251,7 @@ export default function Quotations() {
   const selectProduct = (itemId: string, productId: string) => {
     const product = products.find(p => p.id === productId);
     if (product) {
+      console.log('Selected product:', product.name, 'Price:', product.price);
       updateItem(itemId, 'product_id', product.id);
       updateItem(itemId, 'product_name', product.name);
       updateItem(itemId, 'product_sku', product.sku);
