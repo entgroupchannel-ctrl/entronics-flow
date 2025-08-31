@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Plus, MoreHorizontal, Filter, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Search, Plus, MoreHorizontal, Filter, Calendar, ChevronLeft, ChevronRight, Edit, Printer, Share, Download, Mail, Copy, Trash } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
@@ -245,9 +246,43 @@ export default function SalesDocuments() {
                         </Badge>
                       </div>
                       <div className="col-span-1 flex justify-center">
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem>
+                              <Edit className="w-4 h-4 mr-2" />
+                              แก้ไข
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Printer className="w-4 h-4 mr-2" />
+                              พิมพ์
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Share className="w-4 h-4 mr-2" />
+                              แชร์
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Download className="w-4 h-4 mr-2" />
+                              ดาวน์โหลด
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Mail className="w-4 h-4 mr-2" />
+                              พิมพ์จ่าหน้าซอง
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Copy className="w-4 h-4 mr-2" />
+                              สร้างซ้ำ
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600">
+                              <Trash className="w-4 h-4 mr-2" />
+                              ลบ
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </div>
