@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Trash2, Edit3, Save, X, FileText, Share2, Printer, Download } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, format } from 'date-fns';
 import jsPDF from 'jspdf';
@@ -69,6 +70,7 @@ interface Quotation {
 
 export default function Quotations() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [salesStaff, setSalesStaff] = useState<{id: string; name: string}[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -311,14 +313,73 @@ export default function Quotations() {
 
   const saveQuotation = async () => {
     try {
-      // Here you would implement the actual save logic
-      // For now, we'll just show a success message
+      // Calculate totals
+      const itemSubtotal = items.reduce((sum, item) => sum + item.line_total, 0);
+      const vatAmount = itemSubtotal * 0.07;
+      const totalAmount = itemSubtotal + vatAmount - quotation.withholding_tax_amount;
+
+      // Save quotation to database
+      const { data: savedQuotation, error: quotationError } = await supabase
+        .from('quotations')
+        .insert({
+          quotation_number: quotation.quotation_number,
+          quotation_date: quotation.quotation_date,
+          valid_until: quotation.valid_until,
+          customer_id: quotation.customer_id,
+          customer_name: quotation.customer_name,
+          customer_email: quotation.customer_email,
+          customer_phone: quotation.customer_phone,
+          customer_address: quotation.customer_address,
+          subtotal: itemSubtotal,
+          discount_amount: quotation.discount_amount,
+          discount_percentage: quotation.discount_percentage,
+          vat_amount: vatAmount,
+          withholding_tax_amount: quotation.withholding_tax_amount,
+          total_amount: totalAmount,
+          status: 'draft',
+          notes: quotation.notes,
+          terms_conditions: quotation.terms_conditions,
+          created_by: user?.id
+        })
+        .select()
+        .single();
+
+      if (quotationError) throw quotationError;
+
+      // Save quotation items
+      if (items.length > 0) {
+        const itemsToSave = items.map(item => ({
+          quotation_id: savedQuotation.id,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          product_sku: item.product_sku,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount_amount: item.discount_amount,
+          discount_percentage: item.discount_type === 'percentage' ? item.discount_amount : 0,
+          line_total: item.line_total,
+          is_software: item.is_software
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('quotation_items')
+          .insert(itemsToSave);
+
+        if (itemsError) throw itemsError;
+      }
+
       toast({
         title: "บันทึกสำเร็จ",
         description: "ใบเสนอราคาได้รับการบันทึกเรียบร้อยแล้ว",
         variant: "default",
       });
-    } catch (error) {
+
+      // Navigate back to quotations list
+      navigate('/');
+      
+    } catch (error: any) {
+      console.error('Error saving quotation:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถบันทึกใบเสนอราคาได้",

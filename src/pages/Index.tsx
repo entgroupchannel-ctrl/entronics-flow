@@ -29,7 +29,8 @@ import {
   User,
   Search,
   Settings,
-  MapPin
+  MapPin,
+  FileText
 } from "lucide-react";
 
 interface ServiceRequest {
@@ -89,6 +90,7 @@ const Index = () => {
   
   const [currentView, setCurrentView] = useState('dashboard');
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
+  const [quotations, setQuotations] = useState<any[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -132,8 +134,17 @@ const Index = () => {
 
       if (techError) throw techError;
 
+      // Fetch quotations
+      const { data: quotationsData, error: quotationsError } = await supabase
+        .from('quotations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (quotationsError) throw quotationsError;
+
       setServiceRequests(requests || []);
       setTechnicians(techData || []);
+      setQuotations(quotationsData || []);
     } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
@@ -386,28 +397,27 @@ const Index = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Service Requests List */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ClipboardList className="h-5 w-5" />
-                งานซ่อมล่าสุด (10 รายการ)
+                งานซ่อมล่าสุด (5 รายการ)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {serviceRequests.slice(0, 10).length === 0 ? (
+              {serviceRequests.slice(0, 5).length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   ยังไม่มีงานซ่อม
                 </div>
               ) : (
-                serviceRequests.slice(0, 10).map((request) => (
+                serviceRequests.slice(0, 5).map((request) => (
                   <div key={request.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold">{request.ticket_number}</span>
                           {getStatusBadge(request.status)}
-                          {getPriorityBadge(request.priority)}
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {new Date(request.created_at).toLocaleDateString('th-TH')}
@@ -415,26 +425,14 @@ const Index = () => {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span>{request.customer_name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <span>{request.customer_phone}</span>
-                        </div>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span>{request.customer_name}</span>
                       </div>
-                      <div className="space-y-1">
-                        <div>
-                          <span className="font-medium">อุปกรณ์: </span>
-                          <span>{request.device_type} {request.device_brand} {request.device_model}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium">ช่าง: </span>
-                          <span>{request.technicians?.name || 'ยังไม่มอบหมาย'}</span>
-                        </div>
+                      <div>
+                        <span className="font-medium">อุปกรณ์: </span>
+                        <span>{request.device_type}</span>
                       </div>
                     </div>
                   </div>
@@ -446,6 +444,67 @@ const Index = () => {
                   <Button 
                     variant="outline" 
                     onClick={() => setCurrentView('service')}
+                  >
+                    ดูทั้งหมด
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quotations List */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                ใบเสนอราคาล่าสุด (5 รายการ)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {quotations.slice(0, 5).length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  ยังไม่มีใบเสนอราคา
+                </div>
+              ) : (
+                quotations.slice(0, 5).map((quotation) => (
+                  <div key={quotation.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold">{quotation.quotation_number}</span>
+                          <Badge variant={quotation.status === 'approved' ? 'default' : 'secondary'}>
+                            {quotation.status === 'draft' ? 'ร่าง' : 
+                             quotation.status === 'sent' ? 'ส่งแล้ว' : 
+                             quotation.status === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(quotation.created_at).toLocaleDateString('th-TH')}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span>{quotation.customer_name}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium">ยอดรวม: </span>
+                        <span>{quotation.total_amount?.toLocaleString('th-TH')} บาท</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+              
+              {quotations.length > 0 && (
+                <div className="text-center pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => window.location.href = '/quotations'}
                   >
                     ดูทั้งหมด
                   </Button>
@@ -489,14 +548,22 @@ const Index = () => {
                 <Users className="mr-2 h-4 w-4" />
                 จัดการลูกค้า
               </Button>
-              <Button 
-                className="w-full justify-start" 
-                variant="outline"
-                onClick={() => window.location.href = '/inventory'}
-              >
-                <DollarSign className="mr-2 h-4 w-4" />
-                คลังสินค้า
-              </Button>
+               <Button 
+                 className="w-full justify-start" 
+                 variant="outline"
+                 onClick={() => window.location.href = '/inventory'}
+               >
+                 <DollarSign className="mr-2 h-4 w-4" />
+                 คลังสินค้า
+               </Button>
+               <Button 
+                 className="w-full justify-start" 
+                 variant="outline"
+                 onClick={() => window.location.href = '/quotations'}
+               >
+                 <FileText className="mr-2 h-4 w-4" />
+                 สร้างใบเสนอราคา
+               </Button>
             </CardContent>
           </Card>
         </div>
