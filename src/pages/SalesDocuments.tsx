@@ -66,6 +66,16 @@ export default function SalesDocuments() {
       case 'sent': return 'bg-blue-100 text-blue-800';
       case 'approved': return 'bg-green-100 text-green-800';
       case 'rejected': return 'bg-red-100 text-red-800';
+      case 'bill_created': return 'bg-purple-100 text-purple-800';
+      case 'delivery_created': return 'bg-indigo-100 text-indigo-800';
+      case 'tax_invoice_created': return 'bg-cyan-100 text-cyan-800';
+      case 'purchase_order_created': return 'bg-orange-100 text-orange-800';
+      case 'split_bill': return 'bg-pink-100 text-pink-800';
+      case 'split_delivery': return 'bg-violet-100 text-violet-800';
+      case 'split_tax_invoice': return 'bg-emerald-100 text-emerald-800';
+      case 'deposit_bill': return 'bg-yellow-100 text-yellow-800';
+      case 'deposit_delivery': return 'bg-lime-100 text-lime-800';
+      case 'deposit_tax_invoice': return 'bg-teal-100 text-teal-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -76,6 +86,16 @@ export default function SalesDocuments() {
       case 'sent': return 'รออนุมัติ';
       case 'approved': return 'อนุมัติ';
       case 'rejected': return 'ปฏิเสธ';
+      case 'bill_created': return 'สร้างใบวางบิล/ใบแจ้งหนี้';
+      case 'delivery_created': return 'สร้างใบส่งสินค้า/ใบกำกับภาษี';
+      case 'tax_invoice_created': return 'สร้างใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)';
+      case 'purchase_order_created': return 'สร้างใบสั่งซื้อ';
+      case 'split_bill': return 'แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้';
+      case 'split_delivery': return 'แบ่งจ่ายใบส่งสินค้า/ใบกำกับภาษี';
+      case 'split_tax_invoice': return 'แบ่งจ่ายใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)';
+      case 'deposit_bill': return 'มัดจำใบวางบิล/ใบแจ้งหนี้';
+      case 'deposit_delivery': return 'มัดจำใบส่งสินค้า/ใบกำกับภาษี';
+      case 'deposit_tax_invoice': return 'มัดจำใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)';
       default: return status;
     }
   };
