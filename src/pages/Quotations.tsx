@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Trash2, Edit3, Save, X, FileText, Share2, Printer, Download } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, format } from 'date-fns';
 import jsPDF from 'jspdf';
@@ -67,6 +68,7 @@ interface Quotation {
 }
 
 export default function Quotations() {
+  const navigate = useNavigate();
   const [salesStaff, setSalesStaff] = useState<{id: string; name: string}[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -304,11 +306,7 @@ export default function Quotations() {
   };
 
   const closeWindow = () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = '/';
-    }
+    navigate(-1); // ย้อนกลับไปหน้าก่อนหน้า
   };
 
   const saveQuotation = async () => {
