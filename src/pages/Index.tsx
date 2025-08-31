@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { useToast } from "@/hooks/use-toast";
@@ -93,6 +95,12 @@ const Index = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+  
+  // Update form states
+  const [selectedTechnician, setSelectedTechnician] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [sendEmail, setSendEmail] = useState(false);
+  const [emailList, setEmailList] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -159,7 +167,7 @@ const Index = () => {
     };
   };
 
-  const updateRequestStatus = async (requestId: string, newStatus: string, technicianId?: string) => {
+  const updateRequestStatus = async (requestId: string, newStatus: string, technicianId?: string, shouldSendEmail = false, emailAddresses = '') => {
     try {
       const updates: any = { status: newStatus };
       if (technicianId) {
@@ -186,17 +194,25 @@ const Index = () => {
           notes: `Status updated to ${newStatus}`,
         });
 
-      // Send completion email if status is completed
-      if (newStatus === 'completed') {
+      // Send email if requested
+      if (shouldSendEmail && emailAddresses) {
         const request = serviceRequests.find(r => r.id === requestId);
         if (request) {
-          await supabase.functions.invoke('send-service-confirmation', {
-            body: {
-              serviceRequest: { ...request, status: newStatus },
-              customerEmail: request.customer_email,
-              type: 'completion',
-            },
-          });
+          const emailList = emailAddresses.split(',').map(email => email.trim()).filter(email => email);
+          
+          for (const email of emailList) {
+            try {
+              await supabase.functions.invoke('send-service-confirmation', {
+                body: {
+                  serviceRequest: { ...request, status: newStatus },
+                  customerEmail: email,
+                  type: newStatus === 'completed' ? 'completion' : 'update'
+                }
+              });
+            } catch (emailError) {
+              console.error('Error sending email to:', email, emailError);
+            }
+          }
         }
       }
 
@@ -206,6 +222,12 @@ const Index = () => {
       });
 
       fetchData();
+      
+      // Reset form states
+      setSelectedTechnician('');
+      setSelectedStatus('');
+      setSendEmail(false);
+      setEmailList('');
     } catch (error: any) {
       console.error('Error updating status:', error);
       toast({
@@ -214,6 +236,23 @@ const Index = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleUpdateRequest = (requestId: string) => {
+    updateRequestStatus(
+      requestId, 
+      selectedStatus, 
+      selectedTechnician || undefined,
+      sendEmail,
+      emailList
+    );
+  };
+
+  const handleDialogOpen = (request: ServiceRequest) => {
+    setSelectedTechnician(request.assigned_technician_id || '');
+    setSelectedStatus(request.status);
+    setSendEmail(false);
+    setEmailList(request.customer_email);
   };
 
   const getStatusBadge = (status: string) => {
@@ -567,7 +606,11 @@ const Index = () => {
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDialogOpen(request)}
+                        >
                           ดูรายละเอียด
                         </Button>
                       </DialogTrigger>
@@ -617,19 +660,74 @@ const Index = () => {
                           </div>
                           
                           {canManageInventory() && (
-                            <div className="flex gap-2 pt-4 border-t">
-                              <Select onValueChange={(value) => updateRequestStatus(request.id, value)}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="อัพเดทสถานะ" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="assigned">มอบหมายช่าง</SelectItem>
-                                  <SelectItem value="in_progress">เริ่มซ่อม</SelectItem>
-                                  <SelectItem value="waiting_parts">รออะไหล่</SelectItem>
-                                  <SelectItem value="completed">เสร็จสิ้น</SelectItem>
-                                  <SelectItem value="cancelled">ยกเลิก</SelectItem>
-                                </SelectContent>
-                              </Select>
+                            <div className="space-y-4 pt-4 border-t">
+                              {/* Technician Assignment */}
+                              <div className="space-y-2">
+                                <Label>มอบหมายช่างเทคนิค</Label>
+                                <Select value={selectedTechnician} onValueChange={setSelectedTechnician}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="เลือกช่างเทคนิค" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="">ไม่มอบหมาย</SelectItem>
+                                    {technicians.filter(tech => tech.is_available).map((tech) => (
+                                      <SelectItem key={tech.id} value={tech.id}>
+                                        {tech.name} - {tech.specialization} (งาน: {tech.current_workload})
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Status Selection */}
+                              <div className="space-y-2">
+                                <Label>สถานะงาน</Label>
+                                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="เลือกสถานะ" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="pending">รอดำเนินการ</SelectItem>
+                                    <SelectItem value="assigned">มอบหมายแล้ว</SelectItem>
+                                    <SelectItem value="in_progress">กำลังดำเนินการ</SelectItem>
+                                    <SelectItem value="waiting_parts">รออะไหล่</SelectItem>
+                                    <SelectItem value="completed">เสร็จสิ้น</SelectItem>
+                                    <SelectItem value="cancelled">ยกเลิก</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Email Options */}
+                              <div className="space-y-3">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id="send-email" 
+                                    checked={sendEmail}
+                                    onCheckedChange={(checked) => setSendEmail(checked === true)}
+                                  />
+                                  <Label htmlFor="send-email">ส่ง Email แจ้งอัพเดท</Label>
+                                </div>
+                                
+                                {sendEmail && (
+                                  <div className="space-y-2">
+                                    <Label>Email ผู้รับ (คั่นด้วยเครื่องหมายจุลภาค)</Label>
+                                    <Input
+                                      placeholder="email1@example.com, email2@example.com"
+                                      value={emailList}
+                                      onChange={(e) => setEmailList(e.target.value)}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Update Button */}
+                              <Button 
+                                onClick={() => handleUpdateRequest(request.id)}
+                                className="w-full"
+                                disabled={!selectedStatus}
+                              >
+                                อัพเดทข้อมูล
+                              </Button>
                             </div>
                           )}
                         </div>
