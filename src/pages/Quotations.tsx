@@ -352,6 +352,18 @@ export default function Quotations() {
                     </div>
                   </div>
                 )}
+
+                {/* Total Amount - moved here */}
+                <div className="bg-primary/5 p-3 rounded-lg">
+                  <Label className="text-sm font-medium">จำนวนเงินรวมทั้งสิ้น</Label>
+                  <div className="text-2xl font-bold text-primary mt-1">
+                    {quotation.total_amount.toLocaleString('th-TH', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}
+                  </div>
+                  <div className="text-sm text-muted-foreground">บาท</div>
+                </div>
               </div>
 
               {/* Right - Quote Info */}
@@ -399,87 +411,79 @@ export default function Quotations() {
                   </div>
                 </div>
 
-                {/* Total Amount */}
-                <div className="text-right bg-primary/5 p-3 rounded-lg">
-                  <Label className="text-sm font-medium">จำนวนเงินรวมทั้งสิ้น</Label>
-                  <div className="text-2xl font-bold text-primary mt-1">
-                    {quotation.total_amount.toLocaleString('th-TH', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })}
-                  </div>
-                  <div className="text-sm text-muted-foreground">บาท</div>
-                </div>
-
-                {/* Dates */}
-                <div className="grid grid-cols-1 gap-2">
-                  <div className="w-[40%]">
-                    <Label className="text-sm">วันที่</Label>
-                    <Input
-                      type="date"
-                      value={quotation.quotation_date}
-                      onChange={(e) => setQuotation(prev => ({ ...prev, quotation_date: e.target.value }))}
-                      className="text-sm h-8"
-                    />
-                  </div>
-                  <div className="w-[40%]">
-                    <Label className="text-sm">เครดิต (วัน)</Label>
-                    <Input
-                      type="number"
-                      defaultValue={15}
-                      className="text-sm h-8"
-                      min="0"
-                    />
-                  </div>
-                  <div className="w-[40%]">
-                    <Label className="text-sm">ครบกำหนด</Label>
-                    <Input
-                      type="date"
-                      value={quotation.valid_until}
-                      onChange={(e) => setQuotation(prev => ({ ...prev, valid_until: e.target.value }))}
-                      className="text-sm h-8"
-                    />
+                {/* Dates - moved here and aligned right */}
+                <div className="flex justify-end">
+                  <div className="grid grid-cols-1 gap-2 w-[40%]">
+                    <div>
+                      <Label className="text-sm">วันที่</Label>
+                      <Input
+                        type="date"
+                        value={quotation.quotation_date}
+                        onChange={(e) => setQuotation(prev => ({ ...prev, quotation_date: e.target.value }))}
+                        className="text-sm h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm">เครดิต (วัน)</Label>
+                      <Input
+                        type="number"
+                        defaultValue={15}
+                        className="text-sm h-8"
+                        min="0"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm">ครบกำหนด</Label>
+                      <Input
+                        type="date"
+                        value={quotation.valid_until}
+                        onChange={(e) => setQuotation(prev => ({ ...prev, valid_until: e.target.value }))}
+                        className="text-sm h-8"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Salesperson */}
-                <div className="w-[40%]">
-                  <Label className="text-sm font-medium">พนักงานขาย</Label>
-                  <div className="flex items-center space-x-2 mt-1">
-                    {isEditingSalesperson ? (
-                      <div className="flex items-center space-x-2 flex-1">
-                        <Input
-                          value={salesperson}
-                          onChange={(e) => setSalesperson(e.target.value)}
-                          className="flex-1 h-8"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setIsEditingSalesperson(false)}
-                        >
-                          <Save className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setIsEditingSalesperson(false)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center space-x-2 flex-1">
-                        <span className="flex-1 p-2 border rounded bg-background text-sm h-8 flex items-center">{salesperson}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsEditingSalesperson(true)}
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
+                {/* Salesperson - moved here and aligned right */}
+                <div className="flex justify-end">
+                  <div className="w-[40%]">
+                    <Label className="text-sm font-medium">พนักงานขาย</Label>
+                    <div className="flex items-center space-x-2 mt-1">
+                      {isEditingSalesperson ? (
+                        <div className="flex items-center space-x-2 flex-1">
+                          <Input
+                            value={salesperson}
+                            onChange={(e) => setSalesperson(e.target.value)}
+                            className="flex-1 h-8"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsEditingSalesperson(false)}
+                          >
+                            <Save className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsEditingSalesperson(false)}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2 flex-1">
+                          <span className="flex-1 p-2 border rounded bg-background text-sm h-8 flex items-center">{salesperson}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsEditingSalesperson(true)}
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
