@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Inventory from "./pages/Inventory";
 import Customers from "./pages/Customers";
+import Quotations from "./pages/Quotations";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ServiceRequest from "./pages/ServiceRequest";
@@ -32,6 +33,11 @@ const App = () => (
             <Route path="/customers" element={
               <ProtectedRoute>
                 <Customers />
+              </ProtectedRoute>
+            } />
+            <Route path="/quotations" element={
+              <ProtectedRoute>
+                <Quotations />
               </ProtectedRoute>
             } />
             <Route path="/inventory" element={

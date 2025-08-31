@@ -30,7 +30,7 @@ const menuItems = [
   {
     title: "ขาย & ใบเสนอราคา",
     icon: ShoppingCart,
-    href: "/sales"
+    href: "/quotations"
   },
   {
     title: "บริการ & ซ่อม",
@@ -97,6 +97,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
           const Icon = item.icon;
           const isInventory = item.title === "คลังสินค้า";
           const isCustomers = item.title === "รายชื่อลูกค้า";
+          const isQuotations = item.title === "ขาย & ใบเสนอราคา";
           const isService = item.title === "บริการ & ซ่อม";
           const isDashboard = item.title === "แดชบอร์ด";
           
@@ -135,6 +136,23 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
                 onClick={() => window.location.href = '/customers'}
+              >
+                <Icon className="mr-3 h-4 w-4" />
+                {item.title}
+              </Button>
+            );
+          }
+
+          if (isQuotations) {
+            return (
+              <Button
+                key={item.href}
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start h-10 px-3",
+                  "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
+                onClick={() => window.location.href = '/quotations'}
               >
                 <Icon className="mr-3 h-4 w-4" />
                 {item.title}
