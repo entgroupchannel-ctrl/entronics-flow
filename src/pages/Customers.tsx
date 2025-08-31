@@ -1,78 +1,83 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, MoreHorizontal, Phone, Mail } from 'lucide-react';
+import { Search, MoreHorizontal, Phone, Mail } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
+import { AddCustomerForm } from '@/components/customers/AddCustomerForm';
+import { useToast } from '@/hooks/use-toast';
 
-// Mock data for demonstration
-const customersData = [
-  {
-    id: 1,
-    name: "101 Training Co.,Ltd",
-    contact: "Ms. Nithima Chuai..",
-    phone: "06-5526-6591",
-    email: "nithima@101training.c..",
-    type: "ลูกค้า",
-    status: "สำคัญ"
-  },
-  {
-    id: 2,
-    name: "101TRAINING COMPANY LIMITED",
-    contact: "Ms.Nithima Chuai..",
-    phone: "065-5266591",
-    email: "Nithima@101training.c..",
-    type: "ลูกค้า",
-    status: "สำคัญ"
-  },
-  {
-    id: 3,
-    name: "108 OA Co.,Ltd.",
-    contact: "Lamul Lunkhunto..",
-    phone: "02 410 4488ex..",
-    email: "lamul@108oa.co.th",
-    type: "ลูกค้า",
-    status: undefined
-  },
-  {
-    id: 4,
-    name: "24 Automation CO.,LTD.",
-    contact: "คุณอดิศักดิ์ อินดี",
-    phone: "02-015-6610",
-    email: "info@24automation.com",
-    type: "ลูกค้า",
-    status: undefined
-  }
-];
-
-const suppliersData = [
-  {
-    id: 1,
-    name: "2 Be Shop (บริษัทอีไลฟ์ จิตเสียส์ จำกัด)",
-    contact: "",
-    phone: "",
-    email: "",
-    type: "ผู้จำหน่าย",
-    status: undefined
-  }
-];
+interface Customer {
+  id: string;
+  name: string;
+  contact_person?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  customer_type: string;
+  status?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function Customers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("customers");
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setCustomers(data || []);
+    } catch (error: any) {
+      toast({
+        title: 'เกิดข้อผิดพลาด',
+        description: 'ไม่สามารถโหลดข้อมูลลูกค้าได้',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
 
   const getFilteredData = () => {
-    const data = activeTab === "customers" ? customersData : 
-                 activeTab === "suppliers" ? suppliersData : 
-                 [...customersData, ...suppliersData];
+    let filteredData = customers;
     
-    return data.filter(item => 
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.contact.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Filter by tab
+    if (activeTab === "customers") {
+      filteredData = customers.filter(c => c.customer_type === "ลูกค้า");
+    } else if (activeTab === "suppliers") {
+      filteredData = customers.filter(c => c.customer_type === "ผู้จำหน่าย");
+    } else if (activeTab === "both") {
+      filteredData = customers.filter(c => c.customer_type === "ผู้จำหน่าย/ลูกค้า");
+    }
+    
+    // Filter by search term
+    if (searchTerm) {
+      filteredData = filteredData.filter(item => 
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.contact_person && item.contact_person.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    
+    return filteredData;
   };
 
   const getStatusBadge = (status?: string) => {
@@ -98,10 +103,7 @@ export default function Customers() {
                   <h1 className="text-3xl font-bold text-foreground">รายชื่อลูกค้า</h1>
                   <p className="text-muted-foreground">จัดการข้อมูลลูกค้าและผู้จำหน่าย</p>
                 </div>
-                <Button className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  สร้างใหม่
-                </Button>
+                <AddCustomerForm onSuccess={fetchCustomers} />
               </div>
 
               {/* Search and Filters */}
@@ -154,55 +156,62 @@ export default function Customers() {
 
                   {/* Table Content */}
                   <div className="divide-y divide-border">
-                    {getFilteredData().map((item) => (
-                      <div key={item.id} className="grid grid-cols-12 gap-4 p-4 hover:bg-muted/30 transition-colors">
-                        <div className="col-span-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                            <div>
-                              <div className="font-medium">{item.name}</div>
-                              {item.status && (
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {getStatusBadge(item.status)}
-                                </div>
-                              )}
+                    {loading ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        กำลังโหลดข้อมูล...
+                      </div>
+                    ) : getFilteredData().length > 0 ? (
+                      getFilteredData().map((item) => (
+                        <div key={item.id} className="grid grid-cols-12 gap-4 p-4 hover:bg-muted/30 transition-colors">
+                          <div className="col-span-3">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${
+                                item.customer_type === 'ลูกค้า' ? 'bg-blue-500' : 
+                                item.customer_type === 'ผู้จำหน่าย' ? 'bg-orange-500' : 'bg-green-500'
+                              }`}></div>
+                              <div>
+                                <div className="font-medium">{item.name}</div>
+                                {item.status && item.status !== 'ปกติ' && (
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    {getStatusBadge(item.status)}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
+                          <div className="col-span-2 text-sm">{item.contact_person}</div>
+                          <div className="col-span-2 text-sm">
+                            {item.phone && (
+                              <div className="flex items-center gap-1">
+                                <Phone className="h-3 w-3" />
+                                {item.phone}
+                              </div>
+                            )}
+                          </div>
+                          <div className="col-span-2 text-sm">
+                            {item.email && (
+                              <div className="flex items-center gap-1">
+                                <Mail className="h-3 w-3" />
+                                {item.email}
+                              </div>
+                            )}
+                          </div>
+                          <div className="col-span-2 text-sm">
+                            <Badge variant="outline">{item.customer_type}</Badge>
+                          </div>
+                          <div className="col-span-1 flex justify-end">
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="col-span-2 text-sm">{item.contact}</div>
-                        <div className="col-span-2 text-sm">
-                          {item.phone && (
-                            <div className="flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {item.phone}
-                            </div>
-                          )}
-                        </div>
-                        <div className="col-span-2 text-sm">
-                          {item.email && (
-                            <div className="flex items-center gap-1">
-                              <Mail className="h-3 w-3" />
-                              {item.email}
-                            </div>
-                          )}
-                        </div>
-                        <div className="col-span-2 text-sm">
-                          <Badge variant="outline">{item.type}</Badge>
-                        </div>
-                        <div className="col-span-1 flex justify-end">
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        ไม่พบข้อมูลที่ค้นหา
                       </div>
-                    ))}
+                    )}
                   </div>
-
-                  {getFilteredData().length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      ไม่พบข้อมูลที่ค้นหา
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </div>
