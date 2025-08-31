@@ -22,6 +22,8 @@ import {
   Eye,
   AlertTriangle
 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -59,6 +61,8 @@ const Inventory = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const { toast } = useToast();
@@ -169,6 +173,99 @@ const Inventory = () => {
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถเพิ่มสินค้าได้",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEditProduct = async () => {
+    if (!editingProduct || !editingProduct.sku || !editingProduct.name) {
+      toast({
+        title: "ข้อมูลไม่ครบถ้วน",
+        description: "กรุณากรอก SKU และชื่อสินค้า",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Determine status based on stock
+      let status = "In Stock";
+      if (editingProduct.stock === 0) {
+        status = "Out of Stock";
+      } else if (editingProduct.stock <= 5) {
+        status = "Low Stock";
+      }
+
+      const { error } = await supabase
+        .from('products')
+        .update({
+          sku: editingProduct.sku,
+          name: editingProduct.name,
+          category: editingProduct.category || null,
+          brand: editingProduct.brand || null,
+          price: editingProduct.price || 0,
+          stock: editingProduct.stock || 0,
+          status: status
+        })
+        .eq('id', editingProduct.id);
+
+      if (error) {
+        console.error('Error updating product:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถอัพเดทสินค้าได้",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await loadProducts();
+      setEditingProduct(null);
+      setShowEditDialog(false);
+      
+      toast({
+        title: "อัพเดทสินค้าสำเร็จ",
+        description: `อัพเดทสินค้า ${editingProduct.name} เรียบร้อยแล้ว`
+      });
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถอัพเดทสินค้าได้",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string, productName: string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
+
+      if (error) {
+        console.error('Error deleting product:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถลบสินค้าได้",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await loadProducts();
+      
+      toast({
+        title: "ลบสินค้าสำเร็จ",
+        description: `ลบสินค้า ${productName} เรียบร้อยแล้ว`
+      });
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบสินค้าได้",
         variant: "destructive"
       });
     }
@@ -346,6 +443,105 @@ const Inventory = () => {
                 </Card>
               )}
 
+              {/* Edit Product Dialog */}
+              <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>แก้ไขสินค้า</DialogTitle>
+                    <DialogDescription>
+                      แก้ไขข้อมูลสินค้าในระบบ
+                    </DialogDescription>
+                  </DialogHeader>
+                  {editingProduct && (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="edit-sku">SKU *</Label>
+                            <Input
+                              id="edit-sku"
+                              value={editingProduct.sku}
+                              onChange={(e) => setEditingProduct({...editingProduct, sku: e.target.value})}
+                              placeholder="ADV-PPC-3150"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="edit-name">ชื่อสินค้า *</Label>
+                            <Input
+                              id="edit-name"
+                              value={editingProduct.name}
+                              onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
+                              placeholder="Advantech PPC-3150 15 inch Panel PC"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="edit-category">หมวดหมู่</Label>
+                            <Select value={editingProduct.category || ""} onValueChange={(value) => setEditingProduct({...editingProduct, category: value})}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="เลือกหมวดหมู่" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {categories.map(category => (
+                                  <SelectItem key={category} value={category}>{category}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="edit-brand">ยี่ห้อ</Label>
+                            <Select value={editingProduct.brand || ""} onValueChange={(value) => setEditingProduct({...editingProduct, brand: value})}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="เลือกยี่ห้อ" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {brands.map(brand => (
+                                  <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="edit-price">ราคาขาย (บาท)</Label>
+                            <Input
+                              id="edit-price"
+                              type="number"
+                              value={editingProduct.price}
+                              onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})}
+                              placeholder="45000"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="edit-stock">จำนวนสต๊อค</Label>
+                            <Input
+                              id="edit-stock"
+                              type="number"
+                              value={editingProduct.stock}
+                              onChange={(e) => setEditingProduct({...editingProduct, stock: Number(e.target.value)})}
+                              placeholder="12"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                      ยกเลิก
+                    </Button>
+                    <Button onClick={handleEditProduct}>
+                      บันทึกการเปลี่ยนแปลง
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
               {/* Products Table */}
               <Card>
                 <CardHeader>
@@ -403,15 +599,40 @@ const Inventory = () => {
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center justify-center gap-2">
-                                  <Button variant="ghost" size="icon">
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                  <Button variant="ghost" size="icon">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={() => {
+                                      setEditingProduct(product);
+                                      setShowEditDialog(true);
+                                    }}
+                                  >
                                     <Edit className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="icon">
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>ยืนยันการลบสินค้า</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          คุณแน่ใจหรือไม่ที่จะลบสินค้า "{product.name}" นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() => handleDeleteProduct(product.id, product.name)}
+                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        >
+                                          ลบสินค้า
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
                                 </div>
                               </TableCell>
                             </TableRow>
