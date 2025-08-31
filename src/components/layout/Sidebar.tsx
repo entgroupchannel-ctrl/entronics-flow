@@ -174,31 +174,21 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                     if (iframe) {
                       iframe.src = 'https://entronics-flow.lovable.app/sales-documents';
                     }
+                    // Toggle submenu
+                    setSalesMenuOpen(!salesMenuOpen);
                   }}
                 >
                   <Icon className="mr-3 h-4 w-4" />
                   {item.title}
+                  {salesMenuOpen ? (
+                    <ChevronDown className="ml-auto h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="ml-auto h-4 w-4" />
+                  )}
                 </Button>
                 
                 {/* Collapsible sub-menu */}
                 <Collapsible open={salesMenuOpen} onOpenChange={setSalesMenuOpen}>
-                  <CollapsibleTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={cn(
-                        "w-full justify-start h-8 px-6 text-xs",
-                        "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      )}
-                    >
-                      ตัวเลือกอื่นๆ
-                      {salesMenuOpen ? (
-                        <ChevronDown className="ml-auto h-3 w-3" />
-                      ) : (
-                        <ChevronRight className="ml-auto h-3 w-3" />
-                      )}
-                    </Button>
-                  </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-1 ml-6">
                     {salesSubMenu.map((subItem) => (
                       <Button
