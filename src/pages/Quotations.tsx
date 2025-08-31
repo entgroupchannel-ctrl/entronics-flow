@@ -226,7 +226,7 @@ export default function Quotations() {
 
   const updateItem = (id: string, field: keyof QuotationItem, value: any) => {
     console.log('updateItem called:', { id, field, value });
-    setItems(items.map(item => {
+    setItems(prevItems => prevItems.map(item => {
       if (item.id === id) {
         console.log('Updating item:', item.id, 'field:', field, 'new value:', value);
         const updatedItem = { ...item, [field]: value };
@@ -256,11 +256,33 @@ export default function Quotations() {
     const product = products.find(p => p.id === productId);
     if (product) {
       console.log('Selected product:', product.name, 'Price:', product.price);
-      updateItem(itemId, 'product_id', product.id);
-      updateItem(itemId, 'product_name', product.name);
-      updateItem(itemId, 'product_sku', product.sku);
-      updateItem(itemId, 'unit_price', product.price);
-      updateItem(itemId, 'description', `${product.brand ? product.brand + ' ' : ''}${product.name}`);
+      // Update all fields at once to avoid state conflicts
+      setItems(prevItems => prevItems.map(item => {
+        if (item.id === itemId) {
+          const updatedItem = {
+            ...item,
+            product_id: product.id,
+            product_name: product.name,
+            product_sku: product.sku,
+            unit_price: product.price,
+            description: `${product.brand ? product.brand + ' ' : ''}${product.name}`
+          };
+          
+          // Recalculate line total
+          const subtotal = updatedItem.quantity * updatedItem.unit_price;
+          let discountAmount = updatedItem.discount_amount;
+          
+          if (updatedItem.discount_type === 'percentage') {
+            discountAmount = subtotal * (updatedItem.discount_amount / 100);
+          }
+          
+          updatedItem.line_total = subtotal - discountAmount;
+          console.log('Product selected - updated item:', updatedItem);
+          
+          return updatedItem;
+        }
+        return item;
+      }));
     }
   };
 
