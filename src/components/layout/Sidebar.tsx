@@ -20,48 +20,48 @@ interface SidebarProps {
 
 const menuItems = [
   {
-    title: "Dashboard",
+    title: "แดชบอร์ด",
     icon: LayoutDashboard,
     href: "/",
     active: true
   },
   {
-    title: "Supplier Management",
+    title: "จัดการซัพพลายเออร์",
     icon: Building2,
     href: "/suppliers"
   },
   {
-    title: "Inventory",
+    title: "คลังสินค้า",
     icon: Package,
     href: "/inventory"
   },
   {
-    title: "Sales & Quotation",
+    title: "ขาย & ใบเสนอราคา",
     icon: ShoppingCart,
     href: "/sales"
   },
   {
-    title: "Service & Repair",
+    title: "บริการ & ซ่อม",
     icon: Wrench,
     href: "/service"
   },
   {
-    title: "Financial",
+    title: "การเงิน",
     icon: DollarSign,
     href: "/financial"
   },
   {
-    title: "Analytics",
+    title: "วิเคราะห์ข้อมูล",
     icon: BarChart3,
     href: "/analytics"
   },
   {
-    title: "Reports",
+    title: "รายงาน",
     icon: FileText,
     href: "/reports"
   },
   {
-    title: "Settings",
+    title: "ตั้งค่า",
     icon: Settings,
     href: "/settings"
   }
