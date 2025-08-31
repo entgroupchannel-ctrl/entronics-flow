@@ -108,7 +108,7 @@ export function Sidebar({ className }: SidebarProps) {
                     ? "bg-primary text-primary-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
-                onClick={() => window.open('https://entronics-flow.lovable.app/inventory', '_blank')}
+                onClick={() => window.location.href = '/inventory'}
               >
                 <Icon className="mr-3 h-4 w-4" />
                 {item.title}
