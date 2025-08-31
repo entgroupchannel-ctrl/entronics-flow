@@ -448,6 +448,7 @@ const Inventory = () => {
               )}
 
               {/* Edit Product Dialog */}
+              {canManageInventory() && (
               <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
                 <DialogContent className="sm:max-w-[600px]">
                   <DialogHeader>
@@ -545,6 +546,7 @@ const Inventory = () => {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+              )}
 
               {/* Products Table */}
               <Card>
@@ -570,6 +572,7 @@ const Inventory = () => {
                           <TableHead className="text-right">ราคาขาย</TableHead>
                           <TableHead className="text-right">สต๊อค</TableHead>
                            <TableHead>สถานะ</TableHead>
+                           {!canManageInventory() && <TableHead className="text-center">สถานะการเข้าถึง</TableHead>}
                            {canManageInventory() && <TableHead className="text-center">จัดการ</TableHead>}
                         </TableRow>
                       </TableHeader>
@@ -602,44 +605,53 @@ const Inventory = () => {
                                  {getStatusBadge(product.status)}
                                </TableCell>
                                {canManageInventory() && (
-                                 <TableCell>
-                                   <div className="flex items-center justify-center gap-2">
-                                     <Button 
-                                       variant="ghost" 
-                                       size="icon"
-                                       onClick={() => {
-                                         setEditingProduct(product);
-                                         setShowEditDialog(true);
-                                       }}
-                                     >
-                                       <Edit className="h-4 w-4" />
-                                     </Button>
-                                     <AlertDialog>
-                                       <AlertDialogTrigger asChild>
-                                         <Button variant="ghost" size="icon">
-                                           <Trash2 className="h-4 w-4" />
-                                         </Button>
-                                       </AlertDialogTrigger>
-                                       <AlertDialogContent>
-                                         <AlertDialogHeader>
-                                           <AlertDialogTitle>ยืนยันการลบสินค้า</AlertDialogTitle>
-                                           <AlertDialogDescription>
-                                             คุณแน่ใจหรือไม่ที่จะลบสินค้า "{product.name}" นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้
-                                           </AlertDialogDescription>
-                                         </AlertDialogHeader>
-                                         <AlertDialogFooter>
-                                           <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-                                           <AlertDialogAction
-                                             onClick={() => handleDeleteProduct(product.id, product.name)}
-                                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                           >
-                                             ลบสินค้า
-                                           </AlertDialogAction>
-                                         </AlertDialogFooter>
-                                       </AlertDialogContent>
-                                     </AlertDialog>
-                                   </div>
-                                 </TableCell>
+                               <TableCell>
+                                 <div className="flex items-center justify-center gap-2">
+                                   <Button 
+                                     variant="ghost" 
+                                     size="icon"
+                                     onClick={() => {
+                                       setEditingProduct(product);
+                                       setShowEditDialog(true);
+                                     }}
+                                   >
+                                     <Edit className="h-4 w-4" />
+                                   </Button>
+                                   <AlertDialog>
+                                     <AlertDialogTrigger asChild>
+                                       <Button variant="ghost" size="icon">
+                                         <Trash2 className="h-4 w-4" />
+                                       </Button>
+                                     </AlertDialogTrigger>
+                                     <AlertDialogContent>
+                                       <AlertDialogHeader>
+                                         <AlertDialogTitle>ยืนยันการลบสินค้า</AlertDialogTitle>
+                                         <AlertDialogDescription>
+                                           คุณแน่ใจหรือไม่ที่จะลบสินค้า "{product.name}" นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                         </AlertDialogDescription>
+                                       </AlertDialogHeader>
+                                       <AlertDialogFooter>
+                                         <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                                         <AlertDialogAction
+                                           onClick={() => handleDeleteProduct(product.id, product.name)}
+                                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                         >
+                                           ลบสินค้า
+                                         </AlertDialogAction>
+                                       </AlertDialogFooter>
+                                     </AlertDialogContent>
+                                   </AlertDialog>
+                                 </div>
+                               </TableCell>
+                               )}
+                               {!canManageInventory() && (
+                               <TableCell>
+                                 <div className="flex items-center justify-center">
+                                   <Badge variant="outline" className="text-muted-foreground">
+                                     ดูข้อมูลอย่างเดียว
+                                   </Badge>
+                                 </div>
+                               </TableCell>
                                )}
                             </TableRow>
                           ))

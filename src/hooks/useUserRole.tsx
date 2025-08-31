@@ -9,34 +9,34 @@ export const useUserRole = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchUserRoles = async () => {
-      if (!user) {
-        setUserRoles([]);
-        setLoading(false);
-        return;
-      }
+  const fetchUserRoles = async () => {
+    if (!user) {
+      setUserRoles([]);
+      setLoading(false);
+      return;
+    }
 
-      try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id);
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
 
-        if (error) {
-          console.error('Error fetching user roles:', error);
-          setUserRoles([]);
-        } else {
-          setUserRoles(data?.map(r => r.role as UserRole) || []);
-        }
-      } catch (error) {
+      if (error) {
         console.error('Error fetching user roles:', error);
         setUserRoles([]);
-      } finally {
-        setLoading(false);
+      } else {
+        setUserRoles((data || []).map(item => item.role as UserRole));
       }
-    };
+    } catch (error) {
+      console.error('Error fetching user roles:', error);
+      setUserRoles([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUserRoles();
   }, [user]);
 
@@ -57,6 +57,7 @@ export const useUserRole = () => {
     loading,
     hasRole,
     canManageInventory,
-    isAdmin
+    isAdmin,
+    refetchRoles: fetchUserRoles
   };
 };
