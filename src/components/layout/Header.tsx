@@ -1,9 +1,13 @@
-import { Bell, Search, User } from "lucide-react";
+import { Bell, Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Header() {
+  const { user, signOut } = useAuth();
+
   return (
     <header className="h-16 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="flex h-full items-center justify-between px-6">
@@ -32,9 +36,22 @@ export function Header() {
           </Button>
 
           {/* Profile */}
-          <Button variant="ghost" size="icon">
-            <User className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <User className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem disabled>
+                <span className="text-sm text-muted-foreground">{user?.email}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={signOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                ออกจากระบบ
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
