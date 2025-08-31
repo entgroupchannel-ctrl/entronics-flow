@@ -37,6 +37,7 @@ interface QuotationItem {
   quantity: number;
   unit_price: number;
   discount_amount: number;
+  discount_type: 'amount' | 'percentage';
   line_total: number;
   is_software: boolean;
 }
@@ -176,6 +177,7 @@ export default function Quotations() {
       quantity: 1,
       unit_price: 0,
       discount_amount: 0,
+      discount_type: 'amount',
       line_total: 0,
       is_software: false
     };
@@ -189,7 +191,13 @@ export default function Quotations() {
         
         // Recalculate line total
         const subtotal = updatedItem.quantity * updatedItem.unit_price;
-        updatedItem.line_total = subtotal - updatedItem.discount_amount;
+        let discountAmount = updatedItem.discount_amount;
+        
+        if (updatedItem.discount_type === 'percentage') {
+          discountAmount = subtotal * (updatedItem.discount_amount / 100);
+        }
+        
+        updatedItem.line_total = subtotal - discountAmount;
         
         return updatedItem;
       }
@@ -482,7 +490,6 @@ export default function Quotations() {
                     <TableRow className="bg-primary text-primary-foreground">
                       <TableHead className="text-center w-16 text-primary-foreground">ลำดับ</TableHead>
                       <TableHead className="w-80 text-primary-foreground">ชื่อสินค้า</TableHead>
-                      <TableHead className="w-60 text-primary-foreground">รายละเอียด</TableHead>
                       <TableHead className="text-center w-20 text-primary-foreground">จำนวน</TableHead>
                       <TableHead className="text-center w-20 text-primary-foreground">หน่วย</TableHead>
                       <TableHead className="text-center w-32 text-primary-foreground">ราคาต่อหน่วย</TableHead>
@@ -494,101 +501,127 @@ export default function Quotations() {
                   </TableHeader>
                   <TableBody>
                     {items.map((item, index) => (
-                      <TableRow key={item.id}>
-                        <TableCell className="text-center font-medium">
-                          {index + 1}
-                        </TableCell>
-                        <TableCell>
-                          <Select onValueChange={(value) => selectProduct(item.id, value)}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="เลือกสินค้า" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {products.map(product => (
-                                <SelectItem key={product.id} value={product.id}>
-                                  <div className="flex flex-col">
-                                    <span className="font-medium">{product.name}</span>
-                                    <span className="text-sm text-muted-foreground">
-                                      {product.sku} - ฿{product.price.toLocaleString()}
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {item.product_name && (
-                            <div className="text-sm text-muted-foreground mt-1">
-                              {item.product_sku}
+                      <React.Fragment key={item.id}>
+                        <TableRow>
+                          <TableCell className="text-center font-medium">
+                            {index + 1}
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-2">
+                              <Select onValueChange={(value) => selectProduct(item.id, value)}>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="เลือกสินค้า" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {products.map(product => (
+                                    <SelectItem key={product.id} value={product.id}>
+                                      <div className="flex flex-col">
+                                        <span className="font-medium">{product.name}</span>
+                                        <span className="text-sm text-muted-foreground">
+                                          {product.sku} - ฿{product.price.toLocaleString()}
+                                        </span>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {item.product_name && (
+                                <div className="text-sm text-muted-foreground">
+                                  {item.product_sku}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Textarea
-                            value={item.description || ''}
-                            onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                            placeholder="รายละเอียดเพิ่มเติม"
-                            className="min-h-[60px] text-sm"
-                            rows={2}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                            className="text-center"
-                            min="0"
-                            step="0.01"
-                          />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <span className="text-sm">ชิ้น</span>
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            value={item.unit_price}
-                            onChange={(e) => updateItem(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
-                            className="text-right"
-                            min="0"
-                            step="0.01"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            value={item.discount_amount}
-                            onChange={(e) => updateItem(item.id, 'discount_amount', parseFloat(e.target.value) || 0)}
-                            className="text-right"
-                            min="0"
-                            step="0.01"
-                          />
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          ฿{item.line_total.toLocaleString('th-TH', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                          })}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <input
-                            type="checkbox"
-                            checked={item.is_software}
-                            onChange={(e) => updateItem(item.id, 'is_software', e.target.checked)}
-                            className="w-4 h-4"
-                          />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeItem(item.id)}
-                            className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                              className="text-center"
+                              min="0"
+                              step="0.01"
+                            />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <span className="text-sm">ชิ้น</span>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="number"
+                              value={item.unit_price}
+                              onChange={(e) => updateItem(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
+                              className="text-right"
+                              min="0"
+                              step="0.01"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="flex items-center space-x-1">
+                                <Input
+                                  type="number"
+                                  value={item.discount_amount}
+                                  onChange={(e) => updateItem(item.id, 'discount_amount', parseFloat(e.target.value) || 0)}
+                                  className="text-right flex-1"
+                                  min="0"
+                                  step="0.01"
+                                />
+                                <Select
+                                  value={item.discount_type}
+                                  onValueChange={(value) => updateItem(item.id, 'discount_type', value)}
+                                >
+                                  <SelectTrigger className="w-16">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="amount">฿</SelectItem>
+                                    <SelectItem value="percentage">%</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            ฿{item.line_total.toLocaleString('th-TH', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <input
+                              type="checkbox"
+                              checked={item.is_software}
+                              onChange={(e) => updateItem(item.id, 'is_software', e.target.checked)}
+                              className="w-4 h-4"
+                            />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeItem(item.id)}
+                              className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell></TableCell>
+                          <TableCell colSpan={8} className="bg-muted/30 p-4">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">รายละเอียด</Label>
+                              <Textarea
+                                value={item.description || ''}
+                                onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                                placeholder="รายละเอียดเพิ่มเติม"
+                                className="w-full text-sm"
+                                rows={3}
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      </React.Fragment>
                     ))}
                   </TableBody>
                 </Table>
