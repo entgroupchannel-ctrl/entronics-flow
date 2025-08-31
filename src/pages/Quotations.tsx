@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Trash2, Edit3, Save, X, FileText, Share2, Printer, Download } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { addDays, format } from 'date-fns';
 
 interface Customer {
   id: string;
@@ -66,23 +67,28 @@ interface Quotation {
 export default function Quotations() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [quotation, setQuotation] = useState<Quotation>({
-    quotation_number: '',
-    quotation_date: new Date().toISOString().split('T')[0],
-    valid_until: '',
-    customer_name: '',
-    customer_email: '',
-    customer_phone: '',
-    customer_address: '',
-    subtotal: 0,
-    discount_amount: 0,
-    discount_percentage: 0,
-    vat_amount: 0,
-    withholding_tax_amount: 0,
-    total_amount: 0,
-    status: 'draft',
-    notes: '',
-    terms_conditions: ''
+  const [quotation, setQuotation] = useState<Quotation>(() => {
+    const today = new Date();
+    const validUntil = addDays(today, 15);
+    
+    return {
+      quotation_number: '',
+      quotation_date: format(today, 'yyyy-MM-dd'),
+      valid_until: format(validUntil, 'yyyy-MM-dd'),
+      customer_name: '',
+      customer_email: '',
+      customer_phone: '',
+      customer_address: '',
+      subtotal: 0,
+      discount_amount: 0,
+      discount_percentage: 0,
+      vat_amount: 0,
+      withholding_tax_amount: 0,
+      total_amount: 0,
+      status: 'draft',
+      notes: '',
+      terms_conditions: ''
+    };
   });
   
   const [items, setItems] = useState<QuotationItem[]>([]);
