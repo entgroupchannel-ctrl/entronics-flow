@@ -250,6 +250,102 @@ const Inventory = () => {
                 </CardContent>
               </Card>
 
+              {/* Add Product Form */}
+              {showAddForm && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>เพิ่มสินค้าใหม่</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="sku">SKU *</Label>
+                          <Input
+                            id="sku"
+                            value={newProduct.sku}
+                            onChange={(e) => setNewProduct({...newProduct, sku: e.target.value})}
+                            placeholder="ADV-PPC-3150"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="name">ชื่อสินค้า *</Label>
+                          <Input
+                            id="name"
+                            value={newProduct.name}
+                            onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                            placeholder="Advantech PPC-3150 15 inch Panel PC"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="category">หมวดหมู่ *</Label>
+                          <Select value={newProduct.category} onValueChange={(value) => setNewProduct({...newProduct, category: value})}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="เลือกหมวดหมู่" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {categories.map(category => (
+                                <SelectItem key={category} value={category}>{category}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="brand">ยี่ห้อ</Label>
+                          <Select value={newProduct.brand} onValueChange={(value) => setNewProduct({...newProduct, brand: value})}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="เลือกยี่ห้อ" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {brands.map(brand => (
+                                <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="price">ราคาขาย (บาท)</Label>
+                          <Input
+                            id="price"
+                            type="number"
+                            value={newProduct.price}
+                            onChange={(e) => setNewProduct({...newProduct, price: Number(e.target.value)})}
+                            placeholder="45000"
+                          />
+                        </div>
+
+                         <div>
+                           <Label htmlFor="stock">จำนวนสต๊อค</Label>
+                           <Input
+                             id="stock"
+                             type="number"
+                             value={newProduct.stock}
+                             onChange={(e) => setNewProduct({...newProduct, stock: Number(e.target.value)})}
+                             placeholder="12"
+                           />
+                         </div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <Button onClick={handleAddProduct}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        เพิ่มสินค้า
+                      </Button>
+                      <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                        ยกเลิก
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Products Table */}
               <Card>
                 <CardHeader>
