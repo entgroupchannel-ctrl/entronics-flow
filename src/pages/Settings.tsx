@@ -878,10 +878,15 @@ export default function Settings() {
                           )}
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="default"
+                            className="h-8 w-12 p-0"
                             onClick={() => toggleAnnouncementStatus(announcement.id, announcement.is_active)}
                           >
-                            {announcement.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                            {announcement.is_active ? (
+                              <ToggleRight className="w-6 h-6 text-green-600" />
+                            ) : (
+                              <ToggleLeft className="w-6 h-6 text-gray-400" />
+                            )}
                           </Button>
                         </div>
                       </TableCell>
