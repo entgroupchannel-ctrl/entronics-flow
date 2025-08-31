@@ -65,6 +65,7 @@ interface Quotation {
 }
 
 export default function Quotations() {
+  const [salesStaff, setSalesStaff] = useState<{id: string; name: string}[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [quotation, setQuotation] = useState<Quotation>(() => {
@@ -96,15 +97,47 @@ export default function Quotations() {
   const [isEditingQuotationNumber, setIsEditingQuotationNumber] = useState(false);
   const [isEditingCustomer, setIsEditingCustomer] = useState(false);
   const [salesperson, setSalesperson] = useState('ผู้เสนอราคา');
-  const [isEditingSalesperson, setIsEditingSalesperson] = useState(false);
   const { toast } = useToast();
 
   // Load data
   useEffect(() => {
     loadCustomers();
     loadProducts();
+    loadSalesStaff();
     generateQuotationNumber();
   }, []);
+
+  const loadSalesStaff = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          user_id,
+          full_name,
+          username,
+          user_roles!inner(
+            role
+          )
+        `)
+        .eq('user_roles.role', 'sales');
+      
+      if (error) throw error;
+      
+      const salesStaffData = data?.map(profile => ({
+        id: profile.user_id,
+        name: profile.full_name || profile.username || 'ไม่ระบุชื่อ'
+      })) || [];
+      
+      setSalesStaff(salesStaffData);
+    } catch (error) {
+      console.error('Error loading sales staff:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลพนักงานขายได้",
+        variant: "destructive",
+      });
+    }
+  };
 
   const loadCustomers = async () => {
     try {
@@ -448,41 +481,19 @@ export default function Quotations() {
                 <div className="flex justify-end">
                   <div className="w-[40%]">
                     <Label className="text-sm font-medium">พนักงานขาย</Label>
-                    <div className="flex items-center space-x-2 mt-1">
-                      {isEditingSalesperson ? (
-                        <div className="flex items-center space-x-2 flex-1">
-                          <Input
-                            value={salesperson}
-                            onChange={(e) => setSalesperson(e.target.value)}
-                            className="flex-1 h-8"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setIsEditingSalesperson(false)}
-                          >
-                            <Save className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setIsEditingSalesperson(false)}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-2 flex-1">
-                          <span className="flex-1 p-2 border rounded bg-background text-sm h-8 flex items-center">{salesperson}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIsEditingSalesperson(true)}
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      )}
+                    <div className="mt-1">
+                      <Select value={salesperson} onValueChange={setSalesperson}>
+                        <SelectTrigger className="h-8">
+                          <SelectValue placeholder="เลือกพนักงานขาย" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {salesStaff.map(staff => (
+                            <SelectItem key={staff.id} value={staff.name}>
+                              {staff.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
