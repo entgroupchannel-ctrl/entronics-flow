@@ -1,0 +1,564 @@
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Plus, Trash2, Save, X, FileText } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { addDays, format } from 'date-fns';
+
+interface Customer {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  sku: string;
+  price: number;
+  category?: string;
+  brand?: string;
+}
+
+interface QuotationItem {
+  id: string;
+  product_id?: string;
+  product_name: string;
+  product_sku?: string;
+  description?: string;
+  quantity: number;
+  unit_price: number;
+  discount_amount: number;
+  discount_type: 'amount' | 'percentage';
+  line_total: number;
+  is_software: boolean;
+}
+
+interface Quotation {
+  id?: string;
+  quotation_number: string;
+  quotation_date: string;
+  valid_until?: string;
+  customer_id?: string;
+  customer_name: string;
+  customer_email?: string;
+  customer_phone?: string;
+  customer_address?: string;
+  subtotal: number;
+  discount_amount: number;
+  discount_percentage: number;
+  vat_amount: number;
+  withholding_tax_amount: number;
+  total_amount: number;
+  status: string;
+  notes?: string;
+  terms_conditions?: string;
+}
+
+export default function QuotationForm() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [quotation, setQuotation] = useState<Quotation>(() => {
+    const today = new Date();
+    const validUntil = addDays(today, 15);
+    
+    return {
+      quotation_number: '',
+      quotation_date: format(today, 'yyyy-MM-dd'),
+      valid_until: format(validUntil, 'yyyy-MM-dd'),
+      customer_name: '',
+      customer_email: '',
+      customer_phone: '',
+      customer_address: '',
+      subtotal: 0,
+      discount_amount: 0,
+      discount_percentage: 0,
+      vat_amount: 0,
+      withholding_tax_amount: 0,
+      total_amount: 0,
+      status: 'draft',
+      notes: '',
+      terms_conditions: ''
+    };
+  });
+  
+  const [items, setItems] = useState<QuotationItem[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadCustomers();
+    loadProducts();
+    generateQuotationNumber();
+  }, []);
+
+  const loadCustomers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      setCustomers(data || []);
+    } catch (error) {
+      console.error('Error loading customers:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลลูกค้าได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error loading products:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลสินค้าได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const generateQuotationNumber = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const number = `QT${year}${month}${random}`;
+    setQuotation(prev => ({ ...prev, quotation_number: number }));
+  };
+
+  const calculateTotals = () => {
+    const subtotal = items.reduce((sum, item) => sum + item.line_total, 0);
+    const vatAmount = subtotal * 0.07;
+    const softwareItems = items.filter(item => item.is_software);
+    const softwareTotal = softwareItems.reduce((sum, item) => sum + item.line_total, 0);
+    const withholdingTaxAmount = softwareTotal * 0.03;
+    const totalAmount = subtotal + vatAmount - withholdingTaxAmount;
+
+    setQuotation(prev => ({
+      ...prev,
+      subtotal,
+      vat_amount: vatAmount,
+      withholding_tax_amount: withholdingTaxAmount,
+      total_amount: totalAmount
+    }));
+  };
+
+  useEffect(() => {
+    calculateTotals();
+  }, [items]);
+
+  const addItem = () => {
+    const newItem: QuotationItem = {
+      id: Date.now().toString(),
+      product_name: '',
+      description: '',
+      quantity: 1,
+      unit_price: 0,
+      discount_amount: 0,
+      discount_type: 'amount',
+      line_total: 0,
+      is_software: false
+    };
+    setItems([...items, newItem]);
+  };
+
+  const updateItem = (id: string, field: keyof QuotationItem, value: any) => {
+    setItems(prevItems => prevItems.map(item => {
+      if (item.id === id) {
+        const updatedItem = { ...item, [field]: value };
+        
+        const subtotal = updatedItem.quantity * updatedItem.unit_price;
+        let discountAmount = updatedItem.discount_amount;
+        
+        if (updatedItem.discount_type === 'percentage') {
+          discountAmount = subtotal * (updatedItem.discount_amount / 100);
+        }
+        
+        updatedItem.line_total = subtotal - discountAmount;
+        
+        return updatedItem;
+      }
+      return item;
+    }));
+  };
+
+  const removeItem = (id: string) => {
+    setItems(items.filter(item => item.id !== id));
+  };
+
+  const selectProduct = (itemId: string, productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      setItems(prevItems => prevItems.map(item => {
+        if (item.id === itemId) {
+          const updatedItem = {
+            ...item,
+            product_id: product.id,
+            product_name: product.name,
+            product_sku: product.sku,
+            unit_price: product.price,
+            description: `${product.brand ? product.brand + ' ' : ''}${product.name}`
+          };
+          
+          const subtotal = updatedItem.quantity * updatedItem.unit_price;
+          let discountAmount = updatedItem.discount_amount;
+          
+          if (updatedItem.discount_type === 'percentage') {
+            discountAmount = subtotal * (updatedItem.discount_amount / 100);
+          }
+          
+          updatedItem.line_total = subtotal - discountAmount;
+          
+          return updatedItem;
+        }
+        return item;
+      }));
+    }
+  };
+
+  const selectCustomer = (customerId: string) => {
+    const customer = customers.find(c => c.id === customerId);
+    if (customer) {
+      setSelectedCustomer(customer);
+      setQuotation(prev => ({
+        ...prev,
+        customer_id: customer.id,
+        customer_name: customer.name,
+        customer_email: customer.email || '',
+        customer_phone: customer.phone || '',
+        customer_address: customer.address || ''
+      }));
+    }
+  };
+
+  const saveQuotation = async () => {
+    try {
+      const itemSubtotal = items.reduce((sum, item) => sum + item.line_total, 0);
+      const vatAmount = itemSubtotal * 0.07;
+      const totalAmount = itemSubtotal + vatAmount - quotation.withholding_tax_amount;
+
+      const { data: savedQuotation, error: quotationError } = await supabase
+        .from('quotations')
+        .insert({
+          quotation_number: quotation.quotation_number,
+          quotation_date: quotation.quotation_date,
+          valid_until: quotation.valid_until,
+          customer_id: quotation.customer_id,
+          customer_name: quotation.customer_name,
+          customer_email: quotation.customer_email,
+          customer_phone: quotation.customer_phone,
+          customer_address: quotation.customer_address,
+          subtotal: itemSubtotal,
+          discount_amount: quotation.discount_amount,
+          discount_percentage: quotation.discount_percentage,
+          vat_amount: vatAmount,
+          withholding_tax_amount: quotation.withholding_tax_amount,
+          total_amount: totalAmount,
+          status: 'draft',
+          notes: quotation.notes,
+          terms_conditions: quotation.terms_conditions,
+          created_by: user?.id
+        })
+        .select()
+        .single();
+
+      if (quotationError) throw quotationError;
+
+      if (items.length > 0) {
+        const itemsToSave = items.map(item => ({
+          quotation_id: savedQuotation.id,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          product_sku: item.product_sku,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount_amount: item.discount_amount,
+          discount_percentage: item.discount_type === 'percentage' ? item.discount_amount : 0,
+          line_total: item.line_total,
+          is_software: item.is_software
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('quotation_items')
+          .insert(itemsToSave);
+
+        if (itemsError) throw itemsError;
+      }
+
+      toast({
+        title: "บันทึกสำเร็จ",
+        description: "ใบเสนอราคาได้รับการบันทึกเรียบร้อยแล้ว",
+        variant: "default",
+      });
+
+      navigate('/quotations');
+      
+    } catch (error: any) {
+      console.error('Error saving quotation:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกใบเสนอราคาได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-7xl mx-auto space-y-4">
+        {/* Breadcrumb */}
+        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+          <button onClick={() => navigate('/')} className="hover:text-foreground">
+            หน้าหลัก
+          </button>
+          <span>/</span>
+          <button onClick={() => navigate('/quotations')} className="hover:text-foreground">
+            ใบเสนอราคา
+          </button>
+          <span>/</span>
+          <span className="text-foreground">สร้างใบเสนอราคาใหม่</span>
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <FileText className="w-8 h-8 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">สร้างใบเสนอราคาใหม่</h1>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" size="sm" onClick={() => navigate('/quotations')}>
+              <X className="w-4 h-4 mr-2" />
+              ยกเลิก
+            </Button>
+            <Button variant="default" size="sm" onClick={saveQuotation}>
+              <Save className="w-4 h-4 mr-2" />
+              บันทึกเอกสาร
+            </Button>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <Card>
+          <CardContent className="p-4">
+            {/* Customer and Document Info */}
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-sm font-medium">ชื่อลูกค้า</Label>
+                  <Select onValueChange={selectCustomer}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="เลือกลูกค้า" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {customers.map(customer => (
+                        <SelectItem key={customer.id} value={customer.id}>
+                          {customer.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {selectedCustomer && (
+                  <>
+                    <div>
+                      <Label className="text-sm font-medium">อีเมล</Label>
+                      <Input 
+                        value={quotation.customer_email} 
+                        onChange={(e) => setQuotation(prev => ({ ...prev, customer_email: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">เบอร์โทรศัพท์</Label>
+                      <Input 
+                        value={quotation.customer_phone} 
+                        onChange={(e) => setQuotation(prev => ({ ...prev, customer_phone: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">ที่อยู่</Label>
+                      <Textarea 
+                        value={quotation.customer_address} 
+                        onChange={(e) => setQuotation(prev => ({ ...prev, customer_address: e.target.value }))}
+                        className="mt-1"
+                        rows={3}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-sm font-medium">เลขที่เอกสาร</Label>
+                  <Input 
+                    value={quotation.quotation_number} 
+                    onChange={(e) => setQuotation(prev => ({ ...prev, quotation_number: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">วันที่</Label>
+                  <Input 
+                    type="date"
+                    value={quotation.quotation_date} 
+                    onChange={(e) => setQuotation(prev => ({ ...prev, quotation_date: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">วันที่หมดอายุ</Label>
+                  <Input 
+                    type="date"
+                    value={quotation.valid_until} 
+                    onChange={(e) => setQuotation(prev => ({ ...prev, valid_until: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Items Table */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">รายการสินค้า</h3>
+                <Button onClick={addItem} size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  เพิ่มรายการ
+                </Button>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>รายการสินค้า</TableHead>
+                    <TableHead className="w-20">จำนวน</TableHead>
+                    <TableHead className="w-24">ราคา/หน่วย</TableHead>
+                    <TableHead className="w-20">ส่วนลด</TableHead>
+                    <TableHead className="w-24">รวม</TableHead>
+                    <TableHead className="w-12"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {items.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        <div className="space-y-2">
+                          <Select onValueChange={(value) => selectProduct(item.id, value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="เลือกสินค้า" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {products.map(product => (
+                                <SelectItem key={product.id} value={product.id}>
+                                  {product.name} - {product.sku}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            placeholder="รายละเอียดเพิ่มเติม"
+                            value={item.description}
+                            onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(item.id, 'quantity', Number(e.target.value))}
+                          min="1"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={item.unit_price}
+                          onChange={(e) => updateItem(item.id, 'unit_price', Number(e.target.value))}
+                          min="0"
+                          step="0.01"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={item.discount_amount}
+                          onChange={(e) => updateItem(item.id, 'discount_amount', Number(e.target.value))}
+                          min="0"
+                          step="0.01"
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {item.line_total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Summary */}
+            <div className="flex justify-end mt-6">
+              <div className="w-80 space-y-2">
+                <div className="flex justify-between">
+                  <span>ยอดรวม:</span>
+                  <span>{quotation.subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>VAT 7%:</span>
+                  <span>{quotation.vat_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
+                </div>
+                {quotation.withholding_tax_amount > 0 && (
+                  <div className="flex justify-between">
+                    <span>หักภาษี ณ ที่จ่าย:</span>
+                    <span>-{quotation.withholding_tax_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
+                  </div>
+                )}
+                <hr />
+                <div className="flex justify-between font-bold text-lg">
+                  <span>รวมทั้งสิ้น:</span>
+                  <span>{quotation.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

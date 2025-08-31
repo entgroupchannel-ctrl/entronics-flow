@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Inventory from "./pages/Inventory";
 import Customers from "./pages/Customers";
 import Quotations from "./pages/Quotations";
+import QuotationForm from "./pages/QuotationForm";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ServiceRequest from "./pages/ServiceRequest";
@@ -40,6 +41,11 @@ const App = () => (
             <Route path="/quotations" element={
               <ProtectedRoute>
                 <Quotations />
+              </ProtectedRoute>
+            } />
+            <Route path="/quotations/new" element={
+              <ProtectedRoute>
+                <QuotationForm />
               </ProtectedRoute>
             } />
             <Route path="/inventory" element={
