@@ -25,6 +25,7 @@ import {
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Product {
@@ -66,6 +67,7 @@ const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const { toast } = useToast();
+  const { canManageInventory, loading: roleLoading } = useUserRole();
 
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
     sku: "",
@@ -338,17 +340,19 @@ const Inventory = () => {
                           <SelectItem key={category} value={category}>{category}</SelectItem>
                         ))}
                       </SelectContent>
-                    </Select>
-                    <Button onClick={() => setShowAddForm(true)} className="whitespace-nowrap">
-                      <Plus className="h-4 w-4 mr-2" />
-                      เพิ่มสินค้า
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                     </Select>
+                     {canManageInventory() && (
+                       <Button onClick={() => setShowAddForm(true)} className="whitespace-nowrap">
+                         <Plus className="h-4 w-4 mr-2" />
+                         เพิ่มสินค้า
+                       </Button>
+                     )}
+                   </div>
+                 </CardContent>
+               </Card>
 
-              {/* Add Product Form */}
-              {showAddForm && (
+               {/* Add Product Form */}
+               {showAddForm && canManageInventory() && (
                 <Card>
                   <CardHeader>
                     <CardTitle>เพิ่มสินค้าใหม่</CardTitle>
@@ -565,17 +569,17 @@ const Inventory = () => {
                           <TableHead>ยี่ห้อ</TableHead>
                           <TableHead className="text-right">ราคาขาย</TableHead>
                           <TableHead className="text-right">สต๊อค</TableHead>
-                          <TableHead>สถานะ</TableHead>
-                          <TableHead className="text-center">จัดการ</TableHead>
+                           <TableHead>สถานะ</TableHead>
+                           {canManageInventory() && <TableHead className="text-center">จัดการ</TableHead>}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredProducts.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                              {searchTerm || selectedCategory !== "all" ? "ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา" : "ยังไม่มีสินค้าในระบบ"}
-                            </TableCell>
-                          </TableRow>
+                         {filteredProducts.length === 0 ? (
+                           <TableRow>
+                             <TableCell colSpan={canManageInventory() ? 8 : 7} className="text-center py-8 text-muted-foreground">
+                               {searchTerm || selectedCategory !== "all" ? "ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา" : "ยังไม่มีสินค้าในระบบ"}
+                             </TableCell>
+                           </TableRow>
                         ) : (
                           filteredProducts.map((product) => (
                             <TableRow key={product.id}>
@@ -594,47 +598,49 @@ const Inventory = () => {
                                   )}
                                 </div>
                               </TableCell>
-                              <TableCell>
-                                {getStatusBadge(product.status)}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center justify-center gap-2">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon"
-                                    onClick={() => {
-                                      setEditingProduct(product);
-                                      setShowEditDialog(true);
-                                    }}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button variant="ghost" size="icon">
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>ยืนยันการลบสินค้า</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          คุณแน่ใจหรือไม่ที่จะลบสินค้า "{product.name}" นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-                                        <AlertDialogAction
-                                          onClick={() => handleDeleteProduct(product.id, product.name)}
-                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        >
-                                          ลบสินค้า
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </div>
-                              </TableCell>
+                               <TableCell>
+                                 {getStatusBadge(product.status)}
+                               </TableCell>
+                               {canManageInventory() && (
+                                 <TableCell>
+                                   <div className="flex items-center justify-center gap-2">
+                                     <Button 
+                                       variant="ghost" 
+                                       size="icon"
+                                       onClick={() => {
+                                         setEditingProduct(product);
+                                         setShowEditDialog(true);
+                                       }}
+                                     >
+                                       <Edit className="h-4 w-4" />
+                                     </Button>
+                                     <AlertDialog>
+                                       <AlertDialogTrigger asChild>
+                                         <Button variant="ghost" size="icon">
+                                           <Trash2 className="h-4 w-4" />
+                                         </Button>
+                                       </AlertDialogTrigger>
+                                       <AlertDialogContent>
+                                         <AlertDialogHeader>
+                                           <AlertDialogTitle>ยืนยันการลบสินค้า</AlertDialogTitle>
+                                           <AlertDialogDescription>
+                                             คุณแน่ใจหรือไม่ที่จะลบสินค้า "{product.name}" นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                           </AlertDialogDescription>
+                                         </AlertDialogHeader>
+                                         <AlertDialogFooter>
+                                           <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                                           <AlertDialogAction
+                                             onClick={() => handleDeleteProduct(product.id, product.name)}
+                                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                           >
+                                             ลบสินค้า
+                                           </AlertDialogAction>
+                                         </AlertDialogFooter>
+                                       </AlertDialogContent>
+                                     </AlertDialog>
+                                   </div>
+                                 </TableCell>
+                               )}
                             </TableRow>
                           ))
                         )}
