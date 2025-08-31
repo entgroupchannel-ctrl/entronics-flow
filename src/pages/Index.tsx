@@ -1,12 +1,18 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SalesChart } from "@/components/dashboard/SalesChart";
+import { useToast } from "@/hooks/use-toast";
 import { 
   ClipboardList, 
   Users, 
@@ -18,7 +24,10 @@ import {
   Calendar,
   Phone,
   Mail,
-  User
+  User,
+  Search,
+  Settings,
+  MapPin
 } from "lucide-react";
 
 interface ServiceRequest {
@@ -27,46 +36,103 @@ interface ServiceRequest {
   customer_name: string;
   customer_phone: string;
   customer_email: string;
+  customer_address: string;
   device_type: string;
   device_brand?: string;
   device_model?: string;
+  problem_description: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'pending' | 'assigned' | 'in_progress' | 'waiting_parts' | 'completed' | 'cancelled';
+  assigned_technician_id?: string;
+  estimated_cost?: number;
+  actual_cost?: number;
+  scheduled_date?: string;
+  completed_date?: string;
+  customer_satisfaction?: number;
+  customer_feedback?: string;
   created_at: string;
+  updated_at: string;
   technicians?: {
     name: string;
     phone?: string;
+    specialization: string;
   };
 }
 
+interface Technician {
+  id: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  specialization: string;
+  is_available: boolean;
+  current_workload: number;
+  rating: number;
+  total_jobs: number;
+}
+
+// Create a context for sharing state between Sidebar and Index
+const AppContext = React.createContext<{
+  currentView: string;
+  setCurrentView: (view: string) => void;
+}>({
+  currentView: 'dashboard',
+  setCurrentView: () => {}
+});
+
 const Index = () => {
   const { user } = useAuth();
+  const { canManageInventory } = useUserRole();
+  const { toast } = useToast();
+  
+  const [currentView, setCurrentView] = useState('dashboard');
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
 
   useEffect(() => {
-    fetchServiceRequests();
+    fetchData();
     setupRealtimeSubscription();
   }, []);
 
-  const fetchServiceRequests = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch service requests with technician info
+      const { data: requests, error: requestsError } = await supabase
         .from('service_requests')
         .select(`
           *,
           technicians (
             name,
-            phone
+            phone,
+            specialization
           )
         `)
-        .order('created_at', { ascending: false })
-        .limit(10);
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setServiceRequests(data || []);
-    } catch (error) {
-      console.error('Error fetching service requests:', error);
+      if (requestsError) throw requestsError;
+
+      // Fetch technicians
+      const { data: techData, error: techError } = await supabase
+        .from('technicians')
+        .select('*')
+        .order('name');
+
+      if (techError) throw techError;
+
+      setServiceRequests(requests || []);
+      setTechnicians(techData || []);
+    } catch (error: any) {
+      console.error('Error fetching data:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลได้",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -83,7 +149,7 @@ const Index = () => {
           table: 'service_requests'
         },
         () => {
-          fetchServiceRequests();
+          fetchData();
         }
       )
       .subscribe();
@@ -91,6 +157,63 @@ const Index = () => {
     return () => {
       supabase.removeChannel(channel);
     };
+  };
+
+  const updateRequestStatus = async (requestId: string, newStatus: string, technicianId?: string) => {
+    try {
+      const updates: any = { status: newStatus };
+      if (technicianId) {
+        updates.assigned_technician_id = technicianId;
+      }
+      if (newStatus === 'completed') {
+        updates.completed_date = new Date().toISOString();
+      }
+
+      const { error } = await supabase
+        .from('service_requests')
+        .update(updates)
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      // Add to status history
+      await supabase
+        .from('service_status_history')
+        .insert({
+          service_request_id: requestId,
+          new_status: newStatus as 'pending' | 'assigned' | 'in_progress' | 'waiting_parts' | 'completed' | 'cancelled',
+          changed_by: user?.id,
+          notes: `Status updated to ${newStatus}`,
+        });
+
+      // Send completion email if status is completed
+      if (newStatus === 'completed') {
+        const request = serviceRequests.find(r => r.id === requestId);
+        if (request) {
+          await supabase.functions.invoke('send-service-confirmation', {
+            body: {
+              serviceRequest: { ...request, status: newStatus },
+              customerEmail: request.customer_email,
+              type: 'completion',
+            },
+          });
+        }
+      }
+
+      toast({
+        title: "อัพเดทสำเร็จ",
+        description: "สถานะงานซ่อมได้รับการอัพเดท",
+      });
+
+      fetchData();
+    } catch (error: any) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถอัพเดทสถานะได้",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -141,6 +264,19 @@ const Index = () => {
     );
   };
 
+  // Filter requests for service view
+  const filteredRequests = serviceRequests.filter(request => {
+    const matchesSearch = 
+      request.ticket_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.device_type.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || request.status === statusFilter;
+    const matchesPriority = priorityFilter === "all" || request.priority === priorityFilter;
+
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
+
   // Calculate metrics
   const totalRequests = serviceRequests.length;
   const pendingRequests = serviceRequests.filter(r => r.status === 'pending').length;
@@ -153,7 +289,9 @@ const Index = () => {
   if (loading) {
     return (
       <div className="flex h-screen">
-        <Sidebar />
+        <div className="w-64">
+          <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
+        </div>
         <main className="flex-1 flex items-center justify-center">
           <div>กำลังโหลด...</div>
         </main>
@@ -161,171 +299,410 @@ const Index = () => {
     );
   }
 
-  return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      
-      <main className="flex-1 overflow-y-auto p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">ภาพรวมระบบจัดการงานซ่อม</p>
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={() => window.location.href = '/service-request'}>
-              แจ้งซ่อมใหม่
-            </Button>
-            <Button variant="outline" onClick={() => window.location.href = '/service-dashboard'}>
-              จัดการงานซ่อม
-            </Button>
-          </div>
+  const renderDashboardView = () => (
+    <>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">ภาพรวมระบบจัดการงานซ่อม</p>
         </div>
-
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <MetricCard
-            title="งานซ่อมทั้งหมด"
-            value={totalRequests}
-            icon={ClipboardList}
-            className="border-blue-200"
-          />
-          <MetricCard
-            title="รอดำเนินการ"
-            value={pendingRequests}
-            icon={Timer}
-            className="border-orange-200"
-          />
-          <MetricCard
-            title="กำลังซ่อม"
-            value={inProgressRequests}
-            icon={Wrench}
-            className="border-yellow-200"
-          />
-          <MetricCard
-            title="เสร็จสิ้นวันนี้"
-            value={completedToday}
-            icon={CheckCircle}
-            className="border-green-200"
-          />
+        <div className="flex gap-2">
+          <Button onClick={() => window.location.href = '/service-request'}>
+            แจ้งซ่อมใหม่
+          </Button>
+          <Button variant="outline" onClick={() => setCurrentView('service')}>
+            จัดการงานซ่อม
+          </Button>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Service Requests List */}
-          <div className="lg:col-span-2 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ClipboardList className="h-5 w-5" />
-                  งานซ่อมล่าสุด (10 รายการ)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {serviceRequests.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    ยังไม่มีงานซ่อม
-                  </div>
-                ) : (
-                  serviceRequests.map((request) => (
-                    <div key={request.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold">{request.ticket_number}</span>
-                            {getStatusBadge(request.status)}
-                            {getPriorityBadge(request.priority)}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(request.created_at).toLocaleDateString('th-TH')}
-                          </p>
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <MetricCard
+          title="งานซ่อมทั้งหมด"
+          value={totalRequests}
+          icon={ClipboardList}
+          className="border-blue-200"
+        />
+        <MetricCard
+          title="รอดำเนินการ"
+          value={pendingRequests}
+          icon={Timer}
+          className="border-orange-200"
+        />
+        <MetricCard
+          title="กำลังซ่อม"
+          value={inProgressRequests}
+          icon={Wrench}
+          className="border-yellow-200"
+        />
+        <MetricCard
+          title="เสร็จสิ้นวันนี้"
+          value={completedToday}
+          icon={CheckCircle}
+          className="border-green-200"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Service Requests List */}
+        <div className="lg:col-span-2 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ClipboardList className="h-5 w-5" />
+                งานซ่อมล่าสุด (10 รายการ)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {serviceRequests.slice(0, 10).length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  ยังไม่มีงานซ่อม
+                </div>
+              ) : (
+                serviceRequests.slice(0, 10).map((request) => (
+                  <div key={request.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold">{request.ticket_number}</span>
+                          {getStatusBadge(request.status)}
+                          {getPriorityBadge(request.priority)}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(request.created_at).toLocaleDateString('th-TH')}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span>{request.customer_name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span>{request.customer_phone}</span>
                         </div>
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span>{request.customer_name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Phone className="h-4 w-4 text-muted-foreground" />
-                            <span>{request.customer_phone}</span>
-                          </div>
+                      <div className="space-y-1">
+                        <div>
+                          <span className="font-medium">อุปกรณ์: </span>
+                          <span>{request.device_type} {request.device_brand} {request.device_model}</span>
                         </div>
-                        <div className="space-y-1">
-                          <div>
-                            <span className="font-medium">อุปกรณ์: </span>
-                            <span>{request.device_type} {request.device_brand} {request.device_model}</span>
-                          </div>
-                          <div>
-                            <span className="font-medium">ช่าง: </span>
-                            <span>{request.technicians?.name || 'ยังไม่มอบหมาย'}</span>
-                          </div>
+                        <div>
+                          <span className="font-medium">ช่าง: </span>
+                          <span>{request.technicians?.name || 'ยังไม่มอบหมาย'}</span>
                         </div>
                       </div>
                     </div>
-                  ))
-                )}
-                
-                {serviceRequests.length > 0 && (
-                  <div className="text-center pt-4">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => window.location.href = '/service-dashboard'}
-                    >
-                      ดูทั้งหมด
-                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                ))
+              )}
+              
+              {serviceRequests.length > 0 && (
+                <div className="text-center pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCurrentView('service')}
+                  >
+                    ดูทั้งหมด
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sales Chart */}
+        <div className="space-y-4">
+          <SalesChart />
+          
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>การดำเนินการด่วน</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => window.location.href = '/service-request'}
+              >
+                <ClipboardList className="mr-2 h-4 w-4" />
+                แจ้งซ่อมใหม่
+              </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => setCurrentView('service')}
+              >
+                <Wrench className="mr-2 h-4 w-4" />
+                จัดการงานซ่อม
+              </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => window.location.href = '/customers'}
+              >
+                <Users className="mr-2 h-4 w-4" />
+                จัดการลูกค้า
+              </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => window.location.href = '/inventory'}
+              >
+                <DollarSign className="mr-2 h-4 w-4" />
+                คลังสินค้า
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </>
+  );
+
+  const renderServiceView = () => (
+    <>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Service Dashboard</h1>
+        <Button onClick={() => window.location.href = '/service-request'}>
+          แจ้งซ่อมใหม่
+        </Button>
+      </div>
+
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <MetricCard
+          title="งานทั้งหมด"
+          value={totalRequests}
+          icon={ClipboardList}
+          className="border-blue-200"
+        />
+        <MetricCard
+          title="รอดำเนินการ"
+          value={pendingRequests}
+          icon={Timer}
+          className="border-orange-200"
+        />
+        <MetricCard
+          title="กำลังซ่อม"
+          value={inProgressRequests}
+          icon={Settings}
+          className="border-yellow-200"
+        />
+        <MetricCard
+          title="เสร็จสิ้น"
+          value={serviceRequests.filter(r => r.status === 'completed').length}
+          icon={CheckCircle}
+          className="border-green-200"
+        />
+      </div>
+
+      <Tabs defaultValue="requests" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="requests">งานซ่อม</TabsTrigger>
+          <TabsTrigger value="technicians">ช่างเทคนิค</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="requests" className="space-y-4">
+          {/* Filters */}
+          <div className="flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="ค้นหาตามหมายเลข, ชื่อลูกค้า, อุปกรณ์..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="สถานะ" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">ทุกสถานะ</SelectItem>
+                <SelectItem value="pending">รอดำเนินการ</SelectItem>
+                <SelectItem value="assigned">มอบหมายแล้ว</SelectItem>
+                <SelectItem value="in_progress">กำลังดำเนินการ</SelectItem>
+                <SelectItem value="waiting_parts">รออะไหล่</SelectItem>
+                <SelectItem value="completed">เสร็จสิ้น</SelectItem>
+                <SelectItem value="cancelled">ยกเลิก</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="ความเร่งด่วน" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">ทุกระดับ</SelectItem>
+                <SelectItem value="urgent">เร่งด่วน</SelectItem>
+                <SelectItem value="high">สูง</SelectItem>
+                <SelectItem value="medium">ปานกลาง</SelectItem>
+                <SelectItem value="low">ปกติ</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Sales Chart */}
-          <div className="space-y-4">
-            <SalesChart />
-            
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>การดำเนินการด่วน</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => window.location.href = '/service-request'}
-                >
-                  <ClipboardList className="mr-2 h-4 w-4" />
-                  แจ้งซ่อมใหม่
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => window.location.href = '/service-dashboard'}
-                >
-                  <Wrench className="mr-2 h-4 w-4" />
-                  จัดการงานซ่อม
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => window.location.href = '/customers'}
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  จัดการลูกค้า
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => window.location.href = '/inventory'}
-                >
-                  <DollarSign className="mr-2 h-4 w-4" />
-                  คลังสินค้า
-                </Button>
-              </CardContent>
-            </Card>
+          {/* Service Requests List */}
+          <div className="grid gap-4">
+            {filteredRequests.map((request) => (
+              <Card key={request.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-lg">{request.ticket_number}</h3>
+                        {getStatusBadge(request.status)}
+                        {getPriorityBadge(request.priority)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(request.created_at).toLocaleDateString('th-TH')}
+                      </p>
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          ดูรายละเอียด
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            {request.ticket_number}
+                            {getStatusBadge(request.status)}
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                <span className="font-medium">{request.customer_name}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Phone className="h-4 w-4" />
+                                <span>{request.customer_phone}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Mail className="h-4 w-4" />
+                                <span>{request.customer_email}</span>
+                              </div>
+                              <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                <MapPin className="h-4 w-4 mt-0.5" />
+                                <span>{request.customer_address}</span>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <div>
+                                <span className="font-medium">อุปกรณ์: </span>
+                                <span>{request.device_type} {request.device_brand} {request.device_model}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium">ปัญหา: </span>
+                                <p className="text-sm mt-1">{request.problem_description}</p>
+                              </div>
+                              {request.technicians && (
+                                <div>
+                                  <span className="font-medium">ช่างที่รับผิดชอบ: </span>
+                                  <span>{request.technicians.name}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {canManageInventory() && (
+                            <div className="flex gap-2 pt-4 border-t">
+                              <Select onValueChange={(value) => updateRequestStatus(request.id, value)}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="อัพเดทสถานะ" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="assigned">มอบหมายช่าง</SelectItem>
+                                  <SelectItem value="in_progress">เริ่มซ่อม</SelectItem>
+                                  <SelectItem value="waiting_parts">รออะไหล่</SelectItem>
+                                  <SelectItem value="completed">เสร็จสิ้น</SelectItem>
+                                  <SelectItem value="cancelled">ยกเลิก</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">ลูกค้า: </span>
+                      <span>{request.customer_name}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium">อุปกรณ์: </span>
+                      <span>{request.device_type}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium">ช่าง: </span>
+                      <span>{request.technicians?.name || 'ยังไม่มอบหมาย'}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {filteredRequests.length === 0 && (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">ไม่พบงานซ่อม</h3>
+                  <p className="text-muted-foreground">ไม่มีงานซ่อมที่ตรงกับเงื่อนไขการค้นหา</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
-        </div>
+        </TabsContent>
+
+        <TabsContent value="technicians" className="space-y-4">
+          <div className="grid gap-4">
+            {technicians.map((tech) => (
+              <Card key={tech.id}>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold text-lg">{tech.name}</h3>
+                      <p className="text-sm text-muted-foreground">{tech.specialization}</p>
+                      <div className="flex items-center gap-4 mt-2 text-sm">
+                        <span>งานปัจจุบัน: {tech.current_workload}</span>
+                        <span>คะแนน: {tech.rating.toFixed(1)}/5.0</span>
+                        <span>งานที่เสร็จ: {tech.total_jobs}</span>
+                      </div>
+                    </div>
+                    <Badge variant={tech.is_available ? "default" : "secondary"}>
+                      {tech.is_available ? "พร้อมทำงาน" : "ไม่ว่าง"}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </>
+  );
+
+  return (
+    <div className="flex h-screen bg-background">
+      <div className="w-64">
+        <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
+      </div>
+      
+      <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        {currentView === 'dashboard' ? renderDashboardView() : renderServiceView()}
       </main>
     </div>
   );

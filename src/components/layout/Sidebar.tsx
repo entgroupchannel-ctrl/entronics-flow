@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
   className?: string;
+  onMenuClick?: (view: string) => void;
+  currentView?: string;
 }
 
 const menuItems = [
@@ -73,7 +75,7 @@ const menuItems = [
   }
 ];
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
   return (
     <div className={cn("flex h-full w-64 flex-col bg-card border-r border-border", className)}>
       {/* Logo */}
@@ -96,6 +98,11 @@ export function Sidebar({ className }: SidebarProps) {
           const isInventory = item.title === "คลังสินค้า";
           const isCustomers = item.title === "รายชื่อลูกค้า";
           const isService = item.title === "บริการ & ซ่อม";
+          const isDashboard = item.title === "แดชบอร์ด";
+          
+          const isActive = (isDashboard && currentView === 'dashboard') || 
+                          (isService && currentView === 'service') ||
+                          (!isDashboard && !isService && item.active);
           
           if (isInventory) {
             return (
@@ -120,7 +127,7 @@ export function Sidebar({ className }: SidebarProps) {
             return (
               <Button
                 key={item.href}
-                variant={item.active ? "default" : "ghost"}
+                variant={isActive ? "default" : "ghost"}
                 className={cn(
                   "w-full justify-start h-10 px-3",
                   item.active 
@@ -139,30 +146,47 @@ export function Sidebar({ className }: SidebarProps) {
             return (
               <Button
                 key={item.href}
-                variant={item.active ? "default" : "ghost"}
+                variant={isActive ? "default" : "ghost"}
                 className={cn(
                   "w-full justify-start h-10 px-3",
-                  item.active 
+                  isActive 
                     ? "bg-primary text-primary-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
-                onClick={() => window.location.href = '/service-dashboard'}
+                onClick={() => onMenuClick?.('service')}
               >
                 <Icon className="mr-3 h-4 w-4" />
                 {item.title}
               </Button>
             );
           }
-          
+
+          if (isDashboard) {
+            return (
+              <Button
+                key={item.href}
+                variant={isActive ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start h-10 px-3",
+                  isActive 
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
+                onClick={() => onMenuClick?.('dashboard')}
+              >
+                <Icon className="mr-3 h-4 w-4" />
+                {item.title}
+              </Button>
+            );
+          }
+
           return (
             <Button
               key={item.href}
-              variant={item.active ? "default" : "ghost"}
+              variant="ghost"
               className={cn(
                 "w-full justify-start h-10 px-3",
-                item.active 
-                  ? "bg-primary text-primary-foreground shadow-sm" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                "text-muted-foreground hover:text-foreground hover:bg-accent"
               )}
             >
               <Icon className="mr-3 h-4 w-4" />
