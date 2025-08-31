@@ -11,6 +11,8 @@ import { Plus, Trash2, Edit3, Save, X, FileText, Share2, Printer, Download } fro
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, format } from 'date-fns';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 interface Customer {
   id: string;
@@ -322,6 +324,72 @@ export default function Quotations() {
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถบันทึกใบเสนอราคาได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const downloadPDF = () => {
+    try {
+      const doc = new jsPDF();
+      
+      // Set up fonts - using default font for Thai support
+      doc.setFont('helvetica');
+      
+      // Header
+      doc.setFontSize(20);
+      doc.text('ใบเสนอราคา', 105, 30, { align: 'center' });
+      
+      // Quotation details
+      doc.setFontSize(12);
+      doc.text(`เลขที่: ${quotation.quotation_number}`, 150, 50);
+      doc.text(`วันที่: ${format(new Date(quotation.quotation_date), 'dd/MM/yyyy')}`, 150, 60);
+      doc.text(`ลูกค้า: ${quotation.customer_name}`, 20, 80);
+      doc.text(`อีเมล: ${quotation.customer_email}`, 20, 90);
+      doc.text(`โทรศัพท์: ${quotation.customer_phone}`, 20, 100);
+      
+      // Items table
+      const tableColumn = ['ลำดับ', 'รายการ', 'จำนวน', 'ราคา/หน่วย', 'ส่วนลด', 'รวม'];
+      const tableRows = items.map((item, index) => [
+        (index + 1).toString(),
+        item.product_name,
+        item.quantity.toString(),
+        item.unit_price.toLocaleString('th-TH'),
+        item.discount_amount.toLocaleString('th-TH'),
+        item.line_total.toLocaleString('th-TH')
+      ]);
+
+      (doc as any).autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 120,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [66, 139, 202] }
+      });
+
+      // Summary
+      const finalY = (doc as any).lastAutoTable.finalY + 20;
+      doc.text(`ยอดรวม: ${quotation.subtotal.toLocaleString('th-TH')} บาท`, 150, finalY);
+      doc.text(`VAT 7%: ${quotation.vat_amount.toLocaleString('th-TH')} บาท`, 150, finalY + 10);
+      if (quotation.withholding_tax_amount > 0) {
+        doc.text(`หักภาษี ณ ที่จ่าย: ${quotation.withholding_tax_amount.toLocaleString('th-TH')} บาท`, 150, finalY + 20);
+      }
+      doc.setFontSize(14);
+      doc.text(`รวมทั้งสิ้น: ${quotation.total_amount.toLocaleString('th-TH')} บาท`, 150, finalY + 35);
+
+      // Save PDF
+      doc.save(`quotation-${quotation.quotation_number}.pdf`);
+      
+      toast({
+        title: "ดาวน์โหลดสำเร็จ",
+        description: "ไฟล์ PDF ถูกดาวน์โหลดเรียบร้อยแล้ว",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถสร้าง PDF ได้",
         variant: "destructive",
       });
     }
@@ -784,7 +852,7 @@ export default function Quotations() {
                   <Printer className="w-4 h-4 mr-2" />
                   พิมพ์
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={downloadPDF}>
                   <Download className="w-4 h-4 mr-2" />
                   ดาวน์โหลด PDF
                 </Button>
