@@ -11,12 +11,8 @@ import {
   BarChart3,
   FileText,
   Bell,
-  ChevronDown,
-  ChevronRight
-} from "lucide-react";
+ } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useState } from "react";
 
 interface SidebarProps {
   className?: string;
@@ -24,15 +20,6 @@ interface SidebarProps {
   currentView?: string;
 }
 
-const salesSubMenu = [
-  { title: "ใบเสนอราคา", href: "/quotations" },
-  { title: "ใบวางบิล/ใบแจ้งหนี้", href: "/invoices" },
-  { title: "ใบกำกับภาษี", href: "/tax-invoices" },
-  { title: "ใบเสร็จรับเงิน", href: "/receipts" },
-  { title: "ขายเงินสด", href: "/cash-sales" },
-  { title: "ใบลดหนี้", href: "/credit-notes" },
-  { title: "ใบเพิ่มหนี้", href: "/debit-notes" }
-];
 
 const menuItems = [
   {
@@ -42,9 +29,9 @@ const menuItems = [
     active: true
   },
   {
-    title: "ขาย & ใบเสนอราคา",
+    title: "ใบเสนอราคา",
     icon: ShoppingCart,
-    href: "/quotations"
+    href: "/sales-documents"
   },
   {
     title: "บริการ & ซ่อม",
@@ -90,7 +77,6 @@ const menuItems = [
 ];
 
 export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
-  const [salesMenuOpen, setSalesMenuOpen] = useState(false);
   return (
     <div className={cn("flex h-full w-64 flex-col bg-card border-r border-border", className)}>
       {/* Logo */}
@@ -112,7 +98,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
           const Icon = item.icon;
           const isInventory = item.title === "คลังสินค้า";
           const isCustomers = item.title === "รายชื่อลูกค้า";
-          const isQuotations = item.title === "ขาย & ใบเสนอราคา";
+          const isQuotations = item.title === "ใบเสนอราคา";
           const isService = item.title === "บริการ & ซ่อม";
           const isDashboard = item.title === "แดชบอร์ด";
           
@@ -160,52 +146,18 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
 
           if (isQuotations) {
             return (
-              <div key={item.href}>
-                {/* Main sales button that navigates to sales documents */}
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start h-10 px-3",
-                    "text-muted-foreground hover:text-foreground hover:bg-accent"
-                  )}
-                  onClick={() => {
-                    // Navigate to sales documents page
-                    window.location.href = '/sales-documents';
-                    // Toggle submenu
-                    setSalesMenuOpen(!salesMenuOpen);
-                  }}
-                >
-                  <Icon className="mr-3 h-4 w-4" />
-                  {item.title}
-                  {salesMenuOpen ? (
-                    <ChevronDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="ml-auto h-4 w-4" />
-                  )}
-                </Button>
-                
-                {/* Collapsible sub-menu */}
-                <Collapsible open={salesMenuOpen} onOpenChange={setSalesMenuOpen}>
-                  <CollapsibleContent className="space-y-1 ml-6">
-                    {salesSubMenu.map((subItem) => (
-                      <Button
-                        key={subItem.href}
-                        variant="ghost"
-                        size="sm"
-                        className={cn(
-                          "w-full justify-start h-8 px-3 text-sm",
-                          "text-muted-foreground hover:text-foreground hover:bg-accent"
-                        )}
-                        onClick={() => {
-                          window.location.href = subItem.href;
-                        }}
-                      >
-                        {subItem.title}
-                      </Button>
-                    ))}
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
+              <Button
+                key={item.href}
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start h-10 px-3",
+                  "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
+                onClick={() => window.location.href = '/sales-documents'}
+              >
+                <Icon className="mr-3 h-4 w-4" />
+                {item.title}
+              </Button>
             );
           }
 
