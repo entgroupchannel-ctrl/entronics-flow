@@ -26,16 +26,6 @@ const menuItems = [
     active: true
   },
   {
-    title: "จัดการซัพพลายเออร์",
-    icon: Building2,
-    href: "/suppliers"
-  },
-  {
-    title: "คลังสินค้า",
-    icon: Package,
-    href: "/inventory"
-  },
-  {
     title: "ขาย & ใบเสนอราคา",
     icon: ShoppingCart,
     href: "/sales"
@@ -44,6 +34,16 @@ const menuItems = [
     title: "บริการ & ซ่อม",
     icon: Wrench,
     href: "/service"
+  },
+  {
+    title: "จัดการซัพพลายเออร์",
+    icon: Building2,
+    href: "/suppliers"
+  },
+  {
+    title: "คลังสินค้า",
+    icon: Package,
+    href: "/inventory"
   },
   {
     title: "การเงิน",
