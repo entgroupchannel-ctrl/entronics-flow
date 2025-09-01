@@ -383,6 +383,88 @@ export default function InvoiceForm() {
     }
   };
 
+  const saveAndClose = async () => {
+    try {
+      await saveInvoice();
+      navigate('/invoices');
+    } catch (error) {
+      // Error handling is already done in saveInvoice
+    }
+  };
+
+  const exportToPDF = async () => {
+    // ตรวจสอบข้อมูลก่อน export
+    if (!invoice.invoice_number) {
+      toast({
+        title: "ไม่สามารถส่งออก PDF ได้",
+        description: "กรุณากรอกหมายเลขใบแจ้งหนี้ก่อน",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.length === 0) {
+      toast({
+        title: "ไม่สามารถส่งออก PDF ได้", 
+        description: "กรุณาเพิ่มรายการสินค้าอย่างน้อย 1 รายการ",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { jsPDF } = await import('jspdf');
+      
+      // Create PDF with proper A4 settings
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Save PDF
+      doc.save(`Invoice_${invoice.invoice_number}.pdf`);
+      
+      toast({
+        title: "ส่งออกสำเร็จ",
+        description: "ใบแจ้งหนี้ได้รับการส่งออกเป็น PDF เรียบร้อยแล้ว",
+      });
+      
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถส่งออก PDF ได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const printInvoice = () => {
+    window.print();
+  };
+
+  const shareInvoice = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `ใบแจ้งหนี้ ${invoice.invoice_number}`,
+          text: `ใบแจ้งหนี้จาก ENT GROUP สำหรับ ${invoice.customer_name}`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.log('Error sharing:', error);
+      }
+    } else {
+      // Fallback สำหรับเบราว์เซอร์ที่ไม่รองรับ Web Share API
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "คัดลอกลิงก์แล้ว",
+        description: "ลิงก์ใบแจ้งหนี้ได้ถูกคัดลอกไปยังคลิปบอร์ดแล้ว",
+      });
+    }
+  };
+
   const saveInvoice = async () => {
     try {
       if (!invoice.invoice_number || !invoice.customer_name) {
@@ -500,13 +582,51 @@ export default function InvoiceForm() {
           </div>
           
           <div className="flex items-center space-x-2">
+            {/* เมนูส่งออกและพิมพ์ */}
+            <div className="flex items-center space-x-1 border-r pr-2">
+              <Button variant="ghost" size="sm" onClick={shareInvoice} title="แชร์">
+                <Share className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={printInvoice} title="พิมพ์">
+                <Printer className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={exportToPDF} title="ดาวน์โหลด PDF">
+                <Download className="w-4 h-4" />
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" title="เพิ่มเติม">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={exportToPDF}>
+                    <Download className="w-4 h-4 mr-2" />
+                    ส่งออก PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={printInvoice}>
+                    <Printer className="w-4 h-4 mr-2" />
+                    พิมพ์เอกสาร
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={shareInvoice}>
+                    <Share className="w-4 h-4 mr-2" />
+                    แชร์เอกสาร
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            
             <Button variant="outline" size="sm" onClick={() => navigate('/invoices')}>
               <X className="w-4 h-4 mr-2" />
               ยกเลิก
             </Button>
-            <Button variant="default" size="sm" onClick={saveInvoice}>
+            <Button variant="outline" size="sm" onClick={saveInvoice}>
               <Save className="w-4 h-4 mr-2" />
-              บันทึกเอกสาร
+              บันทึก
+            </Button>
+            <Button variant="default" size="sm" onClick={saveAndClose}>
+              <Save className="w-4 h-4 mr-2" />
+              บันทึกและปิด
             </Button>
           </div>
         </div>
