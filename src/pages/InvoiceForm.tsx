@@ -236,41 +236,25 @@ export default function InvoiceForm() {
     const nonTaxableAmount = items
       .filter(item => !item.is_software) // สินค้าที่ไม่เสียภาษี
       .reduce((sum, item) => sum + item.line_total, 0);
-    const taxableAmount = items
+    const totalTaxableAmount = items
       .filter(item => item.is_software) // สินค้าที่เสียภาษี (ซอฟต์แวร์)
       .reduce((sum, item) => sum + item.line_total, 0);
     
-    
-    // คำนวณแบ่งชำระจากยอดหลังหักส่วนลด (ยังไม่รวม VAT)
+    // คำนวณแบ่งชำระจากยอดหลังหักส่วนลด
     const partialPaymentAmount = priceAfterDiscount * (invoice.partial_payment_percentage / 100);
     
-    // ถ้าแบ่งชำระ ให้คิด VAT จากยอดแบ่งชำระเท่านั้น
-    // ถ้าไม่แบ่งชำระ ให้คิด VAT จากยอดรวมทั้งหมด
-    let vatAmount, withholdingTaxAmount, totalAmount;
+    // คิด VAT 7% จากยอดแบ่งชำระเท่านั้น
+    const vatAmount = includeVat ? partialPaymentAmount * 0.07 : 0;
     
-    if (invoice.partial_payment_percentage > 0) {
-      // แบ่งชำระ: คิด VAT เฉพาะจากยอดแบ่งชำระ
-      const taxablePartialAmount = items
-        .filter(item => item.is_software)
-        .reduce((sum, item) => sum + item.line_total, 0) * (invoice.partial_payment_percentage / 100);
-      
-      vatAmount = includeVat ? taxablePartialAmount * 0.07 : 0;
-      withholdingTaxAmount = taxablePartialAmount * 0.03;
-      totalAmount = partialPaymentAmount + vatAmount - withholdingTaxAmount;
-    } else {
-      // ไม่แบ่งชำระ: คิด VAT จากยอดรวมทั้งหมด
-      const taxableAmount = items
-        .filter(item => item.is_software)
-        .reduce((sum, item) => sum + item.line_total, 0);
-      
-      vatAmount = includeVat ? taxableAmount * 0.07 : 0;
-      withholdingTaxAmount = taxableAmount * 0.03;
-      totalAmount = priceAfterDiscount + vatAmount - withholdingTaxAmount;
-    }
+    // คิดหัก ณ ที่จ่าย 3% จากยอดแบ่งชำระ (ถ้ามีซอฟต์แวร์)
+    const withholdingTaxAmount = (totalTaxableAmount / priceAfterDiscount) * partialPaymentAmount * 0.03;
     
-    // คำนวณ VAT สำหรับแสดงผลแยก
-    const partialPaymentVat = includeVat ? partialPaymentAmount * (items.filter(item => item.is_software).reduce((sum, item) => sum + item.line_total, 0) / priceAfterDiscount) * 0.07 : 0;
-    const partialPaymentTotal = partialPaymentAmount + partialPaymentVat;
+    // จำนวนเงินรวมแบ่งชำระ = ยอดแบ่งชำระ + VAT - หัก ณ ที่จ่าย
+    const partialPaymentVat = vatAmount;
+    const partialPaymentTotal = partialPaymentAmount + vatAmount - withholdingTaxAmount;
+    
+    // ยอดรวมทั้งหมด (สำหรับแสดง)
+    const totalAmount = priceAfterDiscount;
 
     setInvoice(prev => ({
       ...prev,
@@ -278,7 +262,7 @@ export default function InvoiceForm() {
       discount_amount: totalDiscount,
       vat_amount: vatAmount,
       withholding_tax_amount: withholdingTaxAmount,
-      taxable_amount: taxableAmount,
+      taxable_amount: totalTaxableAmount,
       non_taxable_amount: nonTaxableAmount,
       total_amount: totalAmount,
       partial_payment_amount: partialPaymentAmount,
