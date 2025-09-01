@@ -400,10 +400,12 @@ export default function QuotationForm() {
                     </SelectContent>
                   </Select>
                   
-                  {selectedCustomer && selectedCustomer.tax_id && (
+                  {selectedCustomer && (
                     <div className="mt-2 p-2 bg-muted rounded-md">
                       <Label className="text-xs font-medium text-muted-foreground">หมายเลขผู้เสียภาษี / TAX ID</Label>
-                      <div className="text-sm font-mono font-medium">{selectedCustomer.tax_id}</div>
+                      <div className="text-sm font-mono font-medium">
+                        {selectedCustomer.tax_id || 'ไม่มีข้อมูลหมายเลขผู้เสียภาษี'}
+                      </div>
                     </div>
                   )}
                 </div>
