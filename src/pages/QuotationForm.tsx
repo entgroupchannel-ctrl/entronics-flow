@@ -549,7 +549,8 @@ export default function QuotationForm() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-primary hover:bg-primary">
-                    <TableHead className="w-[35%] text-primary-foreground font-semibold">รายการสินค้า</TableHead>
+                    <TableHead className="w-16 text-primary-foreground font-semibold text-center">ลำดับ</TableHead>
+                    <TableHead className="w-[30%] text-primary-foreground font-semibold">รายการสินค้า</TableHead>
                     <TableHead className="w-28 text-primary-foreground font-semibold text-center">จำนวน</TableHead>
                     <TableHead className="w-40 text-primary-foreground font-semibold text-center">ราคาต่อหน่วย</TableHead>
                     <TableHead className="w-36 text-primary-foreground font-semibold text-center">ส่วนลด</TableHead>
@@ -558,9 +559,16 @@ export default function QuotationForm() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {items.map((item) => (
+                  {items.map((item, index) => (
                     <TableRow key={item.id}>
-                      <TableCell className="w-[35%]">
+                      <TableCell className="w-16 text-center">
+                        <div className="flex items-center justify-center h-full">
+                          <span className="font-medium text-muted-foreground">
+                            {index + 1}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="w-[30%]">
                         <div className="space-y-2">
                           <Select onValueChange={(value) => selectProduct(item.id, value)}>
                             <SelectTrigger className="text-sm">
@@ -629,10 +637,10 @@ export default function QuotationForm() {
                           </Select>
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell className="w-24 font-medium text-right">
                         {item.line_total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="w-12">
                         <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </Button>
