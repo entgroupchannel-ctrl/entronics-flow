@@ -68,6 +68,10 @@ const Inventory = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importPreview, setImportPreview] = useState<any[]>([]);
+  const [importErrors, setImportErrors] = useState<string[]>([]);
   const { toast } = useToast();
   const { canManageInventory, loading: roleLoading } = useUserRole();
 
@@ -310,7 +314,8 @@ const Inventory = () => {
           'Unit': 'เครื่อง',
           'Category': 'Computers',
           'Description': 'อุตสาหกรรมคอมพิวเตอร์ขนาด 15 นิ้ว สำหรับใช้งานในสภาพแวดล้อมที่เข้มงวด',
-          'UnitPrice': 45000
+          'UnitPrice': 45000,
+          'Stock': 12
         },
         {
           'ProductCode': 'TBR-TAB-101',
@@ -318,7 +323,8 @@ const Inventory = () => {
           'Unit': 'เครื่อง',
           'Category': 'Tablets',
           'Description': 'แท็บเล็ตทนทานขนาด 10.1 นิ้ว สำหรับงานภาคสนาม',
-          'UnitPrice': 25000
+          'UnitPrice': 25000,
+          'Stock': 8
         },
         {
           'ProductCode': 'DPR-MON-24',
@@ -326,7 +332,8 @@ const Inventory = () => {
           'Unit': 'เครื่อง',
           'Category': 'Monitors',
           'Description': 'จอมอนิเตอร์อุตสาหกรรมขนาด 24 นิ้ว คุณภาพสูง',
-          'UnitPrice': 18000
+          'UnitPrice': 18000,
+          'Stock': 15
         }
       ];
 
@@ -341,6 +348,7 @@ const Inventory = () => {
         ['- Category: หมวดหมู่สินค้า (' + categories.join(', ') + ')'],
         ['- Description: รายละเอียดสินค้า'],
         ['- UnitPrice: ราคาขายต่อหน่วย (ตัวเลขเท่านั้น)'],
+        ['- Stock: จำนวนสต๊อค (ตัวเลขเท่านั้น, เป็นทางเลือก)'],
         [''],
         [''],
         ['หมายเหตุ:'],
@@ -391,6 +399,134 @@ const Inventory = () => {
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถสร้าง Template ได้",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImportFile(file);
+    setImportErrors([]);
+    setImportPreview([]);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        // Validate and preview data
+        const errors: string[] = [];
+        const validatedData: any[] = [];
+
+        jsonData.forEach((row: any, index: number) => {
+          const rowNum = index + 2; // Account for header row
+          const productCode = row.ProductCode?.toString().trim();
+          const name = row.Name?.toString().trim();
+          const category = row.Category?.toString().trim();
+          const description = row.Description?.toString().trim() || "";
+          const unitPrice = parseFloat(row.UnitPrice) || 0;
+          const stock = parseInt(row.Stock) || 0;
+
+          // Validation
+          if (!productCode) {
+            errors.push(`แถว ${rowNum}: ต้องระบุ ProductCode`);
+          }
+          if (!name) {
+            errors.push(`แถว ${rowNum}: ต้องระบุ Name`);
+          }
+          if (category && !categories.includes(category)) {
+            errors.push(`แถว ${rowNum}: หมวดหมู่ '${category}' ไม่ถูกต้อง`);
+          }
+
+          if (productCode && name) {
+            // Determine status based on stock
+            let status = "In Stock";
+            if (stock === 0) {
+              status = "Out of Stock";
+            } else if (stock <= 5) {
+              status = "Low Stock";
+            }
+
+            validatedData.push({
+              sku: productCode,
+              name: name,
+              category: category || null,
+              description: description || null,
+              price: unitPrice,
+              stock: stock,
+              status: status
+            });
+          }
+        });
+
+        setImportErrors(errors);
+        setImportPreview(validatedData);
+        setShowImportDialog(true);
+      } catch (error) {
+        console.error('Error reading file:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถอ่านไฟล์ Excel ได้",
+          variant: "destructive"
+        });
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleImportProducts = async () => {
+    if (importPreview.length === 0) return;
+
+    try {
+      // Check for duplicate SKUs
+      const existingSkus = products.map(p => p.sku);
+      const duplicateSkus = importPreview.filter(p => existingSkus.includes(p.sku));
+      
+      if (duplicateSkus.length > 0) {
+        toast({
+          title: "พบ SKU ซ้ำ",
+          description: `SKU ที่ซ้ำ: ${duplicateSkus.map(p => p.sku).join(', ')}`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('products')
+        .insert(importPreview);
+
+      if (error) {
+        console.error('Error importing products:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถนำเข้าสินค้าได้",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await loadProducts();
+      setShowImportDialog(false);
+      setImportFile(null);
+      setImportPreview([]);
+      setImportErrors([]);
+
+      toast({
+        title: "นำเข้าสำเร็จ",
+        description: `นำเข้าสินค้า ${importPreview.length} รายการเรียบร้อยแล้ว`
+      });
+    } catch (error) {
+      console.error('Error importing products:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถนำเข้าสินค้าได้",
         variant: "destructive"
       });
     }
@@ -903,7 +1039,15 @@ const Inventory = () => {
                       <p className="text-muted-foreground mb-4">
                         อัปโหลดไฟล์ Excel เพื่อนำเข้าสินค้าจำนวนมาก
                       </p>
-                      <Button variant="outline">
+                      <input
+                        type="file"
+                        accept=".xlsx,.xls"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        id="excel-upload"
+                      />
+                      <Button variant="outline" onClick={() => document.getElementById('excel-upload')?.click()}>
+                        <Upload className="h-4 w-4 mr-2" />
                         เลือกไฟล์
                       </Button>
                     </CardContent>
@@ -984,6 +1128,81 @@ const Inventory = () => {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Import Preview Dialog */}
+          <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+            <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>ตรวจสอบข้อมูลก่อนนำเข้า</DialogTitle>
+                <DialogDescription>
+                  ตรวจสอบข้อมูลสินค้าที่จะนำเข้าและแก้ไขข้อผิดพลาด (หากมี)
+                </DialogDescription>
+              </DialogHeader>
+
+              {importErrors.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-destructive">พบข้อผิดพลาด:</h4>
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                    <ul className="text-sm text-destructive space-y-1">
+                      {importErrors.map((error, index) => (
+                        <li key={index}>• {error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {importPreview.length > 0 && (
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">ข้อมูลที่จะนำเข้า ({importPreview.length} รายการ):</h4>
+                  <div className="border rounded-md max-h-60 overflow-y-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>SKU</TableHead>
+                          <TableHead>ชื่อสินค้า</TableHead>
+                          <TableHead>หมวดหมู่</TableHead>
+                          <TableHead>ราคาขาย</TableHead>
+                          <TableHead>สต๊อค</TableHead>
+                          <TableHead>สถานะ</TableHead>
+                          <TableHead>รายละเอียด</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {importPreview.map((product, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{product.sku}</TableCell>
+                            <TableCell>{product.name}</TableCell>
+                            <TableCell>{product.category || "-"}</TableCell>
+                            <TableCell>฿{product.price.toLocaleString()}</TableCell>
+                            <TableCell>{product.stock}</TableCell>
+                            <TableCell>
+                              <Badge variant={product.status === "In Stock" ? "default" : product.status === "Low Stock" ? "secondary" : "destructive"}>
+                                {product.status === "In Stock" ? "มีสต๊อค" : product.status === "Low Stock" ? "สต๊อคต่ำ" : "หมดสต๊อค"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="max-w-xs truncate">{product.description || "-"}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+                  ยกเลิก
+                </Button>
+                <Button 
+                  onClick={handleImportProducts}
+                  disabled={importErrors.length > 0 || importPreview.length === 0}
+                >
+                  นำเข้าสินค้า ({importPreview.length} รายการ)
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     </div>
