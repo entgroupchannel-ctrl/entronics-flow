@@ -45,12 +45,19 @@ const menuItems = [
     iconColor: "text-blue-500"
   },
   {
-    title: "ใบเสนอราคา / Quotation",
+    title: "เอกสารการขาย / Sales Documents",
     icon: FileText,
     href: "/quotations",
-    view: "quotations",
+    view: "sales-documents",
     iconColor: "text-green-500",
     submenu: [
+      {
+        title: "ใบเสนอราคา",
+        icon: FileText,
+        href: "/quotations",
+        view: "quotations",
+        iconColor: "text-green-500"
+      },
       {
         title: "ใบวางบิล/ใบแจ้งหนี้",
         icon: FileText,
@@ -121,7 +128,7 @@ const menuItems = [
 export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false); // เปิดไซด์บาร์เป็นค่าเริ่มต้น
   const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({
-    quotations: true // เปิดเมนูใบเสนอราคาไว้เป็น default
+    'sales-documents': true // เปิดเมนูเอกสารการขายไว้เป็น default
   });
   const location = useLocation();
   const navigate = useNavigate();
