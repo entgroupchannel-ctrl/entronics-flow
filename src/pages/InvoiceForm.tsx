@@ -602,16 +602,19 @@ export default function InvoiceForm() {
                             onChange={(e) => updateItem(item.id, 'description', e.target.value)}
                             className="text-sm"
                           />
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`software-${item.id}`}
-                              checked={item.is_software}
-                              onCheckedChange={(checked) => updateItem(item.id, 'is_software', checked)}
-                            />
-                            <Label htmlFor={`software-${item.id}`} className="text-xs">
-                              ซอฟต์แวร์ (หัก ณ ที่จ่าย 3%)
-                            </Label>
-                          </div>
+                          {/* แสดง checkbox ซอฟต์แวร์เฉพาะเมื่อสินค้าเป็นซอฟต์แวร์ หรือมีการเลือกสินค้าแล้ว */}
+                          {(item.is_software || item.product_name) && (
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`software-${item.id}`}
+                                checked={item.is_software}
+                                onCheckedChange={(checked) => updateItem(item.id, 'is_software', checked)}
+                              />
+                              <Label htmlFor={`software-${item.id}`} className="text-xs">
+                                ซอฟต์แวร์ (หัก ณ ที่จ่าย 3%)
+                              </Label>
+                            </div>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
