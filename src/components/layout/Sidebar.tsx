@@ -97,13 +97,6 @@ const menuItems = [
     iconColor: "text-teal-500"
   },
   {
-    title: "พนักงานขับรถ / Driver Staff",
-    icon: Users,
-    href: "/staff-management",
-    view: "staff-management",
-    iconColor: "text-emerald-500"
-  },
-  {
     title: "ตั้งค่า / Settings",
     icon: Settings,
     href: "/settings",
