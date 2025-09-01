@@ -11,6 +11,8 @@ import Inventory from "./pages/Inventory";
 import Customers from "./pages/Customers";
 import Quotations from "./pages/Quotations";
 import QuotationForm from "./pages/QuotationForm";
+import Invoices from "./pages/Invoices";
+import InvoiceForm from "./pages/InvoiceForm";
 import Settings from "./pages/Settings";
 import Financial from "./pages/Financial";
 import Analytics from "./pages/Analytics";
@@ -54,6 +56,16 @@ const App = () => (
             <Route path="/quotations/new" element={
               <ProtectedRoute>
                 <QuotationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/invoices" element={
+              <ProtectedRoute>
+                <Invoices />
+              </ProtectedRoute>
+            } />
+            <Route path="/invoices/new" element={
+              <ProtectedRoute>
+                <InvoiceForm />
               </ProtectedRoute>
             } />
             <Route path="/inventory" element={

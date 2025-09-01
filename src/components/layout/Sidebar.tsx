@@ -56,30 +56,7 @@ const menuItems = [
         icon: FileText,
         href: "/invoices",
         view: "invoices",
-        iconColor: "text-blue-500",
-        submenu: [
-          {
-            title: "สร้างใบวางบิล/ใบแจ้งหนี้",
-            icon: FileText,
-            href: "/invoices/create",
-            view: "create-invoice",
-            iconColor: "text-blue-500"
-          },
-          {
-            title: "มัดจำใบวางบิล/ใบแจ้งหนี้",
-            icon: CreditCard,
-            href: "/invoices/downpayment",
-            view: "downpayment-invoice",
-            iconColor: "text-purple-500"
-          },
-          {
-            title: "แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้",
-            icon: RefreshCw,
-            href: "/invoices/split-payment",
-            view: "split-payment-invoice",
-            iconColor: "text-orange-500"
-          }
-        ]
+        iconColor: "text-blue-500"
       }
     ]
   },
