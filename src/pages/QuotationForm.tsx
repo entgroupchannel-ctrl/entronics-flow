@@ -114,13 +114,16 @@ export default function QuotationForm() {
   const { toast } = useToast();
 
   useEffect(() => {
-    loadCustomers();
-    loadProducts();
-    if (id) {
-      loadQuotation(id);
-    } else {
-      generateQuotationNumber();
-    }
+    const loadData = async () => {
+      await loadCustomers();
+      await loadProducts();
+      if (id) {
+        await loadQuotation(id);
+      } else {
+        generateQuotationNumber();
+      }
+    };
+    loadData();
   }, [id]);
 
   const loadCustomers = async () => {
@@ -214,11 +217,18 @@ export default function QuotationForm() {
           setItems(loadedItems);
         }
 
-        // Set customer if available
+        // Set customer if available - need to wait for customers to be loaded
         if (data.customer_id) {
-          const customer = customers.find(c => c.id === data.customer_id);
-          if (customer) {
-            setSelectedCustomer(customer);
+          // Load the customer specifically if not in the current list
+          const { data: customerData, error: customerError } = await supabase
+            .from('customers')
+            .select('*')
+            .eq('id', data.customer_id)
+            .single();
+          
+          if (!customerError && customerData) {
+            setSelectedCustomer(customerData);
+            setCustomerSearchValue(customerData.name);
           }
         }
       }
