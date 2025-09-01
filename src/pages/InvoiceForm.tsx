@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit } from 'lucide-react';
+import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, MoreHorizontal } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
@@ -560,15 +561,15 @@ export default function InvoiceForm() {
 
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">ลำดับ</TableHead>
-                    <TableHead className="w-80">รายการสินค้า</TableHead>
-                    <TableHead className="w-20">จำนวน</TableHead>
-                    <TableHead className="w-24">ราคาต่อหน่วย</TableHead>
-                    <TableHead className="w-20">ส่วนลด</TableHead>
-                    <TableHead className="w-16">ประเภท</TableHead>
-                    <TableHead className="w-24">ยอดรวม</TableHead>
-                    <TableHead className="w-12"></TableHead>
+                  <TableRow className="bg-primary hover:bg-primary">
+                    <TableHead className="text-primary-foreground w-12">ลำดับ</TableHead>
+                    <TableHead className="text-primary-foreground w-80">รายการสินค้า</TableHead>
+                    <TableHead className="text-primary-foreground w-20">จำนวน</TableHead>
+                    <TableHead className="text-primary-foreground w-24">ราคาต่อหน่วย</TableHead>
+                    <TableHead className="text-primary-foreground w-20">ส่วนลด</TableHead>
+                    <TableHead className="text-primary-foreground w-16">ประเภท</TableHead>
+                    <TableHead className="text-primary-foreground w-24">ยอดรวม</TableHead>
+                    <TableHead className="text-primary-foreground w-12"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -664,9 +665,23 @@ export default function InvoiceForm() {
                         {item.line_total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </TableCell>
                       <TableCell className="w-12">
-                        <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 rounded-lg border border-border hover:bg-accent hover:text-accent-foreground"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => removeItem(item.id)}>
+                              <Trash2 className="w-4 h-4 mr-2 text-red-500" />
+                              ลบรายการ
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
