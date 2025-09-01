@@ -57,17 +57,33 @@ export default function Customers() {
   // Fetch customers from database
   const fetchCustomers = async () => {
     try {
-      const { data, error } = await supabase
+      console.log('Fetching customers...');
+      
+      // ดึงข้อมูลทั้งหมดโดยไม่จำกัดจำนวน
+      const { data, error, count } = await supabase
         .from('customers')
-        .select('*')
-        .order('created_at', { ascending: false }); // ล่าสุดก่อน
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .limit(10000); // เพิ่ม limit สูงสุดเป็น 10,000
+
+      console.log('Total customers in database:', count);
+      console.log('Fetched customers:', data?.length);
 
       if (error) throw error;
       setCustomers(data || []);
       
       // Reset to first page when data is refreshed
       setCurrentPage(1);
+
+      if (count && count > 10000) {
+        toast({
+          title: 'แจ้งเตือน',
+          description: `พบข้อมูลลูกค้า ${count} รายการ แต่แสดงได้เพียง 10,000 รายการแรก`,
+          variant: 'default',
+        });
+      }
     } catch (error: any) {
+      console.error('Error fetching customers:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถโหลดข้อมูลลูกค้าได้',
