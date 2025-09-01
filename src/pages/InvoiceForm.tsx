@@ -35,6 +35,7 @@ interface Product {
   price: number;
   category?: string;
   brand?: string;
+  is_software?: boolean;
 }
 
 interface InvoiceItem {
@@ -286,6 +287,7 @@ export default function InvoiceForm() {
       updateItem(itemId, 'product_name', product.name);
       updateItem(itemId, 'product_sku', product.sku);
       updateItem(itemId, 'unit_price', product.price);
+      updateItem(itemId, 'is_software', product.is_software || false);
     }
   };
 

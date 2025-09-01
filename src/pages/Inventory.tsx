@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
@@ -46,6 +47,7 @@ interface Product {
   service_request_id?: string;
   repaired_date?: string;
   repair_notes?: string;
+  is_software: boolean;
 }
 
 const categories = [
@@ -103,7 +105,8 @@ const Inventory = () => {
     price: 0,
     stock: 0,
     status: "In Stock",
-    description: ""
+    description: "",
+    is_software: false
   });
 
   // Load products from Supabase
@@ -191,7 +194,8 @@ const Inventory = () => {
         price: 0,
         stock: 0,
         status: "In Stock",
-        description: ""
+        description: "",
+        is_software: false
       });
       setShowAddForm(false);
       
@@ -769,7 +773,21 @@ const Inventory = () => {
                          placeholder="รายละเอียดเพิ่มเติมของสินค้า..."
                          rows={3}
                        />
-                     </div>
+                      </div>
+
+                      {/* Checkbox สำหรับระบุซอฟต์แวร์ */}
+                      <div className="col-span-full">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="is_software"
+                            checked={newProduct.is_software || false}
+                            onCheckedChange={(checked) => setNewProduct({...newProduct, is_software: checked as boolean})}
+                          />
+                          <Label htmlFor="is_software" className="text-sm font-medium">
+                            สินค้าซอฟต์แวร์ (หัก ณ ที่จ่าย 3%)
+                          </Label>
+                        </div>
+                      </div>
 
                     <div className="flex gap-4">
                       <Button onClick={handleAddProduct}>
@@ -880,8 +898,22 @@ const Inventory = () => {
                              onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})}
                              placeholder="รายละเอียดเพิ่มเติมของสินค้า..."
                              rows={3}
-                           />
-                         </div>
+                            />
+                          </div>
+
+                          {/* Checkbox สำหรับระบุซอฟต์แวร์ในฟอร์มแก้ไข */}
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="edit-is_software"
+                                checked={editingProduct.is_software || false}
+                                onCheckedChange={(checked) => setEditingProduct({...editingProduct, is_software: checked as boolean})}
+                              />
+                              <Label htmlFor="edit-is_software" className="text-sm font-medium">
+                                สินค้าซอฟต์แวร์ (หัก ณ ที่จ่าย 3%)
+                              </Label>
+                            </div>
+                          </div>
                        </div>
                     )}
                     <DialogFooter>

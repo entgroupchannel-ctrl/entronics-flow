@@ -726,6 +726,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_software: boolean
           item_condition: string | null
           name: string
           price: number
@@ -744,6 +745,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_software?: boolean
           item_condition?: string | null
           name: string
           price?: number
@@ -762,6 +764,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_software?: boolean
           item_condition?: string | null
           name?: string
           price?: number
