@@ -244,13 +244,17 @@ export default function Quotations() {
                         onStatusUpdate={loadQuotations}
                       />
                     </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
+                     <TableCell>
+                       <DropdownMenu>
+                         <DropdownMenuTrigger asChild>
+                           <Button 
+                             variant="outline" 
+                             size="sm" 
+                             className="h-8 w-8 p-0 rounded-lg border border-border hover:bg-accent hover:text-accent-foreground"
+                           >
+                             <MoreHorizontal className="w-4 h-4" />
+                           </Button>
+                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem>
                             <Edit className="w-4 h-4 mr-2" />
