@@ -309,7 +309,7 @@ export default function Quotations() {
                   </div>
                 </div>
                 
-                <Button onClick={createNewQuotation} className="bg-green-600 hover:bg-green-700">
+                <Button onClick={createNewQuotation} className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   สร้างใบเสนอราคา
                 </Button>
