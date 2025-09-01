@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -940,6 +941,8 @@ const Index = () => {
     </>
   );
 
+  const navigate = useNavigate();
+
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
@@ -947,13 +950,17 @@ const Index = () => {
       case 'service':
         return renderServiceView();
       case 'inventory':
-        return <div className="p-6">Inventory Management - Under Development</div>;
+        navigate('/inventory');
+        return null;
       case 'customers':
-        return <div className="p-6">Customer Management - Under Development</div>;
+        navigate('/customers');
+        return null;
       case 'quotations':
-        return <div className="p-6">Quotations Management - Under Development</div>;
+        navigate('/quotations');
+        return null;
       case 'settings':
-        return <div className="p-6">Settings - Under Development</div>;
+        navigate('/settings');
+        return null;
       default:
         return renderDashboardView();
     }
