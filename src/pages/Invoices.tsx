@@ -26,6 +26,8 @@ interface Invoice {
   due_date?: string;
   paid_amount?: number;
   invoice_items?: any[];
+  quotations?: { quotation_number: string } | null;
+  tax_invoices?: { tax_invoice_number: string }[] | null;
 }
 
 export default function Invoices() {
@@ -53,7 +55,9 @@ export default function Invoices() {
         .from('invoices')
         .select(`
           *,
-          invoice_items (*)
+          invoice_items (*),
+          quotations:quotation_id (quotation_number),
+          tax_invoices!invoice_id (tax_invoice_number)
         `)
         .order('created_at', { ascending: false });
 
@@ -302,6 +306,7 @@ export default function Invoices() {
                       <TableHead>ลูกค้า</TableHead>
                       <TableHead>ยอดรวม</TableHead>
                       <TableHead>สถานะ</TableHead>
+                      <TableHead>เอกสารที่เกี่ยวข้อง</TableHead>
                       <TableHead>วันครบกำหนด</TableHead>
                       <TableHead className="w-12"></TableHead>
                     </TableRow>
@@ -309,13 +314,13 @@ export default function Invoices() {
                   <TableBody>
                     {loading ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">
+                        <TableCell colSpan={9} className="text-center py-8">
                           กำลังโหลดข้อมูล...
                         </TableCell>
                       </TableRow>
                     ) : currentItems.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                           ไม่มีข้อมูลใบแจ้งหนี้
                         </TableCell>
                       </TableRow>
@@ -351,6 +356,50 @@ export default function Invoices() {
                               invoice={invoice} 
                               onStatusUpdate={loadInvoices}
                             />
+                          </TableCell>
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <div className="space-y-1">
+                              {/* เอกสารอ้างอิง */}
+                              {invoice.quotations && (
+                                <div className="text-xs text-muted-foreground">
+                                  เอกสารอ้างอิง
+                                </div>
+                              )}
+                              {invoice.quotations && (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="h-auto p-0 text-blue-600 hover:text-blue-800 text-xs"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/quotations`);
+                                  }}
+                                >
+                                  📄 {invoice.quotations.quotation_number}
+                                </Button>
+                              )}
+                              
+                              {/* เอกสารที่เกี่ยวข้อง */}
+                              {invoice.tax_invoices && invoice.tax_invoices.length > 0 && (
+                                <div className="text-xs text-muted-foreground">
+                                  เอกสารที่เกี่ยวข้อง
+                                </div>
+                              )}
+                              {invoice.tax_invoices && invoice.tax_invoices.map((taxInv, index) => (
+                                <Button
+                                  key={index}
+                                  variant="link"
+                                  size="sm"
+                                  className="h-auto p-0 text-blue-600 hover:text-blue-800 text-xs block"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/tax-invoices`);
+                                  }}
+                                >
+                                  📄 {taxInv.tax_invoice_number}
+                                </Button>
+                              ))}
+                            </div>
                           </TableCell>
                           <TableCell>
                             {invoice.due_date ? format(new Date(invoice.due_date), 'dd/MM/yyyy') : '-'}
