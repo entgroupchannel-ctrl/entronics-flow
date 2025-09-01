@@ -58,12 +58,14 @@ const Delivery = () => {
     customer_id: "",
     customer_name: "",
     customer_phone: "",
+    customer_phone_backup: "",
     customer_email: "",
+    customer_line_id: "",
     delivery_address: "",
     delivery_method_id: "",
     order_type: "delivery",
     priority: "normal",
-    scheduled_date: "",
+    scheduled_date: new Date().toISOString().split('T')[0], // Default to today
     delivery_notes: "",
     special_instructions: ""
   });
@@ -273,12 +275,14 @@ const Delivery = () => {
         customer_id: "",
         customer_name: "",
         customer_phone: "",
+        customer_phone_backup: "",
         customer_email: "",
+        customer_line_id: "",
         delivery_address: "",
         delivery_method_id: "",
         order_type: "delivery",
         priority: "normal",
-        scheduled_date: "",
+        scheduled_date: new Date().toISOString().split('T')[0],
         delivery_notes: "",
         special_instructions: ""
       });
@@ -306,7 +310,9 @@ const Delivery = () => {
         customer_id: "",
         customer_name: "",
         customer_phone: "",
+        customer_phone_backup: "",
         customer_email: "",
+        customer_line_id: "",
         delivery_address: ""
       }));
       return;
@@ -319,7 +325,9 @@ const Delivery = () => {
         customer_id: customerId,
         customer_name: customer.name,
         customer_phone: customer.phone || "",
+        customer_phone_backup: customer.phone_backup || "",
         customer_email: customer.email || "",
+        customer_line_id: customer.line_id || "",
         delivery_address: customer.address || ""
       }));
     }
@@ -408,6 +416,27 @@ const Delivery = () => {
                         value={formData.customer_phone}
                         onChange={(e) => setFormData(prev => ({...prev, customer_phone: e.target.value}))}
                         placeholder="0xx-xxx-xxxx"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="customer-phone-backup">เบอร์สำรอง</Label>
+                      <Input
+                        id="customer-phone-backup"
+                        value={formData.customer_phone_backup}
+                        onChange={(e) => setFormData(prev => ({...prev, customer_phone_backup: e.target.value}))}
+                        placeholder="เบอร์โทรสำรอง (ถ้ามี)"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="customer-line-id">Line ID</Label>
+                      <Input
+                        id="customer-line-id"
+                        value={formData.customer_line_id}
+                        onChange={(e) => setFormData(prev => ({...prev, customer_line_id: e.target.value}))}
+                        placeholder="Line ID ลูกค้า (ถ้ามี)"
                       />
                     </div>
                   </div>
