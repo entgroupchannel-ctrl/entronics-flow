@@ -244,7 +244,12 @@ const Delivery = () => {
         items_count: 0, // Will be calculated from delivery_items
         total_weight: order.weight_kg || 0,
         delivery_notes: order.delivery_notes,
-        created_at: order.created_at
+        created_at: order.created_at,
+        assigned_staff_id: order.assigned_staff_id,
+        assignment_date: order.assignment_date,
+        assignment_notes: order.assignment_notes,
+        courier_contact_name: order.courier_contact_name,
+        courier_contact_phone: order.courier_contact_phone
       })) || [];
       
       setDeliveryOrders(transformedData);
