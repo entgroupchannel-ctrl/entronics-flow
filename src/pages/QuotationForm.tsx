@@ -526,241 +526,293 @@ export default function QuotationForm() {
     try {
       const { jsPDF } = await import('jspdf');
       
-      // Create PDF with proper settings for Thai text
+      // Create PDF with proper A4 settings
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
 
-      // Set font to support Thai characters
+      // A4 dimensions: 210mm x 297mm
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 20;
+      const contentWidth = pageWidth - (margin * 2);
+
+      // Set default font
       doc.setFont('helvetica');
-      doc.setFontSize(12);
-
-      // Logo space reserved (จองพื้นที่สำหรับโลโก้)
-      doc.setFillColor(240, 240, 240);
-      doc.rect(15, 10, 40, 20, 'F');
-      doc.setFontSize(8);
-      doc.setTextColor(128, 128, 128);
-      doc.text('LOGO', 35, 20, { align: 'center' });
-
-      // Document title
-      doc.setTextColor(220, 53, 69);
-      doc.setFontSize(18);
-      doc.setFont('helvetica', 'bold');
-      doc.text('QUOTATION / INVOICE', 65, 20);
-      doc.setTextColor(0, 0, 0);
-      
-      // Company Information
       doc.setFontSize(10);
+
+      // Header Section
+      let yPos = margin;
+
+      // Logo space (reserved)
+      doc.setFillColor(248, 249, 250);
+      doc.roundedRect(margin, yPos, 50, 25, 2, 2, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text('LOGO', margin + 25, yPos + 15, { align: 'center' });
+
+      // Company Header
+      doc.setTextColor(220, 53, 69);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('QUOTATION', pageWidth - margin, yPos + 10, { align: 'right' });
+      
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text('ใบเสนอราคา', pageWidth - margin, yPos + 18, { align: 'right' });
+
+      yPos += 35;
+
+      // Decorative line
+      doc.setDrawColor(220, 53, 69);
+      doc.setLineWidth(0.8);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 10;
+
+      // Company Information Section
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ENT GROUP CO., LTD.', margin, yPos);
+      
       doc.setFont('helvetica', 'normal');
-      doc.text('ENT GROUP CO., LTD. (HEAD OFFICE)', 15, 35);
-      doc.text('70/5 Metro Beach Town Chaeng Watthana 2 Village, Moo 4', 15, 40);
-      doc.text('Khlong Thanon Praditsathan, Pak Kret, Nonthaburi 11120', 15, 45);
-      doc.text('TAX ID: 0135558013167', 15, 50);
-      doc.text('TEL: 02-045-6104', 15, 55);
-      doc.text('MOBILE: 095-7391053, 082-2497922', 15, 60);
-      doc.text('FAX: 02-045-6105', 15, 65);
-      doc.text('www.entgroup.co.th', 15, 70);
+      doc.setFontSize(9);
+      yPos += 5;
+      doc.text('70/5 Metro Beach Town Chaeng Watthana 2 Village, Moo 4', margin, yPos);
+      yPos += 4;
+      doc.text('Khlong Thanon Praditsathan, Pak Kret, Nonthaburi 11120', margin, yPos);
+      yPos += 4;
+      doc.text('TAX ID: 0135558013167', margin, yPos);
+      yPos += 4;
+      doc.text('TEL: 02-045-6104  |  MOBILE: 095-7391053, 082-2497922', margin, yPos);
+      yPos += 4;
+      doc.text('FAX: 02-045-6105  |  www.entgroup.co.th', margin, yPos);
 
       // Document Information (Right side)
+      const rightColX = pageWidth - 70;
+      let rightY = yPos - 20;
+      
       doc.setFont('helvetica', 'bold');
-      doc.text('NO:', 130, 35);
-      doc.text('DATE:', 130, 40);
-      doc.text('DUE DATE:', 130, 45);
-      doc.text('SALES:', 130, 50);
-      doc.text('REF:', 130, 55);
+      doc.setFontSize(9);
+      
+      const docInfo = [
+        ['เลขที่:', quotation.quotation_number || ''],
+        ['วันที่:', new Date(quotation.quotation_date).toLocaleDateString('th-TH')],
+        ['ครบกำหนด:', quotation.valid_until ? new Date(quotation.valid_until).toLocaleDateString('th-TH') : '-'],
+        ['ผู้ขาย:', 'คุณปริศ โพธิแสง (บอย)'],
+        ['ตำแหน่ง:', 'Sales Executive']
+      ];
 
-      doc.setFont('helvetica', 'normal');
-      doc.text(quotation.quotation_number || '', 150, 35);
-      doc.text(new Date(quotation.quotation_date).toLocaleDateString('en-GB'), 150, 40);
-      doc.text(quotation.valid_until ? new Date(quotation.valid_until).toLocaleDateString('en-GB') : '-', 150, 45);
-      doc.text('Porissara Phothisaeng (BOY)', 150, 50);
-      doc.text('Sales Executive', 150, 55);
+      docInfo.forEach(([label, value]) => {
+        doc.setFont('helvetica', 'normal');
+        doc.text(label, rightColX, rightY);
+        doc.text(value, rightColX + 20, rightY);
+        rightY += 4;
+      });
 
-      // Customer Info
+      yPos += 25;
+
+      // Customer Section with subtle background
+      doc.setFillColor(248, 249, 250);
+      doc.roundedRect(margin, yPos, contentWidth, 25, 2, 2, 'F');
+      
       doc.setTextColor(220, 53, 69);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.text('CUSTOMER', 15, 85);
+      doc.setFontSize(11);
+      doc.text('ลูกค้า / CUSTOMER', margin + 5, yPos + 7);
       
       doc.setTextColor(0, 0, 0);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
-      doc.text(quotation.customer_name || '', 15, 92);
+      doc.text(quotation.customer_name || '', margin + 5, yPos + 13);
+      
       if (quotation.customer_address) {
-        const addressLines = doc.splitTextToSize(quotation.customer_address, 100);
-        doc.text(addressLines, 15, 99);
+        const addressLines = doc.splitTextToSize(quotation.customer_address, 80);
+        doc.text(addressLines, margin + 5, yPos + 18);
       }
 
-      // Contact Info (Right side)
-      let rightColumnY = 85;
-      if (quotation.customer_phone) {
-        doc.setFont('helvetica', 'bold');
-        doc.text('CONTACT:', 130, rightColumnY);
-        doc.setFont('helvetica', 'normal');
-        doc.text(quotation.customer_phone, 150, rightColumnY);
-        rightColumnY += 7;
+      // Contact info on the right
+      if (quotation.customer_phone || quotation.customer_email) {
+        let contactY = yPos + 7;
+        if (quotation.customer_phone) {
+          doc.text('โทร: ' + quotation.customer_phone, rightColX, contactY);
+          contactY += 4;
+        }
+        if (quotation.customer_email) {
+          doc.text('อีเมล: ' + quotation.customer_email, rightColX, contactY);
+        }
       }
+
+      yPos += 35;
+
+      // Items table with modern design
+      doc.setTextColor(255, 255, 255);
+      doc.setFillColor(220, 53, 69);
+      doc.roundedRect(margin, yPos, contentWidth, 8, 1, 1, 'F');
       
-      if (quotation.customer_email) {
-        doc.setFont('helvetica', 'bold');
-        doc.text('EMAIL:', 130, rightColumnY);
-        doc.setFont('helvetica', 'normal');
-        doc.text(quotation.customer_email, 150, rightColumnY);
-        rightColumnY += 7;
-      }
-
-      // Table Headers with proper positioning
-      let yPos = 120;
-      doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
       
-      // Table header background
-      doc.setFillColor(240, 240, 240);
-      doc.rect(15, yPos - 5, 180, 10, 'F');
+      // Table headers
+      const colWidths = [15, 80, 20, 25, 20, 25];
+      let colX = margin + 2;
+      const headers = ['ลำดับ', 'รายละเอียด', 'จำนวน', 'ราคาต่อหน่วย', 'ส่วนลด', 'จำนวนเงิน'];
       
-      // Table borders
-      doc.setLineWidth(0.3);
-      doc.rect(15, yPos - 5, 180, 10);
-      
-      // Column headers with proper spacing
-      doc.text('#', 18, yPos);
-      doc.text('DESCRIPTION', 30, yPos);
-      doc.text('QTY', 110, yPos);
-      doc.text('UNIT PRICE', 130, yPos);
-      doc.text('DISCOUNT', 155, yPos);
-      doc.text('AMOUNT', 175, yPos);
+      headers.forEach((header, i) => {
+        if (i === 0) {
+          doc.text(header, colX + colWidths[i]/2, yPos + 5.5, { align: 'center' });
+        } else if (i >= 2) {
+          doc.text(header, colX + colWidths[i] - 2, yPos + 5.5, { align: 'right' });
+        } else {
+          doc.text(header, colX + 2, yPos + 5.5);
+        }
+        colX += colWidths[i];
+      });
 
-      // Table Items with proper formatting
       yPos += 12;
+
+      // Table items with alternating background
+      doc.setTextColor(0, 0, 0);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       
       items.forEach((item, index) => {
         if (yPos > 250) {
           doc.addPage();
-          yPos = 30;
+          yPos = margin;
         }
-        
-        // Row background (alternating)
+
+        // Alternating row background
         if (index % 2 === 0) {
           doc.setFillColor(252, 252, 252);
-          doc.rect(15, yPos - 6, 180, 12, 'F');
+          doc.rect(margin, yPos - 2, contentWidth, 12, 'F');
         }
+
+        colX = margin + 2;
         
-        // Row border
-        doc.setLineWidth(0.2);
-        doc.rect(15, yPos - 6, 180, 12);
+        // Item number
+        doc.text((index + 1).toString(), colX + colWidths[0]/2, yPos + 3, { align: 'center' });
+        colX += colWidths[0];
         
-        // Content
-        doc.text((index + 1).toString(), 18, yPos);
+        // Description
+        const description = item.product_name + (item.description && item.description !== item.product_name ? '\n' + item.description : '');
+        const descLines = doc.splitTextToSize(description, colWidths[1] - 4);
+        doc.text(descLines, colX + 2, yPos + 3);
+        colX += colWidths[1];
         
-        // Product description with proper wrapping
-        const productName = item.product_name || '';
-        const description = item.description && item.description !== productName ? item.description : '';
-        const fullDescription = description ? `${productName}\n${description}` : productName;
-        const descLines = doc.splitTextToSize(fullDescription, 75);
-        doc.text(descLines, 30, yPos);
+        // Quantity
+        doc.text(item.quantity.toString(), colX + colWidths[2] - 2, yPos + 3, { align: 'right' });
+        colX += colWidths[2];
         
-        // Right-aligned numbers
-        doc.text(item.quantity.toString(), 118, yPos, { align: 'right' });
-        doc.text(item.unit_price.toLocaleString('en-US', { minimumFractionDigits: 2 }), 148, yPos, { align: 'right' });
-        doc.text(item.discount_amount.toLocaleString('en-US', { minimumFractionDigits: 2 }), 168, yPos, { align: 'right' });
-        doc.text(item.line_total.toLocaleString('en-US', { minimumFractionDigits: 2 }), 188, yPos, { align: 'right' });
+        // Unit price
+        doc.text(item.unit_price.toLocaleString('th-TH', { minimumFractionDigits: 2 }), colX + colWidths[3] - 2, yPos + 3, { align: 'right' });
+        colX += colWidths[3];
+        
+        // Discount
+        doc.text(item.discount_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 }), colX + colWidths[4] - 2, yPos + 3, { align: 'right' });
+        colX += colWidths[4];
+        
+        // Line total
+        doc.text(item.line_total.toLocaleString('th-TH', { minimumFractionDigits: 2 }), colX + colWidths[5] - 2, yPos + 3, { align: 'right' });
         
         yPos += Math.max(12, descLines.length * 4);
       });
 
-      // Summary section with proper formatting
-      yPos += 15;
-      const summaryX = 130;
-      const summaryWidth = 65;
+      // Summary section with elegant design
+      yPos += 10;
+      const summaryX = pageWidth - 80;
+      const summaryWidth = 60;
       
-      // Summary background
-      doc.setFillColor(248, 249, 250);
-      doc.rect(summaryX, yPos - 5, summaryWidth, 45, 'F');
+      doc.setDrawColor(220, 220, 220);
       doc.setLineWidth(0.3);
-      doc.rect(summaryX, yPos - 5, summaryWidth, 45);
       
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      
-      // Summary labels and values
       const subtotalAfterDiscount = quotation.subtotal - quotation.discount_amount;
-      
-      doc.text('SUBTOTAL:', summaryX + 3, yPos + 3);
-      doc.text(subtotalAfterDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 }), summaryX + summaryWidth - 3, yPos + 3, { align: 'right' });
-      
-      doc.text('VAT 7%:', summaryX + 3, yPos + 10);
-      doc.text(quotation.vat_amount.toLocaleString('en-US', { minimumFractionDigits: 2 }), summaryX + summaryWidth - 3, yPos + 10, { align: 'right' });
-      
-      if (quotation.withholding_tax_amount > 0) {
-        doc.text('WHT 3%:', summaryX + 3, yPos + 17);
-        doc.text(`-${quotation.withholding_tax_amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, summaryX + summaryWidth - 3, yPos + 17, { align: 'right' });
-      }
-      
-      // Total line
-      doc.setLineWidth(0.5);
-      doc.line(summaryX + 3, yPos + 24, summaryX + summaryWidth - 3, yPos + 24);
-      
-      doc.setFontSize(11);
-      doc.text('TOTAL:', summaryX + 3, yPos + 32);
-      doc.text(quotation.total_amount.toLocaleString('en-US', { minimumFractionDigits: 2 }), summaryX + summaryWidth - 3, yPos + 32, { align: 'right' });
+      const summaryItems: Array<[string, number]> = [
+        ['ยอดรวม', subtotalAfterDiscount],
+        ['ภาษีมูลค่าเพิ่ม 7%', quotation.vat_amount],
+        ...(quotation.withholding_tax_amount > 0 ? [['หัก ณ ที่จ่าย 3%', -quotation.withholding_tax_amount] as [string, number]] : []),
+        ['ยอดชำระสุทธิ', quotation.total_amount]
+      ];
 
-      // Signature Section
-      yPos += 70;
+      summaryItems.forEach((item, index) => {
+        const isTotal = index === summaryItems.length - 1;
+        
+        if (isTotal) {
+          doc.setDrawColor(220, 53, 69);
+          doc.setLineWidth(0.5);
+          doc.line(summaryX, yPos - 2, summaryX + summaryWidth, yPos - 2);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10);
+        } else {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+        }
+        
+        doc.setTextColor(0, 0, 0);
+        doc.text(item[0], summaryX + 2, yPos + 2);
+        const amount = item[1];
+        const displayAmount = Math.abs(amount).toLocaleString('th-TH', { minimumFractionDigits: 2 }) + (amount < 0 ? ' (หัก)' : '');
+        doc.text(displayAmount, summaryX + summaryWidth - 2, yPos + 2, { align: 'right' });
+        
+        yPos += isTotal ? 8 : 6;
+      });
+
+      // Signature section
+      yPos += 20;
       
+      // Left signature area
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.text('Customer Acceptance', 15, yPos);
-      doc.text('Date: _______________', 15, yPos + 25);
-      
-      doc.text('Authorized By', 130, yPos);
-      doc.text('Porissara Phothisaeng (BOY)', 130, yPos + 8);
-      doc.text('Sales Executive', 130, yPos + 15);
-      doc.text('Date: _______________', 130, yPos + 25);
-      
-      // Signature lines
+      doc.setFontSize(9);
+      doc.text('ลูกค้ายอมรับเงื่อนไข', margin, yPos);
+      doc.setDrawColor(200, 200, 200);
       doc.setLineWidth(0.3);
-      doc.line(15, yPos + 15, 80, yPos + 15); // Customer signature line
-      doc.line(130, yPos + 35, 190, yPos + 35); // Company signature line
+      doc.line(margin, yPos + 15, margin + 60, yPos + 15);
+      doc.text('ลายเซ็น', margin, yPos + 20);
+      doc.text('วันที่ _______________', margin, yPos + 25);
       
-      // Company stamp area
-      yPos += 50;
-      doc.setFont('helvetica', 'bold');
-      doc.text('COMPANY STAMP', 15, yPos);
-      
-      // Stamp box
-      doc.setLineWidth(0.5);
-      doc.rect(15, yPos + 5, 60, 25);
+      // Right signature area
+      doc.text('ผู้เสนอราคา', pageWidth - 70, yPos);
+      doc.text('คุณปริศ โพธิแสง (บอย)', pageWidth - 70, yPos + 5);
+      doc.text('Sales Executive', pageWidth - 70, yPos + 10);
+      doc.line(pageWidth - 70, yPos + 15, pageWidth - 10, yPos + 15);
+      doc.text('วันที่ _______________', pageWidth - 70, yPos + 25);
 
-      // Terms and Conditions
+      // Footer with company stamp area
+      yPos += 35;
+      doc.setFont('helvetica', 'bold');
+      doc.text('ตราประทับบริษัท', margin, yPos);
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(margin, yPos + 5, 40, 20, 2, 2);
+
+      // Terms and conditions
       if (quotation.terms_conditions) {
-        yPos += 40;
+        yPos += 30;
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
-        doc.text('TERMS & CONDITIONS:', 15, yPos);
-        yPos += 8;
+        doc.text('เงื่อนไขและข้อตกลง', margin, yPos);
+        yPos += 5;
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        const termsLines = doc.splitTextToSize(quotation.terms_conditions, 170);
-        doc.text(termsLines, 15, yPos);
+        doc.setFontSize(8);
+        const termsLines = doc.splitTextToSize(quotation.terms_conditions, contentWidth);
+        doc.text(termsLines, margin, yPos);
       }
 
       // Save PDF
       doc.save(`Quotation_${quotation.quotation_number}.pdf`);
       
       toast({
-        title: "Export Successful",
-        description: "PDF has been exported successfully",
+        title: "ส่งออกสำเร็จ",
+        description: "ใบเสนอราคาได้รับการส่งออกเป็น PDF เรียบร้อยแล้ว",
       });
       
     } catch (error) {
       console.error('Error exporting PDF:', error);
       toast({
-        title: "Export Error",
-        description: "Unable to export PDF",
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถส่งออก PDF ได้",
         variant: "destructive",
       });
     }
