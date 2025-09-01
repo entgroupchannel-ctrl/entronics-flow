@@ -868,7 +868,12 @@ export default function ServiceDashboard() {
                               {/* Status Update Section */}
                               {canManageInventory() && (
                                 <div className="mt-4 pt-3 border-t border-gray-200">
-                                  <h4 className="font-medium text-sm text-gray-700 mb-3">แจ้งสถานะงาน</h4>
+                                  <div className="flex justify-end mb-3">
+                                    <h4 className="font-medium text-sm text-gray-700 flex items-center gap-2">
+                                      <Settings className="h-4 w-4 text-blue-600" />
+                                      แจ้งสถานะงาน
+                                    </h4>
+                                  </div>
                                   {!request.assigned_technician_id ? (
                                     <div className="flex gap-2 w-full">
                                       <Select onValueChange={(techId) => updateRequestStatus(request.id, 'assigned', techId)}>
