@@ -66,26 +66,24 @@ export default function Customers() {
   const downloadTemplate = () => {
     const templateData = [
       {
-        'Name': 'บริษัท ตัวอย่าง จำกัด',
-        'ContactPerson': 'คุณสมชาย ใจดี',
-        'Phone': '02-123-4567',
-        'Email': 'contact@example.com',
-        'Address': '123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองตัน กรุงเทพฯ 10110',
-        'CustomerType': 'ลูกค้า',
-        'Status': 'ปกติ',
+        'Address': '123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองตัน กรุงเทพฯ',
+        'postcode': '10110',
         'TaxID': '0123456789012',
-        'LineID': '@companyline'
+        'HQ/Branch': 'สำนักงานใหญ่',
+        'Contact': 'คุณสมชาย ใจดี',
+        'Email': 'contact@example.com',
+        'Mobile Phone': '02-123-4567',
+        'Line ID': '@companyline'
       },
       {
-        'Name': 'บริษัท ผู้จำหน่าย จำกัด', 
-        'ContactPerson': 'คุณสมหญิง รักษ์ดี',
-        'Phone': '02-987-6543',
-        'Email': 'supplier@example.com',
-        'Address': '456 ถนนพระราม 4 แขวงสุริยวงศ์ เขตบางรัก กรุงเทพฯ 10500',
-        'CustomerType': 'ผู้จำหน่าย',
-        'Status': 'สำคัญ',
+        'Address': '456 ถนนพระราม 4 แขวงสุริยวงศ์ เขตบางรัก กรุงเทพฯ',
+        'postcode': '10500',
         'TaxID': '9876543210987',
-        'LineID': '@supplierline'
+        'HQ/Branch': 'สาขาใหญ่',
+        'Contact': 'คุณสมหญิง รักษ์ดี',
+        'Email': 'supplier@example.com',
+        'Mobile Phone': '02-987-6543',
+        'Line ID': '@supplierline'
       }
     ];
 
@@ -95,15 +93,14 @@ export default function Customers() {
     
     // Set column widths
     ws['!cols'] = [
-      { wch: 25 }, // Name
-      { wch: 20 }, // ContactPerson
-      { wch: 15 }, // Phone
-      { wch: 25 }, // Email
       { wch: 50 }, // Address
-      { wch: 15 }, // CustomerType
-      { wch: 10 }, // Status
+      { wch: 10 }, // postcode
       { wch: 15 }, // TaxID
-      { wch: 15 }  // LineID
+      { wch: 15 }, // HQ/Branch
+      { wch: 20 }, // Contact
+      { wch: 25 }, // Email
+      { wch: 15 }, // Mobile Phone
+      { wch: 15 }  // Line ID
     ];
     
     XLSX.writeFile(wb, 'Customer_Template.xlsx');
@@ -133,46 +130,43 @@ export default function Customers() {
 
         jsonData.forEach((row: any, index: number) => {
           const rowNum = index + 2; // Account for header row
-          const name = row.Name?.toString().trim();
-          const contactPerson = row.ContactPerson?.toString().trim() || "";
-          const phone = row.Phone?.toString().trim() || "";
-          const email = row.Email?.toString().trim() || "";
           const address = row.Address?.toString().trim() || "";
-          const customerType = row.CustomerType?.toString().trim() || "ลูกค้า";
-          const status = row.Status?.toString().trim() || "ปกติ";
+          const postcode = row.postcode?.toString().trim() || "";
           const taxId = row.TaxID?.toString().trim() || "";
-          const lineId = row.LineID?.toString().trim() || "";
+          const hqBranch = row['HQ/Branch']?.toString().trim() || "";
+          const contact = row.Contact?.toString().trim() || "";
+          const email = row.Email?.toString().trim() || "";
+          const mobilePhone = row['Mobile Phone']?.toString().trim() || "";
+          const lineId = row['Line ID']?.toString().trim() || "";
 
           // Validation errors for this row
           const rowErrors: string[] = [];
 
-          if (!name) {
-            rowErrors.push("ต้องระบุชื่อ");
+          if (!contact) {
+            rowErrors.push("ต้องระบุชื่อผู้ติดต่อ");
+          }
+
+          if (!address) {
+            rowErrors.push("ต้องระบุที่อยู่");
           }
 
           if (email && existingEmails.includes(email)) {
             rowErrors.push("อีเมลซ้ำกับข้อมูลในระบบ");
           }
 
-          if (customerType && !['ลูกค้า', 'ผู้จำหน่าย', 'ผู้จำหน่าย/ลูกค้า'].includes(customerType)) {
-            rowErrors.push("ประเภทไม่ถูกต้อง (ลูกค้า, ผู้จำหน่าย, ผู้จำหน่าย/ลูกค้า)");
-          }
-
-          if (status && !['ปกติ', 'สำคัญ', 'ระงับ'].includes(status)) {
-            rowErrors.push("สถานะไม่ถูกต้อง (ปกติ, สำคัญ, ระงับ)");
-          }
-
           const customerData = {
             rowNumber: rowNum,
-            name: name || '',
-            contact_person: contactPerson,
-            phone: phone,
+            name: contact || '',
+            contact_person: contact,
+            phone: mobilePhone,
             email: email,
             address: address,
-            customer_type: customerType,
-            status: status,
+            postal_code: postcode,
+            customer_type: 'ลูกค้า',
+            status: 'ปกติ',
             tax_id: taxId,
             line_id: lineId,
+            hq_branch: hqBranch,
             originalRow: row
           };
 
@@ -218,12 +212,14 @@ export default function Customers() {
         phone: customer.phone || null,
         email: customer.email || null,
         address: customer.address || null,
+        postal_code: customer.postal_code || null,
         customer_type: customer.customer_type,
         status: customer.status,
         tax_id: customer.tax_id || null,
         line_id: customer.line_id || null,
         person_type: 'นิติบุคคล',
-        contact_type: 'ลูกค้า'
+        contact_type: 'ลูกค้า',
+        notes: customer.hq_branch ? `สาขา: ${customer.hq_branch}` : null
       }));
 
       const { error } = await supabase
@@ -384,11 +380,14 @@ export default function Customers() {
                                 <TableHeader>
                                   <TableRow>
                                     <TableHead>แถว</TableHead>
-                                    <TableHead>ชื่อ</TableHead>
+                                    <TableHead>ที่อยู่</TableHead>
+                                    <TableHead>รหัสไปรษณีย์</TableHead>
+                                    <TableHead>เลขผู้เสียภาษี</TableHead>
+                                    <TableHead>สาขา</TableHead>
                                     <TableHead>ชื่อผู้ติดต่อ</TableHead>
-                                    <TableHead>เบอร์โทร</TableHead>
                                     <TableHead>อีเมล</TableHead>
-                                    <TableHead>ประเภท</TableHead>
+                                    <TableHead>เบอร์โทร</TableHead>
+                                    <TableHead>Line ID</TableHead>
                                     <TableHead>สถานะ</TableHead>
                                   </TableRow>
                                 </TableHeader>
@@ -399,11 +398,14 @@ export default function Customers() {
                                       className={importErrors.some(e => e.row === customer.rowNumber) ? "bg-destructive/5" : ""}
                                     >
                                       <TableCell>{customer.rowNumber}</TableCell>
-                                      <TableCell>{customer.name || '-'}</TableCell>
+                                      <TableCell className="max-w-[200px] truncate" title={customer.address}>{customer.address || '-'}</TableCell>
+                                      <TableCell>{customer.postal_code || '-'}</TableCell>
+                                      <TableCell>{customer.tax_id || '-'}</TableCell>
+                                      <TableCell>{customer.hq_branch || '-'}</TableCell>
                                       <TableCell>{customer.contact_person || '-'}</TableCell>
-                                      <TableCell>{customer.phone || '-'}</TableCell>
                                       <TableCell>{customer.email || '-'}</TableCell>
-                                      <TableCell>{customer.customer_type || '-'}</TableCell>
+                                      <TableCell>{customer.phone || '-'}</TableCell>
+                                      <TableCell>{customer.line_id || '-'}</TableCell>
                                       <TableCell>
                                         {importErrors.some(e => e.row === customer.rowNumber) ? (
                                           <Badge variant="destructive">ข้อผิดพลาด</Badge>

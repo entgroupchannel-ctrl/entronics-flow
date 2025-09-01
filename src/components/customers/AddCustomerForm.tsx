@@ -148,7 +148,7 @@ export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
 
                 {personType === 'นิติบุคคล' ? (
                   <div className="space-y-2">
-                    <Label htmlFor="tax_id">รหัสนิติบุคคล/หมายเลขผู้เสียภาษี (13 หลัก):</Label>
+                    <Label htmlFor="tax_id">TaxID (รหัสนิติบุคคล/หมายเลขผู้เสียภาษี 13 หลัก):</Label>
                     <Input
                       id="tax_id"
                       name="tax_id"
@@ -183,7 +183,7 @@ export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="contact_person">ชื่อผู้ติดต่อ:</Label>
+                  <Label htmlFor="contact_person">Contact (ชื่อผู้ติดต่อ):</Label>
                   <Input
                     id="contact_person"
                     name="contact_person"
@@ -201,11 +201,11 @@ export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">เบอร์โทรศัพท์:</Label>
+                  <Label htmlFor="phone">Mobile Phone:</Label>
                   <Input
                     id="phone"
                     name="phone"
-                    placeholder="เบอร์โทรศัพท์"
+                    placeholder="เบอร์โทรศัพท์มือถือ"
                   />
                 </div>
 
@@ -233,7 +233,7 @@ export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
                   <Input
                     id="line_id"
                     name="line_id"
-                    placeholder="Line ID"
+                    placeholder="Line ID (เช่น @companyline)"
                   />
                 </div>
               </CardContent>
@@ -261,11 +261,11 @@ export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="address">ที่อยู่:</Label>
+                    <Label htmlFor="address">Address (ที่อยู่):</Label>
                     <Textarea
                       id="address"
                       name="address"
-                      placeholder="ที่อยู่"
+                      placeholder="ที่อยู่สำนักงาน/บ้าน"
                       rows={3}
                     />
                   </div>
@@ -299,7 +299,7 @@ export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="postal_code">รหัสไปรษณีย์:</Label>
+                      <Label htmlFor="postal_code">postcode (รหัสไปรษณีย์):</Label>
                       <Input
                         id="postal_code"
                         name="postal_code"
