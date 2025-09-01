@@ -380,7 +380,7 @@ export default function Invoices() {
                                       variant="ghost"
                                       size="sm"
                                       className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
-                                      title="ดูใบส่งสินค้า/ใบกำกับภาษีที่เกี่ยวข้อง"
+                                      title="ดูเอกสารที่เกี่ยวข้อง"
                                       onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
@@ -418,21 +418,9 @@ export default function Invoices() {
                                         </DropdownMenuItem>
                                       ))
                                     ) : (
-                                      <DropdownMenuItem
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          navigate('/tax-invoices/new', { 
-                                            state: { invoiceId: invoice.id, invoiceNumber: invoice.invoice_number } 
-                                          });
-                                        }}
-                                        className="hover:bg-accent cursor-pointer"
-                                      >
-                                        <Plus className="w-4 h-4 mr-2 text-green-600" />
-                                        <span className="text-green-600">
-                                          สร้างใบส่งสินค้า/ใบกำกับภาษี
-                                        </span>
-                                      </DropdownMenuItem>
+                                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                                        ยังไม่มีเอกสารที่เกี่ยวข้อง
+                                      </div>
                                     )}
                                   </DropdownMenuContent>
                                 </DropdownMenu>
