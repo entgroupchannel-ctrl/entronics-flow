@@ -454,7 +454,22 @@ export default function TaxInvoices() {
                                 สร้างใบเสร็จรับเงิน
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                             <DropdownMenuItem 
+                              <DropdownMenuItem onClick={() => {
+                                setDropdownOpen(null);
+                                console.log('Cancel', taxInvoice.id);
+                              }}>
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                ยกเลิก
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                setDropdownOpen(null);
+                                console.log('Reset', taxInvoice.id);
+                              }}>
+                                <History className="w-4 h-4 mr-2" />
+                                รีเซ็ต
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
                                onClick={(e) => {
                                  e.preventDefault();
                                  e.stopPropagation();
