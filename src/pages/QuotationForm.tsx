@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit } from 'lucide-react';
+import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, Printer, Share, Download, MoreHorizontal } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
@@ -350,6 +351,169 @@ export default function QuotationForm() {
     }
   };
 
+  const exportToPDF = async () => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+
+      // Company Logo (ใช้ logo ที่มีอยู่)
+      doc.addImage(entGroupLogo, 'PNG', 20, 20, 40, 20);
+
+      // Company Header
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ENT GROUP COMPANY LIMITED', 70, 30);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('123/45 ถนนสุขุมวิท แขวงคลองตัน เขตคลองตัน กรุงเทพฯ 10110', 70, 37);
+      doc.text('Tel: 02-xxx-xxxx | Email: info@entgroup.co.th', 70, 42);
+
+      // Document Title
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ใบเสนอราคา / QUOTATION', 105, 65, { align: 'center' });
+
+      // Document Info
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`เลขที่เอกสาร: ${quotation.quotation_number}`, 150, 80);
+      doc.text(`วันที่: ${new Date(quotation.quotation_date).toLocaleDateString('th-TH')}`, 150, 87);
+      doc.text(`ใช้ได้ถึง: ${quotation.valid_until ? new Date(quotation.valid_until).toLocaleDateString('th-TH') : '-'}`, 150, 94);
+
+      // Customer Info
+      doc.setFont('helvetica', 'bold');
+      doc.text('ลูกค้า:', 20, 80);
+      doc.setFont('helvetica', 'normal');
+      doc.text(quotation.customer_name || '', 20, 87);
+      if (quotation.customer_address) {
+        const addressLines = doc.splitTextToSize(quotation.customer_address, 80);
+        doc.text(addressLines, 20, 94);
+      }
+
+      // Table Headers
+      let yPos = 120;
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      
+      // Table header background
+      doc.setFillColor(240, 240, 240);
+      doc.rect(20, yPos - 5, 170, 10, 'F');
+      
+      doc.text('รายการ', 25, yPos);
+      doc.text('จำนวน', 120, yPos);
+      doc.text('ราคาต่อหน่วย', 140, yPos);
+      doc.text('รวม', 170, yPos);
+
+      // Table Items
+      yPos += 10;
+      doc.setFont('helvetica', 'normal');
+      
+      items.forEach((item, index) => {
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 30;
+        }
+        
+        doc.text(`${index + 1}. ${item.product_name}`, 25, yPos);
+        if (item.description && item.description !== item.product_name) {
+          yPos += 5;
+          doc.setFontSize(8);
+          doc.text(`    ${item.description}`, 25, yPos);
+          doc.setFontSize(9);
+        }
+        
+        doc.text(item.quantity.toString(), 125, yPos);
+        doc.text(item.unit_price.toLocaleString('th-TH', { minimumFractionDigits: 2 }), 145, yPos);
+        doc.text(item.line_total.toLocaleString('th-TH', { minimumFractionDigits: 2 }), 175, yPos);
+        
+        yPos += 10;
+      });
+
+      // Summary
+      yPos += 10;
+      doc.line(130, yPos - 5, 190, yPos - 5);
+      
+      doc.text('ยอดรวม:', 140, yPos);
+      doc.text(`${quotation.subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท`, 175, yPos);
+      
+      if (quotation.discount_amount > 0) {
+        yPos += 7;
+        doc.text('ส่วนลด:', 140, yPos);
+        doc.text(`${quotation.discount_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท`, 175, yPos);
+      }
+      
+      if (includeVat && quotation.vat_amount > 0) {
+        yPos += 7;
+        doc.text('ภาษีมูลค่าเพิ่ม 7%:', 140, yPos);
+        doc.text(`${quotation.vat_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท`, 175, yPos);
+      }
+      
+      if (quotation.withholding_tax_amount > 0) {
+        yPos += 7;
+        doc.text('หัก ณ ที่จ่าย 3%:', 140, yPos);
+        doc.text(`${quotation.withholding_tax_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท`, 175, yPos);
+      }
+      
+      yPos += 7;
+      doc.setFont('helvetica', 'bold');
+      doc.text('รวมทั้งสิ้น:', 140, yPos);
+      doc.text(`${quotation.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท`, 175, yPos);
+
+      // Terms and Conditions
+      if (quotation.terms_conditions) {
+        yPos += 15;
+        doc.setFont('helvetica', 'bold');
+        doc.text('เงื่อนไขและข้อตกลง:', 20, yPos);
+        yPos += 7;
+        doc.setFont('helvetica', 'normal');
+        const termsLines = doc.splitTextToSize(quotation.terms_conditions, 170);
+        doc.text(termsLines, 20, yPos);
+      }
+
+      // Save PDF
+      doc.save(`ใบเสนอราคา_${quotation.quotation_number}.pdf`);
+      
+      toast({
+        title: "ส่งออกสำเร็จ",
+        description: "ใบเสนอราคาได้รับการส่งออกเป็น PDF เรียบร้อยแล้ว",
+      });
+      
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถส่งออก PDF ได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const printQuotation = () => {
+    window.print();
+  };
+
+  const shareQuotation = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `ใบเสนอราคา ${quotation.quotation_number}`,
+          text: `ใบเสนอราคาจาก ENT GROUP สำหรับ ${quotation.customer_name}`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.log('Error sharing:', error);
+      }
+    } else {
+      // Fallback สำหรับเบราว์เซอร์ที่ไม่รองรับ Web Share API
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "คัดลอกลิงก์แล้ว",
+        description: "ลิงก์ใบเสนอราคาได้ถูกคัดลอกไปยังคลิปบอร์ดแล้ว",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto space-y-4">
@@ -374,6 +538,40 @@ export default function QuotationForm() {
           </div>
           
           <div className="flex items-center space-x-2">
+            {/* เมนูส่งออกและพิมพ์ */}
+            <div className="flex items-center space-x-1 border-r pr-2">
+              <Button variant="ghost" size="sm" onClick={shareQuotation} title="แชร์">
+                <Share className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={printQuotation} title="พิมพ์">
+                <Printer className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={exportToPDF} title="ดาวน์โหลด PDF">
+                <Download className="w-4 h-4" />
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" title="เพิ่มเติม">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={exportToPDF}>
+                    <Download className="w-4 h-4 mr-2" />
+                    ส่งออก PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={printQuotation}>
+                    <Printer className="w-4 h-4 mr-2" />
+                    พิมพ์เอกสาร
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={shareQuotation}>
+                    <Share className="w-4 h-4 mr-2" />
+                    แชร์เอกสาร
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            
             <Button variant="outline" size="sm" onClick={() => navigate('/quotations')}>
               <X className="w-4 h-4 mr-2" />
               ยกเลิก
