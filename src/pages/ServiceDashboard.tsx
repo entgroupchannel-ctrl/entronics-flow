@@ -49,6 +49,7 @@ interface ServiceRequest {
   problem_description: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'pending' | 'assigned' | 'in_progress' | 'waiting_parts' | 'completed' | 'cancelled' | 'waiting_approval';
+  source: 'staff' | 'technician' | 'customer';
   assigned_technician_id?: string;
   estimated_cost?: number;
   actual_cost?: number;
@@ -161,7 +162,10 @@ export default function ServiceDashboard() {
 
       if (allTechError) throw allTechError;
 
-      setServiceRequests(requests || []);
+      setServiceRequests((requests || []).map(req => ({
+        ...req,
+        source: req.source as 'staff' | 'technician' | 'customer'
+      })));
       setTechnicians(allTechnicians || []);
     } catch (error: any) {
       console.error('Error fetching data:', error);
@@ -279,6 +283,7 @@ export default function ServiceDashboard() {
           problem_description: formData.problem_description,
           priority: formData.priority as 'low' | 'medium' | 'high' | 'urgent',
           status: 'pending',
+          source: (currentTechnician ? 'technician' : 'staff') as 'staff' | 'technician' | 'customer',
           created_by: user?.id
         })
         .select()
@@ -565,6 +570,26 @@ export default function ServiceDashboard() {
     );
   };
 
+  const getSourceBadge = (source: string) => {
+    const variants = {
+      staff: "default",
+      technician: "outline",
+      customer: "secondary"
+    } as const;
+
+    const labels = {
+      staff: "พนักงาน",
+      technician: "ช่าง",
+      customer: "ลูกค้า"
+    };
+
+    return (
+      <Badge variant={variants[source as keyof typeof variants] || "secondary"}>
+        {labels[source as keyof typeof labels] || source}
+      </Badge>
+    );
+  };
+
   // Calculate metrics
   const totalRequests = serviceRequests.length;
   const pendingRequests = serviceRequests.filter(r => r.status === 'pending').length;
@@ -707,6 +732,7 @@ export default function ServiceDashboard() {
                         <h3 className="font-semibold text-lg">{request.ticket_number}</h3>
                         {getStatusBadge(request.status)}
                         {getPriorityBadge(request.priority)}
+                        {getSourceBadge(request.source)}
                       </div>
                       
                       {/* Time information */}
