@@ -366,9 +366,14 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
     }
   };
 
+  const [currentAction, setCurrentAction] = useState<string>('');
+
   const handleDialogConfirm = () => {
+    if (currentAction) {
+      handleAction(currentAction);
+    }
     setIsDialogOpen(false);
-    // The actual action will be handled by handleAction
+    setCurrentAction('');
   };
 
   const statusInfo = getStatusInfo(quotation.workflow_status);
@@ -383,13 +388,13 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
             <ChevronDown className="w-4 h-4 ml-1" />
           </Button>
         </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64 bg-white border shadow-lg">
+          <DropdownMenuContent className="w-64 bg-background border shadow-lg z-50">
             <DropdownMenuItem
               onClick={() => {
                 console.log('Clicked รออนุมัติ');
                 handleAction('wait_for_approve');
               }}
-              className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+              className="flex items-center gap-2 cursor-pointer hover:bg-accent"
             >
               <Clock className="w-4 h-4" />
               <span>รออนุมัติ</span>
@@ -398,9 +403,10 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
             <DropdownMenuItem
               onClick={() => {
                 console.log('Clicked อนุมัติ');
+                setCurrentAction('approve');
                 setIsDialogOpen(true);
               }}
-              className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+              className="flex items-center gap-2 cursor-pointer hover:bg-accent"
             >
               <CheckCircle className="w-4 h-4" />
               <span>อนุมัติ</span>
@@ -409,9 +415,10 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
             <DropdownMenuItem
               onClick={() => {
                 console.log('Clicked ไม่อนุมัติ');
+                setCurrentAction('reject');
                 setIsDialogOpen(true);
               }}
-              className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+              className="flex items-center gap-2 cursor-pointer hover:bg-accent"
             >
               <XCircle className="w-4 h-4" />
               <span>ไม่อนุมัติ</span>
@@ -422,13 +429,13 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
                 <FileText className="w-4 h-4" />
                 <span>ใบวางบิล/ใบแจ้งหนี้</span>
               </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-56">
+              <DropdownMenuSubContent className="w-56 bg-background border shadow-lg z-50">
                 <DropdownMenuItem
                   onClick={() => {
                     console.log('Clicked สร้างใบวางบิล');
                     handleAction('create_invoice');
                   }}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+                  className="flex items-center gap-2 cursor-pointer hover:bg-accent"
                 >
                   <FileText className="w-4 h-4" />
                   <span>สร้างใบวางบิล/ใบแจ้งหนี้</span>
@@ -438,7 +445,7 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
                     console.log('Clicked มัดจำใบวางบิล');
                     handleAction('downpayment_invoice');
                   }}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+                  className="flex items-center gap-2 cursor-pointer hover:bg-accent"
                 >
                   <CreditCard className="w-4 h-4" />
                   <span>มัดจำใบวางบิล/ใบแจ้งหนี้</span>
@@ -448,7 +455,7 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
                     console.log('Clicked แบ่งจ่ายใบวางบิล');
                     handleAction('split_payment_invoice');
                   }}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+                  className="flex items-center gap-2 cursor-pointer hover:bg-accent"
                 >
                   <RefreshCw className="w-4 h-4" />
                   <span>แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้</span>
@@ -461,7 +468,7 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
                 console.log('Clicked สร้างใบสั่งซื้อ');
                 handleAction('create_purchase_order');
               }}
-              className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+              className="flex items-center gap-2 cursor-pointer hover:bg-accent"
             >
               <ShoppingCart className="w-4 h-4" />
               <span>สร้างใบสั่งซื้อ</span>
