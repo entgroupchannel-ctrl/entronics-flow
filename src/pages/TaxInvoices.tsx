@@ -132,8 +132,52 @@ export default function TaxInvoices() {
   };
 
   const handleBulkAction = (action: string) => {
-    console.log(`Bulk action: ${action} for items:`, selectedItems);
-    // Implement bulk actions here
+    if (action === 'delete') {
+      handleBulkDelete();
+    } else {
+      console.log(`Bulk action: ${action} for items:`, selectedItems);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedItems.length === 0) return;
+    
+    const confirmDelete = window.confirm(`คุณต้องการลบใบส่งสินค้า/ใบกำกับภาษี ${selectedItems.length} รายการใช่หรือไม่?\n\n⚠️ การกระทำนี้ไม่สามารถยกเลิกได้`);
+    
+    if (!confirmDelete) return;
+    
+    try {
+      for (const taxInvoiceId of selectedItems) {
+        // ลบ tax invoice items ก่อน
+        await supabase
+          .from('tax_invoice_items')
+          .delete()
+          .eq('tax_invoice_id', taxInvoiceId);
+
+        // ลบ tax invoice
+        await supabase
+          .from('tax_invoices' as any)
+          .delete()
+          .eq('id', taxInvoiceId);
+      }
+
+      toast({
+        title: "ลบสำเร็จ",
+        description: `ลบใบส่งสินค้า/ใบกำกับภาษี ${selectedItems.length} รายการเรียบร้อยแล้ว`,
+      });
+
+      // Clear selections and reload data
+      setSelectedItems([]);
+      loadTaxInvoices();
+
+    } catch (error: any) {
+      console.error('Error bulk deleting tax invoices:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบใบส่งสินค้า/ใบกำกับภาษีได้",
+        variant: "destructive",
+      });
+    }
   };
 
   const openDeleteDialog = (taxInvoiceId: string, taxInvoiceNumber: string) => {
@@ -296,16 +340,24 @@ export default function TaxInvoices() {
                           การดำเนินการ ({selectedItems.length})
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleBulkAction('print')}>
-                          <Printer className="w-4 h-4 mr-2" />
-                          พิมพ์
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleBulkAction('export')}>
-                          <Download className="w-4 h-4 mr-2" />
-                          ส่งออก
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
+                       <DropdownMenuContent>
+                         <DropdownMenuItem onClick={() => handleBulkAction('print')}>
+                           <Printer className="w-4 h-4 mr-2" />
+                           พิมพ์
+                         </DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => handleBulkAction('export')}>
+                           <Download className="w-4 h-4 mr-2" />
+                           ส่งออก
+                         </DropdownMenuItem>
+                         <DropdownMenuSeparator />
+                         <DropdownMenuItem 
+                           onClick={() => handleBulkAction('delete')}
+                           className="text-red-600 hover:bg-red-50 focus:bg-red-50"
+                         >
+                           <Trash2 className="w-4 h-4 mr-2" />
+                           ลบที่เลือก
+                         </DropdownMenuItem>
+                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
                   
@@ -331,6 +383,12 @@ export default function TaxInvoices() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={selectedItems.length === currentItems.length && currentItems.length > 0}
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead>วันที่</TableHead>
                     <TableHead>เลขที่เอกสาร</TableHead>
                     <TableHead>ชื่อลูกค้า/ชื่อโปรเจ็ค</TableHead>
@@ -343,6 +401,12 @@ export default function TaxInvoices() {
                 <TableBody>
                   {currentItems.map((taxInvoice) => (
                     <TableRow key={taxInvoice.id} className="hover:bg-muted/50">
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selectedItems.includes(taxInvoice.id)}
+                          onCheckedChange={(checked) => handleSelectItem(taxInvoice.id, checked as boolean)}
+                        />
+                      </TableCell>
                       <TableCell>
                         {format(new Date(taxInvoice.tax_invoice_date), 'dd/MM/yyyy')}
                       </TableCell>
