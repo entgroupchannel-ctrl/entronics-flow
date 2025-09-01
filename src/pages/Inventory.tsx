@@ -300,28 +300,28 @@ const Inventory = () => {
       // Create sample data for template
       const templateData = [
         {
-          'SKU*': 'ADV-PPC-3150',
-          'ชื่อสินค้า*': 'Advantech PPC-3150 15 inch Panel PC',
-          'หมวดหมู่': 'Computers',
-          'ยี่ห้อ': 'TechBrand',
-          'ราคาขาย (บาท)': 45000,
-          'จำนวนสต๊อค': 12
+          'ProductCode': 'ADV-PPC-3150',
+          'Name': 'Advantech PPC-3150 15 inch Panel PC',
+          'Unit': 'เครื่อง',
+          'Category': 'Computers',
+          'Description': 'อุตสาหกรรมคอมพิวเตอร์ขนาด 15 นิ้ว สำหรับใช้งานในสภาพแวดล้อมที่เข้มงวด',
+          'UnitPrice': 45000
         },
         {
-          'SKU*': 'TBR-TAB-101',
-          'ชื่อสินค้า*': 'TechBrand Rugged Tablet 10.1 inch',
-          'หมวดหมู่': 'Tablets',
-          'ยี่ห้อ': 'TechBrand',
-          'ราคาขาย (บาท)': 25000,
-          'จำนวนสต๊อค': 8
+          'ProductCode': 'TBR-TAB-101',
+          'Name': 'TechBrand Rugged Tablet 10.1 inch',
+          'Unit': 'เครื่อง',
+          'Category': 'Tablets',
+          'Description': 'แท็บเล็ตทนทานขนาด 10.1 นิ้ว สำหรับงานภาคสนาม',
+          'UnitPrice': 25000
         },
         {
-          'SKU*': 'DPR-MON-24',
-          'ชื่อสินค้า*': 'DisplayPro 24 inch Industrial Monitor',
-          'หมวดหมู่': 'Monitors',
-          'ยี่ห้อ': 'DisplayPro',
-          'ราคาขาย (บาท)': 18000,
-          'จำนวนสต๊อค': 15
+          'ProductCode': 'DPR-MON-24',
+          'Name': 'DisplayPro 24 inch Industrial Monitor',
+          'Unit': 'เครื่อง',
+          'Category': 'Monitors',
+          'Description': 'จอมอนิเตอร์อุตสาหกรรมขนาด 24 นิ้ว คุณภาพสูง',
+          'UnitPrice': 18000
         }
       ];
 
@@ -329,15 +329,14 @@ const Inventory = () => {
       const instructions = [
         ['คำแนะนำการใช้งาน Template การนำเข้าสินค้า'],
         [''],
-        ['คอลัมน์ที่จำเป็น (มีเครื่องหมาย * ต้องกรอก):'],
-        ['- SKU*: รหัสสินค้า (ห้ามซ้ำ)'],
-        ['- ชื่อสินค้า*: ชื่อเต็มของสินค้า'],
+        ['คอลัมน์ที่จำเป็น:'],
+        ['- ProductCode: รหัสสินค้า (ห้ามซ้ำ)'],
+        ['- Name: ชื่อเต็มของสินค้า'],
+        ['- Unit: หน่วยนับ (เช่น เครื่อง, ชิ้น, ชุด)'],
+        ['- Category: หมวดหมู่สินค้า (' + categories.join(', ') + ')'],
+        ['- Description: รายละเอียดสินค้า'],
+        ['- UnitPrice: ราคาขายต่อหน่วย (ตัวเลขเท่านั้น)'],
         [''],
-        ['คอลัมน์เพิ่มเติม:'],
-        ['- หมวดหมู่: ' + categories.join(', ')],
-        ['- ยี่ห้อ: ' + brands.join(', ')],
-        ['- ราคาขาย (บาท): ตัวเลขเท่านั้น'],
-        ['- จำนวนสต๊อค: ตัวเลขเท่านั้น'],
         [''],
         ['หมายเหตุ:'],
         ['- สถานะสินค้าจะถูกกำหนดอัตโนมัติ ตามจำนวนสต๊อค'],
