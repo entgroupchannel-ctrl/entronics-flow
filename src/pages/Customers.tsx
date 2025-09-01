@@ -183,6 +183,12 @@ export default function Customers() {
             rowErrors.push("ต้องระบุชื่อบริษัทหรือชื่อผู้ติดต่อ");
           }
 
+          // ตรวจสอบชื่อบริษัทซ้ำ
+          const existingCompanyNames = customers.map(c => c.name.toLowerCase().trim());
+          if (company && existingCompanyNames.includes(company.toLowerCase().trim())) {
+            rowErrors.push("ชื่อบริษัทซ้ำกับข้อมูลในระบบ");
+          }
+
           // ตรวจสอบอีเมลซ้ำ เฉพาะกรณีที่มีอีเมล
           if (email && existingEmails.includes(email)) {
             rowErrors.push("อีเมลซ้ำกับข้อมูลในระบบ");
@@ -325,6 +331,24 @@ export default function Customers() {
   // Update customer
   const handleUpdateCustomer = async (customerData: any) => {
     try {
+      // ตรวจสอบชื่อบริษัทซ้ำ (ยกเว้นของตัวเอง)
+      const { data: existingCustomers, error: checkError } = await supabase
+        .from('customers')
+        .select('id, name')
+        .ilike('name', customerData.name.trim())
+        .neq('id', editingCustomer?.id);
+
+      if (checkError) throw checkError;
+
+      if (existingCustomers && existingCustomers.length > 0) {
+        toast({
+          title: 'พบชื่อบริษัทซ้ำ',
+          description: `ชื่อบริษัท "${customerData.name}" มีอยู่ในระบบแล้ว`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('customers')
         .update(customerData)
@@ -343,7 +367,7 @@ export default function Customers() {
     } catch (error: any) {
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถอัปเดตข้อมูลลูกค้าได้",
+        description: error.message || "ไม่สามารถอัปเดตข้อมูลลูกค้าได้",
         variant: "destructive"
       });
     }

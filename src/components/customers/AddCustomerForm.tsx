@@ -30,56 +30,84 @@ export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
     setIsLoading(true);
 
     const formData = new FormData(event.currentTarget);
-    const customerData = {
-      name: formData.get('name') as string,
-      person_type: personType,
-      tax_id: personType === 'นิติบุคคล' ? formData.get('tax_id') as string : null,
-      citizen_id: personType === 'บุคคลธรรมดา' ? formData.get('citizen_id') as string : null,
-      contact_type: formData.get('contact_type') as string,
-      customer_type: formData.get('customer_type') as string,
-      contact_person: formData.get('contact_person') as string || null,
-      contact_position: formData.get('contact_position') as string || null,
-      phone: formData.get('phone') as string || null,
-      email: formData.get('email') as string || null,
-      address: formData.get('address') as string || null,
-      province: formData.get('province') as string || null,
-      district: formData.get('district') as string || null,
-      sub_district: formData.get('sub_district') as string || null,
-      postal_code: formData.get('postal_code') as string || null,
-      bank_name: formData.get('bank_name') as string || null,
-      bank_account: formData.get('bank_account') as string || null,
-      bank_branch: formData.get('bank_branch') as string || null,
-      swift_code: formData.get('swift_code') as string || null,
-      bank_address: formData.get('bank_address') as string || null,
-      website: formData.get('website') as string || null,
-      line_id: formData.get('line_id') as string || null,
-      facebook: formData.get('facebook') as string || null,
-      hq_branch: formData.get('hq_branch') as string || null,
-      status: formData.get('status') as string,
-      notes: formData.get('notes') as string || null,
-      created_by: user.id,
-    };
+    const companyName = formData.get('name') as string;
 
-    const { error } = await supabase
-      .from('customers')
-      .insert([customerData]);
+    try {
+      // ตรวจสอบชื่อบริษัทซ้ำ
+      const { data: existingCustomers, error: checkError } = await supabase
+        .from('customers')
+        .select('id, name')
+        .ilike('name', companyName.trim());
 
-    if (error) {
+      if (checkError) throw checkError;
+
+      if (existingCustomers && existingCustomers.length > 0) {
+        toast({
+          title: 'พบชื่อบริษัทซ้ำ',
+          description: `ชื่อบริษัท "${companyName}" มีอยู่ในระบบแล้ว`,
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const customerData = {
+        name: companyName,
+        person_type: personType,
+        tax_id: personType === 'นิติบุคคล' ? formData.get('tax_id') as string : null,
+        citizen_id: personType === 'บุคคลธรรมดา' ? formData.get('citizen_id') as string : null,
+        contact_type: formData.get('contact_type') as string,
+        customer_type: formData.get('customer_type') as string,
+        contact_person: formData.get('contact_person') as string || null,
+        contact_position: formData.get('contact_position') as string || null,
+        phone: formData.get('phone') as string || null,
+        email: formData.get('email') as string || null,
+        address: formData.get('address') as string || null,
+        province: formData.get('province') as string || null,
+        district: formData.get('district') as string || null,
+        sub_district: formData.get('sub_district') as string || null,
+        postal_code: formData.get('postal_code') as string || null,
+        bank_name: formData.get('bank_name') as string || null,
+        bank_account: formData.get('bank_account') as string || null,
+        bank_branch: formData.get('bank_branch') as string || null,
+        swift_code: formData.get('swift_code') as string || null,
+        bank_address: formData.get('bank_address') as string || null,
+        website: formData.get('website') as string || null,
+        line_id: formData.get('line_id') as string || null,
+        facebook: formData.get('facebook') as string || null,
+        hq_branch: formData.get('hq_branch') as string || null,
+        status: formData.get('status') as string,
+        notes: formData.get('notes') as string || null,
+        created_by: user.id,
+      };
+
+      const { error } = await supabase
+        .from('customers')
+        .insert([customerData]);
+
+      if (error) {
+        toast({
+          title: 'เกิดข้อผิดพลาด',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'บันทึกสำเร็จ',
+          description: 'เพิ่มข้อมูลลูกค้าเรียบร้อยแล้ว',
+        });
+        setOpen(false);
+        onSuccess();
+        // Reset form
+        (event.target as HTMLFormElement).reset();
+        setPersonType('นิติบุคคล');
+      }
+    } catch (error: any) {
       toast({
         title: 'เกิดข้อผิดพลาด',
-        description: error.message,
+        description: error.message || 'ไม่สามารถตรวจสอบข้อมูลได้',
         variant: 'destructive',
       });
-    } else {
-      toast({
-        title: 'บันทึกสำเร็จ',
-        description: 'เพิ่มข้อมูลลูกค้าเรียบร้อยแล้ว',
-      });
-      setOpen(false);
-      onSuccess();
-      // Reset form
-      (event.target as HTMLFormElement).reset();
-      setPersonType('นิติบุคคล');
     }
 
     setIsLoading(false);
