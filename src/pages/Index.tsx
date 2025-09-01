@@ -967,9 +967,8 @@ const Index = () => {
 
   return (
     <div className="flex h-screen bg-background">
-      <div className="w-64">
-        <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
-      </div>
+      {/* Remove fixed width to allow sidebar to resize itself */}
+      <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
       
       <div className="flex-1 flex flex-col">
         {/* Header with Notification Bell */}
