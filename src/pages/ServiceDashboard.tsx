@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -72,8 +73,10 @@ export default function ServiceDashboard() {
   const { user } = useAuth();
   const { canManageInventory } = useUserRole();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [currentView, setCurrentView] = useState('service-dashboard');
+  const [isCompanyInfoOpen, setIsCompanyInfoOpen] = useState(false);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
@@ -279,13 +282,14 @@ export default function ServiceDashboard() {
       <Sidebar 
         currentView={currentView} 
         onMenuClick={(view) => setCurrentView(view)}
+        onLogoClick={() => setIsCompanyInfoOpen(true)}
       />
       
       <div className="flex-1 flex flex-col">
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold">Service Dashboard</h1>
-            <Button onClick={() => window.open('/service-request', '_blank')}>
+            <Button onClick={() => navigate('/service-request')}>
               แจ้งซ่อมใหม่
             </Button>
           </div>
@@ -510,6 +514,31 @@ export default function ServiceDashboard() {
         </TabsContent>
       </Tabs>
         </main>
+        
+        {/* Company Info Dialog */}
+        <Dialog open={isCompanyInfoOpen} onOpenChange={setIsCompanyInfoOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center">🏢 ENT GROUP</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 text-sm">
+              <div className="text-center">
+                <p className="font-semibold">Software Version 1.0</p>
+                <p className="text-muted-foreground">พัฒนาโดย Therdpoom Phanich</p>
+              </div>
+              
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-2">บริษัท อีเอ็นที กรุ๊ป จำกัด</h4>
+                <div className="space-y-1 text-muted-foreground">
+                  <p>เมทโทร บิซทาวน์ แจ้งวัฒนะ2 เลขที่ 70/5 หมู่ 4</p>
+                  <p>ตำบลคลองพระอุดม อำเภอปากเกร็ด</p>
+                  <p>จังหวัดนนทบุรี 11120</p>
+                  <p className="pt-2">เลขประจำตัวผู้เสียภาษี 0135558013167</p>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
