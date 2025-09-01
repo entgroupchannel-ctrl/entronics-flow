@@ -113,15 +113,37 @@ const Delivery = () => {
       customer_name: "บริษัท เอบีซี จำกัด",
       customer_phone: "02-123-4567",
       delivery_address: "123 ถนนสุขุมวิท แขวงคลองตัน เขตวัฒนา กรุงเทพฯ 10110",
-      status: "in_transit",
+      status: "delivered",
       priority: "urgent",
       delivery_date: "2025-01-09",
       driver_name: "สมชาย รถดี",
       tracking_number: "TRK001234567890",
-      items_count: 5,
+      items_count: 2,
       total_weight: 25.5,
       delivery_notes: "ส่งก่อน 16:00 น.",
-      created_at: "2025-01-08T10:30:00Z"
+      created_at: "2025-01-08T10:30:00Z",
+      warranty_items: [
+        {
+          id: "w1",
+          item_name: "Industrial Panel PC รุ่น IPC-2150",
+          serial_numbers: ["IPC2150-2025-001", "IPC2150-2025-002"],
+          warranty_period_days: 7,
+          warranty_start_date: "2025-01-09", // วันที่ส่งสินค้า
+          warranty_end_date: "2025-01-16", // 7 วันหลังจากส่ง
+          warranty_status: "active",
+          registration_code: "REG20250001"
+        },
+        {
+          id: "w2", 
+          item_name: "Touch Monitor 15 นิ้ว",
+          serial_numbers: ["TM15-2025-001"],
+          warranty_period_days: 7,
+          warranty_start_date: "2025-01-09",
+          warranty_end_date: "2025-01-16",
+          warranty_status: "active",
+          registration_code: "REG20250002"
+        }
+      ]
     },
     {
       id: "2", 
@@ -129,13 +151,87 @@ const Delivery = () => {
       customer_name: "บริษัท เดฟจี จำกัด",
       customer_phone: "02-987-6543",
       delivery_address: "456 ถนนรัชดาภิเษก แขวงห้วยขวาง เขตห้วยขวาง กรุงเทพฯ 10310",
-      status: "preparing",
+      status: "in_transit",
       priority: "normal",
       delivery_date: "2025-01-09",
       tracking_number: "TRK001234567891",
-      items_count: 3,
+      items_count: 1,
       total_weight: 15.2,
-      created_at: "2025-01-08T14:15:00Z"
+      created_at: "2025-01-08T14:15:00Z",
+      warranty_items: [
+        {
+          id: "w3",
+          item_name: "Mini PC รุ่น MPC-500",
+          serial_numbers: ["MPC500-2025-001"],
+          warranty_period_days: 7,
+          warranty_start_date: undefined, // ยังไม่ส่งสินค้า
+          warranty_end_date: undefined,
+          warranty_status: "pending",
+          registration_code: undefined
+        }
+      ]
+    },
+    {
+      id: "3",
+      order_number: "DL2025000003", 
+      customer_name: "บริษัท เทคโนโลยี จำกัด",
+      customer_phone: "02-555-1234",
+      delivery_address: "789 ถนนพระราม 4 แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110",
+      status: "delivered",
+      priority: "normal",
+      delivery_date: "2025-01-02", // ส่งไป 7 วันแล้ว - ประกันหมดอายุ
+      tracking_number: "TRK001234567892",
+      items_count: 1,
+      total_weight: 8.5,
+      created_at: "2025-01-01T09:00:00Z",
+      warranty_items: [
+        {
+          id: "w4",
+          item_name: "Rugged Tablet 10 นิ้ว",
+          serial_numbers: ["RT10-2025-001"],
+          warranty_period_days: 7,
+          warranty_start_date: "2025-01-02", // เริ่มประกัน
+          warranty_end_date: "2025-01-09", // หมดประกันแล้ว (7 วันผ่านไป)
+          warranty_status: "expired",
+          registration_code: "REG20250003"
+        }
+      ]
+    },
+    {
+      id: "4",
+      order_number: "DL2025000004",
+      customer_name: "ร้าน คอมพิวเตอร์ดี",
+      customer_phone: "08-111-2222",
+      delivery_address: "321 ถนนลาดพร้าว แขวงจตุจักร เขตจตุจักร กรุงเทพฯ 10900",
+      status: "preparing",
+      priority: "normal", 
+      delivery_date: "2025-01-10",
+      tracking_number: "TRK001234567893",
+      items_count: 3,
+      total_weight: 12.0,
+      created_at: "2025-01-09T08:00:00Z",
+      warranty_items: [
+        {
+          id: "w5",
+          item_name: "Water Proof PC",
+          serial_numbers: ["WPC-2025-001"],
+          warranty_period_days: 7,
+          warranty_start_date: undefined,
+          warranty_end_date: undefined,
+          warranty_status: "pending",
+          registration_code: undefined
+        },
+        {
+          id: "w6",
+          item_name: "Industrial PC Compact",
+          serial_numbers: ["IPC-COM-001", "IPC-COM-002"],
+          warranty_period_days: 7,
+          warranty_start_date: undefined,
+          warranty_end_date: undefined,
+          warranty_status: "pending", 
+          registration_code: undefined
+        }
+      ]
     }
   ]);
 
