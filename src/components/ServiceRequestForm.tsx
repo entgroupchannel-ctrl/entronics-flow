@@ -462,7 +462,7 @@ export function ServiceRequestForm({
               <Label htmlFor="priority" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 ความเร่งด่วน *
               </Label>
-              <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
+              <Select value={formData.priority || "warranty"} onValueChange={(value) => handleInputChange('priority', value)}>
                 <SelectTrigger className="bg-white dark:bg-gray-800">
                   <SelectValue placeholder="เลือกระดับความเร่งด่วน" />
                 </SelectTrigger>
