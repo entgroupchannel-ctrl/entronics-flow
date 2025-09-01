@@ -866,14 +866,14 @@ export default function QuotationForm() {
             ใบเสนอราคา
           </button>
           <span>/</span>
-          <span className="text-foreground">สร้างใบเสนอราคาใหม่</span>
+          <span className="text-foreground">สร้างใบเสนอราคาใหม่/แก้ไข</span>
         </div>
 
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <FileText className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">สร้างใบเสนอราคาใหม่</h1>
+            <h1 className="text-2xl font-bold text-foreground">สร้างใบเสนอราคาใหม่/แก้ไข</h1>
           </div>
           
           <div className="flex items-center space-x-2">
