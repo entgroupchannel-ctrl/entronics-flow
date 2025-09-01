@@ -140,6 +140,7 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
 
   const getAvailableActions = (currentStatus: string) => {
     const baseActions = [
+      { id: 'wait_for_approve', label: 'รออนุมัติ', icon: <Clock className="w-4 h-4" /> },
       { id: 'approve', label: 'อนุมัติ', icon: <CheckCircle className="w-4 h-4" /> },
       { id: 'reject', label: 'ไม่อนุมัติ', icon: <XCircle className="w-4 h-4" /> },
       { id: 'create_invoice', label: 'สร้างใบวางบิล/ใบแจ้งหนี้', icon: <FileText className="w-4 h-4" /> },
@@ -200,6 +201,9 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
       let updateData: any = {};
 
       switch (actionType) {
+        case 'wait_for_approve':
+          newStatus = 'wait_for_approve';
+          break;
         case 'approve':
           newStatus = 'approved';
           updateData.approved_at = new Date().toISOString();
@@ -231,18 +235,22 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
           newStatus = 'delivery_note_created';
           break;
         case 'create_downpayment_delivery':
+        case 'downpayment_delivery':
           newStatus = 'downpayment_delivery';
           break;
         case 'create_split_payment_delivery':
+        case 'split_payment_delivery':
           newStatus = 'split_payment_delivery';
           break;
         case 'create_tax_invoice':
           newStatus = 'tax_invoice_created';
           break;
         case 'create_downpayment_receipt':
+        case 'downpayment_receipt':
           newStatus = 'downpayment_receipt';
           break;
         case 'create_split_payment_receipt':
+        case 'split_payment_receipt':
           newStatus = 'split_payment_receipt';
           break;
         case 'complete':
