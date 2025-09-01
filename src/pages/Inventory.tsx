@@ -44,8 +44,11 @@ interface Product {
 }
 
 const categories = [
+  "อุปกรณ์ต่อพ่วงคอมพิวเตอร์",
+  "ซอฟแวร์", 
+  "Mini PC",
   "Computers",
-  "Tablets", 
+  "Tablets",
   "Monitors",
   "Components",
   "Accessories"
@@ -438,7 +441,7 @@ const Inventory = () => {
           const category = row.Category?.toString().trim();
           const description = row.Description?.toString().trim() || "";
           const unitPrice = parseFloat(row.UnitPrice) || 0;
-          const stock = parseInt(row.Stock) || 0;
+          const stock = parseInt(row.Stock || row.Quantity || 0) || 0;
 
           // Validation errors for this row
           const rowErrors: string[] = [];
@@ -453,9 +456,10 @@ const Inventory = () => {
             rowErrors.push("ต้องระบุ Name");
           }
           
-          if (category && !categories.includes(category)) {
-            rowErrors.push(`หมวดหมู่ '${category}' ไม่ถูกต้อง`);
-          }
+          // Allow any category, don't validate against predefined list
+          // if (category && !categories.includes(category)) {
+          //   rowErrors.push(`หมวดหมู่ '${category}' ไม่ถูกต้อง`);
+          // }
 
           if (isNaN(unitPrice) || unitPrice < 0) {
             rowErrors.push("ราคาต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0");
