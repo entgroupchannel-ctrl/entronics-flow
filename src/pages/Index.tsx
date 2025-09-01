@@ -37,7 +37,14 @@ import {
   Package,
   Tag,
   Star,
-  AlertCircle
+  AlertCircle,
+  Car,
+  Bike,
+  Building,
+  UserCheck,
+  UserX,
+  Clock,
+  Truck
 } from "lucide-react";
 
 interface ServiceRequest {
@@ -81,6 +88,23 @@ interface Technician {
   total_jobs: number;
 }
 
+interface Staff {
+  id: string;
+  staff_code: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  position: string;
+  department: string;
+  vehicle_type?: string;
+  vehicle_plate?: string;
+  is_available: boolean;
+  is_active: boolean;
+  current_workload: number;
+  max_workload: number;
+  rating: number;
+}
+
 // Create a context for sharing state between Sidebar and Index
 const AppContext = React.createContext<{
   currentView: string;
@@ -102,6 +126,7 @@ const Index = () => {
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -115,24 +140,24 @@ const Index = () => {
   const [emailList, setEmailList] = useState('');
 
   useEffect(() => {
-    fetchData();
-    setupRealtimeSubscription();
-  }, []);
+      fetchData();
+      setupRealtimeSubscription();
+    }, []);
 
-  const fetchData = async () => {
-    try {
-      // Fetch service requests with technician info
-      const { data: requests, error: requestsError } = await supabase
-        .from('service_requests')
-        .select(`
-          *,
-          technicians (
-            name,
-            phone,
-            specialization
-          )
-        `)
-        .order('created_at', { ascending: false });
+    const fetchData = async () => {
+      try {
+        // Fetch service requests with technician info
+        const { data: requests, error: requestsError } = await supabase
+          .from('service_requests')
+          .select(`
+            *,
+            technicians (
+              name,
+              phone,
+              specialization
+            )
+          `)
+          .order('created_at', { ascending: false });
 
       if (requestsError) throw requestsError;
 
@@ -165,22 +190,32 @@ const Index = () => {
 
       if (announcementsError) throw announcementsError;
 
-      // Fetch new customers (last 5)
-      const { data: customersData, error: customersError } = await supabase
-        .from('customers')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5);
+        // Fetch new customers (last 5)
+        const { data: customersData, error: customersError } = await supabase
+          .from('customers')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5);
 
-      if (customersError) throw customersError;
+        if (customersError) throw customersError;
 
-      setServiceRequests(requests || []);
-      setTechnicians(techData || []);
-      setQuotations(quotationsData || []);
-      setAnnouncements(announcementsData || []);
-      setCustomers(customersData || []);
-    } catch (error: any) {
-      console.error('Error fetching data:', error);
+        // Fetch staff data
+        const { data: staffData, error: staffError } = await supabase
+          .from('staff')
+          .select('*')
+          .eq('is_active', true)
+          .order('name');
+
+        if (staffError) throw staffError;
+
+        setServiceRequests(requests || []);
+        setTechnicians(techData || []);
+        setQuotations(quotationsData || []);
+        setAnnouncements(announcementsData || []);
+        setCustomers(customersData || []);
+        setStaff(staffData || []);
+      } catch (error: any) {
+        console.error('Error fetching data:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถโหลดข้อมูลได้",
@@ -191,26 +226,37 @@ const Index = () => {
     }
   };
 
-  const setupRealtimeSubscription = () => {
-    const channel = supabase
-      .channel('dashboard-service-requests')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'service_requests'
-        },
-        () => {
-          fetchData();
-        }
-      )
-      .subscribe();
+    const setupRealtimeSubscription = () => {
+      const channel = supabase
+        .channel('dashboard-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'service_requests'
+          },
+          () => {
+            fetchData();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'staff'
+          },
+          () => {
+            fetchData();
+          }
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
+      return () => {
+        supabase.removeChannel(channel);
+      };
     };
-  };
 
   const updateRequestStatus = async (requestId: string, newStatus: string, technicianId?: string, shouldSendEmail = false, emailAddresses = '') => {
     try {
@@ -371,6 +417,31 @@ const Index = () => {
     new Date(r.created_at).toDateString() === new Date().toDateString()
   ).length;
 
+  // Staff utility functions
+  const getVehicleIcon = (vehicleType: string) => {
+    if (vehicleType?.includes('รถจักรยานยนต์')) return Bike;
+    if (vehicleType?.includes('รถยนต์') || vehicleType?.includes('รถกระบะ') || vehicleType?.includes('รถบรรทุก')) return Car;
+    return Building;
+  };
+
+  const getStaffStatusBadge = (staffMember: Staff) => {
+    if (!staffMember.is_active) {
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <UserX className="h-3 w-3" />
+        ปิดใช้งาน
+      </Badge>;
+    }
+    if (!staffMember.is_available) {
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <Clock className="h-3 w-3" />
+        ไม่ว่าง
+      </Badge>;
+    }
+    return <Badge variant="default" className="flex items-center gap-1 bg-green-100 text-green-800 hover:bg-green-100">
+      <UserCheck className="h-3 w-3" />
+      พร้อมงาน
+    </Badge>;
+  };
 
   const renderDashboardView = () => (
     <>
@@ -463,6 +534,91 @@ const Index = () => {
           className="border-green-200"
         />
       </div>
+
+      {/* Staff Status Section */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            สถานะพนักงานขับรถ
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {staff.length === 0 ? (
+              <div className="col-span-3 text-center py-8 text-muted-foreground">
+                ยังไม่มีข้อมูลพนักงานขับรถ
+              </div>
+            ) : (
+              staff.map((staffMember) => {
+                const VehicleIcon = getVehicleIcon(staffMember.vehicle_type || '');
+                return (
+                  <div key={staffMember.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <VehicleIcon className="h-8 w-8 text-muted-foreground" />
+                        <div>
+                          <h3 className="font-semibold">{staffMember.name}</h3>
+                          <p className="text-sm text-muted-foreground">{staffMember.staff_code}</p>
+                        </div>
+                      </div>
+                      {getStaffStatusBadge(staffMember)}
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      {staffMember.phone && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="h-3 w-3" />
+                          <span>{staffMember.phone}</span>
+                        </div>
+                      )}
+                      
+                      {staffMember.vehicle_type && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <VehicleIcon className="h-3 w-3" />
+                          <span>{staffMember.vehicle_type} {staffMember.vehicle_plate}</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-xs text-muted-foreground">งาน: {staffMember.current_workload}/{staffMember.max_workload}</span>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 text-yellow-500" />
+                          <span className="text-xs">{staffMember.rating.toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+          
+          {/* Summary Stats */}
+          <div className="mt-6 pt-4 border-t">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-green-600">
+                  {staff.filter(s => s.is_active && s.is_available).length}
+                </div>
+                <div className="text-sm text-muted-foreground">พร้อมงาน</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-orange-600">
+                  {staff.filter(s => s.is_active && !s.is_available).length}
+                </div>
+                <div className="text-sm text-muted-foreground">ไม่ว่าง</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-red-600">
+                  {staff.filter(s => !s.is_active).length}
+                </div>
+                <div className="text-sm text-muted-foreground">ปิดใช้งาน</div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Service Requests List */}
