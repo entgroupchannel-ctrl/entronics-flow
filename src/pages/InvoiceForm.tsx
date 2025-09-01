@@ -654,18 +654,21 @@ export default function InvoiceForm() {
                 <div className="flex justify-between items-center">
                   <span>แบ่งชำระ:</span>
                   <div className="flex items-center gap-2">
-                    <select 
-                      value="เปอร์เซ็นต์"
-                      className="text-sm border rounded px-2 py-1"
-                    >
-                      <option>เปอร์เซ็นต์</option>
-                    </select>
+                    <Select value="percentage">
+                      <SelectTrigger className="w-24 text-sm border-gray-300">
+                        <SelectValue placeholder="เปอร์เซ็นต์" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="percentage">เปอร์เซ็นต์</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Input
                       type="number"
                       value={invoice.partial_payment_percentage}
                       onChange={(e) => setInvoice(prev => ({ ...prev, partial_payment_percentage: parseFloat(e.target.value) || 0 }))}
-                      className="w-20 text-right text-sm"
+                      className="w-20 text-right text-sm border-gray-300"
                       placeholder="40.00"
+                      step="0.01"
                     />
                   </div>
                 </div>
@@ -720,7 +723,7 @@ export default function InvoiceForm() {
                 <Textarea
                   value={invoice.notes}
                   onChange={(e) => setInvoice(prev => ({ ...prev, notes: e.target.value }))}
-                  className="mt-1"
+                  className="mt-1 border-2 border-gray-400"
                   rows={3}
                   placeholder="หมายเหตุเพิ่มเติม..."
                 />
@@ -731,7 +734,7 @@ export default function InvoiceForm() {
                 <Textarea
                   value={invoice.terms_conditions}
                   onChange={(e) => setInvoice(prev => ({ ...prev, terms_conditions: e.target.value }))}
-                  className="mt-1"
+                  className="mt-1 border-2 border-gray-400"
                   rows={3}
                 />
               </div>
