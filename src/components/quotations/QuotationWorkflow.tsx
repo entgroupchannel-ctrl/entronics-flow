@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
@@ -14,7 +15,8 @@ import {
   RefreshCw, 
   ShoppingCart,
   Clock,
-  ArrowRight
+  ArrowRight,
+  ChevronDown
 } from 'lucide-react';
 
 interface Quotation {
@@ -37,7 +39,6 @@ interface QuotationWorkflowProps {
 const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStatusUpdate }) => {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [actionType, setActionType] = useState<string>('');
   const [processType, setProcessType] = useState<string>('standard');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
@@ -130,12 +131,9 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
     }
   };
 
-  const handleAction = async () => {
-    if (!actionType) {
-      toast({
-        title: "กรุณาเลือกการดำเนินการ",
-        variant: "destructive"
-      });
+  const handleAction = async (actionType: string, needsInput: boolean = false) => {
+    if (needsInput) {
+      setIsDialogOpen(true);
       return;
     }
 
@@ -193,7 +191,6 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
       });
 
       setIsDialogOpen(false);
-      setActionType('');
       setNotes('');
       setProcessType('standard');
       onStatusUpdate();
@@ -209,6 +206,11 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
     }
   };
 
+  const handleDialogConfirm = () => {
+    setIsDialogOpen(false);
+    // The actual action will be handled by handleAction
+  };
+
   const statusInfo = getStatusInfo(quotation.workflow_status);
   const availableActions = getAvailableActions(quotation.workflow_status);
 
@@ -220,38 +222,42 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
       </Badge>
 
       {availableActions.length > 0 && (
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              จัดการ
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>จัดการใบเสนอราคา {quotation.quotation_number}</DialogTitle>
-            </DialogHeader>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">เลือกการดำเนินการ</label>
-                <Select value={actionType} onValueChange={setActionType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="เลือกการดำเนินการ" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableActions.map((action) => (
-                      <SelectItem key={action.id} value={action.id}>
-                        <div className="flex items-center gap-2">
-                          {action.icon}
-                          {action.label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={loading}>
+                จัดการ
+                <ChevronDown className="w-4 h-4 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              {availableActions.map((action) => (
+                <DropdownMenuItem
+                  key={action.id}
+                  onClick={() => {
+                    const needsInput = action.id === 'reject' || action.id === 'approve' || action.id === 'create_invoice';
+                    if (needsInput) {
+                      setIsDialogOpen(true);
+                    } else {
+                      handleAction(action.id);
+                    }
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  {action.icon}
+                  {action.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-              {(actionType === 'create_invoice') && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>จัดการใบเสนอราคา {quotation.quotation_number}</DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">ประเภทกระบวนการ</label>
                   <Select value={processType} onValueChange={setProcessType}>
@@ -265,41 +271,37 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
                     </SelectContent>
                   </Select>
                 </div>
-              )}
 
-              {(actionType === 'reject' || actionType === 'approve') && (
                 <div>
-                  <label className="text-sm font-medium">
-                    {actionType === 'reject' ? 'เหตุผลการปฏิเสธ' : 'หมายเหตุ'}
-                  </label>
+                  <label className="text-sm font-medium">หมายเหตุ</label>
                   <Textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder={actionType === 'reject' ? 'ระบุเหตุผลการปฏิเสธ...' : 'หมายเหตุเพิ่มเติม...'}
+                    placeholder="หมายเหตุเพิ่มเติม..."
                     className="mt-1"
                   />
                 </div>
-              )}
 
-              <div className="flex gap-2 pt-4">
-                <Button 
-                  onClick={handleAction} 
-                  disabled={loading || !actionType}
-                  className="flex-1"
-                >
-                  {loading ? 'กำลังดำเนินการ...' : 'ยืนยัน'}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsDialogOpen(false)}
-                  className="flex-1"
-                >
-                  ยกเลิก
-                </Button>
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    onClick={handleDialogConfirm}
+                    disabled={loading}
+                    className="flex-1"
+                  >
+                    {loading ? 'กำลังดำเนินการ...' : 'ยืนยัน'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="flex-1"
+                  >
+                    ยกเลิก
+                  </Button>
+                </div>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </div>
   );
