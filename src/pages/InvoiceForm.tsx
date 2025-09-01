@@ -287,8 +287,40 @@ export default function InvoiceForm() {
     }));
   };
 
-  const removeItem = (id: string) => {
-    setItems(prev => prev.filter(item => item.id !== id));
+  const removeItem = async (id: string) => {
+    try {
+      // ถ้าเป็นรายการที่มีอยู่ในฐานข้อมูลแล้ว (ไม่ใช่ temp ID) ให้ลบออกจากฐานข้อมูล
+      if (!id.startsWith('temp-')) {
+        const { error } = await supabase
+          .from('invoice_items')
+          .delete()
+          .eq('id', id);
+
+        if (error) {
+          toast({
+            title: "เกิดข้อผิดพลาด",
+            description: "ไม่สามารถลบรายการได้",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        toast({
+          title: "ลบรายการสำเร็จ",
+          description: "ลบรายการออกจากฐานข้อมูลแล้ว",
+        });
+      }
+
+      // ลบรายการออกจาก state
+      setItems(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Error removing item:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบรายการได้",
+        variant: "destructive",
+      });
+    }
   };
 
   const selectProduct = (itemId: string, productId: string) => {
