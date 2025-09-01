@@ -23,6 +23,7 @@ interface Customer {
   phone?: string;
   address?: string;
   tax_id?: string;
+  line_id?: string;
 }
 
 interface Product {
@@ -58,6 +59,7 @@ interface Quotation {
   customer_email?: string;
   customer_phone?: string;
   customer_address?: string;
+  customer_line_id?: string;
   subtotal: number;
   discount_amount: number;
   discount_percentage: number;
@@ -86,6 +88,7 @@ export default function QuotationForm() {
       customer_email: '',
       customer_phone: '',
       customer_address: '',
+      customer_line_id: '',
       subtotal: 0,
       discount_amount: 0,
       discount_percentage: 0,
@@ -255,7 +258,8 @@ export default function QuotationForm() {
         customer_name: customer.name,
         customer_email: customer.email || '',
         customer_phone: customer.phone || '',
-        customer_address: customer.address || ''
+        customer_address: customer.address || '',
+        customer_line_id: customer.line_id || ''
       }));
     }
   };
@@ -399,21 +403,34 @@ export default function QuotationForm() {
                 
                 {selectedCustomer && (
                   <>
-                    <div>
-                      <Label className="text-sm font-medium">อีเมล</Label>
-                      <Input 
-                        value={quotation.customer_email} 
-                        onChange={(e) => setQuotation(prev => ({ ...prev, customer_email: e.target.value }))}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">เบอร์โทรศัพท์</Label>
-                      <Input 
-                        value={quotation.customer_phone} 
-                        onChange={(e) => setQuotation(prev => ({ ...prev, customer_phone: e.target.value }))}
-                        className="mt-1"
-                      />
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label className="text-sm font-medium">อีเมล</Label>
+                        <Input 
+                          value={quotation.customer_email} 
+                          onChange={(e) => setQuotation(prev => ({ ...prev, customer_email: e.target.value }))}
+                          className="mt-1 text-sm"
+                          placeholder="email@example.com"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">เบอร์โทรศัพท์</Label>
+                        <Input 
+                          value={quotation.customer_phone} 
+                          onChange={(e) => setQuotation(prev => ({ ...prev, customer_phone: e.target.value }))}
+                          className="mt-1 text-sm"
+                          placeholder="08x-xxx-xxxx"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Line ID</Label>
+                        <Input 
+                          value={quotation.customer_line_id || ''} 
+                          onChange={(e) => setQuotation(prev => ({ ...prev, customer_line_id: e.target.value }))}
+                          className="mt-1 text-sm"
+                          placeholder="@lineid"
+                        />
+                      </div>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">ที่อยู่</Label>
