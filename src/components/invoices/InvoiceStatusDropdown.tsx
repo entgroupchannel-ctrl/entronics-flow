@@ -190,13 +190,13 @@ const InvoiceStatusDropdown: React.FC<InvoiceStatusDropdownProps> = ({ invoice, 
           <ChevronDown className="w-3 h-3 ml-1" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64 bg-white border shadow-lg z-50" align="end">
+      <DropdownMenuContent className="w-64 bg-background border shadow-lg z-50" align="end">
         {statusOptions.map((option) => (
           <DropdownMenuItem
             key={option.value}
             onClick={() => handleStatusChange(option.value)}
-            className={`flex items-center gap-2 cursor-pointer hover:bg-gray-100 ${
-              option.value === invoice.status ? 'bg-blue-50' : ''
+            className={`flex items-center gap-2 cursor-pointer hover:bg-accent ${
+              option.value === invoice.status ? 'bg-muted' : ''
             }`}
           >
             {option.icon}

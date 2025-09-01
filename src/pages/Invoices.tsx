@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -112,6 +112,46 @@ export default function Invoices() {
       setSelectedItems(prev => [...prev, invoiceId]);
     } else {
       setSelectedItems(prev => prev.filter(id => id !== invoiceId));
+    }
+  };
+
+  const deleteInvoice = async (invoiceId: string, invoiceNumber: string) => {
+    if (!confirm(`ต้องการลบใบแจ้งหนี้ ${invoiceNumber} ใช่หรือไม่?`)) {
+      return;
+    }
+
+    try {
+      // ลบ invoice items ก่อน
+      const { error: itemsError } = await supabase
+        .from('invoice_items')
+        .delete()
+        .eq('invoice_id', invoiceId);
+
+      if (itemsError) throw itemsError;
+
+      // ลบ invoice
+      const { error: invoiceError } = await supabase
+        .from('invoices' as any)
+        .delete()
+        .eq('id', invoiceId);
+
+      if (invoiceError) throw invoiceError;
+
+      toast({
+        title: "ลบสำเร็จ",
+        description: `ลบใบแจ้งหนี้ ${invoiceNumber} เรียบร้อยแล้ว`,
+      });
+
+      // รีโหลดข้อมูล
+      loadInvoices();
+
+    } catch (error: any) {
+      console.error('Error deleting invoice:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบใบแจ้งหนี้ได้",
+        variant: "destructive",
+      });
     }
   };
 
@@ -298,7 +338,7 @@ export default function Invoices() {
                                   <MoreHorizontal className="w-4 h-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
                                 <DropdownMenuItem onClick={() => navigate(`/invoices/${invoice.id}`)}>
                                   <Edit className="w-4 h-4 mr-2" />
                                   แก้ไข
@@ -314,6 +354,13 @@ export default function Invoices() {
                                 <DropdownMenuItem>
                                   <Share2 className="w-4 h-4 mr-2" />
                                   แชร์
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => deleteInvoice(invoice.id, invoice.invoice_number)}
+                                  className="text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  ลบ
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
