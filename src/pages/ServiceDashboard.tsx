@@ -582,6 +582,7 @@ export default function ServiceDashboard() {
       assigned: "outline", 
       in_progress: "default",
       waiting_parts: "destructive",
+      waiting_approval: "destructive",
       completed: "default",
       cancelled: "secondary"
     } as const;
@@ -591,6 +592,7 @@ export default function ServiceDashboard() {
       assigned: "มอบหมายแล้ว",
       in_progress: "กำลังดำเนินการ", 
       waiting_parts: "รออะไหล่",
+      waiting_approval: "รออนุมัติ",
       completed: "เสร็จสิ้น",
       cancelled: "ยกเลิก"
     };
@@ -757,6 +759,7 @@ export default function ServiceDashboard() {
                 <SelectItem value="assigned">มอบหมายแล้ว</SelectItem>
                 <SelectItem value="in_progress">กำลังดำเนินการ</SelectItem>
                 <SelectItem value="waiting_parts">รออะไหล่</SelectItem>
+                <SelectItem value="waiting_approval">รออนุมัติ</SelectItem>
                 <SelectItem value="completed">เสร็จสิ้น</SelectItem>
                 <SelectItem value="cancelled">ยกเลิก</SelectItem>
               </SelectContent>
@@ -931,8 +934,8 @@ export default function ServiceDashboard() {
 
 
 
-                           {/* Job Status Buttons */}
-                           <div className="flex gap-2 pt-4 border-t">
+                           {/* Job Status Management Buttons */}
+                           <div className="flex flex-wrap gap-2 pt-4 border-t">
                              {/* Technician Actions - for assigned technicians */}
                              {currentTechnician && request.assigned_technician_id === currentTechnician.id && (
                                <>
@@ -953,6 +956,7 @@ export default function ServiceDashboard() {
                                    <Button 
                                      size="sm" 
                                      onClick={() => updateJobStatus(request.id, 'in_progress')}
+                                     className="bg-green-600 hover:bg-green-700"
                                    >
                                      เริ่มซ่อม
                                    </Button>
@@ -963,12 +967,14 @@ export default function ServiceDashboard() {
                                        size="sm" 
                                        onClick={() => updateJobStatus(request.id, 'waiting_parts')}
                                        variant="outline"
+                                       className="border-orange-500 text-orange-600 hover:bg-orange-50"
                                      >
                                        รออะไหล่
                                      </Button>
                                      <Button 
                                        size="sm" 
                                        onClick={() => updateJobStatus(request.id, 'completed')}
+                                       className="bg-green-600 hover:bg-green-700"
                                      >
                                        ส่งงาน
                                      </Button>
@@ -978,6 +984,7 @@ export default function ServiceDashboard() {
                                    <Button 
                                      size="sm" 
                                      onClick={() => updateJobStatus(request.id, 'in_progress')}
+                                     className="bg-blue-600 hover:bg-blue-700"
                                    >
                                      ซ่อมต่อ
                                    </Button>
@@ -988,14 +995,16 @@ export default function ServiceDashboard() {
                              {/* Management Actions - for staff/managers */}
                              {!currentTechnician && (
                                <>
+                                 {/* Pending Status Actions */}
                                  {request.status === 'pending' && (
                                    <>
                                      <Button 
                                        size="sm" 
                                        onClick={() => autoAssignTechnician(request.id)}
                                        variant="outline"
+                                       className="border-blue-500 text-blue-600 hover:bg-blue-50"
                                      >
-                                       มอบหมายช่าง
+                                       มอบหมายช่างอัตโนมัติ
                                      </Button>
                                      <Select onValueChange={(techId) => updateRequestStatus(request.id, 'assigned', techId)}>
                                        <SelectTrigger className="w-40 h-8">
@@ -1011,7 +1020,65 @@ export default function ServiceDashboard() {
                                      </Select>
                                    </>
                                  )}
+
+                                 {/* Assigned Status Actions */}
+                                 {request.status === 'assigned' && (
+                                   <>
+                                     <Button 
+                                       size="sm" 
+                                       onClick={() => updateRequestStatus(request.id, 'in_progress')}
+                                       className="bg-green-600 hover:bg-green-700"
+                                     >
+                                       เริ่มงาน
+                                     </Button>
+                                     <Select onValueChange={(techId) => updateRequestStatus(request.id, 'assigned', techId)}>
+                                       <SelectTrigger className="w-40 h-8">
+                                         <SelectValue placeholder="เปลี่ยนช่าง" />
+                                       </SelectTrigger>
+                                       <SelectContent>
+                                         {technicians.map((tech) => (
+                                           <SelectItem key={tech.id} value={tech.id}>
+                                             {tech.name}
+                                           </SelectItem>
+                                         ))}
+                                       </SelectContent>
+                                     </Select>
+                                   </>
+                                 )}
+
+                                 {/* In Progress Status Actions */}
+                                 {request.status === 'in_progress' && (
+                                   <>
+                                     <Button 
+                                       size="sm" 
+                                       onClick={() => updateRequestStatus(request.id, 'waiting_parts')}
+                                       variant="outline"
+                                       className="border-orange-500 text-orange-600 hover:bg-orange-50"
+                                     >
+                                       รออะไหล่
+                                     </Button>
+                                     <Button 
+                                       size="sm" 
+                                       onClick={() => updateRequestStatus(request.id, 'completed')}
+                                       className="bg-green-600 hover:bg-green-700"
+                                     >
+                                       เสร็จสิ้น
+                                     </Button>
+                                   </>
+                                 )}
+
+                                 {/* Waiting Parts Status Actions */}
+                                 {request.status === 'waiting_parts' && (
+                                   <Button 
+                                     size="sm" 
+                                     onClick={() => updateRequestStatus(request.id, 'in_progress')}
+                                     className="bg-blue-600 hover:bg-blue-700"
+                                   >
+                                     ซ่อมต่อ
+                                   </Button>
+                                 )}
                                  
+                                 {/* Waiting Approval Status Actions */}
                                  {request.status === 'waiting_approval' && (
                                    <>
                                      <Button 
@@ -1025,44 +1092,69 @@ export default function ServiceDashboard() {
                                        size="sm" 
                                        onClick={() => approveJob(request.id, false)}
                                        variant="outline"
+                                       className="border-red-500 text-red-600 hover:bg-red-50"
                                      >
                                        ไม่อนุมัติ
                                      </Button>
                                    </>
                                  )}
+
+                                 {/* Completed Status Actions */}
+                                 {request.status === 'completed' && (
+                                   <Button 
+                                     size="sm" 
+                                     onClick={() => updateRequestStatus(request.id, 'in_progress')}
+                                     variant="outline"
+                                     className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                                   >
+                                     เปิดงานใหม่
+                                   </Button>
+                                 )}
                                  
-                                 {/* Cancel button for all pending/assigned jobs */}
-                                 {['pending', 'assigned', 'in_progress'].includes(request.status) && (
+                                 {/* Cancel button for active jobs */}
+                                 {['pending', 'assigned', 'in_progress', 'waiting_parts', 'waiting_approval'].includes(request.status) && (
                                    <Button 
                                      size="sm" 
                                      onClick={() => updateRequestStatus(request.id, 'cancelled')}
                                      variant="destructive"
+                                     className="ml-auto"
                                    >
                                      ยกเลิกงาน
+                                   </Button>
+                                 )}
+
+                                 {/* Reopen cancelled jobs */}
+                                 {request.status === 'cancelled' && (
+                                   <Button 
+                                     size="sm" 
+                                     onClick={() => updateRequestStatus(request.id, 'pending')}
+                                     className="bg-blue-600 hover:bg-blue-700"
+                                   >
+                                     เปิดงานใหม่
                                    </Button>
                                  )}
                                </>
                              )}
                            </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium">ลูกค้า: </span>
-                      <span>{request.customer_name}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium">อุปกรณ์: </span>
-                      <span>{request.device_type}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium">ช่าง: </span>
-                      <span>{request.technicians?.name || 'ยังไม่มอบหมาย'}</span>
-                    </div>
-                  </div>
+                         </div>
+                       </DialogContent>
+                     </Dialog>
+                   </div>
+                   
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                     <div>
+                       <span className="font-medium">ลูกค้า: </span>
+                       <span>{request.customer_name}</span>
+                     </div>
+                     <div>
+                       <span className="font-medium">อุปกรณ์: </span>
+                       <span>{request.device_type}</span>
+                     </div>
+                     <div>
+                       <span className="font-medium">ช่าง: </span>
+                       <span>{request.technicians?.name || 'ยังไม่มอบหมาย'}</span>
+                     </div>
+                   </div>
                   
                   {/* Technician quick actions on main card */}
                   {currentTechnician && request.assigned_technician_id === currentTechnician.id && (
