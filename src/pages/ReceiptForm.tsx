@@ -14,15 +14,12 @@ import { Sidebar } from "@/components/layout/Sidebar";
 
 interface ReceiptItem {
   id?: string;
-  product_name: string;
-  product_sku: string;
-  description: string;
-  quantity: number;
-  unit_price: number;
-  discount_amount: number;
-  discount_type: 'amount' | 'percentage';
-  line_total: number;
-  is_software: boolean;
+  document_number: string;
+  document_date: string;
+  due_date?: string;
+  subtotal_before_tax: number;
+  payment_amount: number;
+  sequence_number: number;
 }
 
 interface ReceiptForm {
@@ -92,15 +89,12 @@ export default function ReceiptForm() {
 
   const [items, setItems] = useState<ReceiptItem[]>([
     {
-      product_name: "",
-      product_sku: "",
-      description: "",
-      quantity: 1,
-      unit_price: 0,
-      discount_amount: 0,
-      discount_type: "amount",
-      line_total: 0,
-      is_software: false,
+      document_number: "",
+      document_date: new Date().toISOString().split('T')[0],
+      due_date: "",
+      subtotal_before_tax: 0,
+      payment_amount: 0,
+      sequence_number: 1,
     },
   ]);
 
@@ -110,7 +104,7 @@ export default function ReceiptForm() {
       
       // Load from location state if coming from tax invoice
       if (location.state) {
-        const { taxInvoiceId, customerName, totalAmount } = location.state;
+        const { taxInvoiceId, customerName, totalAmount, taxInvoiceNumber, taxInvoiceDate, dueDate } = location.state;
         if (taxInvoiceId) {
           // Check if this tax invoice can issue receipt
           const canIssueReceipt = await checkCanIssueReceipt(taxInvoiceId);
@@ -121,6 +115,18 @@ export default function ReceiptForm() {
             total_amount: totalAmount || 0,
             can_issue_receipt: canIssueReceipt
           }));
+
+          // Pre-populate with tax invoice data
+          if (canIssueReceipt) {
+            setItems([{
+              document_number: taxInvoiceNumber || "",
+              document_date: taxInvoiceDate || new Date().toISOString().split('T')[0],
+              due_date: dueDate || "",
+              subtotal_before_tax: totalAmount || 0,
+              payment_amount: totalAmount || 0,
+              sequence_number: 1,
+            }]);
+          }
         }
       }
 
@@ -160,21 +166,24 @@ export default function ReceiptForm() {
       
       if (customersData) setCustomers(customersData);
 
-      // Load invoices
-      const { data: invoicesData } = await supabase
-        .from('invoices')
-        .select('id, invoice_number, customer_name, total_amount')
-        .order('created_at', { ascending: false });
-      
-      if (invoicesData) setInvoices(invoicesData);
-
-      // Load tax invoices
+      // Load tax invoices with verified payments only
       const { data: taxInvoicesData } = await supabase
         .from('tax_invoices')
-        .select('id, tax_invoice_number, customer_name, total_amount')
+        .select('id, tax_invoice_number, customer_name, total_amount, tax_invoice_date, due_date')
+        .eq('status', 'sent')
         .order('created_at', { ascending: false });
       
-      if (taxInvoicesData) setTaxInvoices(taxInvoicesData);
+      if (taxInvoicesData) {
+        // Filter to only show tax invoices that can issue receipts
+        const filteredInvoices = [];
+        for (const invoice of taxInvoicesData) {
+          const canIssue = await checkCanIssueReceipt(invoice.id);
+          if (canIssue) {
+            filteredInvoices.push(invoice);
+          }
+        }
+        setTaxInvoices(filteredInvoices);
+      }
 
     } catch (error) {
       console.error('Error loading data:', error);
@@ -212,15 +221,12 @@ export default function ReceiptForm() {
         if (receipt.receipt_items && receipt.receipt_items.length > 0) {
           const mappedItems = receipt.receipt_items.map((item: any) => ({
             id: item.id,
-            product_name: item.product_name || "",
-            product_sku: item.product_sku || "",
-            description: item.description || "",
-            quantity: item.quantity || 1,
-            unit_price: item.unit_price || 0,
-            discount_amount: item.discount_amount || 0,
-            discount_type: (item.discount_type as 'amount' | 'percentage') || 'amount',
-            line_total: item.line_total || 0,
-            is_software: item.is_software || false,
+            document_number: item.document_number || "",
+            document_date: item.document_date || new Date().toISOString().split('T')[0],
+            due_date: item.due_date || "",
+            subtotal_before_tax: item.subtotal_before_tax || 0,
+            payment_amount: item.payment_amount || 0,
+            sequence_number: item.sequence_number || 1,
           }));
           setItems(mappedItems);
         }
@@ -233,13 +239,8 @@ export default function ReceiptForm() {
   };
 
   const calculateTotals = () => {
-    const subtotal = items.reduce((sum, item) => {
-      const itemTotal = item.quantity * item.unit_price;
-      const discountAmount = item.discount_type === 'percentage' 
-        ? (itemTotal * item.discount_amount) / 100 
-        : item.discount_amount;
-      return sum + (itemTotal - discountAmount);
-    }, 0);
+    const subtotal = items.reduce((sum, item) => sum + item.subtotal_before_tax, 0);
+    const totalPayments = items.reduce((sum, item) => sum + item.payment_amount, 0);
 
     const discountAmount = formData.discount_percentage > 0 
       ? (subtotal * formData.discount_percentage) / 100 
@@ -263,15 +264,9 @@ export default function ReceiptForm() {
     calculateTotals();
   }, [items, formData.discount_amount, formData.discount_percentage, formData.withholding_tax_amount, formData.amount_paid]);
 
-  const updateItemTotal = (index: number, item: ReceiptItem) => {
-    const itemTotal = item.quantity * item.unit_price;
-    const discountAmount = item.discount_type === 'percentage' 
-      ? (itemTotal * item.discount_amount) / 100 
-      : item.discount_amount;
-    const lineTotal = itemTotal - discountAmount;
-
+  const updateItem = (index: number, updatedItem: ReceiptItem) => {
     const updatedItems = [...items];
-    updatedItems[index] = { ...item, line_total: lineTotal };
+    updatedItems[index] = updatedItem;
     setItems(updatedItems);
   };
 
@@ -279,22 +274,24 @@ export default function ReceiptForm() {
     setItems([
       ...items,
       {
-        product_name: "",
-        product_sku: "",
-        description: "",
-        quantity: 1,
-        unit_price: 0,
-        discount_amount: 0,
-        discount_type: "amount",
-        line_total: 0,
-        is_software: false,
+        document_number: "",
+        document_date: new Date().toISOString().split('T')[0],
+        due_date: "",
+        subtotal_before_tax: 0,
+        payment_amount: 0,
+        sequence_number: items.length + 1,
       },
     ]);
   };
 
   const removeItem = (index: number) => {
     const updatedItems = items.filter((_, i) => i !== index);
-    setItems(updatedItems);
+    // Update sequence numbers
+    const resequencedItems = updatedItems.map((item, idx) => ({
+      ...item,
+      sequence_number: idx + 1
+    }));
+    setItems(resequencedItems);
   };
 
   const handleSave = async () => {
@@ -566,7 +563,7 @@ export default function ReceiptForm() {
           <Card className="mb-6">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>รายการสินค้า/บริการ</CardTitle>
+                <CardTitle>รายการเอกสาร</CardTitle>
                 <Button onClick={addItem} size="sm">
                   <Plus className="w-4 h-4 mr-2" />
                   เพิ่มรายการ
@@ -578,12 +575,12 @@ export default function ReceiptForm() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>ชื่อสินค้า/บริการ</TableHead>
-                      <TableHead>รหัสสินค้า</TableHead>
-                      <TableHead>จำนวน</TableHead>
-                      <TableHead>ราคาต่อหน่วย</TableHead>
-                      <TableHead>ส่วนลด</TableHead>
-                      <TableHead>รวม</TableHead>
+                      <TableHead>ลำดับ</TableHead>
+                      <TableHead>เลขที่เอกสาร</TableHead>
+                      <TableHead>วันที่เอกสาร</TableHead>
+                      <TableHead>วันครบกำหนด</TableHead>
+                      <TableHead>ยอดรวมก่อนภาษี</TableHead>
+                      <TableHead>ยอดชำระ</TableHead>
                       <TableHead className="w-10"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -592,77 +589,67 @@ export default function ReceiptForm() {
                       <TableRow key={index}>
                         <TableCell>
                           <Input
-                            value={item.product_name}
-                            onChange={(e) => {
-                              const updatedItem = { ...item, product_name: e.target.value };
-                              updateItemTotal(index, updatedItem);
-                            }}
-                            placeholder="ชื่อสินค้า/บริการ"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={item.product_sku}
-                            onChange={(e) => {
-                              const updatedItem = { ...item, product_sku: e.target.value };
-                              updateItemTotal(index, updatedItem);
-                            }}
-                            placeholder="รหัสสินค้า"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
                             type="number"
-                            value={item.quantity}
+                            value={item.sequence_number}
                             onChange={(e) => {
-                              const updatedItem = { ...item, quantity: parseInt(e.target.value) || 1 };
-                              updateItemTotal(index, updatedItem);
+                              const updatedItem = { ...item, sequence_number: parseInt(e.target.value) || 1 };
+                              updateItem(index, updatedItem);
                             }}
                             min="1"
+                            className="w-16"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value={item.document_number}
+                            onChange={(e) => {
+                              const updatedItem = { ...item, document_number: e.target.value };
+                              updateItem(index, updatedItem);
+                            }}
+                            placeholder="เลขที่เอกสาร"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="date"
+                            value={item.document_date}
+                            onChange={(e) => {
+                              const updatedItem = { ...item, document_date: e.target.value };
+                              updateItem(index, updatedItem);
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="date"
+                            value={item.due_date || ""}
+                            onChange={(e) => {
+                              const updatedItem = { ...item, due_date: e.target.value };
+                              updateItem(index, updatedItem);
+                            }}
                           />
                         </TableCell>
                         <TableCell>
                           <Input
                             type="number"
                             step="0.01"
-                            value={item.unit_price}
+                            value={item.subtotal_before_tax}
                             onChange={(e) => {
-                              const updatedItem = { ...item, unit_price: parseFloat(e.target.value) || 0 };
-                              updateItemTotal(index, updatedItem);
+                              const updatedItem = { ...item, subtotal_before_tax: parseFloat(e.target.value) || 0 };
+                              updateItem(index, updatedItem);
                             }}
                           />
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-1">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={item.discount_amount}
-                              onChange={(e) => {
-                                const updatedItem = { ...item, discount_amount: parseFloat(e.target.value) || 0 };
-                                updateItemTotal(index, updatedItem);
-                              }}
-                              className="w-20"
-                            />
-                            <Select
-                              value={item.discount_type}
-                              onValueChange={(value: 'amount' | 'percentage') => {
-                                const updatedItem = { ...item, discount_type: value };
-                                updateItemTotal(index, updatedItem);
-                              }}
-                            >
-                              <SelectTrigger className="w-16">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="amount">฿</SelectItem>
-                                <SelectItem value="percentage">%</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          ฿{item.line_total.toFixed(2)}
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={item.payment_amount}
+                            onChange={(e) => {
+                              const updatedItem = { ...item, payment_amount: parseFloat(e.target.value) || 0 };
+                              updateItem(index, updatedItem);
+                            }}
+                          />
                         </TableCell>
                         <TableCell>
                           <Button

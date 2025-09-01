@@ -1313,57 +1313,38 @@ export type Database = {
       receipt_items: {
         Row: {
           created_at: string
-          description: string | null
-          discount_amount: number
-          discount_type: string
+          document_date: string
+          document_number: string
+          due_date: string | null
           id: string
-          is_software: boolean
-          line_total: number
-          product_id: string | null
-          product_name: string
-          product_sku: string | null
-          quantity: number
+          payment_amount: number
           receipt_id: string | null
-          unit_price: number
+          sequence_number: number
+          subtotal_before_tax: number
         }
         Insert: {
           created_at?: string
-          description?: string | null
-          discount_amount?: number
-          discount_type?: string
+          document_date: string
+          document_number: string
+          due_date?: string | null
           id?: string
-          is_software?: boolean
-          line_total?: number
-          product_id?: string | null
-          product_name: string
-          product_sku?: string | null
-          quantity?: number
+          payment_amount?: number
           receipt_id?: string | null
-          unit_price?: number
+          sequence_number?: number
+          subtotal_before_tax?: number
         }
         Update: {
           created_at?: string
-          description?: string | null
-          discount_amount?: number
-          discount_type?: string
+          document_date?: string
+          document_number?: string
+          due_date?: string | null
           id?: string
-          is_software?: boolean
-          line_total?: number
-          product_id?: string | null
-          product_name?: string
-          product_sku?: string | null
-          quantity?: number
+          payment_amount?: number
           receipt_id?: string | null
-          unit_price?: number
+          sequence_number?: number
+          subtotal_before_tax?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "receipt_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "receipt_items_receipt_id_fkey"
             columns: ["receipt_id"]
