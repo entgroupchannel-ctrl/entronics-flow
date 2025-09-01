@@ -460,9 +460,9 @@ export default function QuotationForm() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>รายการสินค้า</TableHead>
+                    <TableHead className="w-[45%]">รายการสินค้า</TableHead>
                     <TableHead className="w-20">จำนวน</TableHead>
-                    <TableHead className="w-24">ราคา/หน่วย</TableHead>
+                    <TableHead className="w-32">ราคา/หน่วย</TableHead>
                     <TableHead className="w-20">ส่วนลด</TableHead>
                     <TableHead className="w-24">รวม</TableHead>
                     <TableHead className="w-12"></TableHead>
@@ -471,15 +471,15 @@ export default function QuotationForm() {
                 <TableBody>
                   {items.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell>
+                      <TableCell className="w-[45%]">
                         <div className="space-y-2">
                           <Select onValueChange={(value) => selectProduct(item.id, value)}>
-                            <SelectTrigger>
+                            <SelectTrigger className="text-sm">
                               <SelectValue placeholder="เลือกสินค้า" />
                             </SelectTrigger>
                             <SelectContent>
                               {products.map(product => (
-                                <SelectItem key={product.id} value={product.id}>
+                                <SelectItem key={product.id} value={product.id} className="text-sm">
                                   {product.name} - {product.sku}
                                 </SelectItem>
                               ))}
@@ -489,6 +489,7 @@ export default function QuotationForm() {
                             placeholder="รายละเอียดเพิ่มเติม"
                             value={item.description}
                             onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                            className="text-sm"
                           />
                         </div>
                       </TableCell>
@@ -500,13 +501,14 @@ export default function QuotationForm() {
                           min="1"
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="w-32">
                         <Input
                           type="number"
                           value={item.unit_price}
                           onChange={(e) => updateItem(item.id, 'unit_price', Number(e.target.value))}
                           min="0"
                           step="0.01"
+                          className="text-right"
                         />
                       </TableCell>
                       <TableCell>
