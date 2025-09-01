@@ -95,7 +95,7 @@ const Index = () => {
   const { canManageInventory } = useUserRole();
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+  const [isCompanyInfoOpen, setIsCompanyInfoOpen] = useState(false);
   const [currentView, setCurrentView] = useState('dashboard');
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [quotations, setQuotations] = useState<any[]>([]);
@@ -1285,6 +1285,42 @@ const Index = () => {
             renderView()
           )}
         </main>
+        
+        {/* Company Info Emoji - Bottom Left */}
+        <div className="fixed bottom-4 left-4 z-50">
+          <button
+            onClick={() => setIsCompanyInfoOpen(true)}
+            className="text-2xl hover:scale-110 transition-transform cursor-pointer bg-white/80 backdrop-blur-sm rounded-full p-2 shadow-lg hover:shadow-xl"
+            title="ข้อมูลบริษัท"
+          >
+            🏢
+          </button>
+        </div>
+
+        {/* Company Info Dialog */}
+        <Dialog open={isCompanyInfoOpen} onOpenChange={setIsCompanyInfoOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center">🏢 ENT GROUP</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 text-sm">
+              <div className="text-center">
+                <p className="font-semibold">Software Version 1.0</p>
+                <p className="text-muted-foreground">พัฒนาโดย Therdpoom Phanich</p>
+              </div>
+              
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-2">บริษัท อีเอ็นที กรุ๊ป จำกัด</h4>
+                <div className="space-y-1 text-muted-foreground">
+                  <p>เมทโทร บิซทาวน์ แจ้งวัฒนะ2 เลขที่ 70/5 หมู่ 4</p>
+                  <p>ตำบลคลองพระอุดม อำเภอปากเกร็ด</p>
+                  <p>จังหวัดนนทบุรี 11120</p>
+                  <p className="pt-2">เลขประจำตัวผู้เสียภาษี 0135558013167</p>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
