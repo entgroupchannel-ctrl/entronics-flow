@@ -9,8 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, Printer, Share, Download, MoreHorizontal } from 'lucide-react';
+import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, Printer, Share, Download, MoreHorizontal, Check, ChevronsUpDown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
@@ -108,6 +109,8 @@ export default function QuotationForm() {
   const [items, setItems] = useState<QuotationItem[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [includeVat, setIncludeVat] = useState(true);
+  const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
+  const [customerSearchValue, setCustomerSearchValue] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -870,25 +873,64 @@ export default function QuotationForm() {
                 <div className="space-y-3">
                   <div>
                     <Label className="text-sm font-medium">ชื่อลูกค้า</Label>
-                    <Select onValueChange={selectCustomer}>
-                      <SelectTrigger className="mt-1 border-gray-300">
-                        <SelectValue placeholder="เลือกลูกค้า" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {customers.map(customer => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            <div className="flex flex-col">
-                              <span>{customer.name}</span>
-                              {customer.tax_id && (
-                                <span className="text-xs text-muted-foreground">
-                                  เลขประจำตัวผู้เสียภาษี: {customer.tax_id}
-                                </span>
-                              )}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Popover open={customerSearchOpen} onOpenChange={setCustomerSearchOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={customerSearchOpen}
+                          className="w-full justify-between mt-1 border-gray-300"
+                        >
+                          {selectedCustomer ? selectedCustomer.name : "เลือกลูกค้า"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0 bg-background border shadow-lg z-[100]">
+                        <Command>
+                          <CommandInput 
+                            placeholder="ค้นหาลูกค้า..." 
+                            value={customerSearchValue}
+                            onValueChange={setCustomerSearchValue}
+                          />
+                          <CommandEmpty>ไม่พบลูกค้า</CommandEmpty>
+                          <CommandGroup>
+                            <CommandList className="max-h-64 overflow-y-auto">
+                              {customers
+                                .filter(customer =>
+                                  customer.name.toLowerCase().includes(customerSearchValue.toLowerCase()) ||
+                                  (customer.tax_id && customer.tax_id.includes(customerSearchValue))
+                                )
+                                .map((customer) => (
+                                  <CommandItem
+                                    key={customer.id}
+                                    value={customer.id}
+                                    onSelect={() => {
+                                      selectCustomer(customer.id);
+                                      setCustomerSearchOpen(false);
+                                      setCustomerSearchValue("");
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedCustomer?.id === customer.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    <div className="flex flex-col">
+                                      <span>{customer.name}</span>
+                                      {customer.tax_id && (
+                                        <span className="text-xs text-muted-foreground">
+                                          เลขประจำตัวผู้เสียภาษี: {customer.tax_id}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </CommandItem>
+                                ))}
+                            </CommandList>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     
                     {selectedCustomer && (
                       <div className="mt-2 p-2 bg-muted rounded-md">
