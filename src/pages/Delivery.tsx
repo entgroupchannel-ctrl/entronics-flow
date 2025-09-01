@@ -41,7 +41,7 @@ interface DeliveryOrder {
   customer_name: string;
   customer_phone: string;
   delivery_address: string;
-  status: 'pending' | 'assigned' | 'in_transit' | 'delivered' | 'failed' | 'preparing';
+  status: 'preparing' | 'ready_to_ship' | 'shipped' | 'in_transit' | 'delivered' | 'failed' | 'returned';
   priority: 'normal' | 'urgent';
   delivery_date: string;
   driver_name?: string;
@@ -110,7 +110,7 @@ const Delivery = () => {
       customer_name: "บริษัท เดฟจี จำกัด",
       customer_phone: "02-987-6543",
       delivery_address: "456 ถนนรัชดาภิเษก แขวงห้วยขวาง เขตห้วยขวาง กรุงเทพฯ 10310",
-      status: "pending",
+      status: "preparing",
       priority: "normal",
       delivery_date: "2025-01-09",
       tracking_number: "TRK001234567891",
@@ -138,19 +138,23 @@ const Delivery = () => {
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      pending: "secondary",
-      assigned: "outline", 
+      preparing: "secondary",
+      ready_to_ship: "outline", 
+      shipped: "default",
       in_transit: "default",
       delivered: "default",
-      failed: "destructive"
+      failed: "destructive",
+      returned: "secondary"
     } as const;
 
     const labels = {
-      pending: "รอจัดส่ง",
-      assigned: "มอบหมายแล้ว",
+      preparing: "เตรียมสินค้า",
+      ready_to_ship: "พร้อมจัดส่ง",
+      shipped: "จัดส่งแล้ว",
       in_transit: "กำลังจัดส่ง", 
       delivered: "จัดส่งสำเร็จ",
-      failed: "จัดส่งไม่สำเร็จ"
+      failed: "จัดส่งไม่สำเร็จ",
+      returned: "ส่งคืน"
     };
 
     return (
@@ -371,7 +375,7 @@ const Delivery = () => {
     setIsLoading(true);
     try {
       const updateData: any = {
-        status: 'assigned',
+        status: 'ready_to_ship', // แก้ไขจาก 'assigned' เป็น 'ready_to_ship'
         assignment_date: new Date().toISOString()
       };
 
@@ -498,19 +502,21 @@ const Delivery = () => {
 
   const getStatusLabel = (status: string) => {
     const labels = {
-      pending: "รอจัดส่ง",
-      assigned: "มอบหมายแล้ว",
+      preparing: "เตรียมสินค้า",
+      ready_to_ship: "พร้อมจัดส่ง",
+      shipped: "จัดส่งแล้ว",
       in_transit: "กำลังจัดส่ง", 
       delivered: "จัดส่งสำเร็จ",
       failed: "จัดส่งไม่สำเร็จ",
-      preparing: "เตรียมสินค้า"
+      returned: "ส่งคืน"
     };
     return labels[status as keyof typeof labels] || status;
   };
 
   // Calculate metrics
   const totalOrders = deliveryOrders.length;
-  const pendingOrders = deliveryOrders.filter(o => o.status === 'pending').length;
+  const preparingOrders = deliveryOrders.filter(o => o.status === 'preparing').length;
+  const readyToShipOrders = deliveryOrders.filter(o => o.status === 'ready_to_ship').length;
   const inTransitOrders = deliveryOrders.filter(o => o.status === 'in_transit').length;
   const deliveredOrders = deliveryOrders.filter(o => o.status === 'delivered').length;
 
@@ -719,8 +725,8 @@ const Delivery = () => {
               className="border-blue-200"
             />
             <MetricCard
-              title="รอจัดส่ง"
-              value={pendingOrders}
+              title="เตรียมสินค้า"
+              value={preparingOrders}
               icon={Clock}
               className="border-orange-200"
             />
@@ -765,11 +771,13 @@ const Delivery = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">ทุกสถานะ</SelectItem>
-                    <SelectItem value="pending">รอจัดส่ง</SelectItem>
-                    <SelectItem value="assigned">มอบหมายแล้ว</SelectItem>
+                    <SelectItem value="preparing">เตรียมสินค้า</SelectItem>
+                    <SelectItem value="ready_to_ship">พร้อมจัดส่ง</SelectItem>
+                    <SelectItem value="shipped">จัดส่งแล้ว</SelectItem>
                     <SelectItem value="in_transit">กำลังจัดส่ง</SelectItem>
                     <SelectItem value="delivered">จัดส่งสำเร็จ</SelectItem>
                     <SelectItem value="failed">จัดส่งไม่สำเร็จ</SelectItem>
+                    <SelectItem value="returned">ส่งคืน</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={priorityFilter} onValueChange={setPriorityFilter}>
@@ -1003,22 +1011,22 @@ const Delivery = () => {
                         เตรียมสินค้า
                       </Button>
                       <Button
-                        variant={editingOrder.status === 'pending' ? "default" : "outline"}
+                        variant={editingOrder.status === 'ready_to_ship' ? "default" : "outline"}
                         size="sm"
-                        onClick={() => handleUpdateStatus(editingOrder.id, 'pending')}
+                        onClick={() => handleUpdateStatus(editingOrder.id, 'ready_to_ship')}
                         disabled={isLoading}
                         className="justify-start"
                       >
-                        รอจัดส่ง
+                        พร้อมจัดส่ง
                       </Button>
                       <Button
-                        variant={editingOrder.status === 'assigned' ? "default" : "outline"}
+                        variant={editingOrder.status === 'shipped' ? "default" : "outline"}
                         size="sm"
-                        onClick={() => handleUpdateStatus(editingOrder.id, 'assigned')}
+                        onClick={() => handleUpdateStatus(editingOrder.id, 'shipped')}
                         disabled={isLoading}
                         className="justify-start"
                       >
-                        มอบหมายแล้ว
+                        จัดส่งแล้ว
                       </Button>
                       <Button
                         variant={editingOrder.status === 'in_transit' ? "default" : "outline"}
@@ -1046,6 +1054,15 @@ const Delivery = () => {
                         className="justify-start"
                       >
                         จัดส่งไม่สำเร็จ
+                      </Button>
+                      <Button
+                        variant={editingOrder.status === 'returned' ? "secondary" : "outline"}
+                        size="sm"
+                        onClick={() => handleUpdateStatus(editingOrder.id, 'returned')}
+                        disabled={isLoading}
+                        className="justify-start"
+                      >
+                        ส่งคืน
                       </Button>
                     </div>
                   </div>
