@@ -78,7 +78,7 @@ export default function InvoiceForm() {
     total_amount: 0,
     notes: '',
     terms_conditions: 'ชำระเงินภายใน 30 วัน นับจากวันที่ออกใบแจ้งหนี้\nกรณีชำระเงินช้ากว่ากำหนด ทางบริษัทฯ ขอสงวนสิทธิ์ในการคิดดอกเบี้ยในอัตราร้อยละ 1.25 ต่อเดือน',
-    status: 'draft' as const
+    status: 'pending'
   });
 
   useEffect(() => {
@@ -381,13 +381,13 @@ export default function InvoiceForm() {
                 <div className="space-y-3 flex flex-col items-end">
                   <div className="w-full max-w-xs">
                     <div className="flex items-center justify-end gap-2 mb-1">
-                      <Edit className="w-4 h-4 text-blue-500" />
+                      <Edit className="w-4 h-4 text-gray-500" />
                       <Label className="text-sm font-medium text-right">เลขที่ใบแจ้งหนี้</Label>
                     </div>
                     <Input 
                       value={invoice.invoice_number} 
                       onChange={(e) => setInvoice(prev => ({ ...prev, invoice_number: e.target.value }))}
-                      className="text-right text-lg font-bold text-blue-600 border-gray-300"
+                      className="text-right text-3xl font-extrabold text-blue-600 border-0 shadow-none bg-transparent h-14 focus:ring-0 focus:border-0"
                       placeholder="INV202400001"
                     />
                   </div>
@@ -458,6 +458,25 @@ export default function InvoiceForm() {
                         />
                       </PopoverContent>
                     </Popover>
+                  </div>
+                  <div className="w-full max-w-xs">
+                    <Label className="text-sm font-medium block text-right mb-1">สถานะเอกสาร</Label>
+                    <Select 
+                      value={invoice.status} 
+                      onValueChange={(value) => setInvoice(prev => ({ ...prev, status: value }))}
+                    >
+                      <SelectTrigger className="border-gray-300">
+                        <SelectValue placeholder="เลือกสถานะ" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">ร่าง</SelectItem>
+                        <SelectItem value="pending">รอการอนุมัติ</SelectItem>
+                        <SelectItem value="sent">ส่งแล้ว</SelectItem>
+                        <SelectItem value="paid">ชำระแล้ว</SelectItem>
+                        <SelectItem value="overdue">เลยกำหนด</SelectItem>
+                        <SelectItem value="cancelled">ยกเลิก</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
