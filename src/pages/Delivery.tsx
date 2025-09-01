@@ -253,7 +253,7 @@ const Delivery = () => {
     try {
       const { data, error } = await supabase
         .from('staff')
-        .select('*')
+        .select('id, name, phone, email, line_id, is_available, current_workload, max_workload, rating, vehicle_type, vehicle_plate, staff_code')
         .eq('is_active', true)
         .order('name');
       
@@ -1142,9 +1142,25 @@ const Delivery = () => {
                             <VehicleIcon className="h-5 w-5 text-muted-foreground" />
                             <div>
                               <p className="font-medium">{staffMember.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {staffMember.staff_code} | {staffMember.vehicle_type} {staffMember.vehicle_plate}
-                              </p>
+                              <div className="space-y-1">
+                                <p className="text-sm text-muted-foreground">
+                                  รหัส: {staffMember.staff_code} | {staffMember.vehicle_type} {staffMember.vehicle_plate}
+                                </p>
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                  {staffMember.phone && (
+                                    <span className="flex items-center gap-1">
+                                      <Phone className="h-3 w-3" />
+                                      {staffMember.phone}
+                                    </span>
+                                  )}
+                                  {staffMember.line_id && (
+                                    <span className="flex items-center gap-1">
+                                      <span className="text-green-600">LINE:</span>
+                                      {staffMember.line_id}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
                           <div className="text-right">
