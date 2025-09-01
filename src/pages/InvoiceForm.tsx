@@ -120,6 +120,7 @@ export default function InvoiceForm() {
         // Set invoice data from quotation
         setInvoice(prev => ({
           ...prev,
+          customer_id: data.customer_id || '',
           customer_name: data.customer_name || '',
           customer_address: data.customer_address || '',
           customer_phone: data.customer_phone || '',
