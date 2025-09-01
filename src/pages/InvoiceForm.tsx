@@ -249,15 +249,20 @@ export default function InvoiceForm() {
     let vatAmount, partialPaymentVat, partialPaymentTotal, remainingAmount, remainingAmountBeforeVat, remainingVat;
     
     if (invoice.partial_payment_percentage > 0) {
-      // กรณีแบ่งชำระ: คิด VAT จากยอดแบ่งชำระ
+      // กรณีแบ่งชำระ: คิด VAT แยกจากแต่ละงวด
+      
+      // งวดแรก (แบ่งชำระ)
       vatAmount = includeVat ? partialPaymentAmount * 0.07 : 0;
       partialPaymentVat = vatAmount;
-      partialPaymentTotal = partialPaymentAmount + vatAmount;
+      partialPaymentTotal = partialPaymentAmount + partialPaymentVat;
       
-      // คำนวณยอดที่เหลือสำหรับงวดสุดท้าย
-      remainingAmount = priceAfterDiscount - partialPaymentTotal;
-      remainingAmountBeforeVat = remainingAmount / 1.07;
-      remainingVat = remainingAmount - remainingAmountBeforeVat;
+      // งวดสุดท้าย (ยอดที่เหลือ)
+      remainingAmountBeforeVat = priceAfterDiscount - partialPaymentAmount;
+      remainingVat = includeVat ? remainingAmountBeforeVat * 0.07 : 0;
+      remainingAmount = remainingAmountBeforeVat + remainingVat;
+      
+      // VAT รวมทั้งหมด = VAT จากงวดแรก + VAT จากงวดสุดท้าย
+      vatAmount = partialPaymentVat + remainingVat;
     } else {
       // กรณีไม่แบ่งชำระ: คิด VAT จากยอดหลังหักส่วนลดทั้งหมด
       vatAmount = includeVat ? priceAfterDiscount * 0.07 : 0;
