@@ -840,32 +840,47 @@ const Delivery = () => {
                                         มอบหมายแล้ว
                                       </span>
                                     </div>
-                                    <div className="space-y-1">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-gray-700">
-                                          พนักงาน:
-                                        </span>
-                                        <span className="text-sm text-blue-600 font-semibold">
-                                          {order.driver_name}
-                                        </span>
-                                      </div>
-                                      {order.staff_phone && (
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-sm text-gray-500">📞</span>
-                                          <span className="text-sm text-gray-600">
-                                            {order.staff_phone}
-                                          </span>
-                                        </div>
-                                      )}
-                                      {order.vehicle_info && (
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-sm text-gray-500">🚗</span>
-                                          <span className="text-sm text-gray-600">
-                                            {order.vehicle_info}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
+                                     <div className="space-y-1">
+                                       <div className="flex items-center gap-2">
+                                         <span className="text-sm font-medium text-gray-700">
+                                           พนักงาน:
+                                         </span>
+                                         <span className="text-sm text-blue-600 font-semibold">
+                                           {order.driver_name}
+                                         </span>
+                                       </div>
+                                       {order.staff_phone && (
+                                         <div className="flex items-center gap-2">
+                                           <span className="text-sm text-gray-500">📞</span>
+                                           <span className="text-sm text-gray-600">
+                                             {order.staff_phone}
+                                           </span>
+                                         </div>
+                                       )}
+                                       {order.vehicle_info && (
+                                         <div className="flex items-center gap-2">
+                                           <span className="text-sm text-gray-500">🚗</span>
+                                           <span className="text-sm text-gray-600">
+                                             {order.vehicle_info}
+                                           </span>
+                                         </div>
+                                       )}
+                                       {order.assignment_date && (
+                                         <div className="flex items-center gap-2">
+                                           <span className="text-sm text-gray-500">📅</span>
+                                           <span className="text-sm text-gray-600">
+                                             มอบหมายเมื่อ: {new Date(order.assignment_date).toLocaleDateString('th-TH', {
+                                               year: 'numeric',
+                                               month: 'long',
+                                               day: 'numeric',
+                                               hour: '2-digit',
+                                               minute: '2-digit',
+                                               timeZone: 'Asia/Bangkok'
+                                             })}
+                                           </span>
+                                         </div>
+                                       )}
+                                     </div>
                                   </div>
                                 </div>
                               </div>
@@ -883,24 +898,39 @@ const Delivery = () => {
                                         Courier Service
                                       </span>
                                     </div>
-                                    <div className="space-y-1">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-gray-700">
-                                          ผู้ติดต่อ:
-                                        </span>
-                                        <span className="text-sm text-green-600 font-semibold">
-                                          {order.courier_contact_name}
-                                        </span>
-                                      </div>
-                                      {order.courier_contact_phone && (
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-sm text-gray-500">📞</span>
-                                          <span className="text-sm text-gray-600">
-                                            {order.courier_contact_phone}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
+                                     <div className="space-y-1">
+                                       <div className="flex items-center gap-2">
+                                         <span className="text-sm font-medium text-gray-700">
+                                           ผู้ติดต่อ:
+                                         </span>
+                                         <span className="text-sm text-green-600 font-semibold">
+                                           {order.courier_contact_name}
+                                         </span>
+                                       </div>
+                                       {order.courier_contact_phone && (
+                                         <div className="flex items-center gap-2">
+                                           <span className="text-sm text-gray-500">📞</span>
+                                           <span className="text-sm text-gray-600">
+                                             {order.courier_contact_phone}
+                                           </span>
+                                         </div>
+                                       )}
+                                       {order.assignment_date && (
+                                         <div className="flex items-center gap-2">
+                                           <span className="text-sm text-gray-500">📅</span>
+                                           <span className="text-sm text-gray-600">
+                                             มอบหมายเมื่อ: {new Date(order.assignment_date).toLocaleDateString('th-TH', {
+                                               year: 'numeric',
+                                               month: 'long',
+                                               day: 'numeric',
+                                               hour: '2-digit',
+                                               minute: '2-digit',
+                                               timeZone: 'Asia/Bangkok'
+                                             })}
+                                           </span>
+                                         </div>
+                                       )}
+                                     </div>
                                   </div>
                                 </div>
                               </div>
