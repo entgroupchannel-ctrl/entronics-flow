@@ -75,6 +75,11 @@ const App = () => (
                 <InvoiceForm />
               </ProtectedRoute>
             } />
+            <Route path="/invoices/:id" element={
+              <ProtectedRoute>
+                <InvoiceForm />
+              </ProtectedRoute>
+            } />
             <Route path="/tax-invoices" element={
               <ProtectedRoute>
                 <TaxInvoices />
