@@ -43,6 +43,7 @@ export default function TaxInvoices() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedTaxInvoiceToDelete, setSelectedTaxInvoiceToDelete] = useState<{id: string, number: string} | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 
   useEffect(() => {
     loadTaxInvoices();
@@ -122,8 +123,13 @@ export default function TaxInvoices() {
   };
 
   const openDeleteDialog = (taxInvoiceId: string, taxInvoiceNumber: string) => {
-    setSelectedTaxInvoiceToDelete({ id: taxInvoiceId, number: taxInvoiceNumber });
-    setDeleteDialogOpen(true);
+    // ปิด dropdown ทันที
+    setDropdownOpen(null);
+    // เปิด dialog หลังจาก dropdown ปิดแล้ว
+    setTimeout(() => {
+      setSelectedTaxInvoiceToDelete({ id: taxInvoiceId, number: taxInvoiceNumber });
+      setDeleteDialogOpen(true);
+    }, 100);
   };
 
   const handleDeleteConfirm = async () => {
@@ -364,36 +370,69 @@ export default function TaxInvoices() {
                         {getStatusBadge(taxInvoice.status)}
                       </TableCell>
                       <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="w-8 h-8 p-0 border border-gray-300 rounded-md">
+                         <DropdownMenu
+                           open={dropdownOpen === taxInvoice.id} 
+                           onOpenChange={(isOpen) => {
+                             setDropdownOpen(isOpen ? taxInvoice.id : null);
+                           }}
+                         >
+                           <DropdownMenuTrigger asChild>
+                             <Button 
+                               variant="ghost" 
+                               size="sm" 
+                               className="w-8 h-8 p-0 border border-border rounded-md hover:bg-accent"
+                               onClick={(e) => e.stopPropagation()}
+                             >
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
-                          </DropdownMenuTrigger>
-                           <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-                             <DropdownMenuItem onClick={() => navigate(`/tax-invoices/${taxInvoice.id}`)}>
+                           </DropdownMenuTrigger>
+                           <DropdownMenuContent 
+                             align="end" 
+                             className="bg-background border shadow-lg z-[100]"
+                             onCloseAutoFocus={(e) => e.preventDefault()}
+                           >
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               navigate(`/tax-invoices/${taxInvoice.id}`);
+                             }}>
                                <FileText className="w-4 h-4 mr-2" />
                                ดูรายละเอียด
                              </DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => navigate(`/tax-invoices/${taxInvoice.id}/edit`)}>
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               navigate(`/tax-invoices/${taxInvoice.id}/edit`);
+                             }}>
                                <Edit className="w-4 h-4 mr-2" />
                                แก้ไข
                              </DropdownMenuItem>
-                             <DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               console.log('Share', taxInvoice.id);
+                             }}>
                                <Share2 className="w-4 h-4 mr-2" />
                                แชร์
                              </DropdownMenuItem>
-                             <DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               window.print();
+                             }}>
                                <Printer className="w-4 h-4 mr-2" />
                                พิมพ์
                              </DropdownMenuItem>
-                             <DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               console.log('Download', taxInvoice.id);
+                             }}>
                                <Download className="w-4 h-4 mr-2" />
                                ดาวน์โหลด PDF
                              </DropdownMenuItem>
                              <DropdownMenuSeparator />
                              <DropdownMenuItem 
-                               onClick={() => openDeleteDialog(taxInvoice.id, taxInvoice.tax_invoice_number)}
+                               onClick={(e) => {
+                                 e.preventDefault();
+                                 e.stopPropagation();
+                                 openDeleteDialog(taxInvoice.id, taxInvoice.tax_invoice_number);
+                               }}
                                className="text-red-600 hover:bg-red-50 focus:bg-red-50"
                              >
                                <Trash2 className="w-4 h-4 mr-2" />
