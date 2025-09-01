@@ -541,14 +541,6 @@ export default function QuotationForm() {
       doc.setTextColor(128, 128, 128);
       doc.text('LOGO', 35, 20, { align: 'center' });
 
-      // Document Header - Red triangle with number
-      doc.setFillColor(220, 53, 69);
-      doc.triangle(170, 8, 185, 8, 185, 18, 'F');
-      
-      doc.setFontSize(12);
-      doc.setTextColor(255, 255, 255);
-      doc.text('1', 176, 15);
-
       // Document title
       doc.setTextColor(220, 53, 69);
       doc.setFontSize(18);
