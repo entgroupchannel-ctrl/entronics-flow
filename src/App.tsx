@@ -60,6 +60,11 @@ const App = () => (
                 <QuotationForm />
               </ProtectedRoute>
             } />
+            <Route path="/quotations/:id/edit" element={
+              <ProtectedRoute>
+                <QuotationForm />
+              </ProtectedRoute>
+            } />
             <Route path="/invoices" element={
               <ProtectedRoute>
                 <Invoices />

@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, Printer, Share, Download, MoreHorizontal } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, format } from 'date-fns';
@@ -76,6 +76,7 @@ interface Quotation {
 
 export default function QuotationForm() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const { user } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -112,8 +113,12 @@ export default function QuotationForm() {
   useEffect(() => {
     loadCustomers();
     loadProducts();
-    generateQuotationNumber();
-  }, []);
+    if (id) {
+      loadQuotation(id);
+    } else {
+      generateQuotationNumber();
+    }
+  }, [id]);
 
   const loadCustomers = async () => {
     try {
@@ -148,6 +153,77 @@ export default function QuotationForm() {
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถโหลดข้อมูลสินค้าได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadQuotation = async (quotationId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('quotations')
+        .select(`
+          *,
+          quotation_items (*)
+        `)
+        .eq('id', quotationId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setQuotation({
+          id: data.id,
+          quotation_number: data.quotation_number,
+          quotation_date: data.quotation_date,
+          valid_until: data.valid_until,
+          customer_id: data.customer_id,
+          customer_name: data.customer_name,
+          customer_email: data.customer_email || '',
+          customer_phone: data.customer_phone || '',
+          customer_address: data.customer_address || '',
+          customer_line_id: data.customer_phone || '',
+          subtotal: data.subtotal,
+          discount_amount: data.discount_amount,
+          discount_percentage: data.discount_percentage,
+          vat_amount: data.vat_amount,
+          withholding_tax_amount: data.withholding_tax_amount,
+          total_amount: data.total_amount,
+          status: data.status,
+          notes: data.notes || '',
+          terms_conditions: data.terms_conditions || ''
+        });
+
+        if (data.quotation_items) {
+          const loadedItems = data.quotation_items.map((item: any) => ({
+            id: item.id,
+            product_id: item.product_id,
+            product_name: item.product_name,
+            product_sku: item.product_sku,
+            description: item.description || '',
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            discount_amount: item.discount_amount,
+            discount_type: (item.discount_percentage > 0 ? 'percentage' : 'amount') as 'amount' | 'percentage',
+            line_total: item.line_total,
+            is_software: item.is_software || false
+          }));
+          setItems(loadedItems);
+        }
+
+        // Set customer if available
+        if (data.customer_id) {
+          const customer = customers.find(c => c.id === data.customer_id);
+          if (customer) {
+            setSelectedCustomer(customer);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading quotation:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลใบเสนอราคาได้",
         variant: "destructive",
       });
     }
@@ -284,60 +360,126 @@ export default function QuotationForm() {
       const vatAmount = itemSubtotal * 0.07;
       const totalAmount = itemSubtotal + vatAmount - quotation.withholding_tax_amount;
 
-      const { data: savedQuotation, error: quotationError } = await supabase
-        .from('quotations')
-        .insert({
-          quotation_number: quotation.quotation_number,
-          quotation_date: quotation.quotation_date,
-          valid_until: quotation.valid_until,
-          customer_id: quotation.customer_id,
-          customer_name: quotation.customer_name,
-          customer_email: quotation.customer_email,
-          customer_phone: quotation.customer_phone,
-          customer_address: quotation.customer_address,
-          subtotal: itemSubtotal,
-          discount_amount: quotation.discount_amount,
-          discount_percentage: quotation.discount_percentage,
-          vat_amount: vatAmount,
-          withholding_tax_amount: quotation.withholding_tax_amount,
-          total_amount: totalAmount,
-          status: 'draft',
-          notes: quotation.notes,
-          terms_conditions: quotation.terms_conditions,
-          created_by: user?.id
-        })
-        .select()
-        .single();
+      if (id) {
+        // Update existing quotation
+        const { error: quotationError } = await supabase
+          .from('quotations')
+          .update({
+            quotation_number: quotation.quotation_number,
+            quotation_date: quotation.quotation_date,
+            valid_until: quotation.valid_until,
+            customer_id: quotation.customer_id,
+            customer_name: quotation.customer_name,
+            customer_email: quotation.customer_email,
+            customer_phone: quotation.customer_phone,
+            customer_address: quotation.customer_address,
+            subtotal: itemSubtotal,
+            discount_amount: quotation.discount_amount,
+            discount_percentage: quotation.discount_percentage,
+            vat_amount: vatAmount,
+            withholding_tax_amount: quotation.withholding_tax_amount,
+            total_amount: totalAmount,
+            status: quotation.status,
+            notes: quotation.notes,
+            terms_conditions: quotation.terms_conditions
+          })
+          .eq('id', id);
 
-      if (quotationError) throw quotationError;
+        if (quotationError) throw quotationError;
 
-      if (items.length > 0) {
-        const itemsToSave = items.map(item => ({
-          quotation_id: savedQuotation.id,
-          product_id: item.product_id,
-          product_name: item.product_name,
-          product_sku: item.product_sku,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          discount_amount: item.discount_amount,
-          discount_percentage: item.discount_type === 'percentage' ? item.discount_amount : 0,
-          line_total: item.line_total,
-          is_software: item.is_software
-        }));
-
-        const { error: itemsError } = await supabase
+        // Delete existing items
+        const { error: deleteError } = await supabase
           .from('quotation_items')
-          .insert(itemsToSave);
+          .delete()
+          .eq('quotation_id', id);
 
-        if (itemsError) throw itemsError;
+        if (deleteError) throw deleteError;
+
+        // Insert updated items
+        if (items.length > 0) {
+          const itemsToSave = items.map(item => ({
+            quotation_id: id,
+            product_id: item.product_id,
+            product_name: item.product_name,
+            product_sku: item.product_sku,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            discount_amount: item.discount_amount,
+            discount_percentage: item.discount_type === 'percentage' ? item.discount_amount : 0,
+            line_total: item.line_total,
+            is_software: item.is_software
+          }));
+
+          const { error: itemsError } = await supabase
+            .from('quotation_items')
+            .insert(itemsToSave);
+
+          if (itemsError) throw itemsError;
+        }
+
+        toast({
+          title: "อัปเดตสำเร็จ",
+          description: "ใบเสนอราคาได้รับการอัปเดตเรียบร้อยแล้ว",
+          variant: "default",
+        });
+      } else {
+        // Create new quotation
+        const { data: savedQuotation, error: quotationError } = await supabase
+          .from('quotations')
+          .insert({
+            quotation_number: quotation.quotation_number,
+            quotation_date: quotation.quotation_date,
+            valid_until: quotation.valid_until,
+            customer_id: quotation.customer_id,
+            customer_name: quotation.customer_name,
+            customer_email: quotation.customer_email,
+            customer_phone: quotation.customer_phone,
+            customer_address: quotation.customer_address,
+            subtotal: itemSubtotal,
+            discount_amount: quotation.discount_amount,
+            discount_percentage: quotation.discount_percentage,
+            vat_amount: vatAmount,
+            withholding_tax_amount: quotation.withholding_tax_amount,
+            total_amount: totalAmount,
+            status: 'draft',
+            notes: quotation.notes,
+            terms_conditions: quotation.terms_conditions,
+            created_by: user?.id
+          })
+          .select()
+          .single();
+
+        if (quotationError) throw quotationError;
+
+        if (items.length > 0) {
+          const itemsToSave = items.map(item => ({
+            quotation_id: savedQuotation.id,
+            product_id: item.product_id,
+            product_name: item.product_name,
+            product_sku: item.product_sku,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            discount_amount: item.discount_amount,
+            discount_percentage: item.discount_type === 'percentage' ? item.discount_amount : 0,
+            line_total: item.line_total,
+            is_software: item.is_software
+          }));
+
+          const { error: itemsError } = await supabase
+            .from('quotation_items')
+            .insert(itemsToSave);
+
+          if (itemsError) throw itemsError;
+        }
+
+        toast({
+          title: "บันทึกสำเร็จ",
+          description: "ใบเสนอราคาได้รับการบันทึกเรียบร้อยแล้ว",
+          variant: "default",
+        });
       }
-
-      toast({
-        title: "บันทึกสำเร็จ",
-        description: "ใบเสนอราคาได้รับการบันทึกเรียบร้อยแล้ว",
-        variant: "default",
-      });
       
     } catch (error: any) {
       console.error('Error saving quotation:', error);
