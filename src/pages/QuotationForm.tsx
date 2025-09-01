@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, Save, X, FileText, CalendarIcon } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
@@ -104,6 +105,7 @@ export default function QuotationForm() {
   
   const [items, setItems] = useState<QuotationItem[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [includeVat, setIncludeVat] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -169,16 +171,16 @@ export default function QuotationForm() {
       }
     }, 0);
     
-    const subtotal = items.reduce((sum, item) => sum + item.line_total, 0);
-    const vatAmount = subtotal * 0.07;
+    const priceAfterDiscount = rawSubtotal - totalDiscount;
+    const vatAmount = includeVat ? priceAfterDiscount * 0.07 : 0;
     const softwareItems = items.filter(item => item.is_software);
-    const softwareTotal = softwareItems.reduce((sum, item) => sum + item.line_total, 0);
-    const withholdingTaxAmount = softwareTotal * 0.03;
-    const totalAmount = subtotal + vatAmount - withholdingTaxAmount;
+    const softwareSubtotal = softwareItems.reduce((sum, item) => sum + item.line_total, 0);
+    const withholdingTaxAmount = softwareSubtotal * 0.03;
+    const totalAmount = priceAfterDiscount + vatAmount - withholdingTaxAmount;
 
     setQuotation(prev => ({
       ...prev,
-      subtotal,
+      subtotal: rawSubtotal,
       discount_amount: totalDiscount,
       vat_amount: vatAmount,
       withholding_tax_amount: withholdingTaxAmount,
@@ -188,7 +190,7 @@ export default function QuotationForm() {
 
   useEffect(() => {
     calculateTotals();
-  }, [items]);
+  }, [items, includeVat]);
 
   const addItem = () => {
     const newItem: QuotationItem = {
@@ -661,11 +663,23 @@ export default function QuotationForm() {
               </Table>
             </div>
 
+            {/* VAT Toggle */}
+            <div className="flex justify-end mt-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="vat-toggle" 
+                  checked={includeVat}
+                  onCheckedChange={(checked) => setIncludeVat(checked as boolean)}
+                />
+                <Label htmlFor="vat-toggle" className="text-sm">คิด VAT 7%</Label>
+              </div>
+            </div>
+
             {/* Summary */}
             <div className="flex justify-end mt-6">
               <div className="w-80 space-y-2">
                 <div className="flex justify-between">
-                  <span>ยอดรวม:</span>
+                  <span>รวมเป็นเงิน:</span>
                   <span>{quotation.subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                 </div>
                 {quotation.discount_amount > 0 && (
@@ -675,9 +689,15 @@ export default function QuotationForm() {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>VAT 7%:</span>
-                  <span>{quotation.vat_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
+                  <span>ราคาหลังหักส่วนลด:</span>
+                  <span>{(quotation.subtotal - quotation.discount_amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                 </div>
+                {includeVat && (
+                  <div className="flex justify-between">
+                    <span>ภาษีมูลค่าเพิ่ม 7%:</span>
+                    <span>{quotation.vat_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
+                  </div>
+                )}
                 {quotation.withholding_tax_amount > 0 && (
                   <div className="flex justify-between text-orange-600">
                     <span>หักภาษี ณ ที่จ่าย:</span>
@@ -686,7 +706,7 @@ export default function QuotationForm() {
                 )}
                 <hr />
                 <div className="flex justify-between font-bold text-lg">
-                  <span>รวมทั้งสิ้น:</span>
+                  <span>จำนวนเงินรวมทั้งสิ้น:</span>
                   <span>{quotation.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                 </div>
               </div>
