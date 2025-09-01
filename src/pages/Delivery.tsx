@@ -23,7 +23,9 @@ import {
   User,
   Calendar,
   Route,
-  Plus
+  Plus,
+  Edit,
+  Save
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +51,8 @@ const Delivery = () => {
   const [currentView, setCurrentView] = useState('delivery');
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<any>(null);
   const [deliveryMethods, setDeliveryMethods] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -331,6 +335,56 @@ const Delivery = () => {
         delivery_address: customer.address || ""
       }));
     }
+  };
+
+  const handleEditOrder = (order: DeliveryOrder) => {
+    setEditingOrder(order);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('delivery_orders')
+        .update({ 
+          status: newStatus,
+          shipped_date: newStatus === 'in_transit' ? new Date().toISOString() : null,
+          delivered_date: newStatus === 'delivered' ? new Date().toISOString() : null
+        })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      toast({
+        title: "อัปเดตสถานะสำเร็จ",
+        description: `สถานะถูกเปลี่ยนเป็น ${getStatusLabel(newStatus)} แล้ว`
+      });
+
+      // Reload delivery orders
+      loadDeliveryOrders();
+      setIsEditDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: error.message || "ไม่สามารถอัปเดตสถานะได้",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels = {
+      pending: "รอจัดส่ง",
+      assigned: "มอบหมายแล้ว",
+      in_transit: "กำลังจัดส่ง", 
+      delivered: "จัดส่งสำเร็จ",
+      failed: "จัดส่งไม่สำเร็จ",
+      preparing: "เตรียมสินค้า"
+    };
+    return labels[status as keyof typeof labels] || status;
   };
 
   // Calculate metrics
@@ -624,66 +678,76 @@ const Delivery = () => {
                           <p className="text-sm text-muted-foreground">
                             สร้างเมื่อ: {new Date(order.created_at).toLocaleDateString('th-TH')}
                           </p>
-                        </div>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              ดูรายละเอียด
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle className="flex items-center gap-2">
-                                {order.order_number}
-                                {getStatusBadge(order.status)}
-                              </DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-6">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4" />
-                                    <span className="font-medium">{order.customer_name}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <Phone className="h-4 w-4" />
-                                    <span>{order.customer_phone}</span>
-                                  </div>
-                                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                                    <MapPin className="h-4 w-4 mt-0.5" />
-                                    <span>{order.delivery_address}</span>
-                                  </div>
-                                </div>
-                                <div className="space-y-2">
-                                  <div>
-                                    <span className="font-medium">Tracking: </span>
-                                    <span className="text-primary font-mono">{order.tracking_number}</span>
-                                  </div>
-                                  <div>
-                                    <span className="font-medium">จำนวนรายการ: </span>
-                                    <span>{order.items_count} รายการ</span>
-                                  </div>
-                                  <div>
-                                    <span className="font-medium">น้ำหนักรวม: </span>
-                                    <span>{order.total_weight} กก.</span>
-                                  </div>
-                                  {order.driver_name && (
-                                    <div>
-                                      <span className="font-medium">คนขับ: </span>
-                                      <span>{order.driver_name}</span>
-                                    </div>
-                                  )}
-                                  {order.delivery_notes && (
-                                    <div>
-                                      <span className="font-medium">หมายเหตุ: </span>
-                                      <p className="text-sm mt-1">{order.delivery_notes}</p>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                         </div>
+                         <div className="flex gap-2">
+                           <Button 
+                             variant="outline" 
+                             size="sm"
+                             onClick={() => handleEditOrder(order)}
+                           >
+                             <Edit className="h-4 w-4 mr-1" />
+                             แก้ไขสถานะ
+                           </Button>
+                           <Dialog>
+                             <DialogTrigger asChild>
+                               <Button variant="outline" size="sm">
+                                 ดูรายละเอียด
+                               </Button>
+                             </DialogTrigger>
+                             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                               <DialogHeader>
+                                 <DialogTitle className="flex items-center gap-2">
+                                   {order.order_number}
+                                   {getStatusBadge(order.status)}
+                                 </DialogTitle>
+                               </DialogHeader>
+                               <div className="space-y-6">
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                   <div className="space-y-2">
+                                     <div className="flex items-center gap-2">
+                                       <User className="h-4 w-4" />
+                                       <span className="font-medium">{order.customer_name}</span>
+                                     </div>
+                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                       <Phone className="h-4 w-4" />
+                                       <span>{order.customer_phone}</span>
+                                     </div>
+                                     <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                       <MapPin className="h-4 w-4 mt-0.5" />
+                                       <span>{order.delivery_address}</span>
+                                     </div>
+                                   </div>
+                                   <div className="space-y-2">
+                                     <div>
+                                       <span className="font-medium">Tracking: </span>
+                                       <span className="text-primary font-mono">{order.tracking_number}</span>
+                                     </div>
+                                     <div>
+                                       <span className="font-medium">จำนวนรายการ: </span>
+                                       <span>{order.items_count} รายการ</span>
+                                     </div>
+                                     <div>
+                                       <span className="font-medium">น้ำหนักรวม: </span>
+                                       <span>{order.total_weight} กก.</span>
+                                     </div>
+                                     {order.driver_name && (
+                                       <div>
+                                         <span className="font-medium">คนขับ: </span>
+                                         <span>{order.driver_name}</span>
+                                       </div>
+                                     )}
+                                     {order.delivery_notes && (
+                                       <div>
+                                         <span className="font-medium">หมายเหตุ: </span>
+                                         <p className="text-sm mt-1">{order.delivery_notes}</p>
+                                       </div>
+                                     )}
+                                   </div>
+                                 </div>
+                               </div>
+                             </DialogContent>
+                           </Dialog>
+                         </div>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
@@ -750,6 +814,96 @@ const Delivery = () => {
               </Card>
             </TabsContent>
           </Tabs>
+
+          {/* Status Edit Dialog */}
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>แก้ไขสถานะการจัดส่ง</DialogTitle>
+              </DialogHeader>
+              {editingOrder && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      ใบจัดส่ง: <span className="font-medium">{editingOrder.order_number}</span>
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      ลูกค้า: <span className="font-medium">{editingOrder.customer_name}</span>
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      สถานะปัจจุบัน: {getStatusBadge(editingOrder.status)}
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>เปลี่ยนสถานะเป็น</Label>
+                    <div className="grid grid-cols-1 gap-2">
+                      <Button
+                        variant={editingOrder.status === 'preparing' ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleUpdateStatus(editingOrder.id, 'preparing')}
+                        disabled={isLoading}
+                        className="justify-start"
+                      >
+                        เตรียมสินค้า
+                      </Button>
+                      <Button
+                        variant={editingOrder.status === 'pending' ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleUpdateStatus(editingOrder.id, 'pending')}
+                        disabled={isLoading}
+                        className="justify-start"
+                      >
+                        รอจัดส่ง
+                      </Button>
+                      <Button
+                        variant={editingOrder.status === 'assigned' ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleUpdateStatus(editingOrder.id, 'assigned')}
+                        disabled={isLoading}
+                        className="justify-start"
+                      >
+                        มอบหมายแล้ว
+                      </Button>
+                      <Button
+                        variant={editingOrder.status === 'in_transit' ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleUpdateStatus(editingOrder.id, 'in_transit')}
+                        disabled={isLoading}
+                        className="justify-start"
+                      >
+                        กำลังจัดส่ง
+                      </Button>
+                      <Button
+                        variant={editingOrder.status === 'delivered' ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleUpdateStatus(editingOrder.id, 'delivered')}
+                        disabled={isLoading}
+                        className="justify-start"
+                      >
+                        จัดส่งสำเร็จ
+                      </Button>
+                      <Button
+                        variant={editingOrder.status === 'failed' ? "destructive" : "outline"}
+                        size="sm"
+                        onClick={() => handleUpdateStatus(editingOrder.id, 'failed')}
+                        disabled={isLoading}
+                        className="justify-start"
+                      >
+                        จัดส่งไม่สำเร็จ
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                      ยกเลิก
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     </div>
