@@ -841,29 +841,119 @@ export default function ServiceDashboard() {
                                 ข้อมูลอุปกรณ์
                               </CardTitle>
                             </CardHeader>
+                             <CardContent className="space-y-4">
+                               {/* Expanded Problem Description - Full width at top */}
+                               <div className="p-4 bg-red-50 rounded-lg border-2 border-red-200">
+                                 <div className="flex items-start gap-2 mb-3">
+                                   <div className="p-1 bg-red-100 rounded">
+                                     <span className="text-red-600 font-bold text-lg">⚠️</span>
+                                   </div>
+                                   <span className="font-bold text-lg text-red-700">อาการเสีย / ปัญหาที่พบ:</span>
+                                 </div>
+                                 <div className="bg-white p-4 rounded-lg border-2 border-red-300 min-h-[140px]">
+                                   <p className="text-base text-red-700 font-semibold leading-relaxed whitespace-pre-wrap break-words">
+                                     {request.problem_description}
+                                   </p>
+                                 </div>
+                               </div>
+                               
+                               {/* Device specifications in a grid */}
+                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                 <div className="p-2 bg-gray-50 rounded border">
+                                   <span className="font-medium text-sm text-gray-700">ประเภทอุปกรณ์:</span>
+                                   <p className="text-sm mt-1">{request.device_type}</p>
+                                 </div>
+                                 <div className="p-2 bg-gray-50 rounded border">
+                                   <span className="font-medium text-sm text-gray-700">ยี่ห้อ:</span>
+                                   <p className="text-sm mt-1">{request.device_brand || 'ไม่ระบุ'}</p>
+                                 </div>
+                                 <div className="p-2 bg-gray-50 rounded border">
+                                   <span className="font-medium text-sm text-gray-700">รุ่น:</span>
+                                   <p className="text-sm mt-1">{request.device_model || 'ไม่ระบุ'}</p>
+                                 </div>
+                               </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Customer Information Card */}
+                          <Card className="bg-white border border-gray-200">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <User className="h-5 w-5" />
+                                ข้อมูลลูกค้า
+                              </CardTitle>
+                            </CardHeader>
                             <CardContent className="space-y-3">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <div className="p-2 bg-gray-50 rounded border">
-                                    <span className="font-medium text-sm text-gray-700">ประเภทอุปกรณ์:</span>
-                                    <p className="text-sm mt-1">{request.device_type}</p>
+                                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded border">
+                                    <User className="h-4 w-4 text-gray-500" />
+                                    <span className="font-medium text-sm text-gray-700">ชื่อ:</span>
+                                    <span className="text-sm">{request.customer_name}</span>
                                   </div>
-                                  <div className="p-2 bg-gray-50 rounded border">
-                                    <span className="font-medium text-sm text-gray-700">ยี่ห้อ:</span>
-                                    <p className="text-sm mt-1">{request.device_brand || 'ไม่ระบุ'}</p>
+                                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded border">
+                                    <Phone className="h-4 w-4 text-gray-500" />
+                                    <span className="font-medium text-sm text-gray-700">โทร:</span>
+                                    <span className="text-sm">{request.customer_phone}</span>
                                   </div>
-                                  <div className="p-2 bg-gray-50 rounded border">
-                                    <span className="font-medium text-sm text-gray-700">รุ่น:</span>
-                                    <p className="text-sm mt-1">{request.device_model || 'ไม่ระบุ'}</p>
+                                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded border">
+                                    <Mail className="h-4 w-4 text-gray-500" />
+                                    <span className="font-medium text-sm text-gray-700">อีเมล:</span>
+                                    <span className="text-sm">{request.customer_email}</span>
                                   </div>
                                 </div>
                                 <div className="space-y-2">
-                                  <div className="p-2 bg-gray-50 rounded border">
-                                    <span className="font-medium text-sm text-gray-700">อาการเสีย:</span>
-                                    <p className="text-sm mt-1 text-red-600 font-medium">{request.problem_description}</p>
+                                  <div className="flex items-start gap-2 p-2 bg-gray-50 rounded border">
+                                    <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                                    <div>
+                                      <span className="font-medium text-sm text-gray-700">ที่อยู่:</span>
+                                      <p className="text-sm mt-1">{request.customer_address}</p>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Device Information Card */}
+                          <Card className="bg-white border border-gray-200">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <Wrench className="h-5 w-5" />
+                                ข้อมูลอุปกรณ์
+                              </CardTitle>
+                            </CardHeader>
+                             <CardContent className="space-y-4">
+                               {/* Expanded Problem Description - Full width at top */}
+                               <div className="p-4 bg-red-50 rounded-lg border-2 border-red-200">
+                                 <div className="flex items-start gap-2 mb-3">
+                                   <div className="p-1 bg-red-100 rounded">
+                                     <span className="text-red-600 font-bold text-lg">⚠️</span>
+                                   </div>
+                                   <span className="font-bold text-lg text-red-700">อาการเสีย / ปัญหาที่พบ:</span>
+                                 </div>
+                                 <div className="bg-white p-4 rounded-lg border-2 border-red-300 min-h-[140px]">
+                                   <p className="text-base text-red-700 font-semibold leading-relaxed whitespace-pre-wrap break-words">
+                                     {request.problem_description}
+                                   </p>
+                                 </div>
+                               </div>
+                               
+                               {/* Device specifications in a grid */}
+                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                 <div className="p-2 bg-gray-50 rounded border">
+                                   <span className="font-medium text-sm text-gray-700">ประเภทอุปกรณ์:</span>
+                                   <p className="text-sm mt-1">{request.device_type}</p>
+                                 </div>
+                                 <div className="p-2 bg-gray-50 rounded border">
+                                   <span className="font-medium text-sm text-gray-700">ยี่ห้อ:</span>
+                                   <p className="text-sm mt-1">{request.device_brand || 'ไม่ระบุ'}</p>
+                                 </div>
+                                 <div className="p-2 bg-gray-50 rounded border">
+                                   <span className="font-medium text-sm text-gray-700">รุ่น:</span>
+                                   <p className="text-sm mt-1">{request.device_model || 'ไม่ระบุ'}</p>
+                                 </div>
+                               </div>
                               
                               {/* Status Update Section */}
                               {canManageInventory() && (
