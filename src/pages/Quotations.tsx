@@ -191,30 +191,18 @@ export default function Quotations() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="bg-blue-600 hover:bg-blue-600">
-                  <TableHead className="w-12 text-white">
-                    <Checkbox
-                      checked={selectedItems.length === paginatedQuotations.length && paginatedQuotations.length > 0}
-                      onCheckedChange={handleSelectAll}
-                    />
-                  </TableHead>
-                  <TableHead className="text-white">วันที่</TableHead>
-                  <TableHead className="text-white">เลขที่เอกสาร</TableHead>
-                  <TableHead className="text-white">ชื่อลูกค้า/ชื่อใบเจ็ด</TableHead>
-                  <TableHead className="text-white text-right">ยอดความสูง</TableHead>
-                  <TableHead className="text-white text-center">สถานะ</TableHead>
-                  <TableHead className="text-white text-center w-12"></TableHead>
+                <TableRow className="bg-primary hover:bg-primary">
+                  <TableHead className="text-primary-foreground">วันที่</TableHead>
+                  <TableHead className="text-primary-foreground">เลขที่เอกสาร</TableHead>
+                  <TableHead className="text-primary-foreground">ชื่อลูกค้า/ชื่อโปรเจ็ค</TableHead>
+                  <TableHead className="text-primary-foreground text-right">ยอดรวมสุทธิ</TableHead>
+                  <TableHead className="text-primary-foreground text-center">สถานะ</TableHead>
+                  <TableHead className="text-primary-foreground text-center w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedQuotations.map((quotation) => (
                   <TableRow key={quotation.id} className="hover:bg-muted/50">
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedItems.includes(quotation.id)}
-                        onCheckedChange={(checked) => handleSelectItem(quotation.id, checked as boolean)}
-                      />
-                    </TableCell>
                     <TableCell>
                       {format(new Date(quotation.quotation_date), 'dd-MM-yyyy')}
                     </TableCell>
