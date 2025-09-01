@@ -723,7 +723,7 @@ export default function InvoiceForm() {
                 <Textarea
                   value={invoice.notes}
                   onChange={(e) => setInvoice(prev => ({ ...prev, notes: e.target.value }))}
-                  className="mt-1 border-2 border-gray-400"
+                  className="mt-1 border-gray-300"
                   rows={3}
                   placeholder="หมายเหตุเพิ่มเติม..."
                 />
@@ -734,7 +734,7 @@ export default function InvoiceForm() {
                 <Textarea
                   value={invoice.terms_conditions}
                   onChange={(e) => setInvoice(prev => ({ ...prev, terms_conditions: e.target.value }))}
-                  className="mt-1 border-2 border-gray-400"
+                  className="mt-1 border-gray-300"
                   rows={3}
                 />
               </div>
