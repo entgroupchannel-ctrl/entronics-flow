@@ -51,48 +51,46 @@ export default function Customers() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Fetch customers from database
-  const fetchCustomers = async () => {
+  // ✨ ปรับปรุงการดึงข้อมูลให้มีประสิทธิภาพมากขึ้น
+  const fetchCustomers = async (page: number = 1, search: string = "", filterType: string = "all") => {
     try {
       console.log('🚀 Starting to fetch customers...');
       setLoading(true);
       
-      // ดึงข้อมูลทั้งหมดโดยใช้ range() แทน limit()
-      let allCustomers: any[] = [];
-      let from = 0;
-      const batchSize = 1000;
-      let hasMoreData = true;
+      // คำนวณ offset และ limit สำหรับ pagination
+      const pageSize = 50; // ลดขนาดหน้าให้เหมาะสม
+      const offset = (page - 1) * pageSize;
+      
+      // สร้าง query พื้นฐาน
+      let query = supabase
+        .from('customers')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false });
 
-      while (hasMoreData) {
-        const { data, error, count } = await supabase
-          .from('customers')
-          .select('*', { count: 'exact' })
-          .order('created_at', { ascending: false })
-          .range(from, from + batchSize - 1);
-
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-          allCustomers = [...allCustomers, ...data];
-          from += batchSize;
-          hasMoreData = data.length === batchSize; // ถ้าได้ข้อมูลเต็ม batch แสดงว่าอาจมีข้อมูลเพิ่ม
-        } else {
-          hasMoreData = false;
-        }
-
-        // ป้องกันไม่ให้เกิด infinite loop
-        if (allCustomers.length > 100000) break;
+      // 🔍 เพิ่ม search filter ที่ฝั่ง database
+      if (search.trim()) {
+        query = query.or(`name.ilike.%${search}%,contact_person.ilike.%${search}%`);
       }
 
-      console.log('📊 Final fetch results:');
-      console.log('- Total customers fetched:', allCustomers.length);
-      
-      const data = allCustomers;
-      const count = allCustomers.length;
+      // 🏷️ เพิ่ม type filter ที่ฝั่ง database
+      if (filterType === "customers") {
+        query = query.eq('customer_type', 'ลูกค้า');
+      } else if (filterType === "suppliers") {
+        query = query.eq('customer_type', 'ผู้จำหน่าย');
+      } else if (filterType === "both") {
+        query = query.eq('customer_type', 'ผู้จำหน่าย/ลูกค้า');
+      }
+
+      // ดำเนินการ query พร้อม pagination
+      const { data, error, count } = await query
+        .range(offset, offset + pageSize - 1);
+
+      if (error) throw error;
 
       console.log('📊 Database response:');
       console.log('- Total count in DB:', count);
@@ -100,19 +98,17 @@ export default function Customers() {
 
       if (data) {
         console.log('✅ Successfully fetched', data.length, 'customers');
-        console.log('📋 Sample customer:', data[0]);
         setCustomers(data);
       } else {
         console.log('⚠️ No data returned');
         setCustomers([]);
       }
       
-      // Reset to first page when data is refreshed
-      setCurrentPage(1);
-
-      // แสดงข้อมูลสถิติ
+      // เซ็ตจำนวนทั้งหมดสำหรับ pagination
+      setTotalCount(count || 0);
+      
       console.log('📈 Final statistics:');
-      console.log('- Customers state length:', data?.length || 0);
+      console.log('- Customers page length:', data?.length || 0);
       console.log('- Total in database:', count);
 
     } catch (error: any) {
@@ -409,41 +405,35 @@ export default function Customers() {
   };
 
   useEffect(() => {
-    fetchCustomers();
-  }, []);
+    fetchCustomers(currentPage, searchTerm, activeTab);
+  }, [currentPage, searchTerm, activeTab]);
 
-  const getFilteredData = () => {
-    let filteredData = customers;
-    
-    // Filter by tab
-    if (activeTab === "customers") {
-      filteredData = customers.filter(c => c.customer_type === "ลูกค้า");
-    } else if (activeTab === "suppliers") {
-      filteredData = customers.filter(c => c.customer_type === "ผู้จำหน่าย");
-    } else if (activeTab === "both") {
-      filteredData = customers.filter(c => c.customer_type === "ผู้จำหน่าย/ลูกค้า");
-    }
-    
-    // Filter by search term
-    return filteredData.filter(item => 
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.contact_person && item.contact_person.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  };
-
-  // Get paginated data
-  const getPaginatedData = () => {
-    const filteredData = getFilteredData();
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredData.slice(startIndex, endIndex);
-  };
-
-  const totalPages = Math.ceil(getFilteredData().length / itemsPerPage);
-
+  // ⚡ Debounced search เพื่อลดการเรียก API
   useEffect(() => {
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [searchTerm, activeTab]);
+    const timeoutId = setTimeout(() => {
+      setCurrentPage(1);
+      fetchCustomers(1, searchTerm, activeTab);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  // ✨ ข้อมูลที่แสดงผลถูก filter ที่ฝั่ง server แล้ว ไม่ต้องกรองอีก
+  const getPaginatedData = () => {
+    return customers; // ข้อมูลที่ได้มาถูก filter และ paginate แล้ว
+  };
+
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
+  // ⚡ ปรับปรุงการจัดการ pagination และ filter
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
 
   const getStatusBadge = (status?: string | null) => {
     if (!status || status === 'ปกติ') return null;
@@ -681,9 +671,9 @@ export default function Customers() {
                       </Select>
                       <span className="text-sm text-muted-foreground">รายการต่อหน้า</span>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      รวม {getFilteredData().length} รายการ
-                    </div>
+                     <div className="text-sm text-muted-foreground">
+                       รวม {totalCount} รายการ
+                     </div>
                   </div>
 
                   {/* Table Content */}
@@ -814,11 +804,11 @@ export default function Customers() {
                     </div>
                   )}
 
-                  {getFilteredData().length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      ไม่พบข้อมูลที่ค้นหา
-                    </div>
-                  )}
+                   {customers.length === 0 && !loading && (
+                     <div className="text-center py-8 text-muted-foreground">
+                       ไม่พบข้อมูลที่ค้นหา
+                     </div>
+                   )}
                 </CardContent>
               </Card>
 
