@@ -360,21 +360,6 @@ const Index = () => {
     new Date(r.created_at).toDateString() === new Date().toDateString()
   ).length;
 
-  if (loading) {
-    return (
-      <div className="flex h-screen">
-        <div className="w-64">
-          <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
-        </div>
-        <div className="flex-1 flex flex-col">
-          <div className="h-16 border-b border-border bg-card" />
-          <main className="flex-1 flex items-center justify-center">
-            <div>กำลังโหลด...</div>
-          </main>
-        </div>
-      </div>
-    );
-  }
 
   const renderDashboardView = () => (
     <>
@@ -1068,7 +1053,13 @@ const Index = () => {
         </div>
         
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          {renderView()}
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div>กำลังโหลด...</div>
+            </div>
+          ) : (
+            renderView()
+          )}
         </main>
       </div>
     </div>
