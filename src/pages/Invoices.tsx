@@ -43,40 +43,28 @@ export default function Invoices() {
 
   const loadInvoices = async () => {
     try {
-      // For now, we'll use mock data since invoice table doesn't exist yet
-      // TODO: Replace with actual Supabase query when invoice table is created
-      const mockInvoices = [
-        {
-          id: '1',
-          invoice_number: 'INV202400001',
-          invoice_date: '2024-01-15',
-          customer_name: 'บริษัท ABC จำกัด',
-          total_amount: 15000,
-          status: 'paid',
-          due_date: '2024-02-15',
-          paid_amount: 15000
-        },
-        {
-          id: '2',
-          invoice_number: 'INV202400002',
-          invoice_date: '2024-01-20',
-          customer_name: 'บริษัท XYZ จำกัด',
-          total_amount: 25000,
-          status: 'pending',
-          due_date: '2024-02-20',
-          paid_amount: 0
-        }
-      ];
-      
-      setInvoices(mockInvoices);
-      setLoading(false);
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('invoices' as any)
+        .select(`
+          *,
+          invoice_items (*)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      setInvoices((data as any) || []);
     } catch (error: any) {
       console.error('Error loading invoices:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโหลดข้อมูลใบแจ้งหนี้ได้",
+        description: "ไม่สามารถโหลดรายการใบแจ้งหนี้ได้",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };

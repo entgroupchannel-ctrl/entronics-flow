@@ -67,6 +67,7 @@ export default function InvoiceForm() {
     invoice_number: '',
     invoice_date: new Date(),
     due_date: addDays(new Date(), 30),
+    customer_id: '',
     customer_name: '',
     customer_address: '',
     customer_phone: '',
@@ -84,7 +85,10 @@ export default function InvoiceForm() {
     non_taxable_amount: 0,
     notes: '',
     terms_conditions: 'ชำระเงินภายใน 30 วัน นับจากวันที่ออกใบแจ้งหนี้\nกรณีชำระเงินช้ากว่ากำหนด ทางบริษัทฯ ขอสงวนสิทธิ์ในการคิดดอกเบี้ยในอัตราร้อยละ 1.25 ต่อเดือน',
-    status: 'รอวางบิล'
+    status: 'รอวางบิล',
+    payment_terms: '30 วัน',
+    project_name: '',
+    po_number: ''
   });
 
   useEffect(() => {
@@ -309,13 +313,73 @@ export default function InvoiceForm() {
         return;
       }
 
-      // TODO: Save to database when invoice table is created
-      console.log('Saving invoice:', invoice);
-      console.log('Invoice items:', items);
+      if (items.length === 0) {
+        toast({
+          title: "ข้อมูลไม่ครบถ้วน",
+          description: "กรุณาเพิ่มรายการสินค้าอย่างน้อย 1 รายการ",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Save invoice to database
+      const { data: invoiceData, error: invoiceError } = await supabase
+        .from('invoices' as any)
+        .insert({
+          customer_id: invoice.customer_id || null,
+          customer_name: invoice.customer_name,
+          customer_address: invoice.customer_address || null,
+          customer_phone: invoice.customer_phone || null,
+          customer_email: invoice.customer_email || null,
+          invoice_date: invoice.invoice_date.toISOString().split('T')[0],
+          due_date: invoice.due_date.toISOString().split('T')[0],
+          subtotal: invoice.subtotal,
+          discount_amount: invoice.discount_amount,
+          discount_percentage: invoice.discount_percentage,
+          vat_amount: invoice.vat_amount,
+          withholding_tax_amount: invoice.withholding_tax_amount,
+          total_amount: invoice.total_amount,
+          status: 'draft',
+          notes: invoice.notes || null,
+          terms_conditions: invoice.terms_conditions || null,
+          payment_terms: invoice.payment_terms || '30 วัน',
+          project_name: invoice.project_name || null,
+          po_number: invoice.po_number || null,
+          created_by: user?.id
+        })
+        .select()
+        .single();
+
+      if (invoiceError) {
+        throw invoiceError;
+      }
+
+      // Save invoice items
+      const invoiceItems = items.map(item => ({
+        invoice_id: (invoiceData as any).id,
+        product_id: item.product_id,
+        product_name: item.product_name,
+        product_sku: item.product_sku,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        discount_amount: item.discount_amount,
+        discount_type: item.discount_type,
+        line_total: item.line_total,
+        is_software: item.is_software
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('invoice_items')
+        .insert(invoiceItems);
+
+      if (itemsError) {
+        throw itemsError;
+      }
 
       toast({
         title: "บันทึกสำเร็จ",
-        description: "ใบแจ้งหนี้ได้รับการบันทึกเรียบร้อยแล้ว",
+        description: `ใบแจ้งหนี้เลขที่ ${invoice.invoice_number} ได้รับการบันทึกเรียบร้อยแล้ว`,
         variant: "default",
       });
 
@@ -325,7 +389,7 @@ export default function InvoiceForm() {
       console.error('Error saving invoice:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถบันทึกใบแจ้งหนี้ได้",
+        description: error.message || "ไม่สามารถบันทึกใบแจ้งหนี้ได้",
         variant: "destructive",
       });
     }
