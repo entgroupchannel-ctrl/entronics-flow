@@ -875,7 +875,7 @@ export default function ServiceDashboard() {
                                     </h4>
                                   </div>
                                   {!request.assigned_technician_id ? (
-                                    <div className="flex gap-2 w-full">
+                                    <div className="flex gap-2 w-full justify-end">
                                       <Select onValueChange={(techId) => updateRequestStatus(request.id, 'assigned', techId)}>
                                         <SelectTrigger className="flex-1">
                                           <SelectValue placeholder="เลือกช่างเทคนิค" />
@@ -909,7 +909,7 @@ export default function ServiceDashboard() {
                                       </Button>
                                     </div>
                                   ) : (
-                                    <div className="flex flex-wrap gap-2 w-full">
+                                    <div className="flex flex-wrap gap-2 w-full justify-end">
                                       {request.status !== 'in_progress' && (
                                         <Button 
                                           size="sm" 
