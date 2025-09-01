@@ -925,9 +925,7 @@ export default function Settings() {
   if (loading) {
     return (
       <div className="flex h-screen">
-        <div className="w-64">
-          <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
-        </div>
+        <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
         <div className="flex-1 flex flex-col">
           <div className="h-16 border-b border-border bg-card" />
           <main className="flex-1 flex items-center justify-center">
@@ -940,9 +938,7 @@ export default function Settings() {
 
   return (
     <div className="flex h-screen">
-      <div className="w-64">
-        <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
-      </div>
+      <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
       <div className="flex-1 flex flex-col">
         <div className="h-16 border-b border-border bg-card" />
         <main className="flex-1 overflow-auto">

@@ -37,6 +37,7 @@ interface Customer {
 }
 
 export default function Customers() {
+  const [currentView, setCurrentView] = useState('customers');
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("customers");
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -448,27 +449,24 @@ export default function Customers() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="flex">
-          <Sidebar />
-          <div className="flex-1">
-            <Header />
-            <main className="p-6">
-              <div className="text-center py-8">กำลังโหลด...</div>
-            </main>
-          </div>
+      <div className="flex h-screen bg-background">
+        <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
+        <div className="flex-1 flex flex-col">
+          <Header />
+          <main className="flex-1 flex items-center justify-center">
+            <div>กำลังโหลด...</div>
+          </main>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex">
-        <Sidebar />
-        <div className="flex-1">
-          <Header />
-          <main className="p-6">
+    <div className="flex h-screen bg-background">
+      <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <main className="flex-1 overflow-auto p-6">
             <div className="space-y-6">
               {/* Header */}
               <div className="flex items-center justify-between">
@@ -911,8 +909,7 @@ export default function Customers() {
                 </DialogContent>
               </Dialog>
             </div>
-          </main>
-        </div>
+        </main>
       </div>
     </div>
   );

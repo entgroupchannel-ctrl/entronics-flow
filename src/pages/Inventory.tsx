@@ -64,6 +64,7 @@ const brands = [
 ];
 
 const Inventory = () => {
+  const [currentView, setCurrentView] = useState('inventory');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -578,7 +579,7 @@ const Inventory = () => {
 
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar />
+      <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
