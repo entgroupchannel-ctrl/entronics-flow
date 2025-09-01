@@ -19,6 +19,7 @@ interface Customer {
   email?: string;
   phone?: string;
   address?: string;
+  tax_id?: string;
 }
 
 interface Product {
@@ -379,7 +380,14 @@ export default function QuotationForm() {
                     <SelectContent>
                       {customers.map(customer => (
                         <SelectItem key={customer.id} value={customer.id}>
-                          {customer.name}
+                          <div className="flex flex-col">
+                            <span>{customer.name}</span>
+                            {customer.tax_id && (
+                              <span className="text-xs text-muted-foreground">
+                                เลขประจำตัวผู้เสียภาษี: {customer.tax_id}
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
