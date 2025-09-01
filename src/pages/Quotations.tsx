@@ -7,12 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
 import { Sidebar } from "@/components/layout/Sidebar";
+import QuotationWorkflow from "@/components/quotations/QuotationWorkflow";
 
 interface Quotation {
   id: string;
@@ -21,6 +22,11 @@ interface Quotation {
   customer_name: string;
   total_amount: number;
   status: string;
+  workflow_status: string;
+  process_type?: string;
+  approved_at?: string;
+  rejected_at?: string;
+  rejection_reason?: string;
   quotation_items?: any[];
 }
 
@@ -47,7 +53,8 @@ export default function Quotations() {
         .from('quotations')
         .select(`
           *,
-          quotation_items (*)
+          quotation_items (*),
+          quotation_workflow_history (*)
         `)
         .order('created_at', { ascending: false });
 
@@ -227,9 +234,10 @@ export default function Quotations() {
                       {quotation.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge className={getStatusColor(quotation.status)}>
-                        {getStatusText(quotation.status)}
-                      </Badge>
+                      <QuotationWorkflow 
+                        quotation={quotation} 
+                        onStatusUpdate={loadQuotations}
+                      />
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -242,6 +250,10 @@ export default function Quotations() {
                           <DropdownMenuItem>
                             <Edit className="w-4 h-4 mr-2" />
                             แก้ไข
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <History className="w-4 h-4 mr-2" />
+                            ประวัติการเปลี่ยนแปลง
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Printer className="w-4 h-4 mr-2" />

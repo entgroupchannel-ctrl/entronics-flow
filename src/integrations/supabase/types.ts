@@ -935,8 +935,51 @@ export type Database = {
           },
         ]
       }
+      quotation_workflow_history: {
+        Row: {
+          action_type: string
+          created_at: string
+          from_status: Database["public"]["Enums"]["quotation_status"] | null
+          id: string
+          notes: string | null
+          performed_by: string | null
+          quotation_id: string
+          to_status: Database["public"]["Enums"]["quotation_status"]
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["quotation_status"] | null
+          id?: string
+          notes?: string | null
+          performed_by?: string | null
+          quotation_id: string
+          to_status: Database["public"]["Enums"]["quotation_status"]
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["quotation_status"] | null
+          id?: string
+          notes?: string | null
+          performed_by?: string | null
+          quotation_id?: string
+          to_status?: Database["public"]["Enums"]["quotation_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_workflow_history_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotations: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           created_by: string | null
           customer_address: string | null
@@ -947,9 +990,15 @@ export type Database = {
           discount_amount: number
           discount_percentage: number
           id: string
+          next_document_type: string | null
           notes: string | null
+          parent_quotation_id: string | null
+          process_type: Database["public"]["Enums"]["process_type"] | null
           quotation_date: string
           quotation_number: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
           status: string
           subtotal: number
           terms_conditions: string | null
@@ -958,8 +1007,13 @@ export type Database = {
           valid_until: string | null
           vat_amount: number
           withholding_tax_amount: number
+          workflow_status:
+            | Database["public"]["Enums"]["quotation_status"]
+            | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           created_by?: string | null
           customer_address?: string | null
@@ -970,9 +1024,15 @@ export type Database = {
           discount_amount?: number
           discount_percentage?: number
           id?: string
+          next_document_type?: string | null
           notes?: string | null
+          parent_quotation_id?: string | null
+          process_type?: Database["public"]["Enums"]["process_type"] | null
           quotation_date?: string
           quotation_number: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           status?: string
           subtotal?: number
           terms_conditions?: string | null
@@ -981,8 +1041,13 @@ export type Database = {
           valid_until?: string | null
           vat_amount?: number
           withholding_tax_amount?: number
+          workflow_status?:
+            | Database["public"]["Enums"]["quotation_status"]
+            | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           created_by?: string | null
           customer_address?: string | null
@@ -993,9 +1058,15 @@ export type Database = {
           discount_amount?: number
           discount_percentage?: number
           id?: string
+          next_document_type?: string | null
           notes?: string | null
+          parent_quotation_id?: string | null
+          process_type?: Database["public"]["Enums"]["process_type"] | null
           quotation_date?: string
           quotation_number?: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           status?: string
           subtotal?: number
           terms_conditions?: string | null
@@ -1004,6 +1075,9 @@ export type Database = {
           valid_until?: string | null
           vat_amount?: number
           withholding_tax_amount?: number
+          workflow_status?:
+            | Database["public"]["Enums"]["quotation_status"]
+            | null
         }
         Relationships: [
           {
@@ -1011,6 +1085,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_parent_quotation_id_fkey"
+            columns: ["parent_quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
             referencedColumns: ["id"]
           },
         ]
@@ -1677,6 +1758,17 @@ export type Database = {
     Enums: {
       app_role: "admin" | "accountant" | "user" | "sales"
       priority_level: "low" | "medium" | "high" | "urgent"
+      process_type: "standard" | "downpayment" | "conversion" | "purchase_order"
+      quotation_status:
+        | "draft"
+        | "wait_for_approve"
+        | "approved"
+        | "rejected"
+        | "invoice_created"
+        | "downpayment_invoice"
+        | "conversion_invoice"
+        | "purchase_order_created"
+        | "completed"
       service_status:
         | "pending"
         | "assigned"
@@ -1819,6 +1911,18 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "accountant", "user", "sales"],
       priority_level: ["low", "medium", "high", "urgent"],
+      process_type: ["standard", "downpayment", "conversion", "purchase_order"],
+      quotation_status: [
+        "draft",
+        "wait_for_approve",
+        "approved",
+        "rejected",
+        "invoice_created",
+        "downpayment_invoice",
+        "conversion_invoice",
+        "purchase_order_created",
+        "completed",
+      ],
       service_status: [
         "pending",
         "assigned",
