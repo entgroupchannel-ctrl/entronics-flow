@@ -59,31 +59,38 @@ export default function Quotations() {
   const loadQuotations = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Load quotations first
+      const { data: quotationsData, error: quotationsError } = await supabase
         .from('quotations')
         .select(`
           *,
-          quotation_items (*),
-          invoices!quotation_id (
-            id,
-            invoice_number,
-            status,
-            total_amount
-          )
+          quotation_items (*)
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (quotationsError) throw quotationsError;
 
-      // Transform data to include related invoices
-      const quotationsWithInvoices = data?.map(quotation => {
-        // Handle the case where invoices might be an error or empty
-        const invoices = Array.isArray(quotation.invoices) ? quotation.invoices : [];
-        return {
-          ...quotation,
-          related_invoices: invoices
-        };
-      }) || [];
+      // Load related invoices separately
+      const quotationIds = quotationsData?.map(q => q.id) || [];
+      let invoicesData: any[] = [];
+      
+      if (quotationIds.length > 0) {
+        const { data: invoices, error: invoicesError } = await supabase
+          .from('invoices')
+          .select('id, invoice_number, status, total_amount, quotation_id')
+          .in('quotation_id', quotationIds);
+
+        if (!invoicesError && invoices) {
+          invoicesData = invoices;
+        }
+      }
+
+      // Combine data
+      const quotationsWithInvoices = quotationsData?.map(quotation => ({
+        ...quotation,
+        related_invoices: invoicesData.filter(invoice => invoice.quotation_id === quotation.id)
+      })) || [];
 
       setQuotations(quotationsWithInvoices as Quotation[]);
     } catch (error: any) {
