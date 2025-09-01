@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, X, FileText, CalendarIcon } from 'lucide-react';
+import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
@@ -470,11 +470,14 @@ export default function QuotationForm() {
 
                 <div className="space-y-3 flex flex-col items-end">
                   <div className="w-full max-w-xs">
-                    <Label className="text-sm font-medium block text-right mb-1">เลขที่เอกสาร</Label>
+                    <div className="flex items-center justify-end gap-2 mb-1">
+                      <Edit className="w-4 h-4 text-blue-500" />
+                      <Label className="text-sm font-medium text-right">เลขที่เอกสาร</Label>
+                    </div>
                     <Input 
                       value={quotation.quotation_number} 
                       onChange={(e) => setQuotation(prev => ({ ...prev, quotation_number: e.target.value }))}
-                      className="text-right"
+                      className="text-right text-lg font-bold text-blue-600"
                       placeholder="QT202400001"
                     />
                   </div>
