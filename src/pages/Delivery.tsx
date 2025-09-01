@@ -375,14 +375,28 @@ const Delivery = () => {
         assignment_date: new Date().toISOString()
       };
 
+      let assignedTo = '';
+      let assignedPhone = '';
+      let vehicleInfo = '';
+
       if (assignmentType === 'staff') {
+        const selectedStaffMember = staff.find(s => s.id === assignmentData.staffId);
         updateData.assigned_staff_id = assignmentData.staffId;
         updateData.assignment_notes = assignmentData.notes;
+        
+        if (selectedStaffMember) {
+          assignedTo = selectedStaffMember.name;
+          assignedPhone = selectedStaffMember.phone || '';
+          vehicleInfo = `${selectedStaffMember.vehicle_type} ${selectedStaffMember.vehicle_plate}`;
+        }
       } else if (assignmentType === 'courier') {
         updateData.courier_contact_name = assignmentData.contactName;
         updateData.courier_contact_phone = assignmentData.contactPhone;
         updateData.assignment_notes = assignmentData.notes;
         updateData.tracking_number = assignmentData.trackingNumber;
+        
+        assignedTo = assignmentData.contactName;
+        assignedPhone = assignmentData.contactPhone;
       }
 
       const { error } = await supabase
@@ -392,11 +406,40 @@ const Delivery = () => {
 
       if (error) throw error;
 
+      // Send email notification to sales team
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('user_id', userData.user?.id)
+          .single();
+
+        await supabase.functions.invoke('send-delivery-assignment', {
+          body: {
+            deliveryNumber: assigningOrder.order_number,
+            customerName: assigningOrder.customer_name,
+            customerPhone: assigningOrder.customer_phone,
+            deliveryAddress: assigningOrder.delivery_address,
+            assignmentType,
+            assignedTo,
+            assignedPhone,
+            vehicleInfo,
+            notes: assignmentData.notes,
+            assignedBy: profile?.full_name || 'ผู้ใช้ระบบ'
+          }
+        });
+        console.log('Email notification sent successfully');
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError);
+        // Don't fail the assignment if email fails
+      }
+
       toast({
         title: "มอบหมายงานสำเร็จ",
         description: assignmentType === 'staff' 
-          ? `มอบหมายงานให้พนักงานแล้ว`
-          : `มอบหมายงานให้ Courier แล้ว`
+          ? `มอบหมายงานให้พนักงานแล้ว และส่งแจ้งเตือนให้ทีม Sales`
+          : `มอบหมายงานให้ Courier แล้ว และส่งแจ้งเตือนให้ทีม Sales`
       });
 
       // Reload data
