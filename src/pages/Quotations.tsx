@@ -273,7 +273,11 @@ export default function Quotations() {
               </TableHeader>
               <TableBody>
                 {paginatedQuotations.map((quotation) => (
-                  <TableRow key={quotation.id} className="hover:bg-muted/50">
+                  <TableRow 
+                    key={quotation.id} 
+                    className="hover:bg-muted/50 cursor-pointer"
+                    onClick={() => navigate(`/quotations/${quotation.id}/edit`)}
+                  >
                     <TableCell>
                       {format(new Date(quotation.quotation_date), 'dd-MM-yyyy')}
                     </TableCell>
