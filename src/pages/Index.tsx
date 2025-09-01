@@ -379,14 +379,6 @@ const Index = () => {
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">ภาพรวมระบบ / ENTGROUP Overview</p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => window.open('/service-request', '_blank')}>
-            แจ้งซ่อมใหม่
-          </Button>
-          <Button variant="outline" onClick={() => setCurrentView('service')}>
-            จัดการงานซ่อม
-          </Button>
-        </div>
       </div>
 
       {/* Announcements Section */}
