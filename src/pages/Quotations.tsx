@@ -460,7 +460,7 @@ export default function Quotations() {
                               <TableCell onClick={() => navigate(`/quotations/${quotation.id}/edit`)}>
                                 {format(new Date(quotation.quotation_date), 'dd-MM-yyyy')}
                               </TableCell>
-                              <TableCell className="font-medium">
+                              <TableCell className="font-medium" onClick={() => navigate(`/quotations/${quotation.id}/edit`)}>
                                 <div className="flex items-center space-x-2">
                                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                                   <span>{quotation.quotation_number}</span>
@@ -511,7 +511,7 @@ export default function Quotations() {
                                   )}
                                 </div>
                               </TableCell>
-                              <TableCell>
+                              <TableCell onClick={() => navigate(`/quotations/${quotation.id}/edit`)}>
                                 <div>
                                   <div className="font-medium">{quotation.customer_name}</div>
                                   <div className="text-sm text-muted-foreground">
@@ -522,7 +522,7 @@ export default function Quotations() {
                                   </div>
                                 </div>
                               </TableCell>
-                               <TableCell className="text-right font-medium">
+                               <TableCell className="text-right font-medium" onClick={() => navigate(`/quotations/${quotation.id}/edit`)}>
                                  <span className="whitespace-nowrap">
                                    ฿{quotation.total_amount.toLocaleString('th-TH', { 
                                      minimumFractionDigits: 2,
