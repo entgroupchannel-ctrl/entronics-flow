@@ -29,6 +29,7 @@ interface SidebarProps {
   className?: string;
   onMenuClick?: (view: string) => void;
   currentView?: string;
+  onLogoClick?: () => void;
 }
 
 const menuItems = [
@@ -111,7 +112,7 @@ const menuItems = [
   }
 ];
 
-export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
+export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(true); // เริ่มต้นให้หุบแล้ว
   const location = useLocation();
   const navigate = useNavigate();
@@ -170,9 +171,13 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
           {/* Logo E when collapsed */}
           {collapsed && (
             <div className="flex items-center justify-center flex-1">
-              <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center">
+              <button 
+                onClick={onLogoClick}
+                className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+                title="ข้อมูลบริษัท"
+              >
                 <span className="text-xl font-bold text-red-500">E</span>
-              </div>
+              </button>
             </div>
           )}
         </div>

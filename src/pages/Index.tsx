@@ -1193,7 +1193,7 @@ const Index = () => {
   return (
     <div className="flex h-screen bg-background">
       {/* Remove fixed width to allow sidebar to resize itself */}
-      <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
+      <Sidebar onMenuClick={setCurrentView} currentView={currentView} onLogoClick={() => setIsCompanyInfoOpen(true)} />
       
       <div className="flex-1 flex flex-col">
         {/* Header with Notification Bell */}
@@ -1285,17 +1285,6 @@ const Index = () => {
             renderView()
           )}
         </main>
-        
-        {/* Company Info Emoji - Bottom Left */}
-        <div className="fixed bottom-4 left-4 z-50">
-          <button
-            onClick={() => setIsCompanyInfoOpen(true)}
-            className="text-2xl hover:scale-110 transition-transform cursor-pointer bg-white/80 backdrop-blur-sm rounded-full p-2 shadow-lg hover:shadow-xl"
-            title="ข้อมูลบริษัท"
-          >
-            🏢
-          </button>
-        </div>
 
         {/* Company Info Dialog */}
         <Dialog open={isCompanyInfoOpen} onOpenChange={setIsCompanyInfoOpen}>
