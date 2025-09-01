@@ -7,13 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files, Receipt, ExternalLink } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files, Receipt, ExternalLink, BarChart3 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
 import { Sidebar } from "@/components/layout/Sidebar";
+import { QuotationsDashboard } from "@/components/dashboard/QuotationsDashboard";
 import QuotationWorkflow from "@/components/quotations/QuotationWorkflow";
 
 interface Quotation {
@@ -51,6 +53,7 @@ export default function Quotations() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedQuotationToDelete, setSelectedQuotationToDelete] = useState<{id: string, number: string} | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   useEffect(() => {
     loadQuotations();
@@ -285,307 +288,7 @@ export default function Quotations() {
     }
   };
 
-  const renderQuotationsContent = () => (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <FileText className="w-8 h-8 text-blue-600" />
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">ใบเสนอราคา / Quotation</h1>
-            <p className="text-sm text-muted-foreground">รายการใบเสนอราคาทั้งหมด</p>
-          </div>
-        </div>
-        
-        <Button onClick={createNewQuotation} className="bg-green-600 hover:bg-green-700">
-          <Plus className="w-4 h-4 mr-2" />
-          สร้างใบเสนอราคา
-        </Button>
-      </div>
-
-      {/* Search and Filter Section */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between space-x-4">
-            <div className="flex items-center space-x-2 flex-1">
-              <Search className="w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="ค้นหาเลขที่เอกสาร หรือ ชื่อลูกค้า..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-md"
-              />
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="สถานะ" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">ทั้งหมด</SelectItem>
-                  <SelectItem value="draft">ร่าง</SelectItem>
-                  <SelectItem value="sent">ส่งแล้ว</SelectItem>
-                  <SelectItem value="approved">อนุมัติ</SelectItem>
-                  <SelectItem value="rejected">ปฏิเสธ</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="p-8 text-center">
-              <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-              <p className="mt-2 text-muted-foreground">กำลังโหลดข้อมูล...</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-primary hover:bg-primary">
-                  <TableHead className="text-primary-foreground">วันที่</TableHead>
-                  <TableHead className="text-primary-foreground">เลขที่เอกสาร</TableHead>
-                  <TableHead className="text-primary-foreground">ชื่อลูกค้า/ชื่อโปรเจ็ค</TableHead>
-                  <TableHead className="text-primary-foreground text-right">ยอดรวมสุทธิ</TableHead>
-                  <TableHead className="text-primary-foreground text-center">สถานะ</TableHead>
-                  <TableHead className="text-primary-foreground text-center w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedQuotations.map((quotation) => (
-                  <TableRow 
-                    key={quotation.id} 
-                    className="hover:bg-muted/50 cursor-pointer"
-                    onClick={() => navigate(`/quotations/${quotation.id}/edit`)}
-                  >
-                    <TableCell>
-                      {format(new Date(quotation.quotation_date), 'dd-MM-yyyy')}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                        <span>{quotation.quotation_number}</span>
-                        {quotation.related_invoices && quotation.related_invoices.length > 0 && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                }}
-                              >
-                                <FileText className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="start"
-                              className="bg-background border shadow-lg z-[100] min-w-[200px]"
-                              onSelect={(e) => e.preventDefault()}
-                            >
-                              <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
-                                เอกสารที่เกี่ยวข้อง
-                              </div>
-                              <div className="px-3 py-1 text-xs text-muted-foreground">
-                                เอกสารอ้างอิง
-                              </div>
-                              {quotation.related_invoices.map((invoice) => (
-                                <DropdownMenuItem
-                                  key={invoice.id}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    navigate(`/invoices/${invoice.id}`);
-                                  }}
-                                  className="hover:bg-accent cursor-pointer"
-                                >
-                                  <ExternalLink className="w-4 h-4 mr-2 text-blue-600" />
-                                  <span className="text-blue-600 hover:underline">
-                                    {invoice.invoice_number}
-                                  </span>
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{quotation.customer_name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {quotation.quotation_items && quotation.quotation_items.length > 0 
-                            ? quotation.quotation_items[0].description || quotation.quotation_items[0].product_name
-                            : 'ไม่มีรายการสินค้า'
-                          }
-                        </div>
-                      </div>
-                    </TableCell>
-                     <TableCell className="text-right font-medium">
-                       <span className="whitespace-nowrap">
-                         ฿{quotation.total_amount.toLocaleString('th-TH', { 
-                           minimumFractionDigits: 2,
-                           maximumFractionDigits: 2 
-                         })}
-                       </span>
-                     </TableCell>
-                    <TableCell className="text-center">
-                      <QuotationWorkflow 
-                        quotation={quotation} 
-                        onStatusUpdate={loadQuotations}
-                      />
-                    </TableCell>
-                     <TableCell>
-                       <DropdownMenu 
-                         open={dropdownOpen === quotation.id} 
-                         onOpenChange={(isOpen) => {
-                           console.log('Dropdown state change:', quotation.id, isOpen);
-                           setDropdownOpen(isOpen ? quotation.id : null);
-                         }}
-                       >
-                         <DropdownMenuTrigger asChild>
-                           <Button 
-                             variant="outline" 
-                             size="sm" 
-                             className="h-8 w-8 p-0 rounded-lg border border-border hover:bg-accent hover:text-accent-foreground"
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               console.log('Dropdown trigger clicked:', quotation.id);
-                             }}
-                           >
-                             <MoreHorizontal className="w-4 h-4" />
-                           </Button>
-                         </DropdownMenuTrigger>
-                         <DropdownMenuContent 
-                           align="end" 
-                           className="bg-background border shadow-lg z-[100]"
-                           onCloseAutoFocus={(e) => e.preventDefault()}
-                         >
-                           <DropdownMenuItem onClick={() => {
-                             setDropdownOpen(null);
-                             navigate(`/quotations/${quotation.id}/edit`);
-                           }}>
-                             <Edit className="w-4 h-4 mr-2" />
-                             แก้ไข
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                              setDropdownOpen(null);
-                              window.print();
-                            }}>
-                              <Printer className="w-4 h-4 mr-2" />
-                              พิมพ์
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                              setDropdownOpen(null);
-                              console.log('Share:', quotation.id);
-                            }}>
-                              <Share2 className="w-4 h-4 mr-2" />
-                              แชร์
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                              setDropdownOpen(null);
-                              console.log('Download:', quotation.id);
-                            }}>
-                              <Download className="w-4 h-4 mr-2" />
-                              ดาวน์โหลด
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                              setDropdownOpen(null);
-                              console.log('Print sales doc:', quotation.id);
-                            }}>
-                              <Files className="w-4 h-4 mr-2" />
-                              พิมพ์จำหน่ายทอง
-                            </DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => {
-                               setDropdownOpen(null);
-                               createInvoiceFromQuotation(quotation);
-                             }}>
-                               <Receipt className="w-4 h-4 mr-2" />
-                               สร้างใบแจ้งหนี้
-                             </DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => {
-                               setDropdownOpen(null);
-                               console.log('Duplicate:', quotation.id);
-                             }}>
-                               <Copy className="w-4 h-4 mr-2" />
-                               สร้างซ้ำ
-                            </DropdownMenuItem>
-                           <DropdownMenuSeparator />
-                           <DropdownMenuItem 
-                             onClick={(e) => {
-                               e.preventDefault();
-                               e.stopPropagation();
-                               console.log('Delete clicked for:', quotation.quotation_number);
-                               openDeleteDialog(quotation.id, quotation.quotation_number);
-                             }}
-                             className="text-red-600 hover:bg-red-50 focus:bg-red-50"
-                           >
-                             <Trash2 className="w-4 h-4 mr-2" />
-                             ลบ
-                           </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-muted-foreground">แสดง</span>
-          <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
-            <SelectTrigger className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
-          <span className="text-sm text-muted-foreground">
-            รายการ จากทั้งหมด {filteredQuotations.length} รายการ
-          </span>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-          >
-            ก่อนหน้า
-          </Button>
-          
-          <span className="text-sm">
-            หน้า {currentPage} จาก {totalPages}
-          </span>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-          >
-            ถัดไป
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+  // This function is no longer needed as we're using tabs
 
   return (
     <div className="flex h-screen">
@@ -596,7 +299,321 @@ export default function Quotations() {
         <div className="h-16 border-b border-border bg-card" />
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-6">
-            {renderQuotationsContent()}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <FileText className="w-8 h-8 text-blue-600" />
+                  <div>
+                    <h1 className="text-2xl font-bold text-foreground">ใบเสนอราคา / Quotation</h1>
+                    <p className="text-sm text-muted-foreground">รายงานและจัดการใบเสนอราคา</p>
+                  </div>
+                </div>
+                
+                <Button onClick={createNewQuotation} className="bg-green-600 hover:bg-green-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  สร้างใบเสนอราคา
+                </Button>
+              </div>
+
+              <TabsList className="grid w-full grid-cols-2 max-w-md">
+                <TabsTrigger value="dashboard" className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  รายงานการขาย
+                </TabsTrigger>
+                <TabsTrigger value="quotations" className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  รายการใบเสนอราคา
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="dashboard" className="space-y-6">
+                <QuotationsDashboard />
+              </TabsContent>
+
+              <TabsContent value="quotations" className="space-y-6">
+                {/* Search and Filter Section */}
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between space-x-4">
+                      <div className="flex items-center space-x-2 flex-1">
+                        <Search className="w-4 h-4 text-muted-foreground" />
+                        <Input
+                          placeholder="ค้นหาเลขที่เอกสาร หรือ ชื่อลูกค้า..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="max-w-md"
+                        />
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                          <SelectTrigger className="w-[150px]">
+                            <SelectValue placeholder="สถานะ" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">ทั้งหมด</SelectItem>
+                            <SelectItem value="draft">ร่าง</SelectItem>
+                            <SelectItem value="sent">ส่งแล้ว</SelectItem>
+                            <SelectItem value="approved">อนุมัติ</SelectItem>
+                            <SelectItem value="rejected">ปฏิเสธ</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Table */}
+                <Card>
+                  <CardContent className="p-0">
+                    {loading ? (
+                      <div className="p-8 text-center">
+                        <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                        <p className="mt-2 text-muted-foreground">กำลังโหลดข้อมูล...</p>
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-primary hover:bg-primary">
+                            <TableHead className="text-primary-foreground">วันที่</TableHead>
+                            <TableHead className="text-primary-foreground">เลขที่เอกสาร</TableHead>
+                            <TableHead className="text-primary-foreground">ชื่อลูกค้า/ชื่อโปรเจ็ค</TableHead>
+                            <TableHead className="text-primary-foreground text-right">ยอดรวมสุทธิ</TableHead>
+                            <TableHead className="text-primary-foreground text-center">สถานะ</TableHead>
+                            <TableHead className="text-primary-foreground text-center w-12"></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {paginatedQuotations.map((quotation) => (
+                            <TableRow 
+                              key={quotation.id} 
+                              className="hover:bg-muted/50 cursor-pointer"
+                              onClick={() => navigate(`/quotations/${quotation.id}/edit`)}
+                            >
+                              <TableCell>
+                                {format(new Date(quotation.quotation_date), 'dd-MM-yyyy')}
+                              </TableCell>
+                              <TableCell className="font-medium">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                  <span>{quotation.quotation_number}</span>
+                                  {quotation.related_invoices && quotation.related_invoices.length > 0 && (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                          }}
+                                        >
+                                          <FileText className="w-4 h-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent
+                                        align="start"
+                                        className="bg-background border shadow-lg z-[100] min-w-[200px]"
+                                        onSelect={(e) => e.preventDefault()}
+                                      >
+                                        <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
+                                          เอกสารที่เกี่ยวข้อง
+                                        </div>
+                                        <div className="px-3 py-1 text-xs text-muted-foreground">
+                                          เอกสารอ้างอิง
+                                        </div>
+                                        {quotation.related_invoices.map((invoice) => (
+                                          <DropdownMenuItem
+                                            key={invoice.id}
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              navigate(`/invoices/${invoice.id}`);
+                                            }}
+                                            className="hover:bg-accent cursor-pointer"
+                                          >
+                                            <ExternalLink className="w-4 h-4 mr-2 text-blue-600" />
+                                            <span className="text-blue-600 hover:underline">
+                                              {invoice.invoice_number}
+                                            </span>
+                                          </DropdownMenuItem>
+                                        ))}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">{quotation.customer_name}</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {quotation.quotation_items && quotation.quotation_items.length > 0 
+                                      ? quotation.quotation_items[0].description || quotation.quotation_items[0].product_name
+                                      : 'ไม่มีรายการสินค้า'
+                                    }
+                                  </div>
+                                </div>
+                              </TableCell>
+                               <TableCell className="text-right font-medium">
+                                 <span className="whitespace-nowrap">
+                                   ฿{quotation.total_amount.toLocaleString('th-TH', { 
+                                     minimumFractionDigits: 2,
+                                     maximumFractionDigits: 2 
+                                   })}
+                                 </span>
+                               </TableCell>
+                              <TableCell className="text-center">
+                                <QuotationWorkflow 
+                                  quotation={quotation} 
+                                  onStatusUpdate={loadQuotations}
+                                />
+                              </TableCell>
+                               <TableCell>
+                                 <DropdownMenu 
+                                   open={dropdownOpen === quotation.id} 
+                                   onOpenChange={(isOpen) => {
+                                     console.log('Dropdown state change:', quotation.id, isOpen);
+                                     setDropdownOpen(isOpen ? quotation.id : null);
+                                   }}
+                                 >
+                                   <DropdownMenuTrigger asChild>
+                                     <Button 
+                                       variant="outline" 
+                                       size="sm" 
+                                       className="h-8 w-8 p-0 rounded-lg border border-border hover:bg-accent hover:text-accent-foreground"
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         console.log('Dropdown trigger clicked:', quotation.id);
+                                       }}
+                                     >
+                                       <MoreHorizontal className="w-4 h-4" />
+                                     </Button>
+                                   </DropdownMenuTrigger>
+                                   <DropdownMenuContent 
+                                     align="end" 
+                                     className="bg-background border shadow-lg z-[100]"
+                                     onCloseAutoFocus={(e) => e.preventDefault()}
+                                   >
+                                     <DropdownMenuItem onClick={() => {
+                                       setDropdownOpen(null);
+                                       navigate(`/quotations/${quotation.id}/edit`);
+                                     }}>
+                                       <Edit className="w-4 h-4 mr-2" />
+                                       แก้ไข
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => {
+                                        setDropdownOpen(null);
+                                        window.print();
+                                      }}>
+                                        <Printer className="w-4 h-4 mr-2" />
+                                        พิมพ์
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => {
+                                        setDropdownOpen(null);
+                                        console.log('Share:', quotation.id);
+                                      }}>
+                                        <Share2 className="w-4 h-4 mr-2" />
+                                        แชร์
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => {
+                                        setDropdownOpen(null);
+                                        console.log('Download:', quotation.id);
+                                      }}>
+                                        <Download className="w-4 h-4 mr-2" />
+                                        ดาวน์โหลด
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => {
+                                        setDropdownOpen(null);
+                                        console.log('Print sales doc:', quotation.id);
+                                      }}>
+                                        <Files className="w-4 h-4 mr-2" />
+                                        พิมพ์จำหน่ายทอง
+                                      </DropdownMenuItem>
+                                       <DropdownMenuItem onClick={() => {
+                                         setDropdownOpen(null);
+                                         createInvoiceFromQuotation(quotation);
+                                       }}>
+                                         <Receipt className="w-4 h-4 mr-2" />
+                                         สร้างใบแจ้งหนี้
+                                       </DropdownMenuItem>
+                                       <DropdownMenuItem onClick={() => {
+                                         setDropdownOpen(null);
+                                         console.log('Duplicate:', quotation.id);
+                                       }}>
+                                         <Copy className="w-4 h-4 mr-2" />
+                                         สร้างซ้ำ
+                                      </DropdownMenuItem>
+                                     <DropdownMenuSeparator />
+                                     <DropdownMenuItem 
+                                       onClick={(e) => {
+                                         e.preventDefault();
+                                         e.stopPropagation();
+                                         console.log('Delete clicked for:', quotation.quotation_number);
+                                         openDeleteDialog(quotation.id, quotation.quotation_number);
+                                       }}
+                                       className="text-red-600 hover:bg-red-50 focus:bg-red-50"
+                                     >
+                                       <Trash2 className="w-4 h-4 mr-2" />
+                                       ลบ
+                                     </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-muted-foreground">แสดง</span>
+                    <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                      <SelectTrigger className="w-20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="25">25</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                        <SelectItem value="100">100</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span className="text-sm text-muted-foreground">
+                      รายการ จากทั้งหมด {filteredQuotations.length} รายการ
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      ก่อนหน้า
+                    </Button>
+                    
+                    <span className="text-sm">
+                      หน้า {currentPage} จาก {totalPages}
+                    </span>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      ถัดไป
+                    </Button>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
 
