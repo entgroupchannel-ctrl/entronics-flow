@@ -369,6 +369,12 @@ export default function Quotations() {
                       <Table>
                         <TableHeader>
                           <TableRow className="bg-primary hover:bg-primary">
+                            <TableHead className="text-primary-foreground w-12">
+                              <Checkbox
+                                checked={selectedItems.length === paginatedQuotations.length && paginatedQuotations.length > 0}
+                                onCheckedChange={handleSelectAll}
+                              />
+                            </TableHead>
                             <TableHead className="text-primary-foreground">วันที่</TableHead>
                             <TableHead className="text-primary-foreground">เลขที่เอกสาร</TableHead>
                             <TableHead className="text-primary-foreground">ชื่อลูกค้า/ชื่อโปรเจ็ค</TableHead>
@@ -381,10 +387,15 @@ export default function Quotations() {
                           {paginatedQuotations.map((quotation) => (
                             <TableRow 
                               key={quotation.id} 
-                              className="hover:bg-muted/50 cursor-pointer"
-                              onClick={() => navigate(`/quotations/${quotation.id}/edit`)}
+                              className="hover:bg-muted/50"
                             >
-                              <TableCell>
+                              <TableCell onClick={(e) => e.stopPropagation()}>
+                                <Checkbox
+                                  checked={selectedItems.includes(quotation.id)}
+                                  onCheckedChange={(checked) => handleSelectItem(quotation.id, checked as boolean)}
+                                />
+                              </TableCell>
+                              <TableCell onClick={() => navigate(`/quotations/${quotation.id}/edit`)}>
                                 {format(new Date(quotation.quotation_date), 'dd-MM-yyyy')}
                               </TableCell>
                               <TableCell className="font-medium">
