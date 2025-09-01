@@ -1324,9 +1324,11 @@ const Delivery = () => {
                         </Button>
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              ดูรายละเอียด
-                            </Button>
+                            <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
+                              <Button variant="outline" size="sm">
+                                ดูรายละเอียด
+                              </Button>
+                            </div>
                           </DialogTrigger>
                           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
