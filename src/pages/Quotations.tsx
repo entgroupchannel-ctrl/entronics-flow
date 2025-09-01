@@ -443,10 +443,11 @@ export default function Quotations() {
                       <Table>
                         <TableHeader>
                           <TableRow className="bg-primary hover:bg-primary">
-                            <TableHead className="text-primary-foreground w-12">
+                            <TableHead className="text-primary-foreground w-12 text-center">
                               <Checkbox
                                 checked={selectedItems.length === paginatedQuotations.length && paginatedQuotations.length > 0}
                                 onCheckedChange={handleSelectAll}
+                                className="mx-auto"
                               />
                             </TableHead>
                             <TableHead className="text-primary-foreground">วันที่</TableHead>
