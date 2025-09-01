@@ -12,6 +12,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { AddCustomerForm } from '@/components/customers/AddCustomerForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from 'xlsx';
 
 interface Customer {
@@ -40,6 +41,7 @@ export default function Customers() {
   const [validCustomers, setValidCustomers] = useState<any[]>([]);
   const [invalidCustomers, setInvalidCustomers] = useState<any[]>([]);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Fetch customers from database
   const fetchCustomers = async () => {
@@ -225,10 +227,15 @@ export default function Customers() {
         status: customer.status,
         tax_id: customer.tax_id || null,
         line_id: customer.line_id || null,
+        hq_branch: customer.hq_branch || null,
         person_type: 'นิติบุคคล',
         contact_type: 'ลูกค้า',
-        notes: customer.hq_branch ? `สาขา: ${customer.hq_branch}` : null
+        notes: customer.notes || null,
+        created_by: user?.id || null
       }));
+
+      console.log('Attempting to insert customers:', customersToInsert.length);
+      console.log('Sample customer data:', customersToInsert[0]);
 
       const { error } = await supabase
         .from('customers')
