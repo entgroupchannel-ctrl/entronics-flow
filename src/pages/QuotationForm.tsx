@@ -338,8 +338,6 @@ export default function QuotationForm() {
         description: "ใบเสนอราคาได้รับการบันทึกเรียบร้อยแล้ว",
         variant: "default",
       });
-
-      navigate('/quotations');
       
     } catch (error: any) {
       console.error('Error saving quotation:', error);
@@ -348,6 +346,15 @@ export default function QuotationForm() {
         description: "ไม่สามารถบันทึกใบเสนอราคาได้",
         variant: "destructive",
       });
+    }
+  };
+
+  const saveAndClose = async () => {
+    try {
+      await saveQuotation();
+      navigate('/quotations');
+    } catch (error) {
+      // Error handling is already done in saveQuotation
     }
   };
 
@@ -676,9 +683,13 @@ export default function QuotationForm() {
               <X className="w-4 h-4 mr-2" />
               ยกเลิก
             </Button>
-            <Button variant="default" size="sm" onClick={saveQuotation}>
+            <Button variant="outline" size="sm" onClick={saveQuotation}>
               <Save className="w-4 h-4 mr-2" />
-              บันทึกเอกสาร
+              บันทึก
+            </Button>
+            <Button variant="default" size="sm" onClick={saveAndClose}>
+              <Save className="w-4 h-4 mr-2" />
+              บันทึกและปิด
             </Button>
           </div>
         </div>
