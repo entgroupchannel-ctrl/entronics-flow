@@ -479,53 +479,104 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ClipboardList className="h-5 w-5" />
-                งานซ่อมล่าสุด (5 รายการ)
+                งานซ่อมล่าสุด
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {serviceRequests.slice(0, 5).length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  ยังไม่มีงานซ่อม
-                </div>
-              ) : (
-                serviceRequests.slice(0, 5).map((request) => (
-                  <div key={request.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+              {serviceRequests.length === 0 ? (
+                // แสดงข้อมูลจำลองเมื่อไม่มีข้อมูลจริง
+                <>
+                  <div className="border rounded-lg p-4 bg-muted/30">
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold">{request.ticket_number}</span>
-                          {getStatusBadge(request.status)}
+                          <span className="font-semibold text-muted-foreground">SR2025000001</span>
+                          <Badge variant="secondary">รอดำเนินการ</Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(request.created_at).toLocaleDateString('th-TH')}
-                        </p>
+                        <p className="text-sm text-muted-foreground">1 ม.ค. 2568</p>
                       </div>
                     </div>
-                    
-                    <div className="space-y-1 text-sm">
+                    <div className="space-y-1 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span>{request.customer_name}</span>
+                        <User className="h-4 w-4" />
+                        <span>ลูกค้าตัวอย่าง</span>
                       </div>
                       <div>
                         <span className="font-medium">อุปกรณ์: </span>
-                        <span>{request.device_type}</span>
+                        <span>คอมพิวเตอร์</span>
                       </div>
                     </div>
                   </div>
-                ))
+                  <div className="border rounded-lg p-4 bg-muted/30">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-muted-foreground">SR2025000002</span>
+                          <Badge variant="outline">มอบหมายแล้ว</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">2 ม.ค. 2568</p>
+                      </div>
+                    </div>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>ลูกค้าตัวอย่าง 2</span>
+                      </div>
+                      <div>
+                        <span className="font-medium">อุปกรณ์: </span>
+                        <span>เครื่องพิมพ์</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-center pt-2">
+                    <p className="text-sm text-muted-foreground">ยังไม่มีงานซ่อมจริง <span className="underline cursor-pointer">Read more...</span></p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {serviceRequests.slice(0, 2).map((request) => (
+                    <div key={request.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">{request.ticket_number}</span>
+                            {getStatusBadge(request.status)}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(request.created_at).toLocaleDateString('th-TH')}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1 text-sm">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span>{request.customer_name}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium">อุปกรณ์: </span>
+                          <span>{request.device_type}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {serviceRequests.length > 2 && (
+                    <div className="text-center pt-2">
+                      <p className="text-sm text-muted-foreground">และอีก {serviceRequests.length - 2} รายการ <span className="underline cursor-pointer" onClick={() => setCurrentView('service')}>Read more...</span></p>
+                    </div>
+                  )}
+                </>
               )}
               
-              {serviceRequests.length > 0 && (
-                <div className="text-center pt-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setCurrentView('service')}
-                  >
-                    ดูทั้งหมด
-                  </Button>
-                </div>
-              )}
+              <div className="text-center pt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setCurrentView('service')}
+                >
+                  ดูทั้งหมด
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -536,57 +587,108 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                ใบเสนอราคาล่าสุด (5 รายการ)
+                ใบเสนอราคาล่าสุด
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {quotations.slice(0, 5).length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  ยังไม่มีใบเสนอราคา
-                </div>
-              ) : (
-                quotations.slice(0, 5).map((quotation) => (
-                  <div key={quotation.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+              {quotations.length === 0 ? (
+                // แสดงข้อมูลจำลองเมื่อไม่มีข้อมูลจริง
+                <>
+                  <div className="border rounded-lg p-4 bg-muted/30">
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold">{quotation.quotation_number}</span>
-                          <Badge variant={quotation.status === 'approved' ? 'default' : 'secondary'}>
-                            {quotation.status === 'draft' ? 'ร่าง' : 
-                             quotation.status === 'sent' ? 'ส่งแล้ว' : 
-                             quotation.status === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'}
-                          </Badge>
+                          <span className="font-semibold text-muted-foreground">QT2025000001</span>
+                          <Badge variant="secondary">ร่าง</Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(quotation.created_at).toLocaleDateString('th-TH')}
-                        </p>
+                        <p className="text-sm text-muted-foreground">1 ม.ค. 2568</p>
                       </div>
                     </div>
-                    
-                    <div className="space-y-1 text-sm">
+                    <div className="space-y-1 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span>{quotation.customer_name}</span>
+                        <User className="h-4 w-4" />
+                        <span>บริษัทตัวอย่าง จำกัด</span>
                       </div>
                       <div>
                         <span className="font-medium">ยอดรวม: </span>
-                        <span>{quotation.total_amount?.toLocaleString('th-TH')} บาท</span>
+                        <span>125,000 บาท</span>
                       </div>
                     </div>
                   </div>
-                ))
+                  <div className="border rounded-lg p-4 bg-muted/30">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-muted-foreground">QT2025000002</span>
+                          <Badge variant="outline">ส่งแล้ว</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">2 ม.ค. 2568</p>
+                      </div>
+                    </div>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>บริษัทตัวอย่าง 2 จำกัด</span>
+                      </div>
+                      <div>
+                        <span className="font-medium">ยอดรวม: </span>
+                        <span>85,500 บาท</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-center pt-2">
+                    <p className="text-sm text-muted-foreground">ยังไม่มีใบเสนอราคาจริง <span className="underline cursor-pointer">Read more...</span></p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {quotations.slice(0, 2).map((quotation) => (
+                    <div key={quotation.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">{quotation.quotation_number}</span>
+                            <Badge variant={quotation.status === 'approved' ? 'default' : 'secondary'}>
+                              {quotation.status === 'draft' ? 'ร่าง' : 
+                               quotation.status === 'sent' ? 'ส่งแล้ว' : 
+                               quotation.status === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(quotation.created_at).toLocaleDateString('th-TH')}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1 text-sm">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span>{quotation.customer_name}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium">ยอดรวม: </span>
+                          <span>{quotation.total_amount?.toLocaleString('th-TH')} บาท</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {quotations.length > 2 && (
+                    <div className="text-center pt-2">
+                      <p className="text-sm text-muted-foreground">และอีก {quotations.length - 2} รายการ <span className="underline cursor-pointer" onClick={() => window.location.href = '/quotations'}>Read more...</span></p>
+                    </div>
+                  )}
+                </>
               )}
               
-              {quotations.length > 0 && (
-                <div className="text-center pt-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => window.location.href = '/quotations'}
-                  >
-                    ดูทั้งหมด
-                  </Button>
-                </div>
-              )}
+              <div className="text-center pt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = '/quotations'}
+                >
+                  ดูทั้งหมด
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -597,70 +699,121 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                ลูกค้าใหม่ล่าสุด (5 รายการ)
+                ลูกค้าใหม่ล่าสุด
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {customers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  ยังไม่มีลูกค้าใหม่
-                </div>
-              ) : (
-                customers.map((customer) => (
-                  <div key={customer.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                // แสดงข้อมูลจำลองเมื่อไม่มีข้อมูลจริง
+                <>
+                  <div className="border rounded-lg p-4 bg-muted/30">
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold">{customer.name}</span>
-                          <Badge variant={customer.status === 'สำคัญ' ? 'default' : 'secondary'}>
-                            {customer.customer_type}
-                          </Badge>
+                          <span className="font-semibold text-muted-foreground">บริษัทตัวอย่าง จำกัด</span>
+                          <Badge variant="secondary">ลูกค้า</Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(customer.created_at).toLocaleDateString('th-TH')}
-                        </p>
+                        <p className="text-sm text-muted-foreground">1 ม.ค. 2568</p>
                       </div>
                     </div>
-                    
-                    <div className="space-y-1 text-sm">
-                      {customer.contact_person && (
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span>{customer.contact_person}</span>
-                        </div>
-                      )}
-                      {customer.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <span>{customer.phone}</span>
-                        </div>
-                      )}
-                      {customer.email && (
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span>{customer.email}</span>
-                        </div>
-                      )}
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>คุณสมชาย ใจดี</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        <span>02-123-4567</span>
+                      </div>
                     </div>
                   </div>
-                ))
+                  <div className="border rounded-lg p-4 bg-muted/30">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-muted-foreground">บริษัทตัวอย่าง 2 จำกัด</span>
+                          <Badge variant="secondary">ลูกค้า</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">2 ม.ค. 2568</p>
+                      </div>
+                    </div>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>คุณสมใจ ดีมาก</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        <span>02-765-4321</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-center pt-2">
+                    <p className="text-sm text-muted-foreground">ยังไม่มีลูกค้าใหม่จริง <span className="underline cursor-pointer">Read more...</span></p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {customers.slice(0, 2).map((customer) => (
+                    <div key={customer.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">{customer.name}</span>
+                            <Badge variant={customer.status === 'สำคัญ' ? 'default' : 'secondary'}>
+                              {customer.customer_type}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(customer.created_at).toLocaleDateString('th-TH')}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1 text-sm">
+                        {customer.contact_person && (
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span>{customer.contact_person}</span>
+                          </div>
+                        )}
+                        {customer.phone && (
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <span>{customer.phone}</span>
+                          </div>
+                        )}
+                        {customer.email && (
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <span>{customer.email}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {customers.length > 2 && (
+                    <div className="text-center pt-2">
+                      <p className="text-sm text-muted-foreground">และอีก {customers.length - 2} รายการ <span className="underline cursor-pointer" onClick={() => window.location.href = '/customers'}>Read more...</span></p>
+                    </div>
+                  )}
+                </>
               )}
               
-              {customers.length > 0 && (
-                <div className="text-center pt-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => window.location.href = '/customers'}
-                  >
-                    ดูทั้งหมด
-                  </Button>
-                </div>
-              )}
+              <div className="text-center pt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = '/customers'}
+                >
+                  ดูทั้งหมด
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Sales Chart */}
+        {/* Sales Chart & Quick Actions */}
         <div className="space-y-4">
           <SalesChart />
           
