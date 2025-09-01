@@ -60,10 +60,13 @@ export default function Customers() {
       const { data, error } = await supabase
         .from('customers')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }); // ล่าสุดก่อน
 
       if (error) throw error;
       setCustomers(data || []);
+      
+      // Reset to first page when data is refreshed
+      setCurrentPage(1);
     } catch (error: any) {
       toast({
         title: 'เกิดข้อผิดพลาด',
@@ -535,7 +538,9 @@ export default function Customers() {
                       </div>
                     </DialogContent>
                   </Dialog>
-                  <AddCustomerForm onSuccess={fetchCustomers} />
+                  <AddCustomerForm onSuccess={() => {
+                    fetchCustomers(); // รีเฟรชข้อมูลและ reset หน้าไป 1
+                  }} />
                 </div>
               </div>
 
