@@ -105,13 +105,15 @@ export function ServiceRequestForm({
       ];
 
       const hardcodedBrands = [
-        { id: '1', name: 'Apple' },
-        { id: '2', name: 'Samsung' },
-        { id: '3', name: 'Huawei' },
-        { id: '4', name: 'Dell' },
-        { id: '5', name: 'HP' },
-        { id: '6', name: 'Canon' },
-        { id: '7', name: 'Sony' }
+        { id: '1', name: 'GREENTHINPC' },
+        { id: '2', name: 'SHAREVDI' },
+        { id: '3', name: 'WANLAN' },
+        { id: '4', name: 'INNODA WATER PROOF' },
+        { id: '5', name: 'CESEPC' },
+        { id: '6', name: 'EMDOOR' },
+        { id: '7', name: 'GOLE' },
+        { id: '8', name: 'PIPO' },
+        { id: '9', name: 'อื่นๆ' }
       ];
 
       setDeviceTypes(hardcodedTypes);
