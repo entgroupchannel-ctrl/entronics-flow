@@ -55,9 +55,7 @@ export default function Invoices() {
         .from('invoices')
         .select(`
           *,
-          invoice_items (*),
-          quotations:quotation_id (quotation_number),
-          tax_invoices!invoice_id (tax_invoice_number)
+          invoice_items (*)
         `)
         .order('created_at', { ascending: false });
 
