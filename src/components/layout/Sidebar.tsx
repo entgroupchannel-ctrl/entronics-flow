@@ -19,7 +19,8 @@ import {
   ChevronDown,
   ChevronRight,
   CreditCard,
-  RefreshCw
+  RefreshCw,
+  Receipt
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -71,6 +72,13 @@ const menuItems = [
         href: "/tax-invoices",
         view: "tax-invoices",
         iconColor: "text-green-600"
+      },
+      {
+        title: "ใบเสร็จรับเงิน",
+        icon: Receipt,
+        href: "/receipts",
+        view: "receipts",
+        iconColor: "text-purple-600"
       }
     ]
   },
