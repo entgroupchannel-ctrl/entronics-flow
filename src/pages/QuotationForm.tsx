@@ -389,161 +389,163 @@ export default function QuotationForm() {
         <Card>
           <CardContent className="p-4">
             {/* Customer and Document Info */}
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-sm font-medium">ชื่อลูกค้า</Label>
-                  <Select onValueChange={selectCustomer}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="เลือกลูกค้า" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {customers.map(customer => (
-                        <SelectItem key={customer.id} value={customer.id}>
-                          <div className="flex flex-col">
-                            <span>{customer.name}</span>
-                            {customer.tax_id && (
-                              <span className="text-xs text-muted-foreground">
-                                เลขประจำตัวผู้เสียภาษี: {customer.tax_id}
-                              </span>
-                            )}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+            <div className="border border-gray-200 rounded-lg p-6 mb-6 bg-gray-50/50">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm font-medium">ชื่อลูกค้า</Label>
+                    <Select onValueChange={selectCustomer}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="เลือกลูกค้า" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {customers.map(customer => (
+                          <SelectItem key={customer.id} value={customer.id}>
+                            <div className="flex flex-col">
+                              <span>{customer.name}</span>
+                              {customer.tax_id && (
+                                <span className="text-xs text-muted-foreground">
+                                  เลขประจำตัวผู้เสียภาษี: {customer.tax_id}
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {selectedCustomer && (
+                      <div className="mt-2 p-2 bg-muted rounded-md">
+                        <Label className="text-xs font-medium text-muted-foreground">หมายเลขผู้เสียภาษี / TAX ID</Label>
+                        <div className="text-sm font-mono font-medium">
+                          {selectedCustomer.tax_id || 'ไม่มีข้อมูลหมายเลขผู้เสียภาษี'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   
                   {selectedCustomer && (
-                    <div className="mt-2 p-2 bg-muted rounded-md">
-                      <Label className="text-xs font-medium text-muted-foreground">หมายเลขผู้เสียภาษี / TAX ID</Label>
-                      <div className="text-sm font-mono font-medium">
-                        {selectedCustomer.tax_id || 'ไม่มีข้อมูลหมายเลขผู้เสียภาษี'}
+                    <>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <Label className="text-sm font-medium">อีเมล</Label>
+                          <Input 
+                            value={quotation.customer_email} 
+                            onChange={(e) => setQuotation(prev => ({ ...prev, customer_email: e.target.value }))}
+                            className="mt-1 text-sm"
+                            placeholder="email@example.com"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium">เบอร์โทรศัพท์</Label>
+                          <Input 
+                            value={quotation.customer_phone} 
+                            onChange={(e) => setQuotation(prev => ({ ...prev, customer_phone: e.target.value }))}
+                            className="mt-1 text-sm"
+                            placeholder="08x-xxx-xxxx"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium">Line ID</Label>
+                          <Input 
+                            value={quotation.customer_line_id || ''} 
+                            onChange={(e) => setQuotation(prev => ({ ...prev, customer_line_id: e.target.value }))}
+                            className="mt-1 text-sm"
+                            placeholder="@lineid"
+                          />
+                        </div>
                       </div>
-                    </div>
+                      <div>
+                        <Label className="text-sm font-medium">ที่อยู่</Label>
+                        <Textarea 
+                          value={quotation.customer_address} 
+                          onChange={(e) => setQuotation(prev => ({ ...prev, customer_address: e.target.value }))}
+                          className="mt-1"
+                          rows={3}
+                        />
+                      </div>
+                    </>
                   )}
                 </div>
-                
-                {selectedCustomer && (
-                  <>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <Label className="text-sm font-medium">อีเมล</Label>
-                        <Input 
-                          value={quotation.customer_email} 
-                          onChange={(e) => setQuotation(prev => ({ ...prev, customer_email: e.target.value }))}
-                          className="mt-1 text-sm"
-                          placeholder="email@example.com"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">เบอร์โทรศัพท์</Label>
-                        <Input 
-                          value={quotation.customer_phone} 
-                          onChange={(e) => setQuotation(prev => ({ ...prev, customer_phone: e.target.value }))}
-                          className="mt-1 text-sm"
-                          placeholder="08x-xxx-xxxx"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Line ID</Label>
-                        <Input 
-                          value={quotation.customer_line_id || ''} 
-                          onChange={(e) => setQuotation(prev => ({ ...prev, customer_line_id: e.target.value }))}
-                          className="mt-1 text-sm"
-                          placeholder="@lineid"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">ที่อยู่</Label>
-                      <Textarea 
-                        value={quotation.customer_address} 
-                        onChange={(e) => setQuotation(prev => ({ ...prev, customer_address: e.target.value }))}
-                        className="mt-1"
-                        rows={3}
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
 
-              <div className="space-y-3 flex flex-col items-end">
-                <div className="w-full max-w-xs">
-                  <Label className="text-sm font-medium block text-right mb-1">เลขที่เอกสาร</Label>
-                  <Input 
-                    value={quotation.quotation_number} 
-                    onChange={(e) => setQuotation(prev => ({ ...prev, quotation_number: e.target.value }))}
-                    className="text-right"
-                    placeholder="QT202400001"
-                  />
-                </div>
-                <div className="w-full max-w-xs">
-                  <Label className="text-sm font-medium block text-right mb-1">วันที่</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-between text-right font-normal",
-                          !quotation.quotation_date && "text-muted-foreground"
-                        )}
-                      >
-                        {quotation.quotation_date ? (
-                          format(new Date(quotation.quotation_date), "dd/MM/yyyy")
-                        ) : (
-                          <span>เลือกวันที่</span>
-                        )}
-                        <CalendarIcon className="h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
-                      <Calendar
-                        mode="single"
-                        selected={quotation.quotation_date ? new Date(quotation.quotation_date) : undefined}
-                        onSelect={(date) => {
-                          if (date) {
-                            setQuotation(prev => ({ ...prev, quotation_date: format(date, 'yyyy-MM-dd') }));
-                          }
-                        }}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="w-full max-w-xs">
-                  <Label className="text-sm font-medium block text-right mb-1">วันที่หมดอายุ</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-between text-right font-normal",
-                          !quotation.valid_until && "text-muted-foreground"
-                        )}
-                      >
-                        {quotation.valid_until ? (
-                          format(new Date(quotation.valid_until), "dd/MM/yyyy")
-                        ) : (
-                          <span>เลือกวันที่</span>
-                        )}
-                        <CalendarIcon className="h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
-                      <Calendar
-                        mode="single"
-                        selected={quotation.valid_until ? new Date(quotation.valid_until) : undefined}
-                        onSelect={(date) => {
-                          if (date) {
-                            setQuotation(prev => ({ ...prev, valid_until: format(date, 'yyyy-MM-dd') }));
-                          }
-                        }}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <div className="space-y-3 flex flex-col items-end">
+                  <div className="w-full max-w-xs">
+                    <Label className="text-sm font-medium block text-right mb-1">เลขที่เอกสาร</Label>
+                    <Input 
+                      value={quotation.quotation_number} 
+                      onChange={(e) => setQuotation(prev => ({ ...prev, quotation_number: e.target.value }))}
+                      className="text-right"
+                      placeholder="QT202400001"
+                    />
+                  </div>
+                  <div className="w-full max-w-xs">
+                    <Label className="text-sm font-medium block text-right mb-1">วันที่</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-between text-right font-normal",
+                            !quotation.quotation_date && "text-muted-foreground"
+                          )}
+                        >
+                          {quotation.quotation_date ? (
+                            format(new Date(quotation.quotation_date), "dd/MM/yyyy")
+                          ) : (
+                            <span>เลือกวันที่</span>
+                          )}
+                          <CalendarIcon className="h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar
+                          mode="single"
+                          selected={quotation.quotation_date ? new Date(quotation.quotation_date) : undefined}
+                          onSelect={(date) => {
+                            if (date) {
+                              setQuotation(prev => ({ ...prev, quotation_date: format(date, 'yyyy-MM-dd') }));
+                            }
+                          }}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="w-full max-w-xs">
+                    <Label className="text-sm font-medium block text-right mb-1">วันที่หมดอายุ</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-between text-right font-normal",
+                            !quotation.valid_until && "text-muted-foreground"
+                          )}
+                        >
+                          {quotation.valid_until ? (
+                            format(new Date(quotation.valid_until), "dd/MM/yyyy")
+                          ) : (
+                            <span>เลือกวันที่</span>
+                          )}
+                          <CalendarIcon className="h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar
+                          mode="single"
+                          selected={quotation.valid_until ? new Date(quotation.valid_until) : undefined}
+                          onSelect={(date) => {
+                            if (date) {
+                              setQuotation(prev => ({ ...prev, valid_until: format(date, 'yyyy-MM-dd') }));
+                            }
+                          }}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
               </div>
             </div>
