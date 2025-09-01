@@ -808,28 +808,34 @@ const Delivery = () => {
                              สร้างเมื่อ: {new Date(order.created_at).toLocaleDateString('th-TH')}
                            </p>
                            
-                           {/* Assignment Info */}
-                           {order.assigned_staff_id && (
-                             <div className="flex items-center gap-2 text-sm">
-                               <Users className="h-4 w-4 text-blue-500" />
-                               <span className="text-blue-600 font-medium">
-                                 มอบหมายให้พนักงานแล้ว
-                               </span>
-                             </div>
-                           )}
-                           {order.courier_contact_name && (
-                             <div className="flex items-center gap-2 text-sm">
-                               <Truck className="h-4 w-4 text-green-500" />
-                               <span className="text-green-600 font-medium">
-                                 Courier: {order.courier_contact_name}
-                               </span>
-                               {order.courier_contact_phone && (
-                                 <span className="text-muted-foreground">
-                                   ({order.courier_contact_phone})
-                                 </span>
-                               )}
-                             </div>
-                           )}
+                            {/* Assignment Info */}
+                            {order.assigned_staff_id && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-4 w-4 text-blue-500" />
+                                  <span className="text-lg">👨‍💼</span>
+                                </div>
+                                <span className="text-blue-600 font-medium">
+                                  มอบหมายให้พนักงานขับรถแล้ว
+                                </span>
+                              </div>
+                            )}
+                            {order.courier_contact_name && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <div className="flex items-center gap-1">
+                                  <Truck className="h-4 w-4 text-green-500" />
+                                  <span className="text-lg">🚚</span>
+                                </div>
+                                <span className="text-green-600 font-medium">
+                                  Courier: {order.courier_contact_name}
+                                </span>
+                                {order.courier_contact_phone && (
+                                  <span className="text-muted-foreground">
+                                    ({order.courier_contact_phone})
+                                  </span>
+                                )}
+                              </div>
+                            )}
                          </div>
                          <div className="flex gap-2">
                            <Button 
