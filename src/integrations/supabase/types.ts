@@ -396,6 +396,7 @@ export type Database = {
           tracking_number: string | null
           tracking_url: string | null
           updated_at: string
+          warranty_tracking_enabled: boolean | null
           weight_kg: number | null
         }
         Insert: {
@@ -434,6 +435,7 @@ export type Database = {
           tracking_number?: string | null
           tracking_url?: string | null
           updated_at?: string
+          warranty_tracking_enabled?: boolean | null
           weight_kg?: number | null
         }
         Update: {
@@ -472,6 +474,7 @@ export type Database = {
           tracking_number?: string | null
           tracking_url?: string | null
           updated_at?: string
+          warranty_tracking_enabled?: boolean | null
           weight_kg?: number | null
         }
         Relationships: [
@@ -1173,6 +1176,7 @@ export type Database = {
           customer_email: string
           customer_feedback: string | null
           customer_id: string | null
+          customer_line_id: string | null
           customer_name: string
           customer_phone: string
           customer_satisfaction: number | null
@@ -1204,6 +1208,7 @@ export type Database = {
           customer_email: string
           customer_feedback?: string | null
           customer_id?: string | null
+          customer_line_id?: string | null
           customer_name: string
           customer_phone: string
           customer_satisfaction?: number | null
@@ -1235,6 +1240,7 @@ export type Database = {
           customer_email?: string
           customer_feedback?: string | null
           customer_id?: string | null
+          customer_line_id?: string | null
           customer_name?: string
           customer_phone?: string
           customer_satisfaction?: number | null
