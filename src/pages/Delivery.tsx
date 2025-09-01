@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1356,13 +1356,20 @@ const Delivery = () => {
                     <Shield className="h-5 w-5" />
                     ติดตามประกันสินค้า
                   </CardTitle>
+                  <CardDescription>
+                    รายการสินค้าที่มีประกัน รวมถึงสินค้าที่หมดประกันแล้ว
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-4">
                     {deliveryOrders
                       .filter(order => order.warranty_items && order.warranty_items.length > 0)
                       .map((order) => (
-                        <Card key={order.id} className="border border-blue-200">
+                        <Card key={order.id} className={`border ${
+                          order.warranty_items?.some(item => item.warranty_status === 'expired') 
+                            ? 'border-red-300 bg-red-50/30' 
+                            : 'border-blue-200'
+                        }`}>
                           <CardContent className="p-4">
                             <div className="flex justify-between items-start mb-3">
                               <div>
@@ -1389,16 +1396,33 @@ const Delivery = () => {
                                         </p>
                                       )}
                                     </div>
-                                    <Badge 
-                                      variant={
-                                        item.warranty_status === 'active' ? 'default' : 
-                                        item.warranty_status === 'expired' ? 'destructive' : 'secondary'
-                                      }
-                                      className="ml-2"
-                                    >
-                                      {item.warranty_status === 'active' ? 'ใช้งานได้' : 
-                                       item.warranty_status === 'expired' ? 'หมดอายุ' : 'รอเริ่มใช้'}
-                                    </Badge>
+                                     <div className="flex items-center gap-2">
+                                       <Badge 
+                                         variant={
+                                           item.warranty_status === 'active' ? 'default' : 
+                                           item.warranty_status === 'expired' ? 'destructive' : 'secondary'
+                                         }
+                                         className={`ml-2 ${item.warranty_status === 'expired' ? 'bg-red-500 text-white border-red-600' : ''}`}
+                                       >
+                                         {item.warranty_status === 'active' ? 'ใช้งานได้' : 
+                                          item.warranty_status === 'expired' ? 'หมดอายุ' : 'รอเริ่มใช้'}
+                                       </Badge>
+                                       {item.warranty_status === 'expired' && (
+                                         <Button 
+                                           size="sm" 
+                                           variant="outline"
+                                           className="text-xs px-2 py-1 h-6 border-orange-300 text-orange-700 hover:bg-orange-50"
+                                           onClick={() => {
+                                             toast({
+                                               title: "แจ้งเตือนลูกค้า",
+                                               description: `ส่งการแจ้งเตือนประกันหมดอายุให้ลูกค้า ${order.customer_name} แล้ว`,
+                                             });
+                                           }}
+                                         >
+                                           แจ้งลูกค้า
+                                         </Button>
+                                       )}
+                                     </div>
                                   </div>
                                   
                                   <div className="grid grid-cols-2 gap-4 text-xs">
@@ -1437,12 +1461,32 @@ const Delivery = () => {
                                     </div>
                                   )}
                                   
-                                  {item.warranty_status === 'expired' && (
-                                    <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs">
-                                      <AlertTriangle className="h-3 w-3 inline mr-1" />
-                                      ประกันหมดอายุแล้ว
-                                    </div>
-                                  )}
+                                   {item.warranty_status === 'expired' && (
+                                     <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded">
+                                       <div className="flex items-center justify-between">
+                                         <div className="flex items-center text-red-700">
+                                           <AlertTriangle className="h-4 w-4 mr-2" />
+                                           <span className="text-sm font-medium">ประกันหมดอายุแล้ว</span>
+                                         </div>
+                                         <Button 
+                                           size="sm" 
+                                           variant="default"
+                                           className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 h-7"
+                                           onClick={() => {
+                                             toast({
+                                               title: "แจ้งเตือนพนักงาน",
+                                               description: `แจ้งเตือนพนักงานเกี่ยวกับประกันที่หมดอายุ: ${item.item_name}`,
+                                             });
+                                           }}
+                                         >
+                                           แจ้งพนักงาน
+                                         </Button>
+                                       </div>
+                                       <p className="text-xs text-red-600 mt-1">
+                                         กรุณาติดต่อลูกค้าเพื่อแจ้งเกี่ยวกับการต่ออายุประกัน
+                                       </p>
+                                     </div>
+                                   )}
                                 </div>
                               ))}
                             </div>
