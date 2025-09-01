@@ -66,6 +66,7 @@ export default function Customers() {
   const downloadTemplate = () => {
     const templateData = [
       {
+        'Company': 'บริษัท ตัวอย่าง จำกัด',
         'Address': '123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองตัน กรุงเทพฯ',
         'postcode': '10110',
         'TaxID': '0123456789012',
@@ -76,6 +77,7 @@ export default function Customers() {
         'Line ID': '@companyline'
       },
       {
+        'Company': 'บริษัท ผู้จำหน่าย จำกัด',
         'Address': '456 ถนนพระราม 4 แขวงสุริยวงศ์ เขตบางรัก กรุงเทพฯ',
         'postcode': '10500',
         'TaxID': '9876543210987',
@@ -93,6 +95,7 @@ export default function Customers() {
     
     // Set column widths
     ws['!cols'] = [
+      { wch: 25 }, // Company
       { wch: 50 }, // Address
       { wch: 10 }, // postcode
       { wch: 15 }, // TaxID
@@ -130,6 +133,7 @@ export default function Customers() {
 
         jsonData.forEach((row: any, index: number) => {
           const rowNum = index + 2; // Account for header row
+          const company = row.Company?.toString().trim() || "";
           const address = row.Address?.toString().trim() || "";
           const postcode = row.postcode?.toString().trim() || "";
           const taxId = row.TaxID?.toString().trim() || "";
@@ -141,6 +145,10 @@ export default function Customers() {
 
           // Validation errors for this row
           const rowErrors: string[] = [];
+
+          if (!company) {
+            rowErrors.push("ต้องระบุชื่อบริษัท");
+          }
 
           if (!contact) {
             rowErrors.push("ต้องระบุชื่อผู้ติดต่อ");
@@ -156,7 +164,7 @@ export default function Customers() {
 
           const customerData = {
             rowNumber: rowNum,
-            name: contact || '',
+            name: company || contact || '',
             contact_person: contact,
             phone: mobilePhone,
             email: email,
@@ -167,6 +175,7 @@ export default function Customers() {
             tax_id: taxId,
             line_id: lineId,
             hq_branch: hqBranch,
+            company: company,
             originalRow: row
           };
 
@@ -380,6 +389,7 @@ export default function Customers() {
                                 <TableHeader>
                                   <TableRow>
                                     <TableHead>แถว</TableHead>
+                                    <TableHead>บริษัท</TableHead>
                                     <TableHead>ที่อยู่</TableHead>
                                     <TableHead>รหัสไปรษณีย์</TableHead>
                                     <TableHead>เลขผู้เสียภาษี</TableHead>
@@ -398,6 +408,7 @@ export default function Customers() {
                                       className={importErrors.some(e => e.row === customer.rowNumber) ? "bg-destructive/5" : ""}
                                     >
                                       <TableCell>{customer.rowNumber}</TableCell>
+                                      <TableCell className="max-w-[150px] truncate" title={customer.company}>{customer.company || '-'}</TableCell>
                                       <TableCell className="max-w-[200px] truncate" title={customer.address}>{customer.address || '-'}</TableCell>
                                       <TableCell>{customer.postal_code || '-'}</TableCell>
                                       <TableCell>{customer.tax_id || '-'}</TableCell>
