@@ -230,9 +230,14 @@ export default function Quotations() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {quotation.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-                    </TableCell>
+                     <TableCell className="text-right font-medium">
+                       <span className="whitespace-nowrap">
+                         ฿{quotation.total_amount.toLocaleString('th-TH', { 
+                           minimumFractionDigits: 2,
+                           maximumFractionDigits: 2 
+                         })}
+                       </span>
+                     </TableCell>
                     <TableCell className="text-center">
                       <QuotationWorkflow 
                         quotation={quotation} 
