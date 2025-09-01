@@ -15,7 +15,11 @@ import {
   FileText,
   Bell,
   Menu,
-  ChevronLeft
+  ChevronLeft,
+  ChevronDown,
+  ChevronRight,
+  CreditCard,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,7 +49,39 @@ const menuItems = [
     icon: FileText,
     href: "/quotations",
     view: "quotations",
-    iconColor: "text-green-500"
+    iconColor: "text-green-500",
+    submenu: [
+      {
+        title: "ใบวางบิล/ใบแจ้งหนี้",
+        icon: FileText,
+        href: "/invoices",
+        view: "invoices",
+        iconColor: "text-blue-500",
+        submenu: [
+          {
+            title: "สร้างใบวางบิล/ใบแจ้งหนี้",
+            icon: FileText,
+            href: "/invoices/create",
+            view: "create-invoice",
+            iconColor: "text-blue-500"
+          },
+          {
+            title: "มัดจำใบวางบิล/ใบแจ้งหนี้",
+            icon: CreditCard,
+            href: "/invoices/downpayment",
+            view: "downpayment-invoice",
+            iconColor: "text-purple-500"
+          },
+          {
+            title: "แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้",
+            icon: RefreshCw,
+            href: "/invoices/split-payment",
+            view: "split-payment-invoice",
+            iconColor: "text-orange-500"
+          }
+        ]
+      }
+    ]
   },
   {
     title: "แจ้งซ่อม / Service Ticket",
@@ -107,12 +143,26 @@ const menuItems = [
 
 export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(true); // เริ่มต้นให้หุบแล้ว
+  const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({});
   const location = useLocation();
   const navigate = useNavigate();
 
   const currentPath = location.pathname;
 
-  const handleMenuClick = (item: typeof menuItems[0]) => {
+  const toggleMenu = (menuKey: string) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [menuKey]: !prev[menuKey]
+    }));
+  };
+
+  const handleMenuClick = (item: any) => {
+    // If item has submenu, toggle it instead of navigating
+    if (item.submenu && !collapsed) {
+      toggleMenu(item.view);
+      return;
+    }
+    
     // Always use navigate for consistent behavior
     navigate(item.href);
     
@@ -122,11 +172,87 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
     }
   };
 
-  const isActive = (item: typeof menuItems[0]) => {
+  const isActive = (item: any) => {
     if (currentView) {
       return currentView === item.view;
     }
     return currentPath === item.href;
+  };
+
+  const renderMenuItem = (item: any, level = 0) => {
+    const Icon = item.icon;
+    const active = isActive(item);
+    const isExpanded = expandedMenus[item.view];
+    const hasSubmenu = item.submenu && item.submenu.length > 0;
+    
+    if (!collapsed) {
+      // Expanded view
+      return (
+        <div key={item.href}>
+          <Button
+            variant={active ? "default" : "ghost"}
+            className={cn(
+              "w-full justify-start h-10 px-3",
+              level > 0 && "ml-4 w-[calc(100%-1rem)]",
+              level > 1 && "ml-8 w-[calc(100%-2rem)]",
+              active 
+                ? "bg-primary text-primary-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            )}
+            onClick={() => handleMenuClick(item)}
+          >
+            <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
+            <span className="text-sm flex-1 text-left">{item.title}</span>
+            {hasSubmenu && (
+              isExpanded ? 
+                <ChevronDown className="h-4 w-4 ml-2" /> : 
+                <ChevronRight className="h-4 w-4 ml-2" />
+            )}
+          </Button>
+          
+          {hasSubmenu && isExpanded && (
+            <div className="mt-1 space-y-1">
+              {item.submenu.map((subItem: any) => renderMenuItem(subItem, level + 1))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Collapsed view - only icons with tooltips
+    return (
+      <Tooltip key={item.href}>
+        <TooltipTrigger asChild>
+          <Button
+            variant={active ? "default" : "ghost"}
+            size="icon"
+            className={cn(
+              "w-12 h-12 mx-auto",
+              active 
+                ? "bg-primary text-primary-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            )}
+            onClick={() => handleMenuClick(item)}
+          >
+            <Icon className={cn("h-5 w-5", item.iconColor)} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right" className="ml-2">
+          <div>
+            <p>{item.title}</p>
+            {hasSubmenu && (
+              <div className="mt-2 space-y-1">
+                {item.submenu.map((subItem: any) => (
+                  <p key={subItem.view} className="text-xs text-muted-foreground">
+                    • {subItem.title}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    );
   };
 
   return (
@@ -177,54 +303,7 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 p-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item);
-            
-            if (!collapsed) {
-              // Expanded view
-              return (
-                <Button
-                  key={item.href}
-                  variant={active ? "default" : "ghost"}
-                  className={cn(
-                    "w-full justify-start h-10 px-3",
-                    active 
-                      ? "bg-primary text-primary-foreground shadow-sm" 
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                  )}
-                  onClick={() => handleMenuClick(item)}
-                >
-                  <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
-                  <span className="text-sm">{item.title}</span>
-                </Button>
-              );
-            }
-
-            // Collapsed view - only icons with tooltips
-            return (
-              <Tooltip key={item.href}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={active ? "default" : "ghost"}
-                    size="icon"
-                    className={cn(
-                      "w-12 h-12 mx-auto",
-                      active 
-                        ? "bg-primary text-primary-foreground shadow-sm" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                    onClick={() => handleMenuClick(item)}
-                  >
-                    <Icon className={cn("h-5 w-5", item.iconColor)} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="ml-2">
-                  <p>{item.title}</p>
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
+          {menuItems.map((item) => renderMenuItem(item))}
         </nav>
 
         {/* User Info */}
