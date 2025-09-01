@@ -1285,7 +1285,7 @@ export type Database = {
           new_status: Database["public"]["Enums"]["service_status"]
           notes: string | null
           old_status: Database["public"]["Enums"]["service_status"] | null
-          service_request_id: string | null
+          service_request_id: string
         }
         Insert: {
           changed_by?: string | null
@@ -1294,7 +1294,7 @@ export type Database = {
           new_status: Database["public"]["Enums"]["service_status"]
           notes?: string | null
           old_status?: Database["public"]["Enums"]["service_status"] | null
-          service_request_id?: string | null
+          service_request_id: string
         }
         Update: {
           changed_by?: string | null
@@ -1303,7 +1303,7 @@ export type Database = {
           new_status?: Database["public"]["Enums"]["service_status"]
           notes?: string | null
           old_status?: Database["public"]["Enums"]["service_status"] | null
-          service_request_id?: string | null
+          service_request_id?: string
         }
         Relationships: [
           {
