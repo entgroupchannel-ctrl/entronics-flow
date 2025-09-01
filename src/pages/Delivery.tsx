@@ -916,11 +916,31 @@ const Delivery = () => {
           </div>
 
           <Tabs defaultValue="orders" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="orders">ใบจัดส่ง</TabsTrigger>
-              <TabsTrigger value="warranty">ติดตามประกัน</TabsTrigger>
-              <TabsTrigger value="tracking">ติดตามสถานะ</TabsTrigger>
-              <TabsTrigger value="drivers">คนขับ</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 bg-muted/30 p-1 rounded-lg border">
+              <TabsTrigger 
+                value="orders" 
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium transition-all hover:bg-muted/50"
+              >
+                📦 ใบจัดส่ง
+              </TabsTrigger>
+              <TabsTrigger 
+                value="warranty" 
+                className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm font-medium transition-all hover:bg-muted/50"
+              >
+                🛡️ ติดตามประกัน
+              </TabsTrigger>
+              <TabsTrigger 
+                value="tracking" 
+                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:shadow-sm font-medium transition-all hover:bg-muted/50"
+              >
+                📍 ติดตามสถานะ
+              </TabsTrigger>
+              <TabsTrigger 
+                value="drivers" 
+                className="data-[state=active]:bg-green-500 data-[state=active]:text-white data-[state=active]:shadow-sm font-medium transition-all hover:bg-muted/50"
+              >
+                🚗 คนขับ
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="orders" className="space-y-4">
