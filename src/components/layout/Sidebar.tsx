@@ -237,15 +237,21 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
         {/* User Info */}
         {!collapsed && (
           <div className="border-t border-border p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
-                <Users className="h-4 w-4 text-white" />
+            <button 
+              onClick={onLogoClick}
+              className="w-full hover:bg-accent/50 rounded-lg p-2 transition-colors"
+              title="ข้อมูลบริษัท"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
+                  <Users className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium text-foreground truncate">Admin User</p>
+                  <p className="text-xs text-muted-foreground truncate">admin@entgroup.com</p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">Admin User</p>
-                <p className="text-xs text-muted-foreground truncate">admin@entgroup.com</p>
-              </div>
-            </div>
+            </button>
           </div>
         )}
 
@@ -254,13 +260,18 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
           <div className="border-t border-border p-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center mx-auto cursor-pointer">
+                <button 
+                  onClick={onLogoClick}
+                  className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center mx-auto cursor-pointer hover:scale-105 transition-transform"
+                  title="ข้อมูลบริษัท"
+                >
                   <Users className="h-5 w-5 text-white" />
-                </div>
+                </button>
               </TooltipTrigger>
               <TooltipContent side="right" className="ml-2">
                 <p>Admin User</p>
                 <p className="text-xs text-muted-foreground">admin@entgroup.com</p>
+                <p className="text-xs text-muted-foreground mt-1">คลิกเพื่อดูข้อมูลบริษัท</p>
               </TooltipContent>
             </Tooltip>
           </div>
