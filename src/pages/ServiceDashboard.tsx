@@ -28,7 +28,9 @@ import {
   Plus,
   Wrench,
   Building,
-  Package
+  Package,
+  Clock,
+  CheckCircle2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
@@ -56,6 +58,8 @@ interface ServiceRequest {
   customer_feedback?: string;
   created_at: string;
   updated_at: string;
+  acknowledged_at?: string;
+  acknowledgment_notes?: string;
   technicians?: {
     name: string;
     phone?: string;
@@ -482,6 +486,37 @@ export default function ServiceDashboard() {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
+  // Acknowledge job function for technicians
+  const acknowledgeJob = async (requestId: string, notes?: string) => {
+    if (!currentTechnician) return;
+    
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({
+          acknowledged_at: new Date().toISOString(),
+          acknowledgment_notes: notes || null
+        })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "รับทราบงานสำเร็จ",
+        description: "คุณได้รับทราบงานนี้แล้ว"
+      });
+
+      fetchData();
+    } catch (error) {
+      console.error('Error acknowledging job:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถรับทราบงานได้",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants = {
       pending: "secondary",
@@ -535,6 +570,17 @@ export default function ServiceDashboard() {
   const pendingRequests = serviceRequests.filter(r => r.status === 'pending').length;
   const inProgressRequests = serviceRequests.filter(r => r.status === 'in_progress').length;
   const completedRequests = serviceRequests.filter(r => r.status === 'completed').length;
+
+  // Format time helper function
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString('th-TH', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">กำลังโหลด...</div>;
@@ -662,9 +708,20 @@ export default function ServiceDashboard() {
                         {getStatusBadge(request.status)}
                         {getPriorityBadge(request.priority)}
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(request.created_at).toLocaleDateString('th-TH')}
-                      </p>
+                      
+                      {/* Time information */}
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          <span>เปิดเคส: {formatDateTime(request.created_at)}</span>
+                        </div>
+                        {request.acknowledged_at && (
+                          <div className="flex items-center gap-1 text-green-600">
+                            <CheckCircle2 className="h-4 w-4" />
+                            <span>รับทราบ: {formatDateTime(request.acknowledged_at)}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
@@ -787,7 +844,20 @@ export default function ServiceDashboard() {
                            {/* Technician Actions */}
                            {currentTechnician && request.assigned_technician_id === currentTechnician.id && (
                              <div className="flex gap-2 pt-4 border-t">
-                               {request.status === 'assigned' && (
+                               {/* Acknowledgment button - only show if not acknowledged */}
+                               {request.status === 'assigned' && !request.acknowledged_at && (
+                                 <Button 
+                                   size="sm" 
+                                   onClick={() => acknowledgeJob(request.id)}
+                                   className="bg-blue-600 hover:bg-blue-700"
+                                 >
+                                   <CheckCircle2 className="h-4 w-4 mr-1" />
+                                   รับทราบงาน
+                                 </Button>
+                               )}
+                               
+                               {/* Work progress buttons */}
+                               {request.acknowledged_at && request.status === 'assigned' && (
                                  <Button 
                                    size="sm" 
                                    onClick={() => updateJobStatus(request.id, 'in_progress')}
@@ -860,6 +930,30 @@ export default function ServiceDashboard() {
                       <span>{request.technicians?.name || 'ยังไม่มอบหมาย'}</span>
                     </div>
                   </div>
+                  
+                  {/* Technician quick actions on main card */}
+                  {currentTechnician && request.assigned_technician_id === currentTechnician.id && (
+                    <div className="flex gap-2 mt-4 pt-4 border-t">
+                      {request.status === 'assigned' && !request.acknowledged_at && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => acknowledgeJob(request.id)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          รับทราบงาน
+                        </Button>
+                      )}
+                      {request.acknowledged_at && request.status === 'assigned' && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => updateJobStatus(request.id, 'in_progress')}
+                        >
+                          เริ่มซ่อม
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}

@@ -1162,6 +1162,8 @@ export type Database = {
       }
       service_requests: {
         Row: {
+          acknowledged_at: string | null
+          acknowledgment_notes: string | null
           actual_cost: number | null
           assigned_technician_id: string | null
           completed_date: string | null
@@ -1190,6 +1192,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          acknowledged_at?: string | null
+          acknowledgment_notes?: string | null
           actual_cost?: number | null
           assigned_technician_id?: string | null
           completed_date?: string | null
@@ -1218,6 +1222,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          acknowledged_at?: string | null
+          acknowledgment_notes?: string | null
           actual_cost?: number | null
           assigned_technician_id?: string | null
           completed_date?: string | null
