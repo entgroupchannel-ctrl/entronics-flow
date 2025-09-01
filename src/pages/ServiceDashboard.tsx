@@ -766,14 +766,43 @@ export default function ServiceDashboard() {
                           ดูรายละเอียด
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle className="flex items-center gap-2">
-                            {request.ticket_number}
-                            {getStatusBadge(request.status)}
-                          </DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-6">
+                       <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                         <DialogHeader>
+                           <DialogTitle className="flex items-center justify-between">
+                             <div className="flex items-center gap-2">
+                               {request.ticket_number}
+                               {getStatusBadge(request.status)}
+                               {getPriorityBadge(request.priority)}
+                               {getSourceBadge(request.source)}
+                             </div>
+                           </DialogTitle>
+                         </DialogHeader>
+                         
+                         {/* Time Information Card - Moved to top */}
+                         <Card className="bg-blue-50 border border-blue-200 mb-4">
+                           <CardHeader className="pb-3">
+                             <CardTitle className="text-lg flex items-center gap-2 text-blue-700">
+                               <Clock className="h-5 w-5" />
+                               ข้อมูลเวลา
+                             </CardTitle>
+                           </CardHeader>
+                           <CardContent>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                               <div className="p-3 bg-white rounded border border-blue-200">
+                                 <span className="font-medium text-sm text-blue-700">เวลาเปิดเคส:</span>
+                                 <p className="text-lg font-semibold text-blue-600 mt-1">{formatDateTime(request.created_at)}</p>
+                               </div>
+                               {request.acknowledged_at && (
+                                 <div className="p-3 bg-green-50 rounded border border-green-200">
+                                   <span className="font-medium text-sm text-green-700">เวลารับทราบ:</span>
+                                   <p className="text-lg font-semibold text-green-600 mt-1">{formatDateTime(request.acknowledged_at)}</p>
+                                 </div>
+                               )}
+                             </div>
+                           </CardContent>
+                         </Card>
+
+                         <div className="space-y-6">
                           {/* Customer Information Card */}
                           <Card className="bg-white border border-gray-200">
                             <CardHeader className="pb-3">
@@ -854,29 +883,6 @@ export default function ServiceDashboard() {
                             </CardContent>
                           </Card>
 
-                          {/* Time Information Card */}
-                          <Card className="bg-white border border-gray-200">
-                            <CardHeader className="pb-3">
-                              <CardTitle className="text-lg flex items-center gap-2">
-                                <Clock className="h-5 w-5" />
-                                ข้อมูลเวลา
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="p-2 bg-gray-50 rounded border">
-                                  <span className="font-medium text-sm text-gray-700">เวลาเปิดเคส:</span>
-                                  <p className="text-sm mt-1">{formatDateTime(request.created_at)}</p>
-                                </div>
-                                {request.acknowledged_at && (
-                                  <div className="p-2 bg-green-50 rounded border border-green-200">
-                                    <span className="font-medium text-sm text-green-700">เวลารับทราบ:</span>
-                                    <p className="text-sm mt-1 text-green-600">{formatDateTime(request.acknowledged_at)}</p>
-                                  </div>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
                            
                            {canManageInventory() && (
                              <div className="flex gap-2 pt-4 border-t">
