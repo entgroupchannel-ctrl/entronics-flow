@@ -5,8 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, MoreHorizontal, Phone, Mail, MapPin, Upload, Download, FileSpreadsheet } from 'lucide-react';
+import { Search, MoreHorizontal, Phone, Mail, MapPin, Upload, Download, FileSpreadsheet, Edit, Trash2 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { AddCustomerForm } from '@/components/customers/AddCustomerForm';
@@ -22,6 +25,10 @@ interface Customer {
   phone: string | null;
   email: string | null;
   address: string | null;
+  postal_code: string | null;
+  tax_id: string | null;
+  line_id: string | null;
+  hq_branch: string | null;
   customer_type: string;
   status: string | null;
   notes: string | null;
@@ -40,6 +47,10 @@ export default function Customers() {
   const [importErrors, setImportErrors] = useState<{row: number, errors: string[]}[]>([]);
   const [validCustomers, setValidCustomers] = useState<any[]>([]);
   const [invalidCustomers, setInvalidCustomers] = useState<any[]>([]);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -267,6 +278,58 @@ export default function Customers() {
     }
   };
 
+  // Delete customer
+  const handleDeleteCustomer = async (customerId: string) => {
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .delete()
+        .eq('id', customerId);
+
+      if (error) throw error;
+
+      toast({
+        title: "ลบข้อมูลสำเร็จ",
+        description: "ลบข้อมูลลูกค้าเรียบร้อยแล้ว",
+      });
+
+      fetchCustomers();
+    } catch (error: any) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบข้อมูลลูกค้าได้",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Update customer
+  const handleUpdateCustomer = async (customerData: any) => {
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update(customerData)
+        .eq('id', editingCustomer?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "อัปเดตข้อมูลสำเร็จ",
+        description: "อัปเดตข้อมูลลูกค้าเรียบร้อยแล้ว",
+      });
+
+      setShowEditDialog(false);
+      setEditingCustomer(null);
+      fetchCustomers();
+    } catch (error: any) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถอัปเดตข้อมูลลูกค้าได้",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
     fetchCustomers();
   }, []);
@@ -289,6 +352,20 @@ export default function Customers() {
       (item.contact_person && item.contact_person.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   };
+
+  // Get paginated data
+  const getPaginatedData = () => {
+    const filteredData = getFilteredData();
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredData.slice(startIndex, endIndex);
+  };
+
+  const totalPages = Math.ceil(getFilteredData().length / itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [searchTerm, activeTab]);
 
   const getStatusBadge = (status?: string | null) => {
     if (!status || status === 'ปกติ') return null;
@@ -510,9 +587,31 @@ export default function Customers() {
                     <div className="col-span-1"></div>
                   </div>
 
+                  {/* Pagination Controls */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">แสดงผล:</span>
+                      <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                        <SelectTrigger className="w-24">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="20">20</SelectItem>
+                          <SelectItem value="50">50</SelectItem>
+                          <SelectItem value="100">100</SelectItem>
+                          <SelectItem value="200">200</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <span className="text-sm text-muted-foreground">รายการต่อหน้า</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      รวม {getFilteredData().length} รายการ
+                    </div>
+                  </div>
+
                   {/* Table Content */}
                   <div className="divide-y divide-border">
-                    {getFilteredData().map((item) => (
+                    {getPaginatedData().map((item) => (
                       <div key={item.id} className="grid grid-cols-12 gap-4 p-4 hover:bg-muted/30 transition-colors">
                         <div className="col-span-3">
                           <div className="flex items-center gap-2">
@@ -554,13 +653,89 @@ export default function Customers() {
                           <Badge variant="outline">{item.customer_type}</Badge>
                         </div>
                         <div className="col-span-1 flex justify-end">
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => {
+                                setEditingCustomer(item);
+                                setShowEditDialog(true);
+                              }}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                แก้ไข
+                              </DropdownMenuItem>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    ลบ
+                                  </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>ยืนยันการลบ</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      คุณแน่ใจหรือไม่ที่จะลบ "{item.name}" ออกจากระบบ? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteCustomer(item.id)}>
+                                      ลบ
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     ))}
                   </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-6">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                      >
+                        หน้าแรก
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        ก่อนหน้า
+                      </Button>
+                      <span className="text-sm text-muted-foreground">
+                        หน้า {currentPage} จาก {totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        ถัดไป
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                      >
+                        หน้าสุดท้าย
+                      </Button>
+                    </div>
+                  )}
 
                   {getFilteredData().length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
@@ -569,6 +744,113 @@ export default function Customers() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Edit Customer Dialog */}
+              <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>แก้ไขข้อมูลลูกค้า</DialogTitle>
+                  </DialogHeader>
+                  {editingCustomer && (
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      const customerData = {
+                        name: formData.get('name') as string,
+                        contact_person: formData.get('contact_person') as string || null,
+                        phone: formData.get('phone') as string || null,
+                        email: formData.get('email') as string || null,
+                        address: formData.get('address') as string || null,
+                        postal_code: formData.get('postal_code') as string || null,
+                        customer_type: formData.get('customer_type') as string,
+                        status: formData.get('status') as string,
+                        tax_id: formData.get('tax_id') as string || null,
+                        line_id: formData.get('line_id') as string || null,
+                        hq_branch: formData.get('hq_branch') as string || null,
+                        notes: formData.get('notes') as string || null,
+                      };
+                      handleUpdateCustomer(customerData);
+                    }} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium">ชื่อบริษัท *</label>
+                          <Input name="name" defaultValue={editingCustomer.name} required />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">ชื่อผู้ติดต่อ</label>
+                          <Input name="contact_person" defaultValue={editingCustomer.contact_person || ''} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">เบอร์โทร</label>
+                          <Input name="phone" defaultValue={editingCustomer.phone || ''} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">อีเมล</label>
+                          <Input name="email" type="email" defaultValue={editingCustomer.email || ''} />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-sm font-medium">ที่อยู่</label>
+                          <Input name="address" defaultValue={editingCustomer.address || ''} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">รหัสไปรษณีย์</label>
+                          <Input name="postal_code" defaultValue={editingCustomer.postal_code || ''} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">เลขผู้เสียภาษี</label>
+                          <Input name="tax_id" defaultValue={editingCustomer.tax_id || ''} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">สาขา</label>
+                          <Input name="hq_branch" defaultValue={editingCustomer.hq_branch || ''} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Line ID</label>
+                          <Input name="line_id" defaultValue={editingCustomer.line_id || ''} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">ประเภท</label>
+                          <Select name="customer_type" defaultValue={editingCustomer.customer_type}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="ลูกค้า">ลูกค้า</SelectItem>
+                              <SelectItem value="ผู้จำหน่าย">ผู้จำหน่าย</SelectItem>
+                              <SelectItem value="ผู้จำหน่าย/ลูกค้า">ผู้จำหน่าย/ลูกค้า</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">สถานะ</label>
+                          <Select name="status" defaultValue={editingCustomer.status || 'ปกติ'}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="ปกติ">ปกติ</SelectItem>
+                              <SelectItem value="สำคัญ">สำคัญ</SelectItem>
+                              <SelectItem value="ระงับ">ระงับ</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-sm font-medium">หมายเหตุ</label>
+                          <Input name="notes" defaultValue={editingCustomer.notes || ''} />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                          ยกเลิก
+                        </Button>
+                        <Button type="submit">
+                          บันทึก
+                        </Button>
+                      </div>
+                    </form>
+                  )}
+                </DialogContent>
+              </Dialog>
             </div>
           </main>
         </div>
