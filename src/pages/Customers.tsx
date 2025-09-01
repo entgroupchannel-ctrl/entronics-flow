@@ -59,29 +59,47 @@ export default function Customers() {
     try {
       console.log('Fetching customers...');
       
-      // ดึงข้อมูลทั้งหมดโดยไม่จำกัดจำนวน
-      const { data, error, count } = await supabase
-        .from('customers')
-        .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .limit(10000); // เพิ่ม limit สูงสุดเป็น 10,000
+      // ดึงข้อมูลทั้งหมดแบบไม่จำกัด โดยใช้ range แทน limit
+      let allCustomers: any[] = [];
+      let start = 0;
+      const batchSize = 1000;
+      let hasMore = true;
 
-      console.log('Total customers in database:', count);
-      console.log('Fetched customers:', data?.length);
+      while (hasMore) {
+        console.log(`Fetching batch: ${start} to ${start + batchSize - 1}`);
+        
+        const { data, error, count } = await supabase
+          .from('customers')
+          .select('*', { count: 'exact' })
+          .order('created_at', { ascending: false })
+          .range(start, start + batchSize - 1);
 
-      if (error) throw error;
-      setCustomers(data || []);
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          allCustomers = [...allCustomers, ...data];
+          start += batchSize;
+          
+          // ถ้าได้ข้อมูลน้อยกว่า batchSize แสดงว่าหมดแล้ว
+          if (data.length < batchSize) {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
+
+        // แสดงจำนวนรวมครั้งแรกที่ได้
+        if (start === batchSize && count) {
+          console.log('Total customers in database:', count);
+        }
+      }
+
+      console.log('Total customers fetched:', allCustomers.length);
+      setCustomers(allCustomers);
       
       // Reset to first page when data is refreshed
       setCurrentPage(1);
 
-      if (count && count > 10000) {
-        toast({
-          title: 'แจ้งเตือน',
-          description: `พบข้อมูลลูกค้า ${count} รายการ แต่แสดงได้เพียง 10,000 รายการแรก`,
-          variant: 'default',
-        });
-      }
     } catch (error: any) {
       console.error('Error fetching customers:', error);
       toast({
