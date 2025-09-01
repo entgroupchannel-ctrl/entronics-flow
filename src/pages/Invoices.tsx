@@ -321,8 +321,12 @@ export default function Invoices() {
                       </TableRow>
                     ) : (
                       currentItems.map((invoice) => (
-                        <TableRow key={invoice.id} className="hover:bg-muted/50">
-                          <TableCell>
+                        <TableRow 
+                          key={invoice.id} 
+                          className="hover:bg-muted/50 cursor-pointer"
+                          onClick={() => navigate(`/invoices/${invoice.id}`)}
+                        >
+                          <TableCell onClick={(e) => e.stopPropagation()}>
                             <Checkbox
                               checked={selectedItems.includes(invoice.id)}
                               onCheckedChange={(checked) => handleSelectItem(invoice.id, checked as boolean)}
@@ -338,7 +342,7 @@ export default function Invoices() {
                           <TableCell className="font-medium">
                             ฿{invoice.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                           </TableCell>
-                          <TableCell>
+                          <TableCell onClick={(e) => e.stopPropagation()}>
                             <InvoiceStatusDropdown 
                               invoice={invoice} 
                               onStatusUpdate={loadInvoices}
@@ -347,7 +351,7 @@ export default function Invoices() {
                           <TableCell>
                             {invoice.due_date ? format(new Date(invoice.due_date), 'dd/MM/yyyy') : '-'}
                           </TableCell>
-                          <TableCell>
+                          <TableCell onClick={(e) => e.stopPropagation()}>
                             <DropdownMenu 
                               open={dropdownOpen === invoice.id} 
                               onOpenChange={(isOpen) => {
