@@ -486,7 +486,7 @@ const Delivery = () => {
             priority: "normal",
             delivery_date: "2025-01-02",
             tracking_number: "TRK001234567892",
-            items_count: 1,
+            items_count: 2,
             total_weight: 8.5,
             created_at: "2025-01-01T09:00:00Z",
             warranty_items: [
@@ -499,6 +499,16 @@ const Delivery = () => {
                 warranty_end_date: "2025-01-09",
                 warranty_status: "expired",
                 registration_code: "REG20250003"
+              },
+              {
+                id: "w5",
+                item_name: "Industrial PC รุ่น IPC-1000",
+                serial_numbers: ["IPC1000-2024-999"],
+                warranty_period_days: 7,
+                warranty_start_date: "2024-12-25",
+                warranty_end_date: "2025-01-01",
+                warranty_status: "expired",
+                registration_code: "REG20240999"
               }
             ]
           },
@@ -535,6 +545,32 @@ const Delivery = () => {
                 warranty_end_date: undefined,
                 warranty_status: "pending", 
                 registration_code: undefined
+              }
+            ]
+          },
+          {
+            id: "5",
+            order_number: "DL2025000005",
+            customer_name: "บริษัท อินดัสเทรียล จำกัด",
+            customer_phone: "02-777-8888",
+            delivery_address: "555 ถนนเพชรบุรี แขวงทุ่งพญาไท เขตราชเทวี กรุงเทพฯ 10400",
+            status: "delivered",
+            priority: "urgent",
+            delivery_date: "2024-12-20",
+            tracking_number: "TRK001234567894",
+            items_count: 1,
+            total_weight: 18.0,
+            created_at: "2024-12-19T10:00:00Z",
+            warranty_items: [
+              {
+                id: "w7",
+                item_name: "Touch Monitor 21 นิ้ว",
+                serial_numbers: ["TM21-2024-888"],
+                warranty_period_days: 7,
+                warranty_start_date: "2024-12-20",
+                warranty_end_date: "2024-12-27",
+                warranty_status: "expired",
+                registration_code: "REG20240888"
               }
             ]
           }
@@ -989,291 +1025,324 @@ const Delivery = () => {
                 {filteredOrders.map((order) => (
                   <Card key={order.id} className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
-                       <div className="flex justify-between items-start mb-4">
-                         <div className="space-y-1">
-                           <div className="flex items-center gap-2">
-                             <h3 className="font-semibold text-lg">{order.order_number}</h3>
-                             {getStatusBadge(order.status)}
-                             {getPriorityBadge(order.priority)}
-                           </div>
-                            <p className="text-sm text-muted-foreground">
-                              สร้างเมื่อ: {new Date(order.created_at).toLocaleDateString('th-TH', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                timeZone: 'Asia/Bangkok'
-                              })}
-                            </p>
-                           
-                            {/* Assignment Info */}
-                             {order.assigned_staff_id && order.driver_name && (
-                               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 my-2">
-                                 <div className="flex items-center gap-2 flex-wrap">
-                                   <div className="flex items-center gap-2">
-                                     <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
-                                       <Users className="h-4 w-4 text-blue-600" />
-                                     </div>
-                                     <span className="text-sm font-semibold text-blue-700">มอบหมายแล้ว</span>
-                                   </div>
-                                   <span className="text-gray-300">|</span>
-                                   <div className="flex items-center gap-1">
-                                     <span className="text-sm">👨‍💼</span>
-                                     <span className="text-sm font-medium text-blue-600">{order.driver_name}</span>
-                                   </div>
-                                   {order.staff_phone && (
-                                     <>
-                                       <span className="text-gray-300">|</span>
-                                       <div className="flex items-center gap-1">
-                                         <span className="text-sm">📞</span>
-                                         <span className="text-sm text-gray-600">{order.staff_phone}</span>
-                                       </div>
-                                     </>
-                                   )}
-                                   {order.vehicle_info && (
-                                     <>
-                                       <span className="text-gray-300">|</span>
-                                       <div className="flex items-center gap-1">
-                                         <span className="text-sm">🚗</span>
-                                         <span className="text-sm text-gray-600">{order.vehicle_info}</span>
-                                       </div>
-                                     </>
-                                   )}
-                                   {order.assignment_date && (
-                                     <>
-                                       <span className="text-gray-300">|</span>
-                                       <div className="flex items-center gap-1">
-                                         <span className="text-sm">📅</span>
-                                         <span className="text-sm text-gray-600">
-                                           {new Date(order.assignment_date).toLocaleDateString('th-TH', {
-                                             day: 'numeric',
-                                             month: 'short',
-                                             hour: '2-digit',
-                                             minute: '2-digit',
-                                             timeZone: 'Asia/Bangkok'
-                                           })}
-                                         </span>
-                                       </div>
-                                     </>
-                                   )}
-                                 </div>
-                               </div>
-                             )}
-                             {order.courier_contact_name && (
-                               <div className="bg-green-50 border border-green-200 rounded-lg p-3 my-2">
-                                 <div className="flex items-center gap-2 flex-wrap">
-                                   <div className="flex items-center gap-2">
-                                     <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
-                                       <Truck className="h-4 w-4 text-green-600" />
-                                     </div>
-                                     <span className="text-sm font-semibold text-green-700">Courier Service</span>
-                                   </div>
-                                   <span className="text-gray-300">|</span>
-                                   <div className="flex items-center gap-1">
-                                     <span className="text-sm">👨‍💼</span>
-                                     <span className="text-sm font-medium text-green-600">{order.courier_contact_name}</span>
-                                   </div>
-                                   {order.courier_contact_phone && (
-                                     <>
-                                       <span className="text-gray-300">|</span>
-                                       <div className="flex items-center gap-1">
-                                         <span className="text-sm">📞</span>
-                                         <span className="text-sm text-gray-600">{order.courier_contact_phone}</span>
-                                       </div>
-                                     </>
-                                   )}
-                                   {order.assignment_date && (
-                                     <>
-                                       <span className="text-gray-300">|</span>
-                                       <div className="flex items-center gap-1">
-                                         <span className="text-sm">📅</span>
-                                         <span className="text-sm text-gray-600">
-                                           {new Date(order.assignment_date).toLocaleDateString('th-TH', {
-                                             day: 'numeric',
-                                             month: 'short',
-                                             hour: '2-digit',
-                                             minute: '2-digit',
-                                             timeZone: 'Asia/Bangkok'
-                                           })}
-                                         </span>
-                                       </div>
-                                     </>
-                                   )}
-                                 </div>
-                               </div>
-                             )}
-                         </div>
-                         <div className="flex gap-2">
-                           <Button 
-                             variant="outline" 
-                             size="sm"
-                             onClick={() => {
-                               setAssigningOrder(order);
-                               setIsAssignDialogOpen(true);
-                             }}
-                           >
-                             <UserPlus className="h-4 w-4 mr-1" />
-                             มอบหมายงาน
-                           </Button>
-                           <Button 
-                             variant="outline" 
-                             size="sm"
-                             onClick={() => handleEditOrder(order)}
-                           >
-                             <Edit className="h-4 w-4 mr-1" />
-                             แก้ไขสถานะ
-                           </Button>
-                           <Dialog>
-                             <DialogTrigger asChild>
-                               <Button variant="outline" size="sm">
-                                 ดูรายละเอียด
-                               </Button>
-                             </DialogTrigger>
-                             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                               <DialogHeader>
-                                 <DialogTitle className="flex items-center gap-2">
-                                   {order.order_number}
-                                   {getStatusBadge(order.status)}
-                                 </DialogTitle>
-                               </DialogHeader>
-                               <div className="space-y-6">
-                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                   <div className="space-y-2">
-                                     <div className="flex items-center gap-2">
-                                       <User className="h-4 w-4" />
-                                       <span className="font-medium">{order.customer_name}</span>
-                                     </div>
-                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                       <Phone className="h-4 w-4" />
-                                       <span>{order.customer_phone}</span>
-                                     </div>
-                                     <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                                       <MapPin className="h-4 w-4 mt-0.5" />
-                                       <span>{order.delivery_address}</span>
-                                     </div>
-                                   </div>
-                                   <div className="space-y-2">
-                                     <div>
-                                       <span className="font-medium">Tracking: </span>
-                                       <span className="text-primary font-mono">{order.tracking_number}</span>
-                                     </div>
-                                     <div>
-                                       <span className="font-medium">จำนวนรายการ: </span>
-                                       <span>{order.items_count} รายการ</span>
-                                     </div>
-                                     <div>
-                                       <span className="font-medium">น้ำหนักรวม: </span>
-                                       <span>{order.total_weight} กก.</span>
-                                     </div>
-                                     {order.driver_name && (
-                                       <div>
-                                         <span className="font-medium">คนขับ: </span>
-                                         <span>{order.driver_name}</span>
-                                       </div>
-                                     )}
-                                     {order.delivery_notes && (
-                                       <div>
-                                         <span className="font-medium">หมายเหตุ: </span>
-                                         <p className="text-sm mt-1">{order.delivery_notes}</p>
-                                       </div>
-                                     )}
-                                   </div>
-                                 </div>
-                               </div>
-                             </DialogContent>
-                           </Dialog>
-                         </div>
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-lg">{order.order_number}</h3>
+                            {getStatusBadge(order.status)}
+                            {getPriorityBadge(order.priority)}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            สร้างเมื่อ: {new Date(order.created_at).toLocaleDateString('th-TH', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              timeZone: 'Asia/Bangkok'
+                            })}
+                          </p>
+                        </div>
+                        
+                        {/* Warranty Status Display - Right Side */}
+                        <div className="flex flex-col items-end gap-2">
+                          {order.warranty_items && order.warranty_items.length > 0 && (
+                            <div className="flex flex-col items-end gap-1">
+                              {order.warranty_items.filter(item => item.warranty_status === 'expired').length > 0 && (
+                                <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1">
+                                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                                  <span className="text-red-700 font-medium text-sm">
+                                    WARRANTY EXPIRED
+                                  </span>
+                                </div>
+                              )}
+                              {order.warranty_items.filter(item => item.warranty_status === 'active').length > 0 && (
+                                <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-1">
+                                  <ShieldCheck className="h-4 w-4 text-green-500" />
+                                  <span className="text-green-700 font-medium text-sm">
+                                    WARRANTY ACTIVE
+                                  </span>
+                                </div>
+                              )}
+                              {order.warranty_items.filter(item => item.warranty_status === 'pending').length > 0 && (
+                                <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-1">
+                                  <Shield className="h-4 w-4 text-orange-500" />
+                                  <span className="text-orange-700 font-medium text-sm">
+                                    WARRANTY PENDING
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                       
-                       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
-                         <div>
-                           <span className="font-medium">ลูกค้า: </span>
-                           <span>{order.customer_name}</span>
-                         </div>
-                         <div>
-                           <span className="font-medium">Tracking: </span>
-                           <span className="text-primary font-mono">{order.tracking_number}</span>
-                         </div>
-                         <div>
-                           <span className="font-medium">วันที่จัดส่ง: </span>
-                           <span>{new Date(order.delivery_date).toLocaleDateString('th-TH')}</span>
-                         </div>
-                         <div>
-                           <span className="font-medium">รายการ: </span>
-                           <span>{order.items_count} รายการ ({order.total_weight} กก.)</span>
-                         </div>
-                         <div>
-                           <span className="font-medium">ประกัน: </span>
-                           <div className="flex items-center gap-1">
-                             {order.warranty_items && order.warranty_items.length > 0 ? (
-                               <>
-                                 <Shield className="h-4 w-4 text-blue-500" />
-                                 <span className="text-xs">
-                                   {order.warranty_items.filter(item => item.warranty_status === 'active').length} ชิ้น
-                                   {order.warranty_items.filter(item => item.warranty_status === 'expired').length > 0 && 
-                                     ` (${order.warranty_items.filter(item => item.warranty_status === 'expired').length} หมดอายุ)`
-                                   }
-                                 </span>
-                               </>
-                             ) : (
-                               <span className="text-xs text-muted-foreground">ไม่มีประกัน</span>
-                             )}
-                           </div>
-                         </div>
-                       </div>
-                       
-                       {/* Warranty Details Section */}
-                       {order.warranty_items && order.warranty_items.length > 0 && (
-                         <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-                           <div className="flex items-center gap-2 mb-3">
-                             <ShieldCheck className="h-4 w-4 text-blue-500" />
-                             <span className="font-medium text-sm">รายละเอียดประกัน</span>
-                           </div>
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                             {order.warranty_items.map((item, index) => (
-                               <div key={item.id} className="text-xs">
-                                 <div className="flex items-center gap-2 mb-1">
-                                   <span className="font-medium">{item.item_name}</span>
-                                   <Badge 
-                                     variant={
-                                       item.warranty_status === 'active' ? 'default' : 
-                                       item.warranty_status === 'expired' ? 'destructive' : 'secondary'
-                                     }
-                                     className="text-xs px-1 py-0"
-                                   >
-                                     {item.warranty_status === 'active' ? 'ใช้งานได้' : 
-                                      item.warranty_status === 'expired' ? 'หมดอายุ' : 'รอเริ่มใช้'}
-                                   </Badge>
-                                 </div>
-                                 {item.serial_numbers && item.serial_numbers.length > 0 && (
-                                   <div className="text-muted-foreground">
-                                     <span className="font-medium">S/N:</span> {item.serial_numbers.join(', ')}
-                                   </div>
-                                 )}
-                                 {item.warranty_period_days > 0 && (
-                                   <div className="text-muted-foreground">
-                                     <span className="font-medium">ระยะประกัน:</span> {item.warranty_period_days} วัน
-                                   </div>
-                                 )}
-                                 {item.warranty_start_date && (
-                                   <div className="text-muted-foreground">
-                                     <span className="font-medium">เริ่ม:</span> {new Date(item.warranty_start_date).toLocaleDateString('th-TH')}
-                                     {item.warranty_end_date && (
-                                       <> ถึง {new Date(item.warranty_end_date).toLocaleDateString('th-TH')}</>
-                                     )}
-                                   </div>
-                                 )}
-                                 {item.registration_code && (
-                                   <div className="text-muted-foreground font-mono">
-                                     <span className="font-medium">รหัสลงทะเบียน:</span> {item.registration_code}
-                                   </div>
-                                 )}
-                               </div>
-                             ))}
-                           </div>
-                         </div>
-                       )}
+                      {/* Assignment Info */}
+                      {order.assigned_staff_id && order.driver_name && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 my-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
+                                <Users className="h-4 w-4 text-blue-600" />
+                              </div>
+                              <span className="text-sm font-semibold text-blue-700">มอบหมายแล้ว</span>
+                            </div>
+                            <span className="text-gray-300">|</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm">👨‍💼</span>
+                              <span className="text-sm font-medium text-blue-600">{order.driver_name}</span>
+                            </div>
+                            {order.staff_phone && (
+                              <>
+                                <span className="text-gray-300">|</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-sm">📞</span>
+                                  <span className="text-sm text-gray-600">{order.staff_phone}</span>
+                                </div>
+                              </>
+                            )}
+                            {order.vehicle_info && (
+                              <>
+                                <span className="text-gray-300">|</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-sm">🚗</span>
+                                  <span className="text-sm text-gray-600">{order.vehicle_info}</span>
+                                </div>
+                              </>
+                            )}
+                            {order.assignment_date && (
+                              <>
+                                <span className="text-gray-300">|</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-sm">📅</span>
+                                  <span className="text-sm text-gray-600">
+                                    {new Date(order.assignment_date).toLocaleDateString('th-TH', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                      timeZone: 'Asia/Bangkok'
+                                    })}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {order.courier_contact_name && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 my-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                                <Truck className="h-4 w-4 text-green-600" />
+                              </div>
+                              <span className="text-sm font-semibold text-green-700">Courier Service</span>
+                            </div>
+                            <span className="text-gray-300">|</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm">👨‍💼</span>
+                              <span className="text-sm font-medium text-green-600">{order.courier_contact_name}</span>
+                            </div>
+                            {order.courier_contact_phone && (
+                              <>
+                                <span className="text-gray-300">|</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-sm">📞</span>
+                                  <span className="text-sm text-gray-600">{order.courier_contact_phone}</span>
+                                </div>
+                              </>
+                            )}
+                            {order.assignment_date && (
+                              <>
+                                <span className="text-gray-300">|</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-sm">📅</span>
+                                  <span className="text-sm text-gray-600">
+                                    {new Date(order.assignment_date).toLocaleDateString('th-TH', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                      timeZone: 'Asia/Bangkok'
+                                    })}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
+                        <div>
+                          <span className="font-medium">ลูกค้า: </span>
+                          <span>{order.customer_name}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium">Tracking: </span>
+                          <span className="text-primary font-mono">{order.tracking_number}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium">วันที่จัดส่ง: </span>
+                          <span>{new Date(order.delivery_date).toLocaleDateString('th-TH')}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium">รายการ: </span>
+                          <span>{order.items_count} รายการ ({order.total_weight} กก.)</span>
+                        </div>
+                        <div>
+                          <span className="font-medium">ประกัน: </span>
+                          <div className="flex items-center gap-1">
+                            {order.warranty_items && order.warranty_items.length > 0 ? (
+                              <>
+                                <Shield className="h-4 w-4 text-blue-500" />
+                                <span className="text-xs">
+                                  {order.warranty_items.filter(item => item.warranty_status === 'active').length} ชิ้น
+                                  {order.warranty_items.filter(item => item.warranty_status === 'expired').length > 0 && 
+                                    ` (${order.warranty_items.filter(item => item.warranty_status === 'expired').length} หมดอายุ)`
+                                  }
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">ไม่มีประกัน</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Warranty Details Section */}
+                      {order.warranty_items && order.warranty_items.length > 0 && (
+                        <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                          <div className="flex items-center gap-2 mb-3">
+                            <ShieldCheck className="h-4 w-4 text-blue-500" />
+                            <span className="font-medium text-sm">รายละเอียดประกัน</span>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {order.warranty_items.map((item, index) => (
+                              <div key={item.id} className="text-xs">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium">{item.item_name}</span>
+                                  <Badge 
+                                    variant={
+                                      item.warranty_status === 'active' ? 'default' : 
+                                      item.warranty_status === 'expired' ? 'destructive' : 'secondary'
+                                    }
+                                    className="text-xs px-1 py-0"
+                                  >
+                                    {item.warranty_status === 'active' ? 'ใช้งานได้' : 
+                                     item.warranty_status === 'expired' ? 'หมดอายุ' : 'รอเริ่มใช้'}
+                                  </Badge>
+                                </div>
+                                {item.serial_numbers && item.serial_numbers.length > 0 && (
+                                  <div className="text-muted-foreground">
+                                    <span className="font-medium">S/N:</span> {item.serial_numbers.join(', ')}
+                                  </div>
+                                )}
+                                {item.warranty_period_days > 0 && (
+                                  <div className="text-muted-foreground">
+                                    <span className="font-medium">ระยะประกัน:</span> {item.warranty_period_days} วัน
+                                  </div>
+                                )}
+                                {item.warranty_start_date && (
+                                  <div className="text-muted-foreground">
+                                    <span className="font-medium">เริ่ม:</span> {new Date(item.warranty_start_date).toLocaleDateString('th-TH')}
+                                    {item.warranty_end_date && (
+                                      <> ถึง {new Date(item.warranty_end_date).toLocaleDateString('th-TH')}</>
+                                    )}
+                                  </div>
+                                )}
+                                {item.registration_code && (
+                                  <div className="text-muted-foreground font-mono">
+                                    <span className="font-medium">รหัสลงทะเบียน:</span> {item.registration_code}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="flex gap-2 mt-4">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setAssigningOrder(order);
+                            setIsAssignDialogOpen(true);
+                          }}
+                        >
+                          <UserPlus className="h-4 w-4 mr-1" />
+                          มอบหมายงาน
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditOrder(order)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          แก้ไขสถานะ
+                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              ดูรายละเอียด
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                {order.order_number}
+                                {getStatusBadge(order.status)}
+                              </DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-6">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    <User className="h-4 w-4" />
+                                    <span className="font-medium">{order.customer_name}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Phone className="h-4 w-4" />
+                                    <span>{order.customer_phone}</span>
+                                  </div>
+                                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                    <MapPin className="h-4 w-4 mt-0.5" />
+                                    <span>{order.delivery_address}</span>
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <div>
+                                    <span className="font-medium">Tracking: </span>
+                                    <span className="text-primary font-mono">{order.tracking_number}</span>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">จำนวนรายการ: </span>
+                                    <span>{order.items_count} รายการ</span>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">น้ำหนักรวม: </span>
+                                    <span>{order.total_weight} กก.</span>
+                                  </div>
+                                  {order.driver_name && (
+                                    <div>
+                                      <span className="font-medium">คนขับ: </span>
+                                      <span>{order.driver_name}</span>
+                                    </div>
+                                  )}
+                                  {order.delivery_notes && (
+                                    <div>
+                                      <span className="font-medium">หมายเหตุ: </span>
+                                      <p className="text-sm mt-1">{order.delivery_notes}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
