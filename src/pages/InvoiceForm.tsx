@@ -9,8 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, MoreHorizontal } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, MoreHorizontal, Clock, Printer, Share, Download } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
@@ -674,7 +674,28 @@ export default function InvoiceForm() {
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                            <DropdownMenuItem onClick={() => {}}>
+                              <Edit className="w-4 h-4 mr-2" />
+                              แก้ไข
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {}}>
+                              <Clock className="w-4 h-4 mr-2" />
+                              ประวัติการเปลี่ยนแปลง
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.print()}>
+                              <Printer className="w-4 h-4 mr-2" />
+                              พิมพ์
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {}}>
+                              <Share className="w-4 h-4 mr-2" />
+                              แชร์
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {}}>
+                              <Download className="w-4 h-4 mr-2" />
+                              ดาวน์โหลด PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => removeItem(item.id)}>
                               <Trash2 className="w-4 h-4 mr-2 text-red-500" />
                               ลบรายการ
