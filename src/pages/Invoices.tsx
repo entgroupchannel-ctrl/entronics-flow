@@ -55,8 +55,10 @@ export default function Invoices() {
   }, []);
 
   const loadInvoices = async () => {
+    console.log('Starting loadInvoices...');
     try {
       setLoading(true);
+      console.log('Loading invoices from database...');
       const { data, error } = await supabase
         .from('invoices')
         .select(`
@@ -65,12 +67,16 @@ export default function Invoices() {
         `)
         .order('created_at', { ascending: false });
 
+      console.log('Raw invoice data:', data);
+      console.log('Invoice query error:', error);
+
       if (error) {
         throw error;
       }
 
       // Load related tax invoices separately for invoices that have them
       const invoiceIds = data?.map(inv => inv.id) || [];
+      console.log('Invoice IDs for tax invoice lookup:', invoiceIds);
       let taxInvoicesData: any[] = [];
       
       if (invoiceIds.length > 0) {
