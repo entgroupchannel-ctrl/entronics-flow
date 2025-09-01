@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, ExternalLink } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, ExternalLink, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,7 @@ interface Invoice {
   invoice_date: string;
   customer_name: string;
   project_name?: string;
+  quotation_id?: string;
   total_amount: number;
   status: string;
   due_date?: string;
@@ -343,7 +344,25 @@ export default function Invoices() {
                             {format(new Date(invoice.invoice_date), 'dd/MM/yyyy')}
                           </TableCell>
                           <TableCell className="font-medium text-primary">
-                            {invoice.invoice_number}
+                            <div className="flex items-center gap-2">
+                              {invoice.invoice_number}
+                              <div className="flex items-center gap-1">
+                                {/* ไอคอนอ้างอิงใบเสนอราคา - แสดงเมื่อมี quotation_id */}
+                                {invoice.quotation_id && (
+                                  <div className="flex items-center gap-1">
+                                    <ArrowLeft className="w-3 h-3 text-blue-500" />
+                                    <span className="text-xs text-blue-500">QT</span>
+                                  </div>
+                                )}
+                                {/* ไอคอนอ้างอิงใบส่งสินค้า - แสดงเมื่อสถานะเป็น วางบิลแล้ว */}
+                                {invoice.status === 'วางบิลแล้ว' && (
+                                  <div className="flex items-center gap-1">
+                                    <ArrowRight className="w-3 h-3 text-green-500" />
+                                    <span className="text-xs text-green-500">INV</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div>
