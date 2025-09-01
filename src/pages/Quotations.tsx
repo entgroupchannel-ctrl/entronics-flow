@@ -369,7 +369,10 @@ export default function Quotations() {
                                 variant="ghost"
                                 size="sm"
                                 className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }}
                               >
                                 <FileText className="w-4 h-4" />
                               </Button>
@@ -377,7 +380,7 @@ export default function Quotations() {
                             <DropdownMenuContent
                               align="start"
                               className="bg-background border shadow-lg z-[100] min-w-[200px]"
-                              onClick={(e) => e.stopPropagation()}
+                              onSelect={(e) => e.preventDefault()}
                             >
                               <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
                                 เอกสารที่เกี่ยวข้อง
@@ -389,10 +392,11 @@ export default function Quotations() {
                                 <DropdownMenuItem
                                   key={invoice.id}
                                   onClick={(e) => {
+                                    e.preventDefault();
                                     e.stopPropagation();
                                     navigate(`/invoices/${invoice.id}`);
                                   }}
-                                  className="hover:bg-accent"
+                                  className="hover:bg-accent cursor-pointer"
                                 >
                                   <ExternalLink className="w-4 h-4 mr-2 text-blue-600" />
                                   <span className="text-blue-600 hover:underline">
