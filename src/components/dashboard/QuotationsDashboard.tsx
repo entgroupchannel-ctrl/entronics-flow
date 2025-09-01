@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { FileText, TrendingUp, CheckCircle, Clock, DollarSign, Target, Activity, Calendar, PieChart } from 'lucide-react';
+import { FileText, TrendingUp, CheckCircle, Clock, DollarSign, Target, Activity } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from 'date-fns';
-import { BarChart, Bar, LineChart, Line, PieChart as RechartsPieChart, Cell, Pie, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area, AreaChart } from 'recharts';
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 
 interface QuotationMetrics {
   todayOpened: number;
@@ -16,28 +15,6 @@ interface QuotationMetrics {
   monthlyOpened: number;
   monthlyAmount: number;
   avgQuotationValue: number;
-  dailyTrend: Array<{
-    date: string;
-    quotations: number;
-    amount: number;
-    approved: number;
-  }>;
-  weeklyTrend: Array<{
-    week: string;
-    quotations: number;
-    amount: number;
-    approved: number;
-  }>;
-  statusDistribution: Array<{
-    name: string;
-    value: number;
-    color: string;
-  }>;
-  monthlyComparison: Array<{
-    month: string;
-    current: number;
-    previous: number;
-  }>;
 }
 
 interface QuotationsDashboardProps {
@@ -55,10 +32,6 @@ export function QuotationsDashboard({ className }: QuotationsDashboardProps) {
     monthlyOpened: 0,
     monthlyAmount: 0,
     avgQuotationValue: 0,
-    dailyTrend: [],
-    weeklyTrend: [],
-    statusDistribution: [],
-    monthlyComparison: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -101,86 +74,6 @@ export function QuotationsDashboard({ className }: QuotationsDashboardProps) {
         .gte('created_at', monthStart.toISOString())
         .lte('created_at', monthEnd.toISOString());
 
-      // Get daily trend for last 7 days
-      const dailyTrendData = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = subDays(now, i);
-        const dayStart = startOfDay(date);
-        const dayEnd = endOfDay(date);
-        
-        const { data: dayQuotations } = await supabase
-          .from('quotations')
-          .select('total_amount, status')
-          .gte('created_at', dayStart.toISOString())
-          .lte('created_at', dayEnd.toISOString());
-
-        dailyTrendData.push({
-          date: format(date, 'MM/dd'),
-          quotations: dayQuotations?.length || 0,
-          amount: dayQuotations?.reduce((sum, q) => sum + (q.total_amount || 0), 0) || 0,
-          approved: dayQuotations?.filter(q => q.status === 'approved').length || 0,
-        });
-      }
-
-      // Get weekly trend for last 4 weeks
-      const weeklyTrendData = [];
-      for (let i = 3; i >= 0; i--) {
-        const weekDate = subWeeks(now, i);
-        const wStart = startOfWeek(weekDate);
-        const wEnd = endOfWeek(weekDate);
-        
-        const { data: weekQuotations } = await supabase
-          .from('quotations')
-          .select('total_amount, status')
-          .gte('created_at', wStart.toISOString())
-          .lte('created_at', wEnd.toISOString());
-
-        weeklyTrendData.push({
-          week: `สัปดาห์ ${i === 0 ? 'นี้' : i + 1}`,
-          quotations: weekQuotations?.length || 0,
-          amount: Math.round((weekQuotations?.reduce((sum, q) => sum + (q.total_amount || 0), 0) || 0) / 1000),
-          approved: weekQuotations?.filter(q => q.status === 'approved').length || 0,
-        });
-      }
-
-      // Get status distribution
-      const statusCounts = {
-        draft: monthlyQuotations?.filter(q => q.status === 'draft').length || 0,
-        sent: monthlyQuotations?.filter(q => q.status === 'sent').length || 0,
-        approved: monthlyQuotations?.filter(q => q.status === 'approved').length || 0,
-        rejected: monthlyQuotations?.filter(q => q.status === 'rejected').length || 0,
-      };
-
-      const statusDistribution = [
-        { name: 'ร่าง', value: statusCounts.draft, color: '#94a3b8' },
-        { name: 'ส่งแล้ว', value: statusCounts.sent, color: '#3b82f6' },
-        { name: 'อนุมัติ', value: statusCounts.approved, color: '#10b981' },
-        { name: 'ปฏิเสธ', value: statusCounts.rejected, color: '#ef4444' },
-      ].filter(item => item.value > 0);
-
-      // Monthly comparison (current month vs previous month)
-      const prevMonthStart = startOfMonth(subMonths(now, 1));
-      const prevMonthEnd = endOfMonth(subMonths(now, 1));
-      
-      const { data: prevMonthQuotations } = await supabase
-        .from('quotations')
-        .select('total_amount')
-        .gte('created_at', prevMonthStart.toISOString())
-        .lte('created_at', prevMonthEnd.toISOString());
-
-      const monthlyComparison = [
-        {
-          month: 'เดือนก่อน',
-          current: Math.round((prevMonthQuotations?.reduce((sum, q) => sum + (q.total_amount || 0), 0) || 0) / 1000),
-          previous: 0,
-        },
-        {
-          month: 'เดือนนี้',
-          current: Math.round((monthlyQuotations?.reduce((sum, q) => sum + (q.total_amount || 0), 0) || 0) / 1000),
-          previous: Math.round((prevMonthQuotations?.reduce((sum, q) => sum + (q.total_amount || 0), 0) || 0) / 1000),
-        }
-      ];
-
       // Calculate basic metrics
       const todayOpened = todayQuotations?.length || 0;
       const todayAmount = todayQuotations?.reduce((sum, q) => sum + (q.total_amount || 0), 0) || 0;
@@ -205,10 +98,6 @@ export function QuotationsDashboard({ className }: QuotationsDashboardProps) {
         monthlyOpened,
         monthlyAmount,
         avgQuotationValue,
-        dailyTrend: dailyTrendData,
-        weeklyTrend: weeklyTrendData,
-        statusDistribution,
-        monthlyComparison,
       });
     } catch (error) {
       console.error('Error loading quotation metrics:', error);
@@ -293,191 +182,79 @@ export function QuotationsDashboard({ className }: QuotationsDashboardProps) {
         />
       </div>
 
-      {/* Charts Section */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 mb-6">
-        {/* Daily Trend Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              แนวโน้มรายวัน (7 วันล่าสุด)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={metrics.dailyTrend}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  fontSize={12}
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <YAxis 
-                  fontSize={12}
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px'
-                  }}
-                  formatter={(value, name) => [
-                    name === 'quotations' ? `${value} ใบ` : 
-                    name === 'approved' ? `${value} ใบ` : 
-                    formatCurrency(Number(value)),
-                    name === 'quotations' ? 'จำนวนใบเสนอราคา' :
-                    name === 'approved' ? 'อนุมัติแล้ว' :
-                    'ยอดเงิน'
-                  ]}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="quotations" 
-                  stackId="1"
-                  stroke="hsl(var(--primary))" 
-                  fill="hsl(var(--primary))"
-                  fillOpacity={0.6}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="approved" 
-                  stackId="2"
-                  stroke="#10b981" 
-                  fill="#10b981"
-                  fillOpacity={0.7}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Status Distribution Pie Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <PieChart className="w-5 h-5 text-primary" />
-              สัดส่วนสถานะ (เดือนนี้)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <RechartsPieChart>
-                <Pie
-                  data={metrics.statusDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {metrics.statusDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  formatter={(value) => [`${value} ใบ`, 'จำนวน']}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px'
-                  }}
-                />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36}
-                  formatter={(value) => value}
-                />
-              </RechartsPieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Additional Charts */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 mb-6">
-        {/* Weekly Trend Bar Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-primary" />
-              เปรียบเทียบรายสัปดาห์
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={metrics.weeklyTrend}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="week" 
-                  fontSize={12}
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <YAxis 
-                  fontSize={12}
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px'
-                  }}
-                  formatter={(value, name) => [
-                    name === 'quotations' ? `${value} ใบ` : 
-                    name === 'approved' ? `${value} ใบ` : 
-                    `${value}K บาท`,
-                    name === 'quotations' ? 'จำนวนใบเสนอราคา' :
-                    name === 'approved' ? 'อนุมัติแล้ว' :
-                    'ยอดเงิน (พัน)'
-                  ]}
-                />
-                <Bar dataKey="quotations" fill="hsl(var(--primary))" />
-                <Bar dataKey="approved" fill="#10b981" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Monthly Comparison */}
-        <Card>
+      {/* Weekly & Monthly Summary */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="col-span-full lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Activity className="w-5 h-5 text-primary" />
-              เปรียบเทียบรายเดือน (ยอดขาย)
+              สรุปสัปดาห์นี้
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={metrics.monthlyComparison}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="month" 
-                  fontSize={12}
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <YAxis 
-                  fontSize={12}
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px'
-                  }}
-                  formatter={(value) => [`${value}K บาท`, 'ยอดขาย (พัน)']}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="current" 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={3}
-                  dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">จำนวนใบ</span>
+              <span className="font-medium">{metrics.weeklyOpened} ใบ</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">ยอดรวม</span>
+              <span className="font-medium">{formatCurrency(metrics.weeklyAmount)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">เฉลี่ยต่อวัน</span>
+              <span className="font-medium">{(metrics.weeklyOpened / 7).toFixed(1)} ใบ</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-full lg:col-span-1">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Target className="w-5 h-5 text-primary" />
+              สรุปเดือนนี้
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">จำนวนใบ</span>
+              <span className="font-medium">{metrics.monthlyOpened} ใบ</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">ยอดรวม</span>
+              <span className="font-medium">{formatCurrency(metrics.monthlyAmount)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">เฉลี่ยต่อวัน</span>
+              <span className="font-medium">{(metrics.monthlyOpened / 30).toFixed(1)} ใบ</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-full lg:col-span-1">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Clock className="w-5 h-5 text-primary" />
+              ข้อเสนอแนะ
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {metrics.approvalRate > 70 ? (
+              <p className="text-success">✅ อัตราการอนุมัติดีมาก!</p>
+            ) : metrics.approvalRate > 40 ? (
+              <p className="text-warning">⚠️ ควรปรับปรุงอัตราการอนุมัติ</p>
+            ) : (
+              <p className="text-destructive">❌ ต้องปรับปรุงกลยุทธ์การขาย</p>
+            )}
+            
+            {metrics.avgQuotationValue > 50000 ? (
+              <p className="text-success">💰 มูลค่าเฉลี่ยสูง</p>
+            ) : (
+              <p className="text-muted-foreground">📈 ลองเพิ่มสินค้า/บริการเสริม</p>
+            )}
+            
+            {metrics.todayOpened === 0 && (
+              <p className="text-warning">🎯 ยังไม่มีใบเสนอราคาวันนี้</p>
+            )}
           </CardContent>
         </Card>
       </div>
