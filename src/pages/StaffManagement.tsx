@@ -172,33 +172,34 @@ const StaffManagement = () => {
     }
 
     setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from('staff')
-        .insert({
-          staff_code: formData.staff_code,
-          name: formData.name,
-          phone: formData.phone || null,
-          email: formData.email || null,
-          line_id: formData.line_id || null,
-          position: formData.position,
-          department: formData.department,
-          vehicle_type: formData.vehicle_type || null,
-          vehicle_plate: formData.vehicle_plate || null,
-          license_number: formData.license_number || null,
-          max_workload: formData.max_workload,
-          hire_date: formData.hire_date || null,
-          salary: formData.salary ? parseFloat(formData.salary) : null,
-          notes: formData.notes || null,
-          emergency_contact: formData.emergency_contact || null,
-          emergency_phone: formData.emergency_phone || null,
-          is_active: true,
-          is_available: true,
-          current_workload: 0,
-          rating: 0,
-          total_deliveries: 0,
-          successful_deliveries: 0
-        });
+     try {
+       const { error } = await supabase
+         .from('staff')
+         .insert({
+           staff_code: formData.staff_code,
+           name: formData.name,
+           phone: formData.phone || null,
+           email: formData.email || null,
+           line_id: formData.line_id || null,
+           position: formData.position,
+           department: formData.department,
+           vehicle_type: formData.vehicle_type || null,
+           vehicle_plate: formData.vehicle_plate || null,
+           license_number: formData.license_number || null,
+           max_workload: formData.max_workload,
+           hire_date: formData.hire_date || null,
+           salary: formData.salary ? parseFloat(formData.salary) : null,
+           notes: formData.notes || null,
+           emergency_contact: formData.emergency_contact || null,
+           emergency_phone: formData.emergency_phone || null,
+           is_active: true,
+           is_available: true,
+           current_workload: 0,
+           rating: 0,
+           total_deliveries: 0,
+           successful_deliveries: 0,
+           created_by: (await supabase.auth.getUser()).data.user?.id
+         });
 
       if (error) throw error;
 
@@ -651,185 +652,234 @@ const StaffManagement = () => {
   }) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="staff_code">รหัสพนักงาน *</Label>
-            <Input
-              id="staff_code"
-              value={formData.staff_code}
-              onChange={(e) => setFormData(prev => ({...prev, staff_code: e.target.value}))}
-              placeholder="DRV001"
-            />
+        {/* Basic Information Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">ข้อมูลพื้นฐาน</h3>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="name">ชื่อ-นามสกุล *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
-              placeholder="ชื่อ นามสกุล"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="phone">เบอร์โทร</Label>
-            <Input
-              id="phone"
-              value={formData.phone}
-              onChange={(e) => setFormData(prev => ({...prev, phone: e.target.value}))}
-              placeholder="081-234-5678"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">อีเมล</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({...prev, email: e.target.value}))}
-              placeholder="example@email.com"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="line_id">Line ID</Label>
-            <Input
-              id="line_id"
-              value={formData.line_id}
-              onChange={(e) => setFormData(prev => ({...prev, line_id: e.target.value}))}
-              placeholder="line_id"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="staff_code">รหัสพนักงาน *</Label>
+              <Input
+                id="staff_code"
+                value={formData.staff_code}
+                onChange={(e) => setFormData(prev => ({...prev, staff_code: e.target.value}))}
+                placeholder="DRV001"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">ชื่อ-นามสกุล *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
+                placeholder="ชื่อ นามสกุล"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="position">ตำแหน่ง</Label>
-            <Select value={formData.position} onValueChange={(value) => setFormData(prev => ({...prev, position: value}))}>
-              <SelectTrigger>
-                <SelectValue placeholder="เลือกตำแหน่ง" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="driver">คนขับ</SelectItem>
-                <SelectItem value="assistant">ผู้ช่วยจัดส่ง</SelectItem>
-                <SelectItem value="supervisor">หัวหน้าทีม</SelectItem>
-              </SelectContent>
-            </Select>
+        {/* Contact Information Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Phone className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">ข้อมูลการติดต่อ</h3>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="department">แผนก</Label>
-            <Select value={formData.department} onValueChange={(value) => setFormData(prev => ({...prev, department: value}))}>
-              <SelectTrigger>
-                <SelectValue placeholder="เลือกแผนก" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="delivery">จัดส่ง</SelectItem>
-                <SelectItem value="logistics">โลจิสติกส์</SelectItem>
-                <SelectItem value="warehouse">คลังสินค้า</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="vehicle_type">ประเภทยานพาหนะ</Label>
-            <Select value={formData.vehicle_type} onValueChange={(value) => setFormData(prev => ({...prev, vehicle_type: value}))}>
-              <SelectTrigger>
-                <SelectValue placeholder="เลือกประเภทยานพาหนะ" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="รถจักรยานยนต์">รถจักรยานยนต์</SelectItem>
-                <SelectItem value="รถยนต์">รถยนต์</SelectItem>
-                <SelectItem value="รถกระบะ">รถกระบะ</SelectItem>
-                <SelectItem value="รถบรรทุก">รถบรรทุก</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="vehicle_plate">ทะเบียนรถ</Label>
-            <Input
-              id="vehicle_plate"
-              value={formData.vehicle_plate}
-              onChange={(e) => setFormData(prev => ({...prev, vehicle_plate: e.target.value}))}
-              placeholder="กข-1234"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="license_number">เลขที่ใบขับขี่</Label>
-            <Input
-              id="license_number"
-              value={formData.license_number}
-              onChange={(e) => setFormData(prev => ({...prev, license_number: e.target.value}))}
-              placeholder="12345678"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="phone">เบอร์โทร</Label>
+              <Input
+                id="phone"
+                value={formData.phone}
+                onChange={(e) => setFormData(prev => ({...prev, phone: e.target.value}))}
+                placeholder="081-234-5678"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">อีเมล</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({...prev, email: e.target.value}))}
+                placeholder="example@email.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="line_id">Line ID</Label>
+              <Input
+                id="line_id"
+                value={formData.line_id}
+                onChange={(e) => setFormData(prev => ({...prev, line_id: e.target.value}))}
+                placeholder="line_id"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="max_workload">งานสูงสุดต่อวัน</Label>
-            <Input
-              id="max_workload"
-              type="number"
-              min="1"
-              max="20"
-              value={formData.max_workload}
-              onChange={(e) => setFormData(prev => ({...prev, max_workload: parseInt(e.target.value) || 5}))}
-            />
+        {/* Job Information Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Building className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">ข้อมูลงาน</h3>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="hire_date">วันที่เริ่มงาน</Label>
-            <Input
-              id="hire_date"
-              type="date"
-              value={formData.hire_date}
-              onChange={(e) => setFormData(prev => ({...prev, hire_date: e.target.value}))}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="salary">เงินเดือน (บาท)</Label>
-            <Input
-              id="salary"
-              type="number"
-              value={formData.salary}
-              onChange={(e) => setFormData(prev => ({...prev, salary: e.target.value}))}
-              placeholder="15000"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="emergency_contact">ชื่อผู้ติดต่อฉุกเฉิน</Label>
-            <Input
-              id="emergency_contact"
-              value={formData.emergency_contact}
-              onChange={(e) => setFormData(prev => ({...prev, emergency_contact: e.target.value}))}
-              placeholder="ชื่อผู้ติดต่อฉุกเฉิน"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="emergency_phone">เบอร์โทรฉุกเฉิน</Label>
-            <Input
-              id="emergency_phone"
-              value={formData.emergency_phone}
-              onChange={(e) => setFormData(prev => ({...prev, emergency_phone: e.target.value}))}
-              placeholder="081-234-5678"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="position">ตำแหน่ง</Label>
+              <Select value={formData.position} onValueChange={(value) => setFormData(prev => ({...prev, position: value}))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกตำแหน่ง" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="driver">คนขับ</SelectItem>
+                  <SelectItem value="assistant">ผู้ช่วยจัดส่ง</SelectItem>
+                  <SelectItem value="supervisor">หัวหน้าทีม</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="department">แผนก</Label>
+              <Select value={formData.department} onValueChange={(value) => setFormData(prev => ({...prev, department: value}))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกแผนก" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="delivery">จัดส่ง</SelectItem>
+                  <SelectItem value="logistics">โลจิสติกส์</SelectItem>
+                  <SelectItem value="warehouse">คลังสินค้า</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="notes">หมายเหตุ</Label>
-          <Textarea
-            id="notes"
-            value={formData.notes}
-            onChange={(e) => setFormData(prev => ({...prev, notes: e.target.value}))}
-            placeholder="หมายเหตุเพิ่มเติม..."
-            rows={3}
-          />
+        {/* Vehicle Information Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Car className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">ข้อมูลยานพาหนะ</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="vehicle_type">ประเภทยานพาหนะ</Label>
+              <Select value={formData.vehicle_type} onValueChange={(value) => setFormData(prev => ({...prev, vehicle_type: value}))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกประเภทยานพาหนะ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="รถจักรยานยนต์">รถจักรยานยนต์</SelectItem>
+                  <SelectItem value="รถยนต์">รถยนต์</SelectItem>
+                  <SelectItem value="รถกระบะ">รถกระบะ</SelectItem>
+                  <SelectItem value="รถบรรทุก">รถบรรทุก</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="vehicle_plate">ทะเบียนรถ</Label>
+              <Input
+                id="vehicle_plate"
+                value={formData.vehicle_plate}
+                onChange={(e) => setFormData(prev => ({...prev, vehicle_plate: e.target.value}))}
+                placeholder="กข-1234"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="license_number">เลขที่ใบขับขี่</Label>
+              <Input
+                id="license_number"
+                value={formData.license_number}
+                onChange={(e) => setFormData(prev => ({...prev, license_number: e.target.value}))}
+                placeholder="12345678"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Work Settings Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Star className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">การตั้งค่างาน</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="max_workload">งานสูงสุดต่อวัน</Label>
+              <Input
+                id="max_workload"
+                type="number"
+                min="1"
+                max="20"
+                value={formData.max_workload}
+                onChange={(e) => setFormData(prev => ({...prev, max_workload: parseInt(e.target.value) || 5}))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hire_date">วันที่เริ่มงาน</Label>
+              <Input
+                id="hire_date"
+                type="date"
+                value={formData.hire_date}
+                onChange={(e) => setFormData(prev => ({...prev, hire_date: e.target.value}))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="salary">เงินเดือน (บาท)</Label>
+              <Input
+                id="salary"
+                type="number"
+                value={formData.salary}
+                onChange={(e) => setFormData(prev => ({...prev, salary: e.target.value}))}
+                placeholder="15000"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Emergency Contact Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Mail className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">ผู้ติดต่อฉุกเฉิน</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="emergency_contact">ชื่อผู้ติดต่อฉุกเฉิน</Label>
+              <Input
+                id="emergency_contact"
+                value={formData.emergency_contact}
+                onChange={(e) => setFormData(prev => ({...prev, emergency_contact: e.target.value}))}
+                placeholder="ชื่อผู้ติดต่อฉุกเฉิน"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="emergency_phone">เบอร์โทรฉุกเฉิน</Label>
+              <Input
+                id="emergency_phone"
+                value={formData.emergency_phone}
+                onChange={(e) => setFormData(prev => ({...prev, emergency_phone: e.target.value}))}
+                placeholder="081-234-5678"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Notes Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <MapPin className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">หมายเหตุ</h3>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="notes">หมายเหตุ</Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData(prev => ({...prev, notes: e.target.value}))}
+              placeholder="หมายเหตุเพิ่มเติม..."
+              rows={3}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
