@@ -30,7 +30,12 @@ import {
   Building,
   Package,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Eye,
+  Star,
+  AlertCircle,
+  TrendingUp,
+  Activity
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
@@ -624,52 +629,95 @@ export default function ServiceDashboard() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants = {
-      pending: "secondary",
-      assigned: "outline", 
-      in_progress: "default",
-      waiting_parts: "destructive",
-      waiting_approval: "destructive",
-      completed: "default",
-      cancelled: "secondary"
-    } as const;
+    const statusConfig = {
+      pending: {
+        variant: "secondary" as const,
+        className: "bg-gradient-to-r from-slate to-slate-light text-white border-0 shadow-md",
+        label: "⏳ รอดำเนินการ"
+      },
+      assigned: {
+        variant: "outline" as const,
+        className: "bg-gradient-to-r from-violet/10 to-violet-light/10 text-violet border-violet/30 shadow-sm",
+        label: "👤 มอบหมายแล้ว"
+      },
+      in_progress: {
+        variant: "default" as const,
+        className: "bg-gradient-to-r from-amber to-amber-light text-white border-0 shadow-md",
+        label: "🔧 กำลังดำเนินการ"
+      },
+      waiting_parts: {
+        variant: "destructive" as const,
+        className: "bg-gradient-to-r from-orange-500 to-rose text-white border-0 shadow-md",
+        label: "📦 รออะไหล่"
+      },
+      waiting_approval: {
+        variant: "destructive" as const,
+        className: "bg-gradient-to-r from-rose to-rose-light text-white border-0 shadow-md",
+        label: "⏱️ รออนุมัติ"
+      },
+      completed: {
+        variant: "default" as const,
+        className: "bg-gradient-to-r from-emerald to-emerald-light text-white border-0 shadow-md",
+        label: "✅ เสร็จสิ้น"
+      },
+      cancelled: {
+        variant: "secondary" as const,
+        className: "bg-gradient-to-r from-slate/20 to-slate-light/20 text-slate border-slate/30 shadow-sm",
+        label: "❌ ยกเลิก"
+      }
+    };
 
-    const labels = {
-      pending: "รอดำเนินการ",
-      assigned: "มอบหมายแล้ว",
-      in_progress: "กำลังดำเนินการ", 
-      waiting_parts: "รออะไหล่",
-      waiting_approval: "รออนุมัติ",
-      completed: "เสร็จสิ้น",
-      cancelled: "ยกเลิก"
+    const config = statusConfig[status as keyof typeof statusConfig] || {
+      variant: "secondary" as const,
+      className: "bg-muted text-muted-foreground",
+      label: status
     };
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
-        {labels[status as keyof typeof labels] || status}
-      </Badge>
+      <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
+        <Badge variant={config.variant} className={config.className}>
+          {config.label}
+        </Badge>
+      </div>
     );
   };
 
   const getPriorityBadge = (priority: string) => {
-    const variants = {
-      low: "secondary",
-      medium: "outline",
-      high: "destructive", 
-      urgent: "destructive"
-    } as const;
+    const priorityConfig = {
+      low: {
+        variant: "secondary" as const,
+        className: "bg-gradient-to-r from-muted to-muted/70 text-muted-foreground border-0 shadow-sm",
+        label: "🟢 ปกติ"
+      },
+      medium: {
+        variant: "outline" as const,
+        className: "bg-gradient-to-r from-amber/10 to-amber-light/10 text-amber border-amber/30 shadow-sm",
+        label: "🟡 ปานกลาง"
+      },
+      high: {
+        variant: "destructive" as const,
+        className: "bg-gradient-to-r from-orange-500 to-rose text-white border-0 shadow-md",
+        label: "🟠 สูง"
+      },
+      urgent: {
+        variant: "destructive" as const,
+        className: "bg-gradient-to-r from-rose to-rose-light text-white border-0 shadow-md animate-pulse",
+        label: "🔴 เร่งด่วน"
+      }
+    };
 
-    const labels = {
-      low: "ปกติ",
-      medium: "ปานกลาง",
-      high: "สูง",
-      urgent: "เร่งด่วน"
+    const config = priorityConfig[priority as keyof typeof priorityConfig] || {
+      variant: "secondary" as const,
+      className: "bg-muted text-muted-foreground",
+      label: priority
     };
 
     return (
-      <Badge variant={variants[priority as keyof typeof variants] || "secondary"}>
-        {labels[priority as keyof typeof labels] || priority}
-      </Badge>
+      <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
+        <Badge variant={config.variant} className={config.className}>
+          {config.label}
+        </Badge>
+      </div>
     );
   };
 
@@ -740,15 +788,23 @@ export default function ServiceDashboard() {
       />
       
       <div className="flex-1 flex flex-col">
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Service Dashboard</h1>
+        <main className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-br from-background via-background to-muted/30">
+          {/* Header Section */}
+          <div className="flex justify-between items-center p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+                🔧 Service Dashboard
+              </h1>
+              <p className="text-muted-foreground mt-2">จัดการงานซ่อมและบริการลูกค้า</p>
+            </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  เปิดเคส/แจ้งปัญหา
-                </Button>
+                <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
+                  <Button className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary shadow-md">
+                    <Plus className="mr-2 h-4 w-4" />
+                    เปิดเคส/แจ้งปัญหา
+                  </Button>
+                </div>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
@@ -765,39 +821,92 @@ export default function ServiceDashboard() {
             </Dialog>
           </div>
 
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <MetricCard
-          title="งานทั้งหมด"
-          value={totalRequests}
-          icon={ClipboardList}
-          className="border-blue-200"
-        />
-        <MetricCard
-          title="รอดำเนินการ"
-          value={pendingRequests}
-          icon={Timer}
-          className="border-orange-200"
-        />
-        <MetricCard
-          title="กำลังซ่อม"
-          value={inProgressRequests}
-          icon={Settings}
-          className="border-yellow-200"
-        />
-        <MetricCard
-          title="เสร็จสิ้น"
-          value={completedRequests}
-          icon={CheckCircle}
-          className="border-green-200"
-        />
-      </div>
+          {/* Enhanced Metrics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="bg-gradient-to-br from-white to-blue-50/50 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-600">งานทั้งหมด</p>
+                    <p className="text-3xl font-bold text-blue-700">{totalRequests}</p>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-full">
+                    <ClipboardList className="h-6 w-6 text-blue-600" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center text-xs">
+                  <TrendingUp className="h-3 w-3 text-blue-500 mr-1" />
+                  <span className="text-blue-600">+12% จากเดือนที่แล้ว</span>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-white to-orange-50/50 border-orange-200 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-orange-600">รอดำเนินการ</p>
+                    <p className="text-3xl font-bold text-orange-700">{pendingRequests}</p>
+                  </div>
+                  <div className="p-3 bg-orange-100 rounded-full">
+                    <Timer className="h-6 w-6 text-orange-600" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center text-xs">
+                  <AlertCircle className="h-3 w-3 text-orange-500 mr-1" />
+                  <span className="text-orange-600">ต้องดำเนินการด่วน</span>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-white to-amber-50/50 border-amber-200 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-amber-600">กำลังซ่อม</p>
+                    <p className="text-3xl font-bold text-amber-700">{inProgressRequests}</p>
+                  </div>
+                  <div className="p-3 bg-amber-100 rounded-full">
+                    <Activity className="h-6 w-6 text-amber-600" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center text-xs">
+                  <Clock className="h-3 w-3 text-amber-500 mr-1" />
+                  <span className="text-amber-600">อยู่ระหว่างดำเนินการ</span>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-white to-emerald-50/50 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-emerald-600">เสร็จสิ้น</p>
+                    <p className="text-3xl font-bold text-emerald-700">{completedRequests}</p>
+                  </div>
+                  <div className="p-3 bg-emerald-100 rounded-full">
+                    <CheckCircle className="h-6 w-6 text-emerald-600" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center text-xs">
+                  <Star className="h-3 w-3 text-emerald-500 mr-1" />
+                  <span className="text-emerald-600">งานที่สำเร็จแล้ว</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-      <Tabs defaultValue="requests" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="requests">งานซ่อม</TabsTrigger>
-          <TabsTrigger value="technicians">ช่างเทคนิค</TabsTrigger>
-        </TabsList>
+          <Tabs defaultValue="requests" className="w-full">
+            <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm inline-block">
+              <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-muted/50 to-muted/30">
+                <TabsTrigger value="requests" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-glow data-[state=active]:text-white">
+                  🛠️ งานซ่อม
+                </TabsTrigger>
+                <TabsTrigger value="technicians" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-teal-light data-[state=active]:text-white">
+                  👨‍🔧 ช่างเทคนิค
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
         <TabsContent value="requests" className="space-y-4">
           {/* Filters */}
@@ -1218,7 +1327,110 @@ export default function ServiceDashboard() {
                        <span className="font-medium">ช่าง: </span>
                        <span>{request.technicians?.name || 'ยังไม่มอบหมาย'}</span>
                      </div>
-                   </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-4 pt-4 border-t">
+                      {/* View Details Button */}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4 mr-2" />
+                              ดูรายละเอียด
+                            </Button>
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              🎫 {request.ticket_number}
+                              {getStatusBadge(request.status)}
+                              {getPriorityBadge(request.priority)}
+                            </DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <User className="h-4 w-4" />
+                                  <span className="font-medium">{request.customer_name}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Phone className="h-4 w-4" />
+                                  <span>{request.customer_phone}</span>
+                                </div>
+                                {request.customer_email && (
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Mail className="h-4 w-4" />
+                                    <span>{request.customer_email}</span>
+                                  </div>
+                                )}
+                                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                  <MapPin className="h-4 w-4 mt-0.5" />
+                                  <span>{request.customer_address}</span>
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <div>
+                                  <span className="font-medium">อุปกรณ์: </span>
+                                  <span>{request.device_type}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">ยี่ห้อ: </span>
+                                  <span>{request.device_brand || 'ไม่ระบุ'}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">รุ่น: </span>
+                                  <span>{request.device_model || 'ไม่ระบุ'}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">ช่างที่รับผิดชอบ: </span>
+                                  <span>{request.technicians?.name || 'ยังไม่มอบหมาย'}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">วันที่แจ้ง: </span>
+                                  <span>{formatDateTime(request.created_at)}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                              <span className="font-bold text-red-700">🔧 ปัญหาที่พบ:</span>
+                              <p className="mt-2 text-red-700 whitespace-pre-wrap">{request.problem_description}</p>
+                            </div>
+                            
+                            {request.estimated_cost && (
+                              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <span className="font-bold text-blue-700">💰 ราคาประเมิน:</span>
+                                <p className="mt-2 text-blue-700">{request.estimated_cost.toLocaleString()} บาท</p>
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      
+                      {/* Quick Action Buttons based on status */}
+                      {request.status === 'pending' && !currentTechnician && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => autoAssignTechnician(request.id)}
+                          className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary"
+                        >
+                          🚀 มอบหมายช่าง
+                        </Button>
+                      )}
+                      
+                      {currentTechnician && request.assigned_technician_id === currentTechnician.id && request.status === 'assigned' && !request.acknowledged_at && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => acknowledgeJob(request.id)}
+                          className="bg-gradient-to-r from-teal to-teal-light"
+                        >
+                          ✅ รับทราบงาน
+                        </Button>
+                      )}
+                    </div>
                   
                   {/* Technician quick actions on main card */}
                   {currentTechnician && request.assigned_technician_id === currentTechnician.id && (
