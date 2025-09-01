@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2 } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -344,34 +344,41 @@ export default function Quotations() {
                            }}>
                              <Edit className="w-4 h-4 mr-2" />
                              แก้ไข
-                           </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => {
-                             setDropdownOpen(null);
-                             console.log('View history:', quotation.id);
-                           }}>
-                             <History className="w-4 h-4 mr-2" />
-                             ประวัติการเปลี่ยนแปลง
-                           </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => {
-                             setDropdownOpen(null);
-                             window.print();
-                           }}>
-                             <Printer className="w-4 h-4 mr-2" />
-                             พิมพ์
-                           </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => {
-                             setDropdownOpen(null);
-                             console.log('Share:', quotation.id);
-                           }}>
-                             <Share2 className="w-4 h-4 mr-2" />
-                             แชร์
-                           </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => {
-                             setDropdownOpen(null);
-                             console.log('Download:', quotation.id);
-                           }}>
-                             <Download className="w-4 h-4 mr-2" />
-                             ดาวน์โหลด PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setDropdownOpen(null);
+                              window.print();
+                            }}>
+                              <Printer className="w-4 h-4 mr-2" />
+                              พิมพ์
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setDropdownOpen(null);
+                              console.log('Share:', quotation.id);
+                            }}>
+                              <Share2 className="w-4 h-4 mr-2" />
+                              แชร์
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setDropdownOpen(null);
+                              console.log('Download:', quotation.id);
+                            }}>
+                              <Download className="w-4 h-4 mr-2" />
+                              ดาวน์โหลด
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setDropdownOpen(null);
+                              console.log('Print sales doc:', quotation.id);
+                            }}>
+                              <Files className="w-4 h-4 mr-2" />
+                              พิมพ์จำหน่ายทอง
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setDropdownOpen(null);
+                              console.log('Duplicate:', quotation.id);
+                            }}>
+                              <Copy className="w-4 h-4 mr-2" />
+                              สร้างซ้ำ
                            </DropdownMenuItem>
                            <DropdownMenuSeparator />
                            <DropdownMenuItem 
