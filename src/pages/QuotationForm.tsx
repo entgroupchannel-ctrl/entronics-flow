@@ -395,7 +395,7 @@ export default function QuotationForm() {
                   <div>
                     <Label className="text-sm font-medium">ชื่อลูกค้า</Label>
                     <Select onValueChange={selectCustomer}>
-                      <SelectTrigger className="mt-1">
+                      <SelectTrigger className="mt-1 border-gray-300">
                         <SelectValue placeholder="เลือกลูกค้า" />
                       </SelectTrigger>
                       <SelectContent>
@@ -424,48 +424,45 @@ export default function QuotationForm() {
                     )}
                   </div>
                   
-                  {selectedCustomer && (
-                    <>
-                      <div className="grid grid-cols-3 gap-3">
-                        <div>
-                          <Label className="text-sm font-medium">อีเมล</Label>
-                          <Input 
-                            value={quotation.customer_email} 
-                            onChange={(e) => setQuotation(prev => ({ ...prev, customer_email: e.target.value }))}
-                            className="mt-1 text-sm"
-                            placeholder="email@example.com"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">เบอร์โทรศัพท์</Label>
-                          <Input 
-                            value={quotation.customer_phone} 
-                            onChange={(e) => setQuotation(prev => ({ ...prev, customer_phone: e.target.value }))}
-                            className="mt-1 text-sm"
-                            placeholder="08x-xxx-xxxx"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Line ID</Label>
-                          <Input 
-                            value={quotation.customer_line_id || ''} 
-                            onChange={(e) => setQuotation(prev => ({ ...prev, customer_line_id: e.target.value }))}
-                            className="mt-1 text-sm"
-                            placeholder="@lineid"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">ที่อยู่</Label>
-                        <Textarea 
-                          value={quotation.customer_address} 
-                          onChange={(e) => setQuotation(prev => ({ ...prev, customer_address: e.target.value }))}
-                          className="mt-1"
-                          rows={3}
-                        />
-                      </div>
-                    </>
-                  )}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-sm font-medium">อีเมล</Label>
+                      <Input 
+                        value={quotation.customer_email} 
+                        onChange={(e) => setQuotation(prev => ({ ...prev, customer_email: e.target.value }))}
+                        className="mt-1 text-sm border-gray-300"
+                        placeholder="email@example.com"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">เบอร์โทรศัพท์</Label>
+                      <Input 
+                        value={quotation.customer_phone} 
+                        onChange={(e) => setQuotation(prev => ({ ...prev, customer_phone: e.target.value }))}
+                        className="mt-1 text-sm border-gray-300"
+                        placeholder="08x-xxx-xxxx"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Line ID</Label>
+                      <Input 
+                        value={quotation.customer_line_id || ''} 
+                        onChange={(e) => setQuotation(prev => ({ ...prev, customer_line_id: e.target.value }))}
+                        className="mt-1 text-sm border-gray-300"
+                        placeholder="@lineid"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">ที่อยู่</Label>
+                    <Textarea 
+                      value={quotation.customer_address} 
+                      onChange={(e) => setQuotation(prev => ({ ...prev, customer_address: e.target.value }))}
+                      className="mt-1 border-gray-300"
+                      rows={3}
+                      placeholder="ที่อยู่ลูกค้า"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-3 flex flex-col items-end">
@@ -477,7 +474,7 @@ export default function QuotationForm() {
                     <Input 
                       value={quotation.quotation_number} 
                       onChange={(e) => setQuotation(prev => ({ ...prev, quotation_number: e.target.value }))}
-                      className="text-right text-lg font-bold text-blue-600"
+                      className="text-right text-lg font-bold text-blue-600 border-gray-300"
                       placeholder="QT202400001"
                     />
                   </div>
