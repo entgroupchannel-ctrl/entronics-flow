@@ -57,58 +57,54 @@ export default function Customers() {
   // Fetch customers from database
   const fetchCustomers = async () => {
     try {
-      console.log('Fetching customers...');
+      console.log('🚀 Starting to fetch customers...');
+      setLoading(true);
       
-      // ดึงข้อมูลทั้งหมดแบบไม่จำกัด โดยใช้ range แทน limit
-      let allCustomers: any[] = [];
-      let start = 0;
-      const batchSize = 1000;
-      let hasMore = true;
+      // วิธีใหม่: ดึงข้อมูลทั้งหมดโดยใช้ very large limit
+      const { data, error, count } = await supabase
+        .from('customers')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .limit(50000); // เพิ่มเป็น 50,000
 
-      while (hasMore) {
-        console.log(`Fetching batch: ${start} to ${start + batchSize - 1}`);
-        
-        const { data, error, count } = await supabase
-          .from('customers')
-          .select('*', { count: 'exact' })
-          .order('created_at', { ascending: false })
-          .range(start, start + batchSize - 1);
+      console.log('📊 Database response:');
+      console.log('- Total count in DB:', count);
+      console.log('- Fetched data length:', data?.length);
+      console.log('- Error:', error);
 
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-          allCustomers = [...allCustomers, ...data];
-          start += batchSize;
-          
-          // ถ้าได้ข้อมูลน้อยกว่า batchSize แสดงว่าหมดแล้ว
-          if (data.length < batchSize) {
-            hasMore = false;
-          }
-        } else {
-          hasMore = false;
-        }
-
-        // แสดงจำนวนรวมครั้งแรกที่ได้
-        if (start === batchSize && count) {
-          console.log('Total customers in database:', count);
-        }
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
       }
 
-      console.log('Total customers fetched:', allCustomers.length);
-      setCustomers(allCustomers);
+      if (data) {
+        console.log('✅ Successfully fetched', data.length, 'customers');
+        console.log('📋 Sample customer:', data[0]);
+        setCustomers(data);
+      } else {
+        console.log('⚠️ No data returned');
+        setCustomers([]);
+      }
       
       // Reset to first page when data is refreshed
       setCurrentPage(1);
 
+      // แสดงข้อมูลสถิติ
+      console.log('📈 Final statistics:');
+      console.log('- Customers state length:', data?.length || 0);
+      console.log('- Total in database:', count);
+
     } catch (error: any) {
-      console.error('Error fetching customers:', error);
+      console.error('💥 Error fetching customers:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถโหลดข้อมูลลูกค้าได้',
+        description: error.message || 'ไม่สามารถโหลดข้อมูลลูกค้าได้',
         variant: 'destructive',
       });
+      setCustomers([]);
     } finally {
       setLoading(false);
+      console.log('🏁 Fetch customers completed');
     }
   };
 
