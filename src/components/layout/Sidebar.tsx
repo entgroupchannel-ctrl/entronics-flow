@@ -115,7 +115,16 @@ const menuItems = [
     icon: DollarSign,
     href: "/financial",
     view: "financial",
-    iconColor: "text-yellow-500"
+    iconColor: "text-yellow-500",
+    submenu: [
+      {
+        title: "รายการรับเงิน",
+        icon: CreditCard,
+        href: "/payment-records",
+        view: "payment-records",
+        iconColor: "text-green-500"
+      }
+    ]
   },
   {
     title: "วิเคราะห์ข้อมูล / Analytics",

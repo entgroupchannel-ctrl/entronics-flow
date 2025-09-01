@@ -794,6 +794,77 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_records: {
+        Row: {
+          amount_received: number
+          bank_account: string | null
+          bank_name: string | null
+          created_at: string
+          created_by: string
+          depositor_name: string | null
+          id: string
+          payment_date: string
+          payment_evidence_url: string | null
+          payment_method: string
+          payment_notes: string | null
+          payment_number: string
+          payment_reference: string | null
+          tax_invoice_id: string
+          updated_at: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          amount_received: number
+          bank_account?: string | null
+          bank_name?: string | null
+          created_at?: string
+          created_by: string
+          depositor_name?: string | null
+          id?: string
+          payment_date?: string
+          payment_evidence_url?: string | null
+          payment_method: string
+          payment_notes?: string | null
+          payment_number: string
+          payment_reference?: string | null
+          tax_invoice_id: string
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          amount_received?: number
+          bank_account?: string | null
+          bank_name?: string | null
+          created_at?: string
+          created_by?: string
+          depositor_name?: string | null
+          id?: string
+          payment_date?: string
+          payment_evidence_url?: string | null
+          payment_method?: string
+          payment_notes?: string | null
+          payment_number?: string
+          payment_reference?: string | null
+          tax_invoice_id?: string
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_records_tax_invoice_id_fkey"
+            columns: ["tax_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "tax_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_warranties: {
         Row: {
           claim_count: number
@@ -1308,6 +1379,7 @@ export type Database = {
           amount_paid: number
           bank_account: string | null
           bank_name: string | null
+          can_issue_receipt: boolean
           created_at: string
           created_by: string | null
           customer_address: string | null
@@ -1321,12 +1393,13 @@ export type Database = {
           invoice_id: string | null
           notes: string | null
           payment_method: string
+          payment_record_id: string | null
           payment_reference: string | null
           payment_status: string
           receipt_date: string
           receipt_number: string
           subtotal: number
-          tax_invoice_id: string | null
+          tax_invoice_id: string
           terms_conditions: string | null
           total_amount: number
           updated_at: string
@@ -1338,6 +1411,7 @@ export type Database = {
           amount_paid?: number
           bank_account?: string | null
           bank_name?: string | null
+          can_issue_receipt?: boolean
           created_at?: string
           created_by?: string | null
           customer_address?: string | null
@@ -1351,12 +1425,13 @@ export type Database = {
           invoice_id?: string | null
           notes?: string | null
           payment_method?: string
+          payment_record_id?: string | null
           payment_reference?: string | null
           payment_status?: string
           receipt_date?: string
           receipt_number: string
           subtotal?: number
-          tax_invoice_id?: string | null
+          tax_invoice_id: string
           terms_conditions?: string | null
           total_amount?: number
           updated_at?: string
@@ -1368,6 +1443,7 @@ export type Database = {
           amount_paid?: number
           bank_account?: string | null
           bank_name?: string | null
+          can_issue_receipt?: boolean
           created_at?: string
           created_by?: string | null
           customer_address?: string | null
@@ -1381,12 +1457,13 @@ export type Database = {
           invoice_id?: string | null
           notes?: string | null
           payment_method?: string
+          payment_record_id?: string | null
           payment_reference?: string | null
           payment_status?: string
           receipt_date?: string
           receipt_number?: string
           subtotal?: number
-          tax_invoice_id?: string | null
+          tax_invoice_id?: string
           terms_conditions?: string | null
           total_amount?: number
           updated_at?: string
@@ -1406,6 +1483,13 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_payment_record_id_fkey"
+            columns: ["payment_record_id"]
+            isOneToOne: false
+            referencedRelation: "payment_records"
             referencedColumns: ["id"]
           },
           {
@@ -2179,6 +2263,10 @@ export type Database = {
         Args: { request_id: string }
         Returns: string
       }
+      can_issue_receipt_for_tax_invoice: {
+        Args: { tax_invoice_id_param: string }
+        Returns: boolean
+      }
       can_manage_inventory: {
         Args: { _user_id: string }
         Returns: boolean
@@ -2192,6 +2280,10 @@ export type Database = {
         Returns: string
       }
       generate_invoice_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_payment_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }

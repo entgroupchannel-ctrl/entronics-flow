@@ -30,7 +30,7 @@ interface ReceiptForm {
   receipt_number?: string;
   receipt_date: string;
   invoice_id?: string;
-  tax_invoice_id?: string;
+  tax_invoice_id: string;
   customer_id?: string;
   customer_name: string;
   customer_address: string;
@@ -51,6 +51,8 @@ interface ReceiptForm {
   payment_status: string;
   notes: string;
   terms_conditions: string;
+  can_issue_receipt?: boolean;
+  payment_record_id?: string;
 }
 
 export default function ReceiptForm() {
@@ -65,6 +67,7 @@ export default function ReceiptForm() {
 
   const [formData, setFormData] = useState<ReceiptForm>({
     receipt_date: new Date().toISOString().split('T')[0],
+    tax_invoice_id: "",
     customer_name: "",
     customer_address: "",
     customer_phone: "",
@@ -84,6 +87,7 @@ export default function ReceiptForm() {
     payment_status: "paid",
     notes: "",
     terms_conditions: "",
+    can_issue_receipt: false,
   });
 
   const [items, setItems] = useState<ReceiptItem[]>([
@@ -101,23 +105,50 @@ export default function ReceiptForm() {
   ]);
 
   useEffect(() => {
-    loadInitialData();
-    
-    // Load from location state if coming from invoice/tax invoice
-    if (location.state) {
-      const { invoiceId, taxInvoiceId, invoiceNumber, customerName } = location.state;
-      setFormData(prev => ({
-        ...prev,
-        invoice_id: invoiceId,
-        tax_invoice_id: taxInvoiceId,
-        customer_name: customerName || ""
-      }));
-    }
+    const initializeData = async () => {
+      await loadInitialData();
+      
+      // Load from location state if coming from tax invoice
+      if (location.state) {
+        const { taxInvoiceId, customerName, totalAmount } = location.state;
+        if (taxInvoiceId) {
+          // Check if this tax invoice can issue receipt
+          const canIssueReceipt = await checkCanIssueReceipt(taxInvoiceId);
+          setFormData(prev => ({
+            ...prev,
+            tax_invoice_id: taxInvoiceId,
+            customer_name: customerName || "",
+            total_amount: totalAmount || 0,
+            can_issue_receipt: canIssueReceipt
+          }));
+        }
+      }
 
-    if (id && id !== "new") {
-      loadReceipt(id);
-    }
+      if (id && id !== "new") {
+        await loadReceipt(id);
+      }
+    };
+
+    initializeData();
   }, [id, location.state]);
+
+  const checkCanIssueReceipt = async (taxInvoiceId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.rpc('can_issue_receipt_for_tax_invoice', {
+        tax_invoice_id_param: taxInvoiceId
+      });
+
+      if (error) {
+        console.error('Error checking receipt eligibility:', error);
+        return false;
+      }
+
+      return data || false;
+    } catch (error) {
+      console.error('Error checking receipt eligibility:', error);
+      return false;
+    }
+  };
 
   const loadInitialData = async () => {
     try {
