@@ -23,7 +23,10 @@ import {
   Star,
   UserCheck,
   UserX,
-  Search
+  Search,
+  Clock,
+  Pause,
+  Play
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -355,6 +358,33 @@ const StaffManagement = () => {
     }
   };
 
+  const toggleAvailabilityStatus = async (staffId: string, currentAvailability: boolean) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('staff')
+        .update({ is_available: !currentAvailability })
+        .eq('id', staffId);
+
+      if (error) throw error;
+
+      toast({
+        title: "เปลี่ยนสถานะพร้อมงานสำเร็จ",
+        description: `${!currentAvailability ? 'พร้อมทำงาน' : 'ไม่ว่าง'}`
+      });
+
+      loadStaff();
+    } catch (error: any) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: error.message || "ไม่สามารถเปลี่ยนสถานะได้",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getVehicleIcon = (vehicleType: string) => {
     if (vehicleType?.includes('รถจักรยานยนต์')) return Bike;
     if (vehicleType?.includes('รถยนต์') || vehicleType?.includes('รถกระบะ') || vehicleType?.includes('รถบรรทุก')) return Car;
@@ -363,12 +393,21 @@ const StaffManagement = () => {
 
   const getStatusBadge = (staff: Staff) => {
     if (!staff.is_active) {
-      return <Badge variant="destructive">ปิดใช้งาน</Badge>;
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <UserX className="h-3 w-3" />
+        ปิดใช้งาน
+      </Badge>;
     }
     if (!staff.is_available) {
-      return <Badge variant="secondary">ไม่ว่าง</Badge>;
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <Clock className="h-3 w-3" />
+        ไม่ว่าง
+      </Badge>;
     }
-    return <Badge variant="default">พร้อมงาน</Badge>;
+    return <Badge variant="default" className="flex items-center gap-1 bg-green-100 text-green-800 hover:bg-green-100">
+      <UserCheck className="h-3 w-3" />
+      พร้อมงาน
+    </Badge>;
   };
 
   return (
@@ -565,19 +604,36 @@ const StaffManagement = () => {
                               variant="outline"
                               size="sm"
                               onClick={() => handleEditStaff(staffMember)}
+                              title="แก้ไขข้อมูล"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
+                            
+                            {/* Available/Busy Toggle */}
+                            {staffMember.is_active && (
+                              <Button
+                                variant={staffMember.is_available ? "default" : "secondary"}
+                                size="sm"
+                                onClick={() => toggleAvailabilityStatus(staffMember.id, staffMember.is_available)}
+                                title={staffMember.is_available ? "เปลี่ยนเป็นไม่ว่าง" : "เปลี่ยนเป็นพร้อมงาน"}
+                              >
+                                {staffMember.is_available ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                              </Button>
+                            )}
+                            
+                            {/* Active/Inactive Toggle */}
                             <Button
                               variant={staffMember.is_active ? "secondary" : "default"}
                               size="sm"
                               onClick={() => toggleStaffStatus(staffMember.id, staffMember.is_active)}
+                              title={staffMember.is_active ? "ปิดใช้งาน" : "เปิดใช้งาน"}
                             >
                               {staffMember.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                             </Button>
+                            
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="destructive" size="sm">
+                                <Button variant="destructive" size="sm" title="ลบพนักงาน">
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
