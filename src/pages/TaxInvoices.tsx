@@ -337,6 +337,7 @@ export default function TaxInvoices() {
                     <TableHead>วันครบกำหนด</TableHead>
                     <TableHead className="text-right">ยอดรวมสุทธิ</TableHead>
                     <TableHead className="text-center">สถานะ</TableHead>
+                    <TableHead className="w-12"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -395,8 +396,80 @@ export default function TaxInvoices() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
+                       </TableCell>
+                       <TableCell>
+                         <DropdownMenu 
+                           open={dropdownOpen === taxInvoice.id} 
+                           onOpenChange={(isOpen) => {
+                             setDropdownOpen(isOpen ? taxInvoice.id : null);
+                           }}
+                         >
+                           <DropdownMenuTrigger asChild>
+                             <Button 
+                               variant="outline" 
+                               size="sm" 
+                               className="h-8 w-8 p-0 rounded-lg border border-border hover:bg-accent hover:text-accent-foreground"
+                               onClick={(e) => e.stopPropagation()}
+                             >
+                               <MoreHorizontal className="w-4 h-4" />
+                             </Button>
+                           </DropdownMenuTrigger>
+                           <DropdownMenuContent 
+                             align="end" 
+                             className="bg-background border shadow-lg z-[100]"
+                             onCloseAutoFocus={(e) => e.preventDefault()}
+                           >
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               navigate(`/tax-invoices/${taxInvoice.id}`);
+                             }}>
+                               <FileText className="w-4 h-4 mr-2" />
+                               ดูรายละเอียด
+                             </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               navigate(`/tax-invoices/${taxInvoice.id}/edit`);
+                             }}>
+                               <Edit className="w-4 h-4 mr-2" />
+                               แก้ไข
+                             </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               console.log('Share', taxInvoice.id);
+                             }}>
+                               <Share2 className="w-4 h-4 mr-2" />
+                               แชร์
+                             </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               window.print();
+                             }}>
+                               <Printer className="w-4 h-4 mr-2" />
+                               พิมพ์
+                             </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               console.log('Download', taxInvoice.id);
+                             }}>
+                               <Download className="w-4 h-4 mr-2" />
+                               ดาวน์โหลด PDF
+                             </DropdownMenuItem>
+                             <DropdownMenuSeparator />
+                             <DropdownMenuItem 
+                               onClick={(e) => {
+                                 e.preventDefault();
+                                 e.stopPropagation();
+                                 openDeleteDialog(taxInvoice.id, taxInvoice.tax_invoice_number);
+                               }}
+                               className="text-red-600 hover:bg-red-50 focus:bg-red-50"
+                             >
+                               <Trash2 className="w-4 h-4 mr-2" />
+                               ลบข้อมูล
+                             </DropdownMenuItem>
+                           </DropdownMenuContent>
+                         </DropdownMenu>
+                       </TableCell>
+                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
