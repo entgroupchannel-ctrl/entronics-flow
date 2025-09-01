@@ -54,6 +54,7 @@ export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
       website: formData.get('website') as string || null,
       line_id: formData.get('line_id') as string || null,
       facebook: formData.get('facebook') as string || null,
+      hq_branch: formData.get('hq_branch') as string || null,
       status: formData.get('status') as string,
       notes: formData.get('notes') as string || null,
       created_by: user.id,
@@ -235,6 +236,20 @@ export function AddCustomerForm({ onSuccess }: AddCustomerFormProps) {
                     name="line_id"
                     placeholder="Line ID (เช่น @companyline)"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="hq_branch">HQ/Branch (สำนักงานใหญ่/สาขา):</Label>
+                  <Select name="hq_branch">
+                    <SelectTrigger>
+                      <SelectValue placeholder="เลือกประเภท" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="สำนักงานใหญ่">สำนักงานใหญ่</SelectItem>
+                      <SelectItem value="สาขาใหญ่">สาขาใหญ่</SelectItem>
+                      <SelectItem value="สาขาย่อย">สาขาย่อย</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardContent>
             </Card>

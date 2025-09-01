@@ -112,6 +112,7 @@ export type Database = {
           district: string | null
           email: string | null
           facebook: string | null
+          hq_branch: string | null
           id: string
           line_id: string | null
           name: string
@@ -143,6 +144,7 @@ export type Database = {
           district?: string | null
           email?: string | null
           facebook?: string | null
+          hq_branch?: string | null
           id?: string
           line_id?: string | null
           name: string
@@ -174,6 +176,7 @@ export type Database = {
           district?: string | null
           email?: string | null
           facebook?: string | null
+          hq_branch?: string | null
           id?: string
           line_id?: string | null
           name?: string
