@@ -9,13 +9,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files, Receipt, ExternalLink, BarChart3 } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files, Receipt, ExternalLink } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
 import { Sidebar } from "@/components/layout/Sidebar";
-import { QuotationsDashboard } from "@/components/dashboard/QuotationsDashboard";
 import QuotationWorkflow from "@/components/quotations/QuotationWorkflow";
 
 interface Quotation {
@@ -53,7 +52,7 @@ export default function Quotations() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedQuotationToDelete, setSelectedQuotationToDelete] = useState<{id: string, number: string} | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('quotations');
 
   useEffect(() => {
     loadQuotations();
@@ -315,14 +314,7 @@ export default function Quotations() {
                 </Button>
               </div>
 
-              <TabsList className="grid w-full grid-cols-2 max-w-md bg-muted/50 p-1 rounded-lg">
-                <TabsTrigger 
-                  value="dashboard" 
-                  className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  รายงานการขาย
-                </TabsTrigger>
+              <TabsList className="grid w-full grid-cols-1 max-w-md bg-muted/50 p-1 rounded-lg">
                 <TabsTrigger 
                   value="quotations" 
                   className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
@@ -331,10 +323,6 @@ export default function Quotations() {
                   รายการใบเสนอราคา
                 </TabsTrigger>
               </TabsList>
-
-              <TabsContent value="dashboard" className="space-y-6">
-                <QuotationsDashboard />
-              </TabsContent>
 
               <TabsContent value="quotations" className="space-y-6">
                 {/* Search and Filter Section */}

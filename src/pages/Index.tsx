@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { MetricCard } from "@/components/dashboard/MetricCard";
+import { QuotationsDashboard } from "@/components/dashboard/QuotationsDashboard";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -534,6 +535,9 @@ const Index = () => {
           className="border-green-200"
         />
       </div>
+
+      {/* Quotations Dashboard */}
+      <QuotationsDashboard />
 
       {/* Staff Status Section */}
       <Card className="mb-6">
