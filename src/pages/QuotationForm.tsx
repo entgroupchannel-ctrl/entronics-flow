@@ -459,13 +459,13 @@ export default function QuotationForm() {
 
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[45%]">รายการสินค้า</TableHead>
-                    <TableHead className="w-20">จำนวน</TableHead>
-                    <TableHead className="w-32">ราคา/หน่วย</TableHead>
-                    <TableHead className="w-20">ส่วนลด</TableHead>
-                    <TableHead className="w-24">รวม</TableHead>
-                    <TableHead className="w-12"></TableHead>
+                  <TableRow className="bg-primary hover:bg-primary">
+                    <TableHead className="w-[45%] text-primary-foreground font-semibold">รายการสินค้า</TableHead>
+                    <TableHead className="w-20 text-primary-foreground font-semibold text-center">จำนวน</TableHead>
+                    <TableHead className="w-32 text-primary-foreground font-semibold text-center">ราคา/หน่วย</TableHead>
+                    <TableHead className="w-20 text-primary-foreground font-semibold text-center">ส่วนลด</TableHead>
+                    <TableHead className="w-24 text-primary-foreground font-semibold text-center">รวม</TableHead>
+                    <TableHead className="w-12 text-primary-foreground"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
