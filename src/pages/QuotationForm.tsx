@@ -6,12 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, Save, X, FileText } from 'lucide-react';
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Plus, Trash2, Save, X, FileText, CalendarIcon } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, format } from 'date-fns';
+import { cn } from "@/lib/utils";
 
 interface Customer {
   id: string;
@@ -437,21 +440,71 @@ export default function QuotationForm() {
                 </div>
                 <div className="w-full max-w-xs">
                   <Label className="text-sm font-medium block text-right mb-1">วันที่</Label>
-                  <Input 
-                    type="date"
-                    value={quotation.quotation_date} 
-                    onChange={(e) => setQuotation(prev => ({ ...prev, quotation_date: e.target.value }))}
-                    className="text-right"
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-between text-right font-normal",
+                          !quotation.quotation_date && "text-muted-foreground"
+                        )}
+                      >
+                        {quotation.quotation_date ? (
+                          format(new Date(quotation.quotation_date), "dd/MM/yyyy")
+                        ) : (
+                          <span>เลือกวันที่</span>
+                        )}
+                        <CalendarIcon className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                      <Calendar
+                        mode="single"
+                        selected={quotation.quotation_date ? new Date(quotation.quotation_date) : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            setQuotation(prev => ({ ...prev, quotation_date: format(date, 'yyyy-MM-dd') }));
+                          }
+                        }}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="w-full max-w-xs">
                   <Label className="text-sm font-medium block text-right mb-1">วันที่หมดอายุ</Label>
-                  <Input 
-                    type="date"
-                    value={quotation.valid_until} 
-                    onChange={(e) => setQuotation(prev => ({ ...prev, valid_until: e.target.value }))}
-                    className="text-right"
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-between text-right font-normal",
+                          !quotation.valid_until && "text-muted-foreground"
+                        )}
+                      >
+                        {quotation.valid_until ? (
+                          format(new Date(quotation.valid_until), "dd/MM/yyyy")
+                        ) : (
+                          <span>เลือกวันที่</span>
+                        )}
+                        <CalendarIcon className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                      <Calendar
+                        mode="single"
+                        selected={quotation.valid_until ? new Date(quotation.valid_until) : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            setQuotation(prev => ({ ...prev, valid_until: format(date, 'yyyy-MM-dd') }));
+                          }
+                        }}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             </div>
