@@ -101,6 +101,7 @@ const Index = () => {
   const [quotations, setQuotations] = useState<any[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -164,10 +165,20 @@ const Index = () => {
 
       if (announcementsError) throw announcementsError;
 
+      // Fetch new customers (last 5)
+      const { data: customersData, error: customersError } = await supabase
+        .from('customers')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (customersError) throw customersError;
+
       setServiceRequests(requests || []);
       setTechnicians(techData || []);
       setQuotations(quotationsData || []);
       setAnnouncements(announcementsData || []);
+      setCustomers(customersData || []);
     } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
@@ -461,7 +472,7 @@ const Index = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Service Requests List */}
         <div className="space-y-4">
           <Card>
@@ -571,6 +582,75 @@ const Index = () => {
                   <Button 
                     variant="outline" 
                     onClick={() => window.location.href = '/quotations'}
+                  >
+                    ดูทั้งหมด
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* New Customers List */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                ลูกค้าใหม่ล่าสุด (5 รายการ)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {customers.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  ยังไม่มีลูกค้าใหม่
+                </div>
+              ) : (
+                customers.map((customer) => (
+                  <div key={customer.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold">{customer.name}</span>
+                          <Badge variant={customer.status === 'สำคัญ' ? 'default' : 'secondary'}>
+                            {customer.customer_type}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(customer.created_at).toLocaleDateString('th-TH')}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1 text-sm">
+                      {customer.contact_person && (
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span>{customer.contact_person}</span>
+                        </div>
+                      )}
+                      {customer.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span>{customer.phone}</span>
+                        </div>
+                      )}
+                      {customer.email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span>{customer.email}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+              
+              {customers.length > 0 && (
+                <div className="text-center pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => window.location.href = '/customers'}
                   >
                     ดูทั้งหมด
                   </Button>
