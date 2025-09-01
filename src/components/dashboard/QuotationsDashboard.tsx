@@ -136,7 +136,7 @@ export function QuotationsDashboard({ className }: QuotationsDashboardProps) {
 
   return (
     <div className={className}>
-      <div className="mb-6">
+      <div className="mb-6 text-right">
         <h2 className="text-xl font-semibold text-foreground mb-2">รายงานใบเสนอราคาประจำวัน</h2>
         <p className="text-sm text-muted-foreground">
           ข้อมูล ณ วันที่ {format(new Date(), 'dd MMMM yyyy')}
