@@ -304,7 +304,6 @@ export default function Invoices() {
                       <TableHead>ลูกค้า</TableHead>
                       <TableHead>ยอดรวม</TableHead>
                       <TableHead>สถานะ</TableHead>
-                      <TableHead>เอกสารที่เกี่ยวข้อง</TableHead>
                       <TableHead>วันครบกำหนด</TableHead>
                       <TableHead className="w-12"></TableHead>
                     </TableRow>
@@ -312,13 +311,13 @@ export default function Invoices() {
                   <TableBody>
                     {loading ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="text-center py-8">
+                        <TableCell colSpan={8} className="text-center py-8">
                           กำลังโหลดข้อมูล...
                         </TableCell>
                       </TableRow>
                     ) : currentItems.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                           ไม่มีข้อมูลใบแจ้งหนี้
                         </TableCell>
                       </TableRow>
@@ -354,52 +353,6 @@ export default function Invoices() {
                               invoice={invoice} 
                               onStatusUpdate={loadInvoices}
                             />
-                          </TableCell>
-                          <TableCell onClick={(e) => e.stopPropagation()}>
-                            <div className="space-y-1">
-                              {/* เอกสารอ้างอิง */}
-                              {invoice.quotations && (
-                                <div className="text-xs text-muted-foreground">
-                                  เอกสารอ้างอิง
-                                </div>
-                              )}
-                              {invoice.quotations && (
-                                <Button
-                                  variant="link"
-                                  size="sm"
-                                  className="h-auto p-0 text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/quotations`);
-                                  }}
-                                >
-                                  <ExternalLink className="w-3 h-3" />
-                                  {invoice.quotations.quotation_number}
-                                </Button>
-                              )}
-                              
-                              {/* เอกสารที่เกี่ยวข้อง */}
-                              {invoice.tax_invoices && invoice.tax_invoices.length > 0 && (
-                                <div className="text-xs text-muted-foreground">
-                                  เอกสารที่เกี่ยวข้อง
-                                </div>
-                              )}
-                              {invoice.tax_invoices && invoice.tax_invoices.map((taxInv, index) => (
-                                <Button
-                                  key={index}
-                                  variant="link"
-                                  size="sm"
-                                  className="h-auto p-0 text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/tax-invoices`);
-                                  }}
-                                >
-                                  <ExternalLink className="w-3 h-3" />
-                                  {taxInv.tax_invoice_number}
-                                </Button>
-                              ))}
-                            </div>
                           </TableCell>
                           <TableCell>
                             {invoice.due_date ? format(new Date(invoice.due_date), 'dd/MM/yyyy') : '-'}
