@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
 import { Sidebar } from "@/components/layout/Sidebar";
+import InvoiceStatusDropdown from "@/components/invoices/InvoiceStatusDropdown";
 
 interface Invoice {
   id: string;
@@ -282,7 +283,10 @@ export default function Invoices() {
                             ฿{invoice.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                           </TableCell>
                           <TableCell>
-                            {getStatusBadge(invoice.status)}
+                            <InvoiceStatusDropdown 
+                              invoice={invoice} 
+                              onStatusUpdate={loadInvoices}
+                            />
                           </TableCell>
                           <TableCell>
                             {invoice.due_date ? format(new Date(invoice.due_date), 'dd/MM/yyyy') : '-'}
