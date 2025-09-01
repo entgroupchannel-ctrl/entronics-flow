@@ -102,6 +102,16 @@ export default function InvoiceForm() {
     calculateTotals();
   }, [items, includeVat]);
 
+  // Set selectedCustomer when customers load and customer_id exists
+  useEffect(() => {
+    if (customers.length > 0 && invoice.customer_id && !selectedCustomer) {
+      const customer = customers.find(c => c.id === invoice.customer_id);
+      if (customer) {
+        setSelectedCustomer(customer);
+      }
+    }
+  }, [customers, invoice.customer_id, selectedCustomer]);
+
   const generateInvoiceNumber = () => {
     const today = new Date();
     const year = today.getFullYear();
@@ -198,6 +208,7 @@ export default function InvoiceForm() {
       setSelectedCustomer(customer);
       setInvoice(prev => ({
         ...prev,
+        customer_id: customerId,
         customer_name: customer.name,
         customer_address: customer.address || '',
         customer_phone: customer.phone || '',
@@ -472,7 +483,7 @@ export default function InvoiceForm() {
                 <div className="space-y-3">
                   <div>
                     <Label className="text-sm font-medium">ชื่อลูกค้า</Label>
-                    <Select onValueChange={selectCustomer}>
+                    <Select value={invoice.customer_id} onValueChange={selectCustomer}>
                       <SelectTrigger className="mt-1 border-gray-300">
                         <SelectValue placeholder="เลือกลูกค้า" />
                       </SelectTrigger>
