@@ -552,177 +552,20 @@ const Delivery = () => {
                   สร้างใบจัดส่งใหม่
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl w-[90vw]">
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>สร้างใบจัดส่งใหม่</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="customer-select">เลือกลูกค้า (ถ้ามี)</Label>
-                      <Select value={formData.customer_id} onValueChange={handleCustomerSelect}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="เลือกลูกค้าที่มีอยู่" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="new">ไม่เลือก (กรอกข้อมูลใหม่)</SelectItem>
-                          {customers.map((customer) => (
-                            <SelectItem key={customer.id} value={customer.id}>
-                              {customer.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="delivery-method">วิธีการจัดส่ง *</Label>
-                      <Select value={formData.delivery_method_id} onValueChange={(value) => setFormData(prev => ({...prev, delivery_method_id: value}))}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="เลือกวิธีการจัดส่ง" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {deliveryMethods.map((method) => (
-                            <SelectItem key={method.id} value={method.id}>
-                              {method.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="customer-name">ชื่อลูกค้า *</Label>
-                      <Input
-                        id="customer-name"
-                        value={formData.customer_name}
-                        onChange={(e) => setFormData(prev => ({...prev, customer_name: e.target.value}))}
-                        placeholder="ชื่อลูกค้า"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="customer-phone">เบอร์โทรศัพท์ *</Label>
-                      <Input
-                        id="customer-phone"
-                        value={formData.customer_phone}
-                        onChange={(e) => setFormData(prev => ({...prev, customer_phone: e.target.value}))}
-                        placeholder="0xx-xxx-xxxx"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="customer-phone-backup">เบอร์สำรอง</Label>
-                      <Input
-                        id="customer-phone-backup"
-                        value={formData.customer_phone_backup}
-                        onChange={(e) => setFormData(prev => ({...prev, customer_phone_backup: e.target.value}))}
-                        placeholder="เบอร์โทรสำรอง (ถ้ามี)"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="customer-line-id">Line ID</Label>
-                      <Input
-                        id="customer-line-id"
-                        value={formData.customer_line_id}
-                        onChange={(e) => setFormData(prev => ({...prev, customer_line_id: e.target.value}))}
-                        placeholder="Line ID ลูกค้า (ถ้ามี)"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="customer-email">อีเมล</Label>
-                    <Input
-                      id="customer-email"
-                      type="email"
-                      value={formData.customer_email}
-                      onChange={(e) => setFormData(prev => ({...prev, customer_email: e.target.value}))}
-                      placeholder="email@example.com"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="delivery-address">ที่อยู่จัดส่ง *</Label>
-                    <Textarea
-                      id="delivery-address"
-                      value={formData.delivery_address}
-                      onChange={(e) => setFormData(prev => ({...prev, delivery_address: e.target.value}))}
-                      placeholder="ที่อยู่สำหรับจัดส่งสินค้า"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="order-type">ประเภทการจัดส่ง</Label>
-                      <Select value={formData.order_type} onValueChange={(value) => setFormData(prev => ({...prev, order_type: value}))}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="ประเภท" />
-                        </SelectTrigger>
-                         <SelectContent>
-                           <SelectItem value="new_product">จัดส่งสินค้าใหม่</SelectItem>
-                           <SelectItem value="repair_return">ส่งคืนของซ่อม</SelectItem>
-                           <SelectItem value="warranty_claim">เคลมสินค้า</SelectItem>
-                         </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="priority">ความเร่งด่วน</Label>
-                      <Select value={formData.priority} onValueChange={(value) => setFormData(prev => ({...prev, priority: value}))}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="ความเร่งด่วน" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="normal">ปกติ</SelectItem>
-                          <SelectItem value="urgent">เร่งด่วน</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="scheduled-date">วันที่ต้องการจัดส่ง</Label>
-                      <Input
-                        id="scheduled-date"
-                        type="date"
-                        value={formData.scheduled_date}
-                        onChange={(e) => setFormData(prev => ({...prev, scheduled_date: e.target.value}))}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="delivery-notes">หมายเหตุการจัดส่ง</Label>
-                    <Textarea
-                      id="delivery-notes"
-                      value={formData.delivery_notes}
-                      onChange={(e) => setFormData(prev => ({...prev, delivery_notes: e.target.value}))}
-                      placeholder="หมายเหตุเพิ่มเติม เช่น เวลาที่สะดวกรับ"
-                      rows={2}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="special-instructions">คำสั่งพิเศษ</Label>
-                    <Textarea
-                      id="special-instructions"
-                      value={formData.special_instructions}
-                      onChange={(e) => setFormData(prev => ({...prev, special_instructions: e.target.value}))}
-                      placeholder="คำสั่งพิเศษสำหรับคนขับ"
-                      rows={2}
-                    />
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                      ยกเลิก
-                    </Button>
-                    <Button onClick={handleCreateDeliveryOrder} disabled={isLoading}>
-                      {isLoading ? "กำลังสร้าง..." : "สร้างใบจัดส่ง"}
-                    </Button>
-                  </div>
-                </div>
+                <DeliveryForm 
+                  formData={formData}
+                  setFormData={setFormData}
+                  customers={customers}
+                  deliveryMethods={deliveryMethods}
+                  onCustomerSelect={handleCustomerSelect}
+                  onSubmit={handleCreateDeliveryOrder}
+                  onCancel={() => setIsCreateDialogOpen(false)}
+                  isLoading={isLoading}
+                />
               </DialogContent>
             </Dialog>
           </div>
@@ -1387,6 +1230,234 @@ const Delivery = () => {
           </Button>
           <Button onClick={handleSubmit} disabled={isLoading}>
             {isLoading ? "กำลังมอบหมาย..." : "มอบหมายงาน"}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Delivery Form Component
+  function DeliveryForm({ 
+    formData, 
+    setFormData, 
+    customers,
+    deliveryMethods,
+    onCustomerSelect,
+    onSubmit, 
+    onCancel, 
+    isLoading 
+  }: {
+    formData: any;
+    setFormData: (data: any) => void;
+    customers: any[];
+    deliveryMethods: any[];
+    onCustomerSelect: (customerId: string) => void;
+    onSubmit: () => void;
+    onCancel: () => void;
+    isLoading: boolean;
+  }) {
+    return (
+      <div className="space-y-6">
+        {/* Customer Selection Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <User className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">ข้อมูลลูกค้า</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="customer-select">เลือกลูกค้า (ถ้ามี)</Label>
+              <Select value={formData.customer_id} onValueChange={onCustomerSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกลูกค้าที่มีอยู่" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">ไม่เลือก (กรอกข้อมูลใหม่)</SelectItem>
+                  {customers.map((customer) => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="customer-name">ชื่อลูกค้า *</Label>
+              <Input
+                id="customer-name"
+                value={formData.customer_name}
+                onChange={(e) => setFormData(prev => ({...prev, customer_name: e.target.value}))}
+                placeholder="ชื่อลูกค้า"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Information Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Phone className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">ข้อมูลการติดต่อ</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="customer-phone">เบอร์โทรศัพท์ *</Label>
+              <Input
+                id="customer-phone"
+                value={formData.customer_phone}
+                onChange={(e) => setFormData(prev => ({...prev, customer_phone: e.target.value}))}
+                placeholder="0xx-xxx-xxxx"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="customer-phone-backup">เบอร์สำรอง</Label>
+              <Input
+                id="customer-phone-backup"
+                value={formData.customer_phone_backup}
+                onChange={(e) => setFormData(prev => ({...prev, customer_phone_backup: e.target.value}))}
+                placeholder="เบอร์โทรสำรอง (ถ้ามี)"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="customer-email">อีเมล</Label>
+              <Input
+                id="customer-email"
+                type="email"
+                value={formData.customer_email}
+                onChange={(e) => setFormData(prev => ({...prev, customer_email: e.target.value}))}
+                placeholder="email@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="customer-line-id">Line ID</Label>
+              <Input
+                id="customer-line-id"
+                value={formData.customer_line_id}
+                onChange={(e) => setFormData(prev => ({...prev, customer_line_id: e.target.value}))}
+                placeholder="Line ID ลูกค้า (ถ้ามี)"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Delivery Address Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <MapPin className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">ที่อยู่จัดส่ง</h3>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="delivery-address">ที่อยู่จัดส่ง *</Label>
+            <Textarea
+              id="delivery-address"
+              value={formData.delivery_address}
+              onChange={(e) => setFormData(prev => ({...prev, delivery_address: e.target.value}))}
+              placeholder="ที่อยู่สำหรับจัดส่งสินค้า"
+              rows={3}
+            />
+          </div>
+        </div>
+
+        {/* Delivery Settings Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Truck className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">การตั้งค่าการจัดส่ง</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="delivery-method">วิธีการจัดส่ง *</Label>
+              <Select value={formData.delivery_method_id} onValueChange={(value) => setFormData(prev => ({...prev, delivery_method_id: value}))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกวิธีการจัดส่ง" />
+                </SelectTrigger>
+                <SelectContent>
+                  {deliveryMethods.map((method) => (
+                    <SelectItem key={method.id} value={method.id}>
+                      {method.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="order-type">ประเภทการจัดส่ง</Label>
+              <Select value={formData.order_type} onValueChange={(value) => setFormData(prev => ({...prev, order_type: value}))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="ประเภท" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new_product">จัดส่งสินค้าใหม่</SelectItem>
+                  <SelectItem value="repair_return">ส่งคืนของซ่อม</SelectItem>
+                  <SelectItem value="warranty_claim">เคลมสินค้า</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="priority">ความเร่งด่วน</Label>
+              <Select value={formData.priority} onValueChange={(value) => setFormData(prev => ({...prev, priority: value}))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="ความเร่งด่วน" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="normal">ปกติ</SelectItem>
+                  <SelectItem value="urgent">เร่งด่วน</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="scheduled-date">วันที่ต้องการจัดส่ง</Label>
+              <Input
+                id="scheduled-date"
+                type="date"
+                value={formData.scheduled_date}
+                onChange={(e) => setFormData(prev => ({...prev, scheduled_date: e.target.value}))}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Notes Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Edit className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">หมายเหตุ</h3>
+          </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="delivery-notes">หมายเหตุการจัดส่ง</Label>
+              <Textarea
+                id="delivery-notes"
+                value={formData.delivery_notes}
+                onChange={(e) => setFormData(prev => ({...prev, delivery_notes: e.target.value}))}
+                placeholder="หมายเหตุเพิ่มเติม เช่น เวลาที่สะดวกรับ"
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="special-instructions">คำสั่งพิเศษ</Label>
+              <Textarea
+                id="special-instructions"
+                value={formData.special_instructions}
+                onChange={(e) => setFormData(prev => ({...prev, special_instructions: e.target.value}))}
+                placeholder="คำสั่งพิเศษสำหรับคนขับ"
+                rows={2}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-2 pt-4">
+          <Button variant="outline" onClick={onCancel}>
+            ยกเลิก
+          </Button>
+          <Button onClick={onSubmit} disabled={isLoading}>
+            {isLoading ? "กำลังสร้าง..." : "สร้างใบจัดส่ง"}
           </Button>
         </div>
       </div>
