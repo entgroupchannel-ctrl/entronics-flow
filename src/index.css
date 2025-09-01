@@ -12,6 +12,20 @@
     --primary-dark: 217 91% 45%;
     --primary-light: 217 91% 75%;
     
+    /* Extended Color Palette for Better UX */
+    --emerald: 142 76% 36%;
+    --emerald-light: 142 76% 50%;
+    --teal: 178 60% 48%;
+    --teal-light: 178 60% 62%;
+    --violet: 263 70% 58%;
+    --violet-light: 263 70% 72%;
+    --rose: 330 81% 60%;
+    --rose-light: 330 81% 74%;
+    --amber: 43 96% 56%;
+    --amber-light: 43 96% 70%;
+    --slate: 215 25% 27%;
+    --slate-light: 215 15% 65%;
+    
     /* Professional Grays */
     --muted: 215 15% 95%;
     --muted-foreground: 215 15% 45%;
@@ -23,10 +37,14 @@
     --destructive: 0 84% 60%;
     --info: 199 89% 48%;
     
-    /* Gradients */
+    /* Enhanced Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 45%));
     --gradient-secondary: linear-gradient(135deg, hsl(215 15% 95%), hsl(215 15% 88%));
     --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(225 85% 55%) 50%, hsl(235 75% 50%) 100%);
+    --gradient-emerald: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 50%));
+    --gradient-violet: linear-gradient(135deg, hsl(263 70% 58%), hsl(263 70% 72%));
+    --gradient-sunset: linear-gradient(135deg, hsl(330 81% 60%), hsl(43 96% 56%));
+    --gradient-ocean: linear-gradient(135deg, hsl(178 60% 48%), hsl(217 91% 60%));
     
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(215 25% 15% / 0.05);

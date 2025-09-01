@@ -252,47 +252,80 @@ const Delivery = () => {
   });
 
   const getStatusBadge = (status: string) => {
-    const variants = {
-      preparing: "secondary",
-      ready_to_ship: "outline", 
-      shipped: "default",
-      in_transit: "default",
-      delivered: "default",
-      failed: "destructive",
-      returned: "secondary"
-    } as const;
+    const statusConfig = {
+      preparing: {
+        variant: "secondary" as const,
+        className: "bg-gradient-to-r from-slate to-slate-light text-white border-0 shadow-md",
+        label: "เตรียมสินค้า"
+      },
+      ready_to_ship: {
+        variant: "outline" as const,
+        className: "bg-gradient-to-r from-violet/10 to-violet-light/10 text-violet border-violet/30 shadow-sm",
+        label: "พร้อมจัดส่ง"
+      },
+      shipped: {
+        variant: "default" as const,
+        className: "bg-gradient-to-r from-teal to-teal-light text-white border-0 shadow-md",
+        label: "จัดส่งแล้ว"
+      },
+      in_transit: {
+        variant: "default" as const,
+        className: "bg-gradient-to-r from-amber to-amber-light text-white border-0 shadow-md",
+        label: "กำลังจัดส่ง"
+      },
+      delivered: {
+        variant: "default" as const,
+        className: "bg-gradient-to-r from-emerald to-emerald-light text-white border-0 shadow-md",
+        label: "จัดส่งสำเร็จ"
+      },
+      failed: {
+        variant: "destructive" as const,
+        className: "bg-gradient-to-r from-destructive to-rose text-white border-0 shadow-md",
+        label: "จัดส่งไม่สำเร็จ"
+      },
+      returned: {
+        variant: "secondary" as const,
+        className: "bg-gradient-to-r from-rose/20 to-rose-light/20 text-rose border-rose/30 shadow-sm",
+        label: "ส่งคืน"
+      }
+    };
 
-    const labels = {
-      preparing: "เตรียมสินค้า",
-      ready_to_ship: "พร้อมจัดส่ง",
-      shipped: "จัดส่งแล้ว",
-      in_transit: "กำลังจัดส่ง", 
-      delivered: "จัดส่งสำเร็จ",
-      failed: "จัดส่งไม่สำเร็จ",
-      returned: "ส่งคืน"
+    const config = statusConfig[status as keyof typeof statusConfig] || {
+      variant: "secondary" as const,
+      className: "bg-muted text-muted-foreground",
+      label: status
     };
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
-        {labels[status as keyof typeof labels] || status}
+      <Badge variant={config.variant} className={config.className}>
+        {config.label}
       </Badge>
     );
   };
 
   const getPriorityBadge = (priority: string) => {
-    const variants = {
-      normal: "secondary",
-      urgent: "destructive"
-    } as const;
+    const priorityConfig = {
+      normal: {
+        variant: "secondary" as const,
+        className: "bg-gradient-to-r from-muted to-muted/70 text-muted-foreground border-0 shadow-sm",
+        label: "ปกติ"
+      },
+      urgent: {
+        variant: "destructive" as const,
+        className: "bg-gradient-to-r from-rose to-rose-light text-white border-0 shadow-md animate-pulse",
+        label: "⚡ เร่งด่วน"
+      }
+    };
 
-    const labels = {
-      normal: "ปกติ",
-      urgent: "เร่งด่วน"
+    const config = priorityConfig[priority as keyof typeof priorityConfig] || {
+      variant: "secondary" as const,
+      className: "bg-muted text-muted-foreground",
+      label: priority
     };
 
     return (
-      <Badge variant={variants[priority as keyof typeof variants] || "secondary"}>
-        {labels[priority as keyof typeof labels] || priority}
+      <Badge variant={config.variant} className={config.className}>
+        {config.label}
       </Badge>
     );
   };
@@ -894,13 +927,17 @@ const Delivery = () => {
       <div className="flex-1 flex flex-col">
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
           <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">ระบบจัดส่งสินค้า / Delivery</h1>
-              <p className="text-muted-foreground">จัดการการจัดส่งและติดตามสถานะ</p>
+            <div className="bg-gradient-to-r from-violet/5 via-teal/5 to-emerald/5 p-1 rounded-lg">
+              <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg border shadow-sm">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-violet to-teal bg-clip-text text-transparent">
+                  ระบบจัดส่งสินค้า / Delivery
+                </h1>
+                <p className="text-slate-light">จัดการการจัดส่งและติดตามสถานะ</p>
+              </div>
             </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button className="bg-gradient-to-r from-emerald to-emerald-light hover:from-emerald-light hover:to-emerald shadow-lg hover:shadow-xl transition-all duration-300 border-0 text-white">
                   <Plus className="mr-2 h-4 w-4" />
                   สร้างใบจัดส่งใหม่
                 </Button>
@@ -929,51 +966,51 @@ const Delivery = () => {
               title="ใบจัดส่งทั้งหมด"
               value={totalOrders}
               icon={Package}
-              className="border-blue-200"
+              className="border-0 bg-gradient-to-br from-primary/10 to-primary-light/10 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-primary"
             />
             <MetricCard
               title="เตรียมสินค้า"
               value={preparingOrders}
               icon={Clock}
-              className="border-orange-200"
+              className="border-0 bg-gradient-to-br from-amber/10 to-amber-light/10 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-amber"
             />
             <MetricCard
               title="กำลังจัดส่ง"
               value={inTransitOrders}
               icon={Truck}
-              className="border-yellow-200"
+              className="border-0 bg-gradient-to-br from-teal/10 to-teal-light/10 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-teal"
             />
             <MetricCard
               title="จัดส่งสำเร็จ"
               value={deliveredOrders}
               icon={CheckCircle}
-              className="border-green-200"
+              className="border-0 bg-gradient-to-br from-emerald/10 to-emerald-light/10 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-emerald"
             />
           </div>
 
           <Tabs defaultValue="orders" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-muted/30 p-1 rounded-lg border">
+            <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-violet/10 via-teal/10 to-emerald/10 p-1 rounded-lg border shadow-md">
               <TabsTrigger 
                 value="orders" 
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium transition-all hover:bg-muted/50"
+                className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary-dark data-[state=active]:text-white data-[state=active]:shadow-lg font-medium transition-all hover:bg-gradient-to-br hover:from-primary/20 hover:to-primary-dark/20 rounded-md"
               >
                 📦 ใบจัดส่ง
               </TabsTrigger>
               <TabsTrigger 
                 value="warranty" 
-                className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm font-medium transition-all hover:bg-muted/50"
+                className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal data-[state=active]:to-teal-light data-[state=active]:text-white data-[state=active]:shadow-lg font-medium transition-all hover:bg-gradient-to-br hover:from-teal/20 hover:to-teal-light/20 rounded-md"
               >
                 🛡️ ติดตามประกัน
               </TabsTrigger>
               <TabsTrigger 
                 value="tracking" 
-                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:shadow-sm font-medium transition-all hover:bg-muted/50"
+                className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber data-[state=active]:to-amber-light data-[state=active]:text-white data-[state=active]:shadow-lg font-medium transition-all hover:bg-gradient-to-br hover:from-amber/20 hover:to-amber-light/20 rounded-md"
               >
                 📍 ติดตามสถานะ
               </TabsTrigger>
               <TabsTrigger 
                 value="drivers" 
-                className="data-[state=active]:bg-green-500 data-[state=active]:text-white data-[state=active]:shadow-sm font-medium transition-all hover:bg-muted/50"
+                className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald data-[state=active]:to-emerald-light data-[state=active]:text-white data-[state=active]:shadow-lg font-medium transition-all hover:bg-gradient-to-br hover:from-emerald/20 hover:to-emerald-light/20 rounded-md"
               >
                 🚗 คนขับ
               </TabsTrigger>
@@ -1571,69 +1608,97 @@ const Delivery = () => {
                   
                   <div className="space-y-2">
                     <Label>เปลี่ยนสถานะเป็น</Label>
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 gap-3">
                       <Button
                         variant={editingOrder.status === 'preparing' ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleUpdateStatus(editingOrder.id, 'preparing')}
                         disabled={isLoading}
-                        className="justify-start"
+                        className={`justify-start transition-all duration-300 ${
+                          editingOrder.status === 'preparing' 
+                            ? 'bg-gradient-to-r from-slate to-slate-light text-white border-0 shadow-md' 
+                            : 'hover:bg-gradient-to-r hover:from-slate/10 hover:to-slate-light/10 hover:border-slate/30'
+                        }`}
                       >
-                        เตรียมสินค้า
+                        📦 เตรียมสินค้า
                       </Button>
                       <Button
                         variant={editingOrder.status === 'ready_to_ship' ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleUpdateStatus(editingOrder.id, 'ready_to_ship')}
                         disabled={isLoading}
-                        className="justify-start"
+                        className={`justify-start transition-all duration-300 ${
+                          editingOrder.status === 'ready_to_ship' 
+                            ? 'bg-gradient-to-r from-violet to-violet-light text-white border-0 shadow-md' 
+                            : 'hover:bg-gradient-to-r hover:from-violet/10 hover:to-violet-light/10 hover:border-violet/30'
+                        }`}
                       >
-                        พร้อมจัดส่ง
+                        ✅ พร้อมจัดส่ง
                       </Button>
                       <Button
                         variant={editingOrder.status === 'shipped' ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleUpdateStatus(editingOrder.id, 'shipped')}
                         disabled={isLoading}
-                        className="justify-start"
+                        className={`justify-start transition-all duration-300 ${
+                          editingOrder.status === 'shipped' 
+                            ? 'bg-gradient-to-r from-teal to-teal-light text-white border-0 shadow-md' 
+                            : 'hover:bg-gradient-to-r hover:from-teal/10 hover:to-teal-light/10 hover:border-teal/30'
+                        }`}
                       >
-                        จัดส่งแล้ว
+                        🚚 จัดส่งแล้ว
                       </Button>
                       <Button
                         variant={editingOrder.status === 'in_transit' ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleUpdateStatus(editingOrder.id, 'in_transit')}
                         disabled={isLoading}
-                        className="justify-start"
+                        className={`justify-start transition-all duration-300 ${
+                          editingOrder.status === 'in_transit' 
+                            ? 'bg-gradient-to-r from-amber to-amber-light text-white border-0 shadow-md' 
+                            : 'hover:bg-gradient-to-r hover:from-amber/10 hover:to-amber-light/10 hover:border-amber/30'
+                        }`}
                       >
-                        กำลังจัดส่ง
+                        📍 กำลังจัดส่ง
                       </Button>
                       <Button
                         variant={editingOrder.status === 'delivered' ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleUpdateStatus(editingOrder.id, 'delivered')}
                         disabled={isLoading}
-                        className="justify-start"
+                        className={`justify-start transition-all duration-300 ${
+                          editingOrder.status === 'delivered' 
+                            ? 'bg-gradient-to-r from-emerald to-emerald-light text-white border-0 shadow-md' 
+                            : 'hover:bg-gradient-to-r hover:from-emerald/10 hover:to-emerald-light/10 hover:border-emerald/30'
+                        }`}
                       >
-                        จัดส่งสำเร็จ
+                        🎉 จัดส่งสำเร็จ
                       </Button>
                       <Button
                         variant={editingOrder.status === 'failed' ? "destructive" : "outline"}
                         size="sm"
                         onClick={() => handleUpdateStatus(editingOrder.id, 'failed')}
                         disabled={isLoading}
-                        className="justify-start"
+                        className={`justify-start transition-all duration-300 ${
+                          editingOrder.status === 'failed' 
+                            ? 'bg-gradient-to-r from-destructive to-rose text-white border-0 shadow-md' 
+                            : 'hover:bg-gradient-to-r hover:from-destructive/10 hover:to-rose/10 hover:border-destructive/30'
+                        }`}
                       >
-                        จัดส่งไม่สำเร็จ
+                        ❌ จัดส่งไม่สำเร็จ
                       </Button>
                       <Button
                         variant={editingOrder.status === 'returned' ? "secondary" : "outline"}
                         size="sm"
                         onClick={() => handleUpdateStatus(editingOrder.id, 'returned')}
                         disabled={isLoading}
-                        className="justify-start"
+                        className={`justify-start transition-all duration-300 ${
+                          editingOrder.status === 'returned' 
+                            ? 'bg-gradient-to-r from-rose/80 to-rose-light/80 text-white border-0 shadow-md' 
+                            : 'hover:bg-gradient-to-r hover:from-rose/10 hover:to-rose-light/10 hover:border-rose/30'
+                        }`}
                       >
-                        ส่งคืน
+                        ↩️ ส่งคืน
                       </Button>
                     </div>
                   </div>

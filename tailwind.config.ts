@@ -30,6 +30,32 @@ export default {
 					dark: 'hsl(var(--primary-dark))',
 					light: 'hsl(var(--primary-light))'
 				},
+				// Extended color palette
+				emerald: {
+					DEFAULT: 'hsl(var(--emerald))',
+					light: 'hsl(var(--emerald-light))'
+				},
+				teal: {
+					DEFAULT: 'hsl(var(--teal))',
+					light: 'hsl(var(--teal-light))'
+				},
+				violet: {
+					DEFAULT: 'hsl(var(--violet))',
+					light: 'hsl(var(--violet-light))'
+				},
+				rose: {
+					DEFAULT: 'hsl(var(--rose))',
+					light: 'hsl(var(--rose-light))'
+				},
+				amber: {
+					DEFAULT: 'hsl(var(--amber))',
+					light: 'hsl(var(--amber-light))'
+				},
+				slate: {
+					DEFAULT: 'hsl(var(--slate))',
+					light: 'hsl(var(--slate-light))'
+				},
+				// Status colors
 				success: 'hsl(var(--success))',
 				warning: 'hsl(var(--warning))',
 				info: 'hsl(var(--info))',
@@ -98,7 +124,11 @@ export default {
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
 				'gradient-secondary': 'var(--gradient-secondary)', 
-				'gradient-hero': 'var(--gradient-hero)'
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-emerald': 'var(--gradient-emerald)',
+				'gradient-violet': 'var(--gradient-violet)',
+				'gradient-sunset': 'var(--gradient-sunset)',
+				'gradient-ocean': 'var(--gradient-ocean)'
 			}
 		}
 	},
