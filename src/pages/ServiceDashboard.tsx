@@ -904,18 +904,44 @@ export default function ServiceDashboard() {
                                    </Button>
                                  </div>
                                ) : (
-                                 <div className="flex gap-2 w-full">
-                                   <Select onValueChange={(value) => updateRequestStatus(request.id, value)}>
-                                     <SelectTrigger className="flex-1">
-                                       <SelectValue placeholder="อัพเดทสถานะ" />
-                                     </SelectTrigger>
-                                     <SelectContent>
-                                       <SelectItem value="in_progress">เริ่มซ่อม</SelectItem>
-                                       <SelectItem value="waiting_parts">รออะไหล่</SelectItem>
-                                       <SelectItem value="completed">เสร็จสิ้น</SelectItem>
-                                       <SelectItem value="cancelled">ยกเลิก</SelectItem>
-                                     </SelectContent>
-                                   </Select>
+                                  <div className="flex flex-wrap gap-2 w-full">
+                                    {request.status !== 'in_progress' && (
+                                      <Button 
+                                        size="sm" 
+                                        onClick={() => updateRequestStatus(request.id, 'in_progress')}
+                                        className="bg-blue-600 hover:bg-blue-700"
+                                      >
+                                        เริ่มซ่อม
+                                      </Button>
+                                    )}
+                                    {request.status !== 'waiting_parts' && (
+                                      <Button 
+                                        size="sm" 
+                                        onClick={() => updateRequestStatus(request.id, 'waiting_parts')}
+                                        variant="outline"
+                                        className="border-orange-500 text-orange-600 hover:bg-orange-50"
+                                      >
+                                        รออะไหล่
+                                      </Button>
+                                    )}
+                                    {request.status !== 'completed' && (
+                                      <Button 
+                                        size="sm" 
+                                        onClick={() => updateRequestStatus(request.id, 'completed')}
+                                        className="bg-green-600 hover:bg-green-700"
+                                      >
+                                        เสร็จสิ้น
+                                      </Button>
+                                    )}
+                                    {request.status !== 'cancelled' && (
+                                      <Button 
+                                        size="sm" 
+                                        onClick={() => updateRequestStatus(request.id, 'cancelled')}
+                                        variant="destructive"
+                                      >
+                                        ยกเลิก
+                                      </Button>
+                                    )}
                                    {request.status === 'completed' && (
                                      <Button 
                                        size="sm" 
