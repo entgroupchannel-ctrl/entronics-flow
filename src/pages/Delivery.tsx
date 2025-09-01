@@ -206,8 +206,7 @@ const Delivery = () => {
         .from('delivery_orders')
         .select(`
           *,
-          delivery_methods(name),
-          customers(name)
+          delivery_methods(name)
         `)
         .order('created_at', { ascending: false });
       
