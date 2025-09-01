@@ -248,7 +248,9 @@ export default function InvoiceForm() {
     const totalAmount = priceAfterDiscount + vatAmount - withholdingTaxAmount;
     
     // คำนวณแบ่งชำระจากยอดสุดท้าย (หลัง VAT และหัก ณ ที่จ่าย)
-    const partialPaymentAmount = totalAmount * (invoice.partial_payment_percentage / 100);
+    const partialPaymentBeforeVat = totalAmount * (invoice.partial_payment_percentage / 100);
+    // เพิ่ม VAT 7% ให้กับยอดแบ่งชำระ
+    const partialPaymentAmount = partialPaymentBeforeVat + (partialPaymentBeforeVat * 0.07);
 
     setInvoice(prev => ({
       ...prev,
