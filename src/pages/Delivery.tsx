@@ -30,7 +30,12 @@ import {
   Users,
   Car,
   Bike,
-  Building
+  Building,
+  Shield,
+  ShieldCheck,
+  Info,
+  CheckCircle2,
+  AlertTriangle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,6 +62,18 @@ interface DeliveryOrder {
   courier_contact_phone?: string;
   staff_phone?: string;
   vehicle_info?: string;
+  warranty_items?: WarrantyItem[];
+}
+
+interface WarrantyItem {
+  id: string;
+  item_name: string;
+  serial_numbers: string[];
+  warranty_period_days: number;
+  warranty_start_date?: string;
+  warranty_end_date?: string;
+  warranty_status: 'pending' | 'active' | 'expired';
+  registration_code?: string;
 }
 
 const Delivery = () => {
@@ -227,36 +244,73 @@ const Delivery = () => {
         .select(`
           *,
           delivery_methods(name),
-          staff(name, phone, vehicle_type, vehicle_plate)
+          staff(name, phone, vehicle_type, vehicle_plate),
+          delivery_items(
+            id,
+            item_name,
+            serial_numbers,
+            warranty_period_days,
+            warranty_start_date,
+            warranty_end_date,
+            product_warranties(
+              id,
+              registration_code,
+              status
+            )
+          )
         `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       
       // Transform data to match interface
-      const transformedData = data?.map(order => ({
-        id: order.id,
-        order_number: order.delivery_number,
-        customer_name: order.customer_name,
-        customer_phone: order.customer_phone,
-        delivery_address: order.delivery_address,
-        status: order.status as any,
-        priority: order.priority as any,
-        delivery_date: order.scheduled_date || order.created_at,
-        tracking_number: order.tracking_number || 'TBD',
-        items_count: 0, // Will be calculated from delivery_items
-        total_weight: order.weight_kg || 0,
-        delivery_notes: order.delivery_notes,
-        created_at: order.created_at,
-        assigned_staff_id: order.assigned_staff_id,
-        assignment_date: order.assignment_date,
-        assignment_notes: order.assignment_notes,
-        courier_contact_name: order.courier_contact_name,
-        courier_contact_phone: order.courier_contact_phone,
-        driver_name: order.staff?.name || null,
-        staff_phone: order.staff?.phone || null,
-        vehicle_info: order.staff ? `${order.staff.vehicle_type} ${order.staff.vehicle_plate}` : null
-      })) || [];
+      const transformedData = data?.map(order => {
+        // Calculate warranty status for each item
+        const warrantyItems = order.delivery_items?.map((item: any) => {
+          let warrantyStatus: 'pending' | 'active' | 'expired' = 'pending';
+          if (item.warranty_start_date) {
+            const endDate = new Date(item.warranty_end_date);
+            const today = new Date();
+            warrantyStatus = endDate < today ? 'expired' : 'active';
+          }
+          
+          return {
+            id: item.id,
+            item_name: item.item_name,
+            serial_numbers: item.serial_numbers || [],
+            warranty_period_days: item.warranty_period_days || 0,
+            warranty_start_date: item.warranty_start_date,
+            warranty_end_date: item.warranty_end_date,
+            warranty_status: warrantyStatus,
+            registration_code: item.product_warranties?.[0]?.registration_code
+          };
+        }) || [];
+
+        return {
+          id: order.id,
+          order_number: order.delivery_number,
+          customer_name: order.customer_name,
+          customer_phone: order.customer_phone,
+          delivery_address: order.delivery_address,
+          status: order.status as any,
+          priority: order.priority as any,
+          delivery_date: order.scheduled_date || order.created_at,
+          tracking_number: order.tracking_number || 'TBD',
+          items_count: order.delivery_items?.length || 0,
+          total_weight: order.weight_kg || 0,
+          delivery_notes: order.delivery_notes,
+          created_at: order.created_at,
+          assigned_staff_id: order.assigned_staff_id,
+          assignment_date: order.assignment_date,
+          assignment_notes: order.assignment_notes,
+          courier_contact_name: order.courier_contact_name,
+          courier_contact_phone: order.courier_contact_phone,
+          driver_name: order.staff?.name || null,
+          staff_phone: order.staff?.phone || null,
+          vehicle_info: order.staff ? `${order.staff.vehicle_type} ${order.staff.vehicle_plate}` : null,
+          warranty_items: warrantyItems
+        };
+      }) || [];
       
       setDeliveryOrders(transformedData);
     } catch (error) {
@@ -599,8 +653,9 @@ const Delivery = () => {
           </div>
 
           <Tabs defaultValue="orders" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="orders">ใบจัดส่ง</TabsTrigger>
+              <TabsTrigger value="warranty">ติดตามประกัน</TabsTrigger>
               <TabsTrigger value="tracking">ติดตามสถานะ</TabsTrigger>
               <TabsTrigger value="drivers">คนขับ</TabsTrigger>
             </TabsList>
@@ -848,28 +903,213 @@ const Delivery = () => {
                          </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <span className="font-medium">ลูกค้า: </span>
-                          <span>{order.customer_name}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium">Tracking: </span>
-                          <span className="text-primary font-mono">{order.tracking_number}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium">วันที่จัดส่ง: </span>
-                          <span>{new Date(order.delivery_date).toLocaleDateString('th-TH')}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium">รายการ: </span>
-                          <span>{order.items_count} รายการ ({order.total_weight} กก.)</span>
-                        </div>
-                      </div>
+                       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
+                         <div>
+                           <span className="font-medium">ลูกค้า: </span>
+                           <span>{order.customer_name}</span>
+                         </div>
+                         <div>
+                           <span className="font-medium">Tracking: </span>
+                           <span className="text-primary font-mono">{order.tracking_number}</span>
+                         </div>
+                         <div>
+                           <span className="font-medium">วันที่จัดส่ง: </span>
+                           <span>{new Date(order.delivery_date).toLocaleDateString('th-TH')}</span>
+                         </div>
+                         <div>
+                           <span className="font-medium">รายการ: </span>
+                           <span>{order.items_count} รายการ ({order.total_weight} กก.)</span>
+                         </div>
+                         <div>
+                           <span className="font-medium">ประกัน: </span>
+                           <div className="flex items-center gap-1">
+                             {order.warranty_items && order.warranty_items.length > 0 ? (
+                               <>
+                                 <Shield className="h-4 w-4 text-blue-500" />
+                                 <span className="text-xs">
+                                   {order.warranty_items.filter(item => item.warranty_status === 'active').length} ชิ้น
+                                   {order.warranty_items.filter(item => item.warranty_status === 'expired').length > 0 && 
+                                     ` (${order.warranty_items.filter(item => item.warranty_status === 'expired').length} หมดอายุ)`
+                                   }
+                                 </span>
+                               </>
+                             ) : (
+                               <span className="text-xs text-muted-foreground">ไม่มีประกัน</span>
+                             )}
+                           </div>
+                         </div>
+                       </div>
+                       
+                       {/* Warranty Details Section */}
+                       {order.warranty_items && order.warranty_items.length > 0 && (
+                         <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                           <div className="flex items-center gap-2 mb-3">
+                             <ShieldCheck className="h-4 w-4 text-blue-500" />
+                             <span className="font-medium text-sm">รายละเอียดประกัน</span>
+                           </div>
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                             {order.warranty_items.map((item, index) => (
+                               <div key={item.id} className="text-xs">
+                                 <div className="flex items-center gap-2 mb-1">
+                                   <span className="font-medium">{item.item_name}</span>
+                                   <Badge 
+                                     variant={
+                                       item.warranty_status === 'active' ? 'default' : 
+                                       item.warranty_status === 'expired' ? 'destructive' : 'secondary'
+                                     }
+                                     className="text-xs px-1 py-0"
+                                   >
+                                     {item.warranty_status === 'active' ? 'ใช้งานได้' : 
+                                      item.warranty_status === 'expired' ? 'หมดอายุ' : 'รอเริ่มใช้'}
+                                   </Badge>
+                                 </div>
+                                 {item.serial_numbers && item.serial_numbers.length > 0 && (
+                                   <div className="text-muted-foreground">
+                                     <span className="font-medium">S/N:</span> {item.serial_numbers.join(', ')}
+                                   </div>
+                                 )}
+                                 {item.warranty_period_days > 0 && (
+                                   <div className="text-muted-foreground">
+                                     <span className="font-medium">ระยะประกัน:</span> {item.warranty_period_days} วัน
+                                   </div>
+                                 )}
+                                 {item.warranty_start_date && (
+                                   <div className="text-muted-foreground">
+                                     <span className="font-medium">เริ่ม:</span> {new Date(item.warranty_start_date).toLocaleDateString('th-TH')}
+                                     {item.warranty_end_date && (
+                                       <> ถึง {new Date(item.warranty_end_date).toLocaleDateString('th-TH')}</>
+                                     )}
+                                   </div>
+                                 )}
+                                 {item.registration_code && (
+                                   <div className="text-muted-foreground font-mono">
+                                     <span className="font-medium">รหัสลงทะเบียน:</span> {item.registration_code}
+                                   </div>
+                                 )}
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       )}
                     </CardContent>
                   </Card>
                 ))}
               </div>
+            </TabsContent>
+
+            <TabsContent value="warranty" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    ติดตามประกันสินค้า
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4">
+                    {deliveryOrders
+                      .filter(order => order.warranty_items && order.warranty_items.length > 0)
+                      .map((order) => (
+                        <Card key={order.id} className="border border-blue-200">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start mb-3">
+                              <div>
+                                <h4 className="font-medium">{order.order_number}</h4>
+                                <p className="text-sm text-muted-foreground">{order.customer_name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  จัดส่งเมื่อ: {new Date(order.delivery_date).toLocaleDateString('th-TH')}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                {getStatusBadge(order.status)}
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              {order.warranty_items?.map((item, index) => (
+                                <div key={item.id} className="p-3 border rounded-lg bg-gray-50/50">
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div className="flex-1">
+                                      <h5 className="font-medium text-sm">{item.item_name}</h5>
+                                      {item.serial_numbers && item.serial_numbers.length > 0 && (
+                                        <p className="text-xs text-muted-foreground">
+                                          Serial: {item.serial_numbers.join(', ')}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <Badge 
+                                      variant={
+                                        item.warranty_status === 'active' ? 'default' : 
+                                        item.warranty_status === 'expired' ? 'destructive' : 'secondary'
+                                      }
+                                      className="ml-2"
+                                    >
+                                      {item.warranty_status === 'active' ? 'ใช้งานได้' : 
+                                       item.warranty_status === 'expired' ? 'หมดอายุ' : 'รอเริ่มใช้'}
+                                    </Badge>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-2 gap-4 text-xs">
+                                    <div>
+                                      <span className="font-medium">ระยะเวลาประกัน:</span>
+                                      <p>{item.warranty_period_days} วัน</p>
+                                    </div>
+                                    {item.warranty_start_date && (
+                                      <div>
+                                        <span className="font-medium">วันที่เริ่มประกัน:</span>
+                                        <p>{new Date(item.warranty_start_date).toLocaleDateString('th-TH')}</p>
+                                      </div>
+                                    )}
+                                    {item.warranty_end_date && (
+                                      <div>
+                                        <span className="font-medium">วันที่หมดประกัน:</span>
+                                        <p className={
+                                          item.warranty_status === 'expired' ? 'text-red-600 font-medium' : ''
+                                        }>
+                                          {new Date(item.warranty_end_date).toLocaleDateString('th-TH')}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {item.registration_code && (
+                                      <div>
+                                        <span className="font-medium">รหัสลงทะเบียน:</span>
+                                        <p className="font-mono">{item.registration_code}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  {item.warranty_status === 'pending' && order.status === 'delivered' && (
+                                    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                                      <Info className="h-3 w-3 inline mr-1" />
+                                      ประกันจะเริ่มนับจากวันที่จัดส่งสินค้าสำเร็จ
+                                    </div>
+                                  )}
+                                  
+                                  {item.warranty_status === 'expired' && (
+                                    <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs">
+                                      <AlertTriangle className="h-3 w-3 inline mr-1" />
+                                      ประกันหมดอายุแล้ว
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    
+                    {deliveryOrders.filter(order => order.warranty_items && order.warranty_items.length > 0).length === 0 && (
+                      <div className="text-center py-12">
+                        <Shield className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium mb-2">ไม่พบข้อมูลประกัน</h3>
+                        <p className="text-muted-foreground">
+                          ยังไม่มีสินค้าที่มีประกันในระบบ
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="tracking" className="space-y-4">
