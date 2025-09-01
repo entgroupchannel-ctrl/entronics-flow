@@ -246,24 +246,33 @@ export default function InvoiceForm() {
     // คำนวณแบ่งชำระจากยอดหลังหักส่วนลด
     const partialPaymentAmount = priceAfterDiscount * (invoice.partial_payment_percentage / 100);
     
-    // คิด VAT 7% จากยอดแบ่งชำระเท่านั้น
-    const vatAmount = includeVat ? partialPaymentAmount * 0.07 : 0;
+    let vatAmount, partialPaymentVat, partialPaymentTotal, remainingAmount, remainingAmountBeforeVat, remainingVat;
     
-    // จำนวนเงินรวมแบ่งชำระ = ยอดแบ่งชำระ + VAT 7%
-    const partialPaymentVat = vatAmount;
-    const partialPaymentTotal = partialPaymentAmount + vatAmount;
-    
-    // คำนวณยอดที่เหลือสำหรับงวดสุดท้าย
-    const remainingAmount = priceAfterDiscount - partialPaymentTotal;
-    // แยก VAT 7% ออกจากยอดงวดสุดท้าย
-    const remainingAmountBeforeVat = remainingAmount / 1.07;
-    const remainingVat = remainingAmount - remainingAmountBeforeVat;
+    if (invoice.partial_payment_percentage > 0) {
+      // กรณีแบ่งชำระ: คิด VAT จากยอดแบ่งชำระ
+      vatAmount = includeVat ? partialPaymentAmount * 0.07 : 0;
+      partialPaymentVat = vatAmount;
+      partialPaymentTotal = partialPaymentAmount + vatAmount;
+      
+      // คำนวณยอดที่เหลือสำหรับงวดสุดท้าย
+      remainingAmount = priceAfterDiscount - partialPaymentTotal;
+      remainingAmountBeforeVat = remainingAmount / 1.07;
+      remainingVat = remainingAmount - remainingAmountBeforeVat;
+    } else {
+      // กรณีไม่แบ่งชำระ: คิด VAT จากยอดหลังหักส่วนลดทั้งหมด
+      vatAmount = includeVat ? priceAfterDiscount * 0.07 : 0;
+      partialPaymentVat = 0;
+      partialPaymentTotal = 0;
+      remainingAmount = 0;
+      remainingAmountBeforeVat = 0;
+      remainingVat = 0;
+    }
     
     // หัก ณ ที่จ่าย (ไม่ใช้ในการคำนวณหลัก)
     const withholdingTaxAmount = (totalTaxableAmount / priceAfterDiscount) * partialPaymentAmount * 0.03;
     
-    // ยอดรวมทั้งหมด (สำหรับแสดง)
-    const totalAmount = priceAfterDiscount;
+    // ยอดรวมทั้งหมด = ยอดหลังหักส่วนลด + VAT
+    const totalAmount = priceAfterDiscount + vatAmount;
 
     setInvoice(prev => ({
       ...prev,
