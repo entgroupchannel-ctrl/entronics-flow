@@ -38,6 +38,7 @@ interface Product {
   price: number;
   stock: number;
   status: "In Stock" | "Low Stock" | "Out of Stock";
+  description?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -77,7 +78,8 @@ const Inventory = () => {
     brand: "",
     price: 0,
     stock: 0,
-    status: "In Stock"
+    status: "In Stock",
+    description: ""
   });
 
   // Load products from Supabase
@@ -138,7 +140,8 @@ const Inventory = () => {
           brand: newProduct.brand || null,
           price: newProduct.price || 0,
           stock: newProduct.stock || 0,
-          status: status
+          status: status,
+          description: newProduct.description || null
         }])
         .select()
         .single();
@@ -163,7 +166,8 @@ const Inventory = () => {
         brand: "",
         price: 0,
         stock: 0,
-        status: "In Stock"
+        status: "In Stock",
+        description: ""
       });
       setShowAddForm(false);
       
@@ -209,7 +213,8 @@ const Inventory = () => {
           brand: editingProduct.brand || null,
           price: editingProduct.price || 0,
           stock: editingProduct.stock || 0,
-          status: status
+          status: status,
+          description: editingProduct.description || null
         })
         .eq('id', editingProduct.id);
 
@@ -528,8 +533,19 @@ const Inventory = () => {
                              placeholder="12"
                            />
                          </div>
-                      </div>
-                    </div>
+                       </div>
+                     </div>
+
+                     <div className="col-span-full">
+                       <Label htmlFor="description">รายละเอียดสินค้า</Label>
+                       <Textarea
+                         id="description"
+                         value={newProduct.description || ""}
+                         onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                         placeholder="รายละเอียดเพิ่มเติมของสินค้า..."
+                         rows={3}
+                       />
+                     </div>
 
                     <div className="flex gap-4">
                       <Button onClick={handleAddProduct}>
@@ -554,84 +570,95 @@ const Inventory = () => {
                         แก้ไขข้อมูลสินค้าในระบบ
                       </DialogDescription>
                     </DialogHeader>
-                    {editingProduct && (
-                      <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="edit-sku">SKU *</Label>
-                              <Input
-                                id="edit-sku"
-                                value={editingProduct.sku}
-                                onChange={(e) => setEditingProduct({...editingProduct, sku: e.target.value})}
-                                placeholder="ADV-PPC-3150"
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="edit-name">ชื่อสินค้า *</Label>
-                              <Input
-                                id="edit-name"
-                                value={editingProduct.name}
-                                onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
-                                placeholder="Advantech PPC-3150 15 inch Panel PC"
-                              />
-                            </div>
+                     {editingProduct && (
+                       <div className="space-y-6">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                           <div className="space-y-4">
+                             <div>
+                               <Label htmlFor="edit-sku">SKU *</Label>
+                               <Input
+                                 id="edit-sku"
+                                 value={editingProduct.sku}
+                                 onChange={(e) => setEditingProduct({...editingProduct, sku: e.target.value})}
+                                 placeholder="ADV-PPC-3150"
+                               />
+                             </div>
+                             
+                             <div>
+                               <Label htmlFor="edit-name">ชื่อสินค้า *</Label>
+                               <Input
+                                 id="edit-name"
+                                 value={editingProduct.name}
+                                 onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
+                                 placeholder="Advantech PPC-3150 15 inch Panel PC"
+                               />
+                             </div>
 
-                            <div>
-                              <Label htmlFor="edit-category">หมวดหมู่</Label>
-                              <Select value={editingProduct.category || ""} onValueChange={(value) => setEditingProduct({...editingProduct, category: value})}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="เลือกหมวดหมู่" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {categories.map(category => (
-                                    <SelectItem key={category} value={category}>{category}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                             <div>
+                               <Label htmlFor="edit-category">หมวดหมู่</Label>
+                               <Select value={editingProduct.category || ""} onValueChange={(value) => setEditingProduct({...editingProduct, category: value})}>
+                                 <SelectTrigger>
+                                   <SelectValue placeholder="เลือกหมวดหมู่" />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                   {categories.map(category => (
+                                     <SelectItem key={category} value={category}>{category}</SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
 
-                            <div>
-                              <Label htmlFor="edit-brand">ยี่ห้อ</Label>
-                              <Select value={editingProduct.brand || ""} onValueChange={(value) => setEditingProduct({...editingProduct, brand: value})}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="เลือกยี่ห้อ" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {brands.map(brand => (
-                                    <SelectItem key={brand} value={brand}>{brand}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
+                             <div>
+                               <Label htmlFor="edit-brand">ยี่ห้อ</Label>
+                               <Select value={editingProduct.brand || ""} onValueChange={(value) => setEditingProduct({...editingProduct, brand: value})}>
+                                 <SelectTrigger>
+                                   <SelectValue placeholder="เลือกยี่ห้อ" />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                   {brands.map(brand => (
+                                     <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                           </div>
 
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="edit-price">ราคาขาย (บาท)</Label>
-                              <Input
-                                id="edit-price"
-                                type="number"
-                                value={editingProduct.price}
-                                onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})}
-                                placeholder="45000"
-                              />
-                            </div>
+                           <div className="space-y-4">
+                             <div>
+                               <Label htmlFor="edit-price">ราคาขาย (บาท)</Label>
+                               <Input
+                                 id="edit-price"
+                                 type="number"
+                                 value={editingProduct.price}
+                                 onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})}
+                                 placeholder="45000"
+                               />
+                             </div>
 
-                            <div>
-                              <Label htmlFor="edit-stock">จำนวนสต๊อค</Label>
-                              <Input
-                                id="edit-stock"
-                                type="number"
-                                value={editingProduct.stock}
-                                onChange={(e) => setEditingProduct({...editingProduct, stock: Number(e.target.value)})}
-                                placeholder="12"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                             <div>
+                               <Label htmlFor="edit-stock">จำนวนสต๊อค</Label>
+                               <Input
+                                 id="edit-stock"
+                                 type="number"
+                                 value={editingProduct.stock}
+                                 onChange={(e) => setEditingProduct({...editingProduct, stock: Number(e.target.value)})}
+                                 placeholder="12"
+                               />
+                             </div>
+                           </div>
+                         </div>
+
+                         <div className="space-y-2">
+                           <Label htmlFor="edit-description">รายละเอียดสินค้า</Label>
+                           <Textarea
+                             id="edit-description"
+                             value={editingProduct.description || ""}
+                             onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})}
+                             placeholder="รายละเอียดเพิ่มเติมของสินค้า..."
+                             rows={3}
+                           />
+                         </div>
+                       </div>
                     )}
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setShowEditDialog(false)}>
@@ -683,9 +710,14 @@ const Inventory = () => {
                           filteredProducts.map((product) => (
                             <TableRow key={product.id}>
                               <TableCell className="font-medium">{product.sku}</TableCell>
-                              <TableCell>
-                                <div className="font-medium">{product.name}</div>
-                              </TableCell>
+                               <TableCell>
+                                 <div className="font-medium">{product.name}</div>
+                                 {product.description && (
+                                   <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                     {product.description}
+                                   </div>
+                                 )}
+                               </TableCell>
                               <TableCell>{product.category || "-"}</TableCell>
                               <TableCell>{product.brand || "-"}</TableCell>
                               <TableCell className="text-right">฿{product.price.toLocaleString()}</TableCell>

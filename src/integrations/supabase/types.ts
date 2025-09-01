@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          priority: string
+          published_at: string
+          target_roles: string[] | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: string
+          published_at?: string
+          target_roles?: string[] | null
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: string
+          published_at?: string
+          target_roles?: string[] | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -253,6 +298,7 @@ export type Database = {
           brand: string | null
           category: string | null
           created_at: string
+          description: string | null
           id: string
           name: string
           price: number
@@ -265,6 +311,7 @@ export type Database = {
           brand?: string | null
           category?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           name: string
           price?: number
@@ -277,6 +324,7 @@ export type Database = {
           brand?: string | null
           category?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           name?: string
           price?: number
