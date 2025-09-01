@@ -374,21 +374,70 @@ export default function Invoices() {
                               <span>{invoice.invoice_number}</span>
                               {/* แสดงไอคอนเมื่อสถานะเป็น วางบิลแล้ว หรือ สร้างใบส่งสินค้า/ใบกำกับภาษี */}
                               {(invoice.status === 'วางบิลแล้ว' || invoice.status === 'สร้างใบส่งสินค้า/ใบกำกับภาษี') && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
-                                  title="มีใบส่งสินค้า/ใบกำกับภาษีที่เกี่ยวข้อง"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    navigate('/tax-invoices');
-                                  }}
-                                >
-                                  <FileText className="w-4 h-4" />
-                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
+                                      title="ดูใบส่งสินค้า/ใบกำกับภาษีที่เกี่ยวข้อง"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                      }}
+                                    >
+                                      <FileText className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent
+                                    align="start"
+                                    className="bg-background border shadow-lg z-[100] min-w-[200px]"
+                                    onSelect={(e) => e.preventDefault()}
+                                  >
+                                    <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
+                                      เอกสารที่เกี่ยวข้อง
+                                    </div>
+                                    <div className="px-3 py-1 text-xs text-muted-foreground">
+                                      ใบส่งสินค้า/ใบกำกับภาษี
+                                    </div>
+                                    {invoice.related_tax_invoices && invoice.related_tax_invoices.length > 0 ? (
+                                      invoice.related_tax_invoices.map((taxInvoice) => (
+                                        <DropdownMenuItem
+                                          key={taxInvoice.id}
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            navigate(`/tax-invoices/${taxInvoice.id}`);
+                                          }}
+                                          className="hover:bg-accent cursor-pointer"
+                                        >
+                                          <ExternalLink className="w-4 h-4 mr-2 text-blue-600" />
+                                          <span className="text-blue-600 hover:underline">
+                                            {taxInvoice.tax_invoice_number}
+                                          </span>
+                                        </DropdownMenuItem>
+                                      ))
+                                    ) : (
+                                      <DropdownMenuItem
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          navigate('/tax-invoices/new', { 
+                                            state: { invoiceId: invoice.id, invoiceNumber: invoice.invoice_number } 
+                                          });
+                                        }}
+                                        className="hover:bg-accent cursor-pointer"
+                                      >
+                                        <Plus className="w-4 h-4 mr-2 text-green-600" />
+                                        <span className="text-green-600">
+                                          สร้างใบส่งสินค้า/ใบกำกับภาษี
+                                        </span>
+                                      </DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               )}
-                              {/* แสดงไอคอนสำหรับ tax invoices ที่มีจริงในฐานข้อมูล */}
+                              {/* แสดงไอคอนสำหรับ tax invoices ที่มีจริงในฐานข้อมูล (สำหรับ backward compatibility) */}
                               {invoice.related_tax_invoices && invoice.related_tax_invoices.length > 0 && (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
