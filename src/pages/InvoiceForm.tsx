@@ -82,6 +82,9 @@ export default function InvoiceForm() {
     partial_payment_amount: 0,
     partial_payment_vat: 0,
     partial_payment_total: 0,
+    remaining_amount: 0,
+    remaining_amount_before_vat: 0,
+    remaining_vat: 0,
     partial_payment_percentage: 60,
     taxable_amount: 0,
     non_taxable_amount: 0,
@@ -246,12 +249,18 @@ export default function InvoiceForm() {
     // คิด VAT 7% จากยอดแบ่งชำระเท่านั้น
     const vatAmount = includeVat ? partialPaymentAmount * 0.07 : 0;
     
-    // คิดหัก ณ ที่จ่าย 3% จากยอดแบ่งชำระ (ถ้ามีซอฟต์แวร์)
-    const withholdingTaxAmount = (totalTaxableAmount / priceAfterDiscount) * partialPaymentAmount * 0.03;
-    
-    // จำนวนเงินรวมแบ่งชำระ = ยอดแบ่งชำระ + VAT - หัก ณ ที่จ่าย
+    // จำนวนเงินรวมแบ่งชำระ = ยอดแบ่งชำระ + VAT 7%
     const partialPaymentVat = vatAmount;
-    const partialPaymentTotal = partialPaymentAmount + vatAmount - withholdingTaxAmount;
+    const partialPaymentTotal = partialPaymentAmount + vatAmount;
+    
+    // คำนวณยอดที่เหลือสำหรับงวดสุดท้าย
+    const remainingAmount = priceAfterDiscount - partialPaymentTotal;
+    // แยก VAT 7% ออกจากยอดงวดสุดท้าย
+    const remainingAmountBeforeVat = remainingAmount / 1.07;
+    const remainingVat = remainingAmount - remainingAmountBeforeVat;
+    
+    // หัก ณ ที่จ่าย (ไม่ใช้ในการคำนวณหลัก)
+    const withholdingTaxAmount = (totalTaxableAmount / priceAfterDiscount) * partialPaymentAmount * 0.03;
     
     // ยอดรวมทั้งหมด (สำหรับแสดง)
     const totalAmount = priceAfterDiscount;
@@ -267,7 +276,10 @@ export default function InvoiceForm() {
       total_amount: totalAmount,
       partial_payment_amount: partialPaymentAmount,
       partial_payment_vat: partialPaymentVat,
-      partial_payment_total: partialPaymentTotal
+      partial_payment_total: partialPaymentTotal,
+      remaining_amount: remainingAmount,
+      remaining_amount_before_vat: remainingAmountBeforeVat,
+      remaining_vat: remainingVat
     }));
   };
 
@@ -884,7 +896,7 @@ export default function InvoiceForm() {
                  
                   {/* แสดงยอดแบ่งชำระ */}
                   {invoice.partial_payment_percentage > 0 && (
-                    <div className="space-y-1">
+                    <div className="space-y-1 border-t pt-2">
                       <div className="flex justify-between text-blue-600">
                         <span>ยอดแบ่งชำระ ({invoice.partial_payment_percentage}%):</span>
                         <span>{invoice.partial_payment_amount?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
@@ -893,9 +905,22 @@ export default function InvoiceForm() {
                         <span>VAT 7% จากยอดแบ่งชำระ:</span>
                         <span>{invoice.partial_payment_vat?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
                       </div>
-                      <div className="flex justify-between text-blue-700 font-semibold">
+                      <div className="flex justify-between text-blue-700 font-semibold border-b pb-1">
                         <span>จำนวนเงินรวมแบ่งชำระ:</span>
                         <span>{invoice.partial_payment_total?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
+                      </div>
+                      
+                      <div className="flex justify-between text-green-600 mt-2">
+                        <span>ยอดงวดสุดท้าย (รวม VAT):</span>
+                        <span>{invoice.remaining_amount?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
+                      </div>
+                      <div className="flex justify-between text-green-600 text-sm">
+                        <span>- ยอดก่อน VAT:</span>
+                        <span>{invoice.remaining_amount_before_vat?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
+                      </div>
+                      <div className="flex justify-between text-green-600 text-sm">
+                        <span>- VAT 7%:</span>
+                        <span>{invoice.remaining_vat?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
                       </div>
                     </div>
                   )}
