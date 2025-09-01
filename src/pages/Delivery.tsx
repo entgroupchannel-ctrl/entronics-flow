@@ -541,7 +541,7 @@ const Delivery = () => {
                   สร้างใบจัดส่งใหม่
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogContent className="max-w-4xl w-[90vw]">
                 <DialogHeader>
                   <DialogTitle>สร้างใบจัดส่งใหม่</DialogTitle>
                 </DialogHeader>
