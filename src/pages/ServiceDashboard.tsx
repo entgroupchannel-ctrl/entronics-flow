@@ -862,13 +862,7 @@ export default function ServiceDashboard() {
                                     <span className="font-medium text-sm text-gray-700">อาการเสีย:</span>
                                     <p className="text-sm mt-1">{request.problem_description}</p>
                                   </div>
-                                  {request.technicians && (
-                                    <div className="p-2 bg-blue-50 rounded border border-blue-200">
-                                      <span className="font-medium text-sm text-blue-700">ช่างที่รับผิดชอบ:</span>
-                                      <p className="text-sm mt-1 text-blue-600">{request.technicians.name}</p>
-                                    </div>
-                                  )}
-                                </div>
+                                 </div>
                               </div>
                             </CardContent>
                           </Card>
