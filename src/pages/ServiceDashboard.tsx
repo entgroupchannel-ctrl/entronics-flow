@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -72,6 +73,7 @@ export default function ServiceDashboard() {
   const { canManageInventory } = useUserRole();
   const { toast } = useToast();
   
+  const [currentView, setCurrentView] = useState('service-dashboard');
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
@@ -273,13 +275,20 @@ export default function ServiceDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Service Dashboard</h1>
-        <Button onClick={() => window.open('/service-request', '_blank')}>
-          แจ้งซ่อมใหม่
-        </Button>
-      </div>
+    <div className="flex h-screen bg-background">
+      <Sidebar 
+        currentView={currentView} 
+        onMenuClick={(view) => setCurrentView(view)}
+      />
+      
+      <div className="flex-1 flex flex-col">
+        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold">Service Dashboard</h1>
+            <Button onClick={() => window.open('/service-request', '_blank')}>
+              แจ้งซ่อมใหม่
+            </Button>
+          </div>
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -500,6 +509,8 @@ export default function ServiceDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+        </main>
+      </div>
     </div>
   );
 }
