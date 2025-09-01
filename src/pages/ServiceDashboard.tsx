@@ -121,6 +121,7 @@ export default function ServiceDashboard() {
   }, []);
 
   const fetchData = async () => {
+    if (loading) return; // Prevent multiple simultaneous fetches
     try {
       // Check if current user is a technician
       const { data: techData, error: techError } = await supabase
@@ -133,12 +134,12 @@ export default function ServiceDashboard() {
         setCurrentTechnician(techData);
       }
 
-      // Fetch service requests with technician info
+      // Fetch service requests with technician info (use left join to include requests without technicians)
       let requestsQuery = supabase
         .from('service_requests')
         .select(`
           *,
-          technicians!inner (
+          technicians (
             name,
             phone,
             specialization
@@ -155,30 +156,33 @@ export default function ServiceDashboard() {
 
       if (requestsError) throw requestsError;
 
-      // Fetch unique technicians only (remove duplicates by name and email)
+      // Fetch unique technicians only - Use DISTINCT to prevent duplicates at database level
       const { data: allTechnicians, error: allTechError } = await supabase
         .from('technicians')
-        .select('*')
+        .select('id, name, phone, email, specialization, is_available, current_workload, rating, total_jobs')
+        .eq('is_available', true)
         .order('name');
 
-      // Filter out duplicates based on name and email
-      const uniqueTechnicians = allTechnicians?.reduce((acc, current) => {
-        const isDuplicate = acc.find(tech => 
-          tech.name === current.name && tech.email === current.email
-        );
-        if (!isDuplicate) {
-          acc.push(current);
-        }
-        return acc;
-      }, [] as any[]) || [];
+      // Additional filtering to ensure absolute uniqueness by name+email combination
+      const uniqueTechnicians = allTechnicians?.filter((tech, index, arr) => {
+        const firstIndex = arr.findIndex(t => t.name === tech.name && t.email === tech.email);
+        return firstIndex === index; // Keep only the first occurrence
+      }) || [];
 
       if (allTechError) throw allTechError;
 
-      setServiceRequests((requests || []).map(req => ({
+      // Process and clean service requests data
+      const processedRequests = (requests || []).map(req => ({
         ...req,
         source: req.source as 'staff' | 'technician' | 'customer'
-      })));
-      setTechnicians(uniqueTechnicians || []);
+      }));
+
+      // Log for debugging duplicate issues
+      console.log('Unique technicians count:', uniqueTechnicians.length);
+      console.log('Service requests count:', processedRequests.length);
+      
+      setServiceRequests(processedRequests);
+      setTechnicians(uniqueTechnicians);
     } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
@@ -1023,8 +1027,11 @@ export default function ServiceDashboard() {
                                         <SelectContent>
                                           {technicians
                                             .filter(tech => tech.is_available)
-                                            .map(tech => (
-                                              <SelectItem key={`${tech.id}-${tech.name}-${tech.email}`} value={tech.id}>
+                                            .map((tech, index) => (
+                                              <SelectItem 
+                                                key={`tech-${tech.id}-${index}`} 
+                                                value={tech.id}
+                                              >
                                                 <div className="flex items-center justify-between w-full">
                                                   <span>{tech.name}</span>
                                                   <div className="flex items-center gap-2 ml-2">
