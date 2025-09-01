@@ -50,7 +50,7 @@ export default function Invoices() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('invoices' as any)
+        .from('invoices')
         .select(`
           *,
           invoice_items (*)
@@ -144,7 +144,7 @@ export default function Invoices() {
 
       // ลบ invoice
       const { error: invoiceError } = await supabase
-        .from('invoices' as any)
+        .from('invoices')
         .delete()
         .eq('id', selectedInvoiceToDelete.id);
 
