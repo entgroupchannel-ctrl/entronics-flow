@@ -80,6 +80,8 @@ export default function InvoiceForm() {
     withholding_tax_amount: 0,
     total_amount: 0,
     partial_payment_amount: 0,
+    partial_payment_vat: 0,
+    partial_payment_total: 0,
     partial_payment_percentage: 60,
     taxable_amount: 0,
     non_taxable_amount: 0,
@@ -248,9 +250,11 @@ export default function InvoiceForm() {
     const totalAmount = priceAfterDiscount + vatAmount - withholdingTaxAmount;
     
     // คำนวณแบ่งชำระจากยอดสุดท้าย (หลัง VAT และหัก ณ ที่จ่าย)
-    const partialPaymentBeforeVat = totalAmount * (invoice.partial_payment_percentage / 100);
-    // เพิ่ม VAT 7% ให้กับยอดแบ่งชำระ
-    const partialPaymentAmount = partialPaymentBeforeVat + (partialPaymentBeforeVat * 0.07);
+    const partialPaymentAmount = totalAmount * (invoice.partial_payment_percentage / 100);
+    // คำนวณ VAT 7% จากยอดแบ่งชำระ
+    const partialPaymentVat = partialPaymentAmount * 0.07;
+    // จำนวนเงินรวมแบ่งชำระ = ยอดแบ่งชำระ + VAT 7%
+    const partialPaymentTotal = partialPaymentAmount + partialPaymentVat;
 
     setInvoice(prev => ({
       ...prev,
@@ -261,7 +265,9 @@ export default function InvoiceForm() {
       taxable_amount: taxableAmount,
       non_taxable_amount: nonTaxableAmount,
       total_amount: totalAmount,
-      partial_payment_amount: partialPaymentAmount
+      partial_payment_amount: partialPaymentAmount,
+      partial_payment_vat: partialPaymentVat,
+      partial_payment_total: partialPaymentTotal
     }));
   };
 
@@ -876,13 +882,23 @@ export default function InvoiceForm() {
                    </div>
                  </div>
                  
-                 {/* แสดงยอดแบ่งชำระ */}
-                 {invoice.partial_payment_percentage > 0 && (
-                   <div className="flex justify-between text-blue-600">
-                     <span>ยอดแบ่งชำระ ({invoice.partial_payment_percentage}%):</span>
-                     <span>{invoice.partial_payment_amount?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
-                   </div>
-                 )}
+                  {/* แสดงยอดแบ่งชำระ */}
+                  {invoice.partial_payment_percentage > 0 && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-blue-600">
+                        <span>ยอดแบ่งชำระ ({invoice.partial_payment_percentage}%):</span>
+                        <span>{invoice.partial_payment_amount?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
+                      </div>
+                      <div className="flex justify-between text-blue-600">
+                        <span>VAT 7% จากยอดแบ่งชำระ:</span>
+                        <span>{invoice.partial_payment_vat?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
+                      </div>
+                      <div className="flex justify-between text-blue-700 font-semibold">
+                        <span>จำนวนเงินรวมแบ่งชำระ:</span>
+                        <span>{invoice.partial_payment_total?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
+                      </div>
+                    </div>
+                  )}
                 
                  <div className="flex justify-between">
                    <span>มูลค่าที่คำนวณภาษี:</span>
