@@ -61,12 +61,11 @@ export default function Customers() {
       console.log('🚀 Starting to fetch customers...');
       setLoading(true);
       
-      // วิธีใหม่: ดึงข้อมูลทั้งหมดโดยใช้ very large limit
+      // ดึงข้อมูลทั้งหมดโดยไม่จำกัดจำนวน
       const { data, error, count } = await supabase
         .from('customers')
         .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .limit(50000); // เพิ่มเป็น 50,000
+        .order('created_at', { ascending: false });
 
       console.log('📊 Database response:');
       console.log('- Total count in DB:', count);
