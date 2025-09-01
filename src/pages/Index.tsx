@@ -943,8 +943,10 @@ const Index = () => {
   );
 
 
-  // Handle navigation for specific views
+  // Handle navigation for specific views (only when not loading)
   useEffect(() => {
+    if (loading) return; // Don't navigate while loading
+    
     switch (currentView) {
       case 'inventory':
         navigate('/inventory');
@@ -959,7 +961,7 @@ const Index = () => {
         navigate('/settings');
         break;
     }
-  }, [currentView, navigate]);
+  }, [currentView, navigate, loading]);
 
   const renderView = () => {
     switch (currentView) {
