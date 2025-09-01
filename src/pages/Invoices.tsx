@@ -324,7 +324,11 @@ export default function Invoices() {
                         <TableRow 
                           key={invoice.id} 
                           className="hover:bg-muted/50 cursor-pointer"
-                          onClick={() => navigate(`/invoices/${invoice.id}`)}
+                          style={{ cursor: 'pointer' }}
+                          onClick={(e) => {
+                            console.log('Row clicked for invoice:', invoice.invoice_number);
+                            navigate(`/invoices/${invoice.id}`);
+                          }}
                         >
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <Checkbox
