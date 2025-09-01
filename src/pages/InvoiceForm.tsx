@@ -655,7 +655,7 @@ export default function InvoiceForm() {
                   <span>แบ่งชำระ:</span>
                   <div className="flex items-center gap-2">
                     <Select value="percentage">
-                      <SelectTrigger className="w-24 text-sm border-gray-300">
+                      <SelectTrigger className="w-32 text-sm border-gray-300">
                         <SelectValue placeholder="เปอร์เซ็นต์" />
                       </SelectTrigger>
                       <SelectContent>
