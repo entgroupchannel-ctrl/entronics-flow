@@ -654,6 +654,146 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          discount_amount: number
+          discount_type: string
+          id: string
+          invoice_id: string | null
+          is_software: boolean
+          line_total: number
+          product_id: string | null
+          product_name: string
+          product_sku: string | null
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          discount_amount?: number
+          discount_type?: string
+          id?: string
+          invoice_id?: string | null
+          is_software?: boolean
+          line_total?: number
+          product_id?: string | null
+          product_name: string
+          product_sku?: string | null
+          quantity?: number
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          discount_amount?: number
+          discount_type?: string
+          id?: string
+          invoice_id?: string | null
+          is_software?: boolean
+          line_total?: number
+          product_id?: string | null
+          product_name?: string
+          product_sku?: string | null
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_address: string | null
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          discount_amount: number
+          discount_percentage: number
+          due_date: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string
+          notes: string | null
+          payment_terms: string | null
+          po_number: string | null
+          project_name: string | null
+          quotation_id: string | null
+          status: string
+          subtotal: number
+          terms_conditions: string | null
+          total_amount: number
+          updated_at: string
+          vat_amount: number
+          withholding_tax_amount: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          discount_amount?: number
+          discount_percentage?: number
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number: string
+          notes?: string | null
+          payment_terms?: string | null
+          po_number?: string | null
+          project_name?: string | null
+          quotation_id?: string | null
+          status?: string
+          subtotal?: number
+          terms_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          vat_amount?: number
+          withholding_tax_amount?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          discount_amount?: number
+          discount_percentage?: number
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          notes?: string | null
+          payment_terms?: string | null
+          po_number?: string | null
+          project_name?: string | null
+          quotation_id?: string | null
+          status?: string
+          subtotal?: number
+          terms_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          vat_amount?: number
+          withholding_tax_amount?: number
+        }
+        Relationships: []
+      }
       product_warranties: {
         Row: {
           claim_count: number
@@ -1722,6 +1862,10 @@ export type Database = {
         Returns: string
       }
       generate_delivery_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_invoice_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
