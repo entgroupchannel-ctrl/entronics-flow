@@ -184,7 +184,13 @@ const InvoiceStatusDropdown: React.FC<InvoiceStatusDropdownProps> = ({ invoice, 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" disabled={loading} className="h-8 text-xs">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          disabled={loading} 
+          className="h-8 text-xs"
+          onClick={(e) => e.stopPropagation()}
+        >
           {currentStatusInfo.icon}
           <span className="ml-1">{currentStatusInfo.label}</span>
           <ChevronDown className="w-3 h-3 ml-1" />
