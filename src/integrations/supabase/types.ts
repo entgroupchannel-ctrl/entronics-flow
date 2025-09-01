@@ -361,7 +361,12 @@ export type Database = {
       }
       delivery_orders: {
         Row: {
+          assigned_staff_id: string | null
+          assignment_date: string | null
+          assignment_notes: string | null
           cod_amount: number | null
+          courier_contact_name: string | null
+          courier_contact_phone: string | null
           created_at: string
           created_by: string | null
           customer_email: string | null
@@ -394,7 +399,12 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          assigned_staff_id?: string | null
+          assignment_date?: string | null
+          assignment_notes?: string | null
           cod_amount?: number | null
+          courier_contact_name?: string | null
+          courier_contact_phone?: string | null
           created_at?: string
           created_by?: string | null
           customer_email?: string | null
@@ -427,7 +437,12 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          assigned_staff_id?: string | null
+          assignment_date?: string | null
+          assignment_notes?: string | null
           cod_amount?: number | null
+          courier_contact_name?: string | null
+          courier_contact_phone?: string | null
           created_at?: string
           created_by?: string | null
           customer_email?: string | null
@@ -460,6 +475,13 @@ export type Database = {
           weight_kg?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "delivery_orders_assigned_staff_id_fkey"
+            columns: ["assigned_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "delivery_orders_delivery_method_id_fkey"
             columns: ["delivery_method_id"]
@@ -1248,6 +1270,93 @@ export type Database = {
           },
         ]
       }
+      staff: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          current_workload: number
+          department: string | null
+          email: string | null
+          emergency_contact: string | null
+          emergency_phone: string | null
+          hire_date: string | null
+          id: string
+          is_active: boolean
+          is_available: boolean
+          license_number: string | null
+          max_workload: number
+          name: string
+          notes: string | null
+          phone: string | null
+          position: string | null
+          rating: number | null
+          salary: number | null
+          staff_code: string
+          successful_deliveries: number | null
+          total_deliveries: number | null
+          updated_at: string
+          user_id: string | null
+          vehicle_plate: string | null
+          vehicle_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          current_workload?: number
+          department?: string | null
+          email?: string | null
+          emergency_contact?: string | null
+          emergency_phone?: string | null
+          hire_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_available?: boolean
+          license_number?: string | null
+          max_workload?: number
+          name: string
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          rating?: number | null
+          salary?: number | null
+          staff_code: string
+          successful_deliveries?: number | null
+          total_deliveries?: number | null
+          updated_at?: string
+          user_id?: string | null
+          vehicle_plate?: string | null
+          vehicle_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          current_workload?: number
+          department?: string | null
+          email?: string | null
+          emergency_contact?: string | null
+          emergency_phone?: string | null
+          hire_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_available?: boolean
+          license_number?: string | null
+          max_workload?: number
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          rating?: number | null
+          salary?: number | null
+          staff_code?: string
+          successful_deliveries?: number | null
+          total_deliveries?: number | null
+          updated_at?: string
+          user_id?: string | null
+          vehicle_plate?: string | null
+          vehicle_type?: string | null
+        }
+        Relationships: []
+      }
       system_settings: {
         Row: {
           category: string
@@ -1463,6 +1572,10 @@ export type Database = {
       accept_invitation: {
         Args: { invitation_token: string }
         Returns: Json
+      }
+      auto_assign_staff: {
+        Args: { delivery_order_id: string }
+        Returns: string
       }
       auto_assign_technician: {
         Args: { request_id: string }
