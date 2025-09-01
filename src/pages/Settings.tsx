@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,6 +87,7 @@ interface Announcement {
 export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState('settings');
   const [loading, setLoading] = useState(true);
   const [invitations, setInvitations] = useState<UserInvitation[]>([]);
@@ -483,8 +485,9 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users">จัดการผู้ใช้</TabsTrigger>
+          <TabsTrigger value="staff">จัดการพนักงาน</TabsTrigger>
           <TabsTrigger value="security">ความปลอดภัย</TabsTrigger>
           <TabsTrigger value="company">ข้อมูลบริษัท</TabsTrigger>
           <TabsTrigger value="announcements">ข่าวสารประกาศ</TabsTrigger>
@@ -607,6 +610,111 @@ export default function Settings() {
                   ))}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Staff Management Tab */}
+        <TabsContent value="staff" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                การจัดการพนักงานขับรถ
+              </CardTitle>
+              <Button 
+                onClick={() => navigate('/staff-management')}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                เปิดหน้าจัดการพนักงาน
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-blue-600 font-medium">พนักงานทั้งหมด</p>
+                      <p className="text-2xl font-bold text-blue-700">-</p>
+                    </div>
+                    <Users className="h-8 w-8 text-blue-500" />
+                  </div>
+                  <p className="text-xs text-blue-600 mt-2">จำนวนพนักงานในระบบ</p>
+                </div>
+                
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-green-600 font-medium">พร้อมปฏิบัติงาน</p>
+                      <p className="text-2xl font-bold text-green-700">-</p>
+                    </div>
+                    <CheckCircle className="h-8 w-8 text-green-500" />
+                  </div>
+                  <p className="text-xs text-green-600 mt-2">พนักงานที่พร้อมรับงาน</p>
+                </div>
+                
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-orange-600 font-medium">ไม่ว่าง</p>
+                      <p className="text-2xl font-bold text-orange-700">-</p>
+                    </div>
+                    <Clock className="h-8 w-8 text-orange-500" />
+                  </div>
+                  <p className="text-xs text-orange-600 mt-2">พนักงานที่กำลังปฏิบัติงาน</p>
+                </div>
+              </div>
+              
+              <div className="border-t pt-4">
+                <h3 className="text-lg font-semibold mb-3">ฟีเจอร์การจัดการพนักงาน</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Plus className="h-5 w-5 text-green-600" />
+                    <div>
+                      <p className="font-medium">เพิ่มพนักงานใหม่</p>
+                      <p className="text-sm text-muted-foreground">เพิ่มข้อมูลพนักงานขับรถใหม่พร้อมข้อมูลยานพาหนะ</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Edit className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="font-medium">แก้ไขข้อมูล</p>
+                      <p className="text-sm text-muted-foreground">อัปเดตข้อมูลส่วนตัวและข้อมูลการทำงาน</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <ToggleLeft className="h-5 w-5 text-orange-600" />
+                    <div>
+                      <p className="font-medium">จัดการสถานะ</p>
+                      <p className="text-sm text-muted-foreground">เปิด/ปิดใช้งานพนักงานและจัดการความพร้อม</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-purple-600" />
+                    <div>
+                      <p className="font-medium">ติดตามประสิทธิภาพ</p>
+                      <p className="text-sm text-muted-foreground">ดูสถิติการทำงานและให้คะแนนพนักงาน</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-start gap-3">
+                  <Bell className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-blue-900">หมายเหตุ</p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      ข้อมูลพนักงานที่เพิ่มในระบบจะถูกใช้งานในการมอบหมายงานจัดส่งโดยอัตโนมัติ 
+                      และสามารถส่งอีเมลแจ้งเตือนได้เมื่อมีการมอบหมายงานใหม่
+                    </p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -22,6 +22,7 @@ import ServiceRequest from "./pages/ServiceRequest";
 import ServiceDashboard from "./pages/ServiceDashboard";
 import Delivery from "./pages/Delivery";
 import SalesDocuments from "./pages/SalesDocuments";
+import StaffManagement from "./pages/StaffManagement";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +99,11 @@ const App = () => (
             <Route path="/sales-documents" element={
               <ProtectedRoute>
                 <SalesDocuments />
+              </ProtectedRoute>
+            } />
+            <Route path="/staff-management" element={
+              <ProtectedRoute>
+                <StaffManagement />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
