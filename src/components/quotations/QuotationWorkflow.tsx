@@ -316,24 +316,28 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
               <ChevronDown className="w-4 h-4 ml-1" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            {availableActions.map((action) => (
-              <DropdownMenuItem
-                key={action.id}
-                onClick={() => {
-                  const needsInput = action.id === 'reject' || action.id === 'approve' || action.id === 'create_invoice';
-                  if (needsInput) {
-                    setIsDialogOpen(true);
-                  } else {
-                    handleAction(action.id);
-                  }
-                }}
-                className="flex items-center gap-2"
-              >
-                {action.icon}
-                {action.label}
-              </DropdownMenuItem>
-            ))}
+          <DropdownMenuContent className="w-56 bg-popover border shadow-md">
+            {availableActions.length === 0 ? (
+              <DropdownMenuItem disabled>ไม่มีตัวเลือก</DropdownMenuItem>
+            ) : (
+              availableActions.map((action) => (
+                <DropdownMenuItem
+                  key={action.id}
+                  onClick={() => {
+                    const needsInput = action.id === 'reject' || action.id === 'approve' || action.id === 'create_invoice';
+                    if (needsInput) {
+                      setIsDialogOpen(true);
+                    } else {
+                      handleAction(action.id);
+                    }
+                  }}
+                  className="flex items-center gap-2 cursor-pointer hover:bg-accent"
+                >
+                  {action.icon}
+                  <span>{action.label}</span>
+                </DropdownMenuItem>
+              ))
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 
