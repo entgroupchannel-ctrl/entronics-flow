@@ -100,7 +100,7 @@ export default function InvoiceForm() {
 
   useEffect(() => {
     calculateTotals();
-  }, [items, includeVat]);
+  }, [items, includeVat, invoice.partial_payment_percentage]);
 
   // Set selectedCustomer when customers load and customer_id exists
   useEffect(() => {
