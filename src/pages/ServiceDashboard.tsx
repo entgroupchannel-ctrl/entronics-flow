@@ -627,12 +627,12 @@ export default function ServiceDashboard() {
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
-                  แจ้งซ่อมออนไลน์
+                  เปิดเคส/แจ้งปัญหา
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>แจ้งซ่อมออนไลน์</DialogTitle>
+                  <DialogTitle>เปิดเคส/แจ้งปัญหา</DialogTitle>
                 </DialogHeader>
                 <ServiceRequestForm 
                   formData={formData}
