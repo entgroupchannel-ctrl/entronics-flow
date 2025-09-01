@@ -490,14 +490,7 @@ export default function InvoiceForm() {
                       <SelectContent>
                         {customers.map(customer => (
                           <SelectItem key={customer.id} value={customer.id}>
-                            <div className="flex flex-col">
-                              <span>{customer.name}</span>
-                              {customer.tax_id && (
-                                <span className="text-xs text-muted-foreground">
-                                  เลขประจำตัวผู้เสียภาษี: {customer.tax_id}
-                                </span>
-                              )}
-                            </div>
+                            {customer.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
