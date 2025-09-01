@@ -425,32 +425,32 @@ export default function QuotationForm() {
                 )}
               </div>
 
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-sm font-medium text-right block">เลขที่เอกสาร</Label>
+              <div className="space-y-3 flex flex-col items-end">
+                <div className="w-full max-w-xs">
+                  <Label className="text-sm font-medium block text-right mb-1">เลขที่เอกสาร</Label>
                   <Input 
                     value={quotation.quotation_number} 
                     onChange={(e) => setQuotation(prev => ({ ...prev, quotation_number: e.target.value }))}
-                    className="mt-1 text-right w-48"
+                    className="text-right"
                     placeholder="QT202400001"
                   />
                 </div>
-                <div>
-                  <Label className="text-sm font-medium text-right block">วันที่</Label>
+                <div className="w-full max-w-xs">
+                  <Label className="text-sm font-medium block text-right mb-1">วันที่</Label>
                   <Input 
                     type="date"
                     value={quotation.quotation_date} 
                     onChange={(e) => setQuotation(prev => ({ ...prev, quotation_date: e.target.value }))}
-                    className="mt-1 text-right w-40"
+                    className="text-right"
                   />
                 </div>
-                <div>
-                  <Label className="text-sm font-medium text-right block">วันที่หมดอายุ</Label>
+                <div className="w-full max-w-xs">
+                  <Label className="text-sm font-medium block text-right mb-1">วันที่หมดอายุ</Label>
                   <Input 
                     type="date"
                     value={quotation.valid_until} 
                     onChange={(e) => setQuotation(prev => ({ ...prev, valid_until: e.target.value }))}
-                    className="mt-1 text-right w-40"
+                    className="text-right"
                   />
                 </div>
               </div>
