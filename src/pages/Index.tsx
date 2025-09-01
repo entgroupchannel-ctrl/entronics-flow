@@ -822,7 +822,7 @@ const Index = () => {
                   ))}
                   {quotations.length > 2 && (
                     <div className="text-center pt-2">
-                      <p className="text-sm text-muted-foreground">และอีก {quotations.length - 2} รายการ <span className="underline cursor-pointer" onClick={() => window.location.href = '/quotations'}>Read more...</span></p>
+                      <p className="text-sm text-muted-foreground">และอีก {quotations.length - 2} รายการ <span className="underline cursor-pointer" onClick={() => navigate('/quotations')}>Read more...</span></p>
                     </div>
                   )}
                 </>
@@ -832,7 +832,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => window.location.href = '/quotations'}
+                  onClick={() => navigate('/quotations')}
                 >
                   ดูทั้งหมด
                 </Button>
@@ -1027,7 +1027,7 @@ const Index = () => {
                <Button 
                  className="w-full justify-start" 
                  variant="outline"
-                 onClick={() => window.location.href = '/quotations'}
+                 onClick={() => navigate('/quotations')}
                >
                  <FileText className="mr-2 h-4 w-4" />
                  สร้างใบเสนอราคา

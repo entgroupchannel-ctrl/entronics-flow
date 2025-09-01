@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, Plus, MoreHorizontal, Filter, Calendar, ChevronLeft, ChevronRight, Edit, Printer, Share, Download, Mail, Copy, Trash } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
 
@@ -31,6 +32,7 @@ export default function SalesDocuments() {
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadQuotations();
@@ -129,7 +131,7 @@ export default function SalesDocuments() {
   };
 
   const createNewQuotation = () => {
-    window.location.href = '/quotations';
+    navigate('/quotations');
   };
 
   return (
