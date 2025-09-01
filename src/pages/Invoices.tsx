@@ -21,6 +21,7 @@ interface Invoice {
   invoice_number: string;
   invoice_date: string;
   customer_name: string;
+  project_name?: string;
   total_amount: number;
   status: string;
   due_date?: string;
@@ -299,12 +300,12 @@ export default function Invoices() {
                           onCheckedChange={handleSelectAll}
                         />
                       </TableHead>
-                      <TableHead>เลขที่ใบแจ้งหนี้</TableHead>
                       <TableHead>วันที่</TableHead>
-                      <TableHead>ลูกค้า</TableHead>
-                      <TableHead>ยอดรวม</TableHead>
-                      <TableHead>สถานะ</TableHead>
+                      <TableHead>เลขที่เอกสาร</TableHead>
+                      <TableHead>ชื่อลูกค้า/ชื่อโปรเจ็ค</TableHead>
                       <TableHead>วันครบกำหนด</TableHead>
+                      <TableHead>ยอดรวมสุทธิ</TableHead>
+                      <TableHead>สถานะ</TableHead>
                       <TableHead className="w-12"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -338,13 +339,23 @@ export default function Invoices() {
                               onCheckedChange={(checked) => handleSelectItem(invoice.id, checked as boolean)}
                             />
                           </TableCell>
+                          <TableCell>
+                            {format(new Date(invoice.invoice_date), 'dd/MM/yyyy')}
+                          </TableCell>
                           <TableCell className="font-medium text-primary">
                             {invoice.invoice_number}
                           </TableCell>
                           <TableCell>
-                            {format(new Date(invoice.invoice_date), 'dd/MM/yyyy')}
+                            <div>
+                              <div className="font-medium">{invoice.customer_name}</div>
+                              {invoice.project_name && (
+                                <div className="text-sm text-muted-foreground">{invoice.project_name}</div>
+                              )}
+                            </div>
                           </TableCell>
-                          <TableCell>{invoice.customer_name}</TableCell>
+                          <TableCell>
+                            {invoice.due_date ? format(new Date(invoice.due_date), 'dd/MM/yyyy') : '-'}
+                          </TableCell>
                           <TableCell className="font-medium">
                             ฿{invoice.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                           </TableCell>
@@ -353,9 +364,6 @@ export default function Invoices() {
                               invoice={invoice} 
                               onStatusUpdate={loadInvoices}
                             />
-                          </TableCell>
-                          <TableCell>
-                            {invoice.due_date ? format(new Date(invoice.due_date), 'dd/MM/yyyy') : '-'}
                           </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <DropdownMenu 
