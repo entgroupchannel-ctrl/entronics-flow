@@ -83,6 +83,7 @@ export default function ServiceDashboard() {
   const [isCompanyInfoOpen, setIsCompanyInfoOpen] = useState(false);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [currentTechnician, setCurrentTechnician] = useState<Technician | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -111,8 +112,19 @@ export default function ServiceDashboard() {
 
   const fetchData = async () => {
     try {
+      // Check if current user is a technician
+      const { data: techData, error: techError } = await supabase
+        .from('technicians')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (techData && !techError) {
+        setCurrentTechnician(techData);
+      }
+
       // Fetch service requests with technician info
-      const { data: requests, error: requestsError } = await supabase
+      let requestsQuery = supabase
         .from('service_requests')
         .select(`
           *,
@@ -121,21 +133,28 @@ export default function ServiceDashboard() {
             phone,
             specialization
           )
-        `)
+        `);
+
+      // If user is a technician, show only their assigned jobs or available jobs
+      if (techData && !techError) {
+        requestsQuery = requestsQuery.or(`assigned_technician_id.eq.${techData.id},assigned_technician_id.is.null`);
+      }
+
+      const { data: requests, error: requestsError } = await requestsQuery
         .order('created_at', { ascending: false });
 
       if (requestsError) throw requestsError;
 
-      // Fetch technicians
-      const { data: techData, error: techError } = await supabase
+      // Fetch all technicians (for managers)
+      const { data: allTechnicians, error: allTechError } = await supabase
         .from('technicians')
         .select('*')
         .order('name');
 
-      if (techError) throw techError;
+      if (allTechError) throw allTechError;
 
       setServiceRequests(requests || []);
-      setTechnicians(techData || []);
+      setTechnicians(allTechnicians || []);
     } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
@@ -317,6 +336,130 @@ export default function ServiceDashboard() {
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถมอบหมายงานอัตโนมัติได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const acceptJob = async (requestId: string) => {
+    if (!currentTechnician) return;
+
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({
+          assigned_technician_id: currentTechnician.id,
+          status: 'assigned'
+        })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      // Add to status history
+      await supabase
+        .from('service_status_history')
+        .insert({
+          service_request_id: requestId,
+          new_status: 'assigned',
+          changed_by: user?.id,
+          notes: 'ช่างรับงาน',
+        });
+
+      toast({
+        title: "รับงานสำเร็จ",
+        description: "คุณได้รับงานนี้แล้ว",
+      });
+
+      fetchData();
+    } catch (error: any) {
+      console.error('Error accepting job:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถรับงานได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateJobStatus = async (requestId: string, newStatus: string, notes?: string) => {
+    try {
+      const updates: any = { status: newStatus };
+      
+      if (newStatus === 'completed') {
+        // When technician marks as completed, it needs manager approval
+        updates.status = 'waiting_approval';
+        updates.completed_date = new Date().toISOString();
+      }
+
+      const { error } = await supabase
+        .from('service_requests')
+        .update(updates)
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      // Add to status history
+      await supabase
+        .from('service_status_history')
+        .insert({
+          service_request_id: requestId,
+          new_status: newStatus === 'completed' ? 'waiting_approval' : newStatus,
+          changed_by: user?.id,
+          notes: notes || `อัพเดทสถานะเป็น ${newStatus}`,
+        });
+
+      const message = newStatus === 'completed' 
+        ? "ส่งงานให้ผู้จัดการอนุมัติแล้ว" 
+        : "อัพเดทสถานะสำเร็จ";
+
+      toast({
+        title: "สำเร็จ",
+        description: message,
+      });
+
+      fetchData();
+    } catch (error: any) {
+      console.error('Error updating job status:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถอัพเดทสถานะได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const approveJob = async (requestId: string, approved: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({
+          status: approved ? 'completed' : 'in_progress'
+        })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      // Add to status history
+      await supabase
+        .from('service_status_history')
+        .insert({
+          service_request_id: requestId,
+          new_status: approved ? 'completed' : 'in_progress',
+          changed_by: user?.id,
+          notes: approved ? 'ผู้จัดการอนุมัติงาน' : 'ผู้จัดการไม่อนุมัติ ต้องแก้ไข',
+        });
+
+      toast({
+        title: approved ? "อนุมัติงานสำเร็จ" : "ไม่อนุมัติงาน",
+        description: approved ? "งานได้รับการอนุมัติแล้ว" : "ส่งงานกลับไปแก้ไข",
+      });
+
+      fetchData();
+    } catch (error: any) {
+      console.error('Error approving job:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถดำเนินการได้",
         variant: "destructive",
       });
     }
