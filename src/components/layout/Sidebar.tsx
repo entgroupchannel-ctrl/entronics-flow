@@ -64,6 +64,13 @@ const menuItems = [
         href: "/invoices",
         view: "invoices",
         iconColor: "text-blue-500"
+      },
+      {
+        title: "ใบส่งสินค้า/ใบกำกับภาษี",
+        icon: FileText,
+        href: "/tax-invoices",
+        view: "tax-invoices",
+        iconColor: "text-green-600"
       }
     ]
   },
