@@ -341,7 +341,7 @@ export function ServiceRequestForm({
                   <SelectTrigger className="bg-white dark:bg-gray-800">
                     <SelectValue placeholder="เลือกประเภทอุปกรณ์" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
+                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 z-50" side="bottom" align="start">
                     {deviceTypes.map((type) => (
                       <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
                     ))}
@@ -358,7 +358,7 @@ export function ServiceRequestForm({
                   <SelectTrigger className="bg-white dark:bg-gray-800">
                     <SelectValue placeholder="เลือกยี่ห้อ" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
+                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 z-50" side="bottom" align="start">
                     {deviceBrands.map((brand) => (
                       <SelectItem key={brand.id} value={brand.name}>{brand.name}</SelectItem>
                     ))}
