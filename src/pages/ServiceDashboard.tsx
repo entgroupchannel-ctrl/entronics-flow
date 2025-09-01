@@ -93,7 +93,7 @@ export default function ServiceDashboard() {
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [currentTechnician, setCurrentTechnician] = useState<Technician | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
@@ -133,7 +133,10 @@ export default function ServiceDashboard() {
   }, [user]);
 
   const fetchData = async () => {
-    if (loading) return; // Prevent multiple simultaneous fetches
+    console.log('ServiceDashboard: fetchData called, loading state:', loading);
+    
+    setLoading(true); // Set loading to true when starting fetch
+    
     try {
       console.log('ServiceDashboard: Starting to fetch data...');
       
