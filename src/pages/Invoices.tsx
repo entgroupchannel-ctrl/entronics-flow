@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +38,8 @@ export default function Invoices() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedInvoiceToDelete, setSelectedInvoiceToDelete] = useState<{id: string, number: string} | null>(null);
 
   useEffect(() => {
     loadInvoices();
@@ -115,17 +118,20 @@ export default function Invoices() {
     }
   };
 
-  const deleteInvoice = async (invoiceId: string, invoiceNumber: string) => {
-    if (!confirm(`ต้องการลบใบแจ้งหนี้ ${invoiceNumber} ใช่หรือไม่?`)) {
-      return;
-    }
+  const openDeleteDialog = (invoiceId: string, invoiceNumber: string) => {
+    setSelectedInvoiceToDelete({ id: invoiceId, number: invoiceNumber });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedInvoiceToDelete) return;
 
     try {
       // ลบ invoice items ก่อน
       const { error: itemsError } = await supabase
         .from('invoice_items')
         .delete()
-        .eq('invoice_id', invoiceId);
+        .eq('invoice_id', selectedInvoiceToDelete.id);
 
       if (itemsError) throw itemsError;
 
@@ -133,13 +139,13 @@ export default function Invoices() {
       const { error: invoiceError } = await supabase
         .from('invoices' as any)
         .delete()
-        .eq('id', invoiceId);
+        .eq('id', selectedInvoiceToDelete.id);
 
       if (invoiceError) throw invoiceError;
 
       toast({
         title: "ลบสำเร็จ",
-        description: `ลบใบแจ้งหนี้ ${invoiceNumber} เรียบร้อยแล้ว`,
+        description: `ลบใบแจ้งหนี้ ${selectedInvoiceToDelete.number} เรียบร้อยแล้ว`,
       });
 
       // รีโหลดข้อมูล
@@ -152,6 +158,9 @@ export default function Invoices() {
         description: "ไม่สามารถลบใบแจ้งหนี้ได้",
         variant: "destructive",
       });
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedInvoiceToDelete(null);
     }
   };
 
@@ -356,7 +365,7 @@ export default function Invoices() {
                                   แชร์
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
-                                  onClick={() => deleteInvoice(invoice.id, invoice.invoice_number)}
+                                  onClick={() => openDeleteDialog(invoice.id, invoice.invoice_number)}
                                   className="text-red-600 hover:bg-red-50"
                                 >
                                   <Trash2 className="w-4 h-4 mr-2" />
@@ -417,6 +426,47 @@ export default function Invoices() {
             )}
           </div>
         </main>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                ยืนยันการลบใบแจ้งหนี้
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
+                คุณต้องการลบใบแจ้งหนี้{' '}
+                <span className="font-medium text-foreground">
+                  {selectedInvoiceToDelete?.number}
+                </span>{' '}
+                ใช่หรือไม่?
+                <br />
+                <span className="text-sm text-destructive mt-2 block">
+                  ⚠️ การกระทำนี้ไม่สามารถยกเลิกได้ และข้อมูลจะถูกลบถาวร
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2">
+              <AlertDialogCancel 
+                onClick={() => {
+                  setDeleteDialogOpen(false);
+                  setSelectedInvoiceToDelete(null);
+                }}
+                className="bg-secondary hover:bg-secondary/80"
+              >
+                ยกเลิก
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                ลบใบแจ้งหนี้
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
