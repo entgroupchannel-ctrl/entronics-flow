@@ -646,7 +646,7 @@ export default function InvoiceForm() {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>ราคาหลังหักส่วนลด:</span>
+                  <span className="underline">ราคาหลังหักส่วนลด:</span>
                   <span>{(invoice.subtotal - invoice.discount_amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                 </div>
                 
