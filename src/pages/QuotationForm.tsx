@@ -160,6 +160,15 @@ export default function QuotationForm() {
   };
 
   const calculateTotals = () => {
+    const rawSubtotal = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const totalDiscount = items.reduce((sum, item) => {
+      if (item.discount_type === 'percentage') {
+        return sum + ((item.quantity * item.unit_price) * (item.discount_amount / 100));
+      } else {
+        return sum + item.discount_amount;
+      }
+    }, 0);
+    
     const subtotal = items.reduce((sum, item) => sum + item.line_total, 0);
     const vatAmount = subtotal * 0.07;
     const softwareItems = items.filter(item => item.is_software);
@@ -170,6 +179,7 @@ export default function QuotationForm() {
     setQuotation(prev => ({
       ...prev,
       subtotal,
+      discount_amount: totalDiscount,
       vat_amount: vatAmount,
       withholding_tax_amount: withholdingTaxAmount,
       total_amount: totalAmount
@@ -658,12 +668,18 @@ export default function QuotationForm() {
                   <span>ยอดรวม:</span>
                   <span>{quotation.subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                 </div>
+                {quotation.discount_amount > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>ส่วนลดรวม:</span>
+                    <span>-{quotation.discount_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>VAT 7%:</span>
                   <span>{quotation.vat_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                 </div>
                 {quotation.withholding_tax_amount > 0 && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-orange-600">
                     <span>หักภาษี ณ ที่จ่าย:</span>
                     <span>-{quotation.withholding_tax_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                   </div>
