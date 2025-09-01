@@ -96,6 +96,8 @@ export default function TaxInvoices() {
         return <Badge variant="outline" className="bg-gray-100 text-gray-800">รีเซ็ต</Badge>;
       case 'ดำเนินการแล้ว':
         return <Badge variant="default" className="bg-green-100 text-green-800">ดำเนินการแล้ว</Badge>;
+      case 'draft':
+        return <Badge variant="default" className="bg-green-100 text-green-800">สร้างใบเสร็จรับเงิน</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
