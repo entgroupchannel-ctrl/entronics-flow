@@ -139,51 +139,52 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
   };
 
   const getAvailableActions = (currentStatus: string) => {
+    const baseActions = [
+      { id: 'approve', label: '✅ อนุมัติ', icon: <CheckCircle className="w-4 h-4" /> },
+      { id: 'reject', label: '❌ ไม่อนุมัติ', icon: <XCircle className="w-4 h-4" /> },
+      { id: 'create_invoice', label: '📄 สร้างใบวางบิล/ใบแจ้งหนี้', icon: <FileText className="w-4 h-4" /> },
+      { id: 'create_delivery_note', label: '📦 สร้างใบส่งสินค้า/ใบกำกับภาษี', icon: <FileText className="w-4 h-4" /> },
+      { id: 'downpayment_invoice', label: '💰 มัดจำใบวางบิล/ใบแจ้งหนี้', icon: <CreditCard className="w-4 h-4" /> },
+      { id: 'split_payment_invoice', label: '🔄 แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้', icon: <RefreshCw className="w-4 h-4" /> },
+      { id: 'downpayment_delivery', label: '📦 มัดจำใบส่งสินค้า/ใบกำกับภาษี', icon: <CreditCard className="w-4 h-4" /> },
+      { id: 'split_payment_delivery', label: '📦 แบ่งจ่ายใบส่งสินค้า/ใบกำกับภาษี', icon: <RefreshCw className="w-4 h-4" /> },
+      { id: 'create_tax_invoice', label: '💰 สร้างใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', icon: <FileText className="w-4 h-4" /> },
+      { id: 'downpayment_receipt', label: '💰 มัดจำใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', icon: <CreditCard className="w-4 h-4" /> },
+      { id: 'split_payment_receipt', label: '💰 แบ่งจ่ายใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', icon: <RefreshCw className="w-4 h-4" /> },
+      { id: 'create_purchase_order', label: '🛒 สร้างใบสั่งซื้อ', icon: <ShoppingCart className="w-4 h-4" /> },
+      { id: 'complete', label: '✅ เสร็จสิ้น', icon: <CheckCircle className="w-4 h-4" /> }
+    ];
+
+    // Filter actions based on current status to show relevant options
     switch (currentStatus) {
       case 'wait_for_approve':
-        return [
-          { id: 'approve', label: '✅ อนุมัติ', icon: <CheckCircle className="w-4 h-4" /> },
-          { id: 'reject', label: '❌ ไม่อนุมัติ', icon: <XCircle className="w-4 h-4" /> }
-        ];
+        return baseActions.filter(action => 
+          ['approve', 'reject', 'create_invoice', 'downpayment_invoice', 'split_payment_invoice', 'create_purchase_order'].includes(action.id)
+        );
       case 'approved':
-        return [
-          { id: 'create_invoice', label: '📄 สร้างใบวางบิล/ใบแจ้งหนี้', icon: <FileText className="w-4 h-4" /> },
-          { id: 'downpayment_invoice', label: '💰 มัดจำใบวางบิล/ใบแจ้งหนี้', icon: <CreditCard className="w-4 h-4" /> },
-          { id: 'split_payment_invoice', label: '🔄 แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้', icon: <RefreshCw className="w-4 h-4" /> },
-          { id: 'create_purchase_order', label: '🛒 สร้างใบสั่งซื้อ', icon: <ShoppingCart className="w-4 h-4" /> }
-        ];
+        return baseActions.filter(action => 
+          ['create_invoice', 'downpayment_invoice', 'split_payment_invoice', 'create_purchase_order', 'create_delivery_note'].includes(action.id)
+        );
       case 'invoice_created':
-        return [
-          { id: 'create_delivery_note', label: '📦 สร้างใบส่งสินค้า/ใบกำกับภาษี', icon: <FileText className="w-4 h-4" /> }
-        ];
+        return baseActions.filter(action => 
+          ['create_delivery_note', 'create_tax_invoice'].includes(action.id)
+        );
       case 'downpayment_invoice':
-        return [
-          { id: 'create_downpayment_delivery', label: '📦 มัดจำใบส่งสินค้า/ใบกำกับภาษี', icon: <FileText className="w-4 h-4" /> }
-        ];
+        return baseActions.filter(action => 
+          ['downpayment_delivery', 'downpayment_receipt'].includes(action.id)
+        );
       case 'split_payment_invoice':
-        return [
-          { id: 'create_split_payment_delivery', label: '📦 แบ่งจ่ายใบส่งสินค้า/ใบกำกับภาษี', icon: <FileText className="w-4 h-4" /> }
-        ];
+        return baseActions.filter(action => 
+          ['split_payment_delivery', 'split_payment_receipt'].includes(action.id)
+        );
       case 'delivery_note_created':
-        return [
-          { id: 'create_tax_invoice', label: '💰 สร้างใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', icon: <FileText className="w-4 h-4" /> }
-        ];
       case 'downpayment_delivery':
-        return [
-          { id: 'create_downpayment_receipt', label: '💰 มัดจำใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', icon: <FileText className="w-4 h-4" /> }
-        ];
       case 'split_payment_delivery':
-        return [
-          { id: 'create_split_payment_receipt', label: '💰 แบ่งจ่ายใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', icon: <FileText className="w-4 h-4" /> }
-        ];
-      case 'tax_invoice_created':
-      case 'downpayment_receipt':
-      case 'split_payment_receipt':
-        return [
-          { id: 'complete', label: '✅ เสร็จสิ้น', icon: <CheckCircle className="w-4 h-4" /> }
-        ];
+        return baseActions.filter(action => 
+          ['create_tax_invoice', 'downpayment_receipt', 'split_payment_receipt', 'complete'].includes(action.id)
+        );
       default:
-        return [];
+        return baseActions.slice(0, 6); // Show first 6 common actions
     }
   };
 
