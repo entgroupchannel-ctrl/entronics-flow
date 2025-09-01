@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useLocation, useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Users, 
@@ -11,8 +13,16 @@ import {
   BarChart3,
   FileText,
   Bell,
- } from "lucide-react";
+  Menu,
+  ChevronLeft
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SidebarProps {
   className?: string;
@@ -20,264 +30,266 @@ interface SidebarProps {
   currentView?: string;
 }
 
-
 const menuItems = [
   {
     title: "แดชบอร์ด / Dashboard",
     icon: LayoutDashboard,
     href: "/",
-    active: true,
+    view: "dashboard",
     iconColor: "text-blue-500"
   },
   {
     title: "ใบเสนอราคา / Quotation",
     icon: FileText,
     href: "/quotations",
+    view: "quotations",
     iconColor: "text-green-500"
   },
   {
     title: "แจ้งซ่อม / Service Ticket",
     icon: Wrench,
     href: "/service-dashboard",
+    view: "service",
     iconColor: "text-orange-500"
   },
   {
     title: "รายชื่อลูกค้า / Customers",
     icon: Users,
     href: "/customers",
+    view: "customers",
     iconColor: "text-purple-500"
   },
   {
     title: "คลังสินค้า / Inventory",
     icon: Package,
     href: "/inventory",
-    active: false,
+    view: "inventory",
     iconColor: "text-cyan-500"
   },
   {
     title: "การเงิน / Financial",
     icon: DollarSign,
     href: "/financial",
+    view: "financial",
     iconColor: "text-yellow-500"
   },
   {
     title: "วิเคราะห์ข้อมูล / Analytics",
     icon: BarChart3,
     href: "/analytics",
+    view: "analytics",
     iconColor: "text-indigo-500"
   },
   {
     title: "รายงาน / Reports",
     icon: FileText,
     href: "/reports",
+    view: "reports",
     iconColor: "text-teal-500"
   },
   {
     title: "ตั้งค่า / Settings",
     icon: Settings,
     href: "/settings",
+    view: "settings",
     iconColor: "text-gray-500"
   }
 ];
 
 export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [hoveredOnCollapsed, setHoveredOnCollapsed] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const currentPath = location.pathname;
+  const showExpanded = !collapsed || hoveredOnCollapsed;
+
+  const handleMenuClick = (item: typeof menuItems[0]) => {
+    if (onMenuClick && item.view) {
+      onMenuClick(item.view);
+    } else {
+      navigate(item.href);
+    }
+  };
+
+  const isActive = (item: typeof menuItems[0]) => {
+    if (currentView) {
+      return currentView === item.view;
+    }
+    return currentPath === item.href;
+  };
+
   return (
-    <div className={cn("flex h-full w-64 flex-col bg-card border-r border-border", className)}>
-      {/* Logo */}
-      <div className="flex h-16 items-center px-6 border-b border-border">
-        <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded bg-gradient-primary flex items-center justify-center">
-            <Building2 className="h-5 w-5 text-white" />
+    <TooltipProvider>
+      <div 
+        className={cn(
+          "flex h-full flex-col bg-card border-r border-border transition-all duration-300 ease-in-out relative",
+          showExpanded ? "w-64" : "w-16",
+          className
+        )}
+        onMouseEnter={() => collapsed && setHoveredOnCollapsed(true)}
+        onMouseLeave={() => setHoveredOnCollapsed(false)}
+      >
+        {/* Expanded overlay when hovering on collapsed state */}
+        {collapsed && hoveredOnCollapsed && (
+          <div className="absolute left-16 top-0 w-48 h-full bg-card border-r border-border shadow-lg z-50 animate-slide-in-right">
+            {/* Logo */}
+            <div className="flex h-16 items-center px-6 border-b border-border">
+              <div>
+                <h1 className="text-lg font-bold text-foreground">ENT GROUP</h1>
+                <p className="text-xs text-muted-foreground">Industrial PC ERP</p>
+              </div>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 space-y-1 p-4">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item);
+                
+                return (
+                  <Button
+                    key={item.href}
+                    variant={active ? "default" : "ghost"}
+                    className={cn(
+                      "w-full justify-start h-10 px-3",
+                      active 
+                        ? "bg-primary text-primary-foreground shadow-sm" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    )}
+                    onClick={() => handleMenuClick(item)}
+                  >
+                    <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
+                    <span className="text-sm">{item.title}</span>
+                  </Button>
+                );
+              })}
+            </nav>
+
+            {/* User Info */}
+            <div className="border-t border-border p-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
+                  <Users className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">Admin User</p>
+                  <p className="text-xs text-muted-foreground truncate">admin@entgroup.com</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground">ENT GROUP</h1>
-            <p className="text-xs text-muted-foreground">Industrial PC ERP</p>
-          </div>
+        )}
+
+        {/* Main sidebar content */}
+        {/* Toggle Button */}
+        <div className="flex h-16 items-center border-b border-border">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-2"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+          
+          {showExpanded && (
+            <div className="flex items-center space-x-2 ml-2">
+              <div className="h-8 w-8 rounded bg-gradient-primary flex items-center justify-center">
+                <Building2 className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-foreground">ENT GROUP</h1>
+                <p className="text-xs text-muted-foreground">Industrial PC ERP</p>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isInventory = item.title.includes("คลังสินค้า");
-          const isCustomers = item.title.includes("รายชื่อลูกค้า");
-          const isQuotations = item.title.includes("ใบเสนอราคา");
-          const isService = item.title.includes("แจ้งซ่อม");
-          const isDashboard = item.title.includes("แดชบอร์ด");
-          const isSettings = item.title.includes("ตั้งค่า");
-          
-          const isActive = (isDashboard && currentView === 'dashboard') || 
-                          (isService && currentView === 'service') ||
-                          (!isDashboard && !isService && item.active);
-          
-          if (isInventory) {
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1 p-2">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item);
+            
+            if (showExpanded) {
+              return (
+                <Button
+                  key={item.href}
+                  variant={active ? "default" : "ghost"}
+                  className={cn(
+                    "w-full justify-start h-10 px-3",
+                    active 
+                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  )}
+                  onClick={() => handleMenuClick(item)}
+                >
+                  <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
+                  <span className="text-sm">{item.title}</span>
+                </Button>
+              );
+            }
+
+            // Collapsed view - only icons with tooltips
             return (
-              <Button
-                key={item.href}
-                variant={item.active ? "default" : "ghost"}
-                className={cn(
-                  "w-full justify-start h-10 px-3",
-                  item.active 
-                    ? "bg-primary text-primary-foreground shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                onClick={() => {
-                  // Use React Router navigation instead of page reload
-                  if (onMenuClick) {
-                    onMenuClick('inventory');
-                  } else {
-                    window.location.href = '/inventory';
-                  }
-                }}
-              >
-                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
-                {item.title}
-              </Button>
+              <Tooltip key={item.href}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={active ? "default" : "ghost"}
+                    size="icon"
+                    className={cn(
+                      "w-12 h-12 mx-auto",
+                      active 
+                        ? "bg-primary text-primary-foreground shadow-sm" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    )}
+                    onClick={() => handleMenuClick(item)}
+                  >
+                    <Icon className={cn("h-5 w-5", item.iconColor)} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="ml-2">
+                  <p>{item.title}</p>
+                </TooltipContent>
+              </Tooltip>
             );
-          }
-          
-          if (isCustomers) {
-            return (
-              <Button
-                key={item.href}
-                variant={isActive ? "default" : "ghost"}
-                className={cn(
-                  "w-full justify-start h-10 px-3",
-                  item.active 
-                    ? "bg-primary text-primary-foreground shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                onClick={() => {
-                  // Use React Router navigation instead of page reload  
-                  if (onMenuClick) {
-                    onMenuClick('customers');
-                  } else {
-                    window.location.href = '/customers';
-                  }
-                }}
-              >
-                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
-                {item.title}
-              </Button>
-            );
-          }
+          })}
+        </nav>
 
-          if (isQuotations) {
-            return (
-              <Button
-                key={item.href}
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start h-10 px-3",
-                  "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                onClick={() => {
-                  // Use React Router navigation instead of page reload
-                  if (onMenuClick) {
-                    onMenuClick('quotations');
-                  } else {
-                    window.location.href = '/quotations';
-                  }
-                }}
-              >
-                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
-                {item.title}
-              </Button>
-            );
-          }
-
-          if (isService) {
-            return (
-              <Button
-                key={item.href}
-                variant={isActive ? "default" : "ghost"}
-                className={cn(
-                  "w-full justify-start h-10 px-3",
-                  isActive 
-                    ? "bg-primary text-primary-foreground shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                onClick={() => onMenuClick?.('service')}
-              >
-                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
-                {item.title}
-              </Button>
-            );
-          }
-
-          if (isDashboard) {
-            return (
-              <Button
-                key={item.href}
-                variant={isActive ? "default" : "ghost"}
-                className={cn(
-                  "w-full justify-start h-10 px-3",
-                  isActive 
-                    ? "bg-primary text-primary-foreground shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                onClick={() => onMenuClick?.('dashboard')}
-              >
-                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
-                {item.title}
-              </Button>
-            );
-          }
-
-          
-          if (isSettings) {
-            return (
-              <Button
-                key={item.href}
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start h-10 px-3",
-                  "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                onClick={() => {
-                  // Use React Router navigation instead of page reload
-                  if (onMenuClick) {
-                    onMenuClick('settings');
-                  } else {
-                    window.location.href = '/settings';
-                  }
-                }}
-              >
-                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
-                {item.title}
-              </Button>
-            );
-          }
-
-          return (
-            <Button
-              key={item.href}
-              variant="ghost"
-              className={cn(
-                "w-full justify-start h-10 px-3",
-                "text-muted-foreground hover:text-foreground hover:bg-accent"
-              )}
-              >
-                <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
-                {item.title}
-              </Button>
-          );
-        })}
-      </nav>
-
-      {/* User Info */}
-      <div className="border-t border-border p-4">
-        <div className="flex items-center space-x-3">
-          <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
-            <Users className="h-4 w-4 text-white" />
+        {/* User Info */}
+        {showExpanded && (
+          <div className="border-t border-border p-4">
+            <div className="flex items-center space-x-3">
+              <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
+                <Users className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">Admin User</p>
+                <p className="text-xs text-muted-foreground truncate">admin@entgroup.com</p>
+              </div>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">Admin User</p>
-            <p className="text-xs text-muted-foreground truncate">admin@entgroup.com</p>
+        )}
+
+        {/* Collapsed user avatar */}
+        {!showExpanded && (
+          <div className="border-t border-border p-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center mx-auto cursor-pointer">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="ml-2">
+                <p>Admin User</p>
+                <p className="text-xs text-muted-foreground">admin@entgroup.com</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
-        </div>
+        )}
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
