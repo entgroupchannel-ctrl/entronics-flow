@@ -723,8 +723,13 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          item_condition: string | null
           name: string
           price: number
+          repair_notes: string | null
+          repair_order_id: string | null
+          repaired_date: string | null
+          service_request_id: string | null
           sku: string
           status: string
           stock: number
@@ -736,8 +741,13 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          item_condition?: string | null
           name: string
           price?: number
+          repair_notes?: string | null
+          repair_order_id?: string | null
+          repaired_date?: string | null
+          service_request_id?: string | null
           sku: string
           status?: string
           stock?: number
@@ -749,14 +759,34 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          item_condition?: string | null
           name?: string
           price?: number
+          repair_notes?: string | null
+          repair_order_id?: string | null
+          repaired_date?: string | null
+          service_request_id?: string | null
           sku?: string
           status?: string
           stock?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_repair_order_id_fkey"
+            columns: ["repair_order_id"]
+            isOneToOne: false
+            referencedRelation: "repair_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

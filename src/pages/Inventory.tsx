@@ -41,6 +41,11 @@ interface Product {
   description?: string;
   created_at?: string;
   updated_at?: string;
+  item_condition?: string;
+  repair_order_id?: string;
+  service_request_id?: string;
+  repaired_date?: string;
+  repair_notes?: string;
 }
 
 const categories = [
@@ -51,7 +56,15 @@ const categories = [
   "Tablets",
   "Monitors",
   "Components",
-  "Accessories"
+  "Accessories",
+  "อุปกรณ์ซ่อมแซม"
+];
+
+const itemConditions = [
+  "new",
+  "refurbished", 
+  "repaired",
+  "used"
 ];
 
 const brands = [
@@ -72,6 +85,7 @@ const Inventory = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCondition, setSelectedCondition] = useState<string>("all");
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<any[]>([]);
@@ -294,7 +308,8 @@ const Inventory = () => {
                          product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesCondition = selectedCondition === "all" || product.item_condition === selectedCondition;
+    return matchesSearch && matchesCategory && matchesCondition;
   });
 
   const getStatusBadge = (status: string) => {
@@ -307,6 +322,21 @@ const Inventory = () => {
         return <Badge variant="destructive">หมดสต๊อค</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getConditionBadge = (condition: string) => {
+    switch (condition) {
+      case "new":
+        return <Badge variant="default">ใหม่</Badge>;
+      case "refurbished":
+        return <Badge variant="secondary">ปรับสภาพ</Badge>;
+      case "repaired":
+        return <Badge variant="outline">ซ่อมแซม</Badge>;
+      case "used":
+        return <Badge variant="secondary">มือสอง</Badge>;
+      default:
+        return <Badge variant="outline">{condition}</Badge>;
     }
   };
 
@@ -624,6 +654,19 @@ const Inventory = () => {
                         ))}
                       </SelectContent>
                      </Select>
+                     
+                     <Select value={selectedCondition} onValueChange={setSelectedCondition}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="เลือกสภาพ" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">ทุกสภาพ</SelectItem>
+                        <SelectItem value="new">ใหม่</SelectItem>
+                        <SelectItem value="refurbished">ปรับสภาพ</SelectItem>
+                        <SelectItem value="repaired">ซ่อมแซม</SelectItem>
+                        <SelectItem value="used">มือสอง</SelectItem>
+                      </SelectContent>
+                     </Select>
                      {canManageInventory() && (
                        <Button onClick={() => setShowAddForm(true)} className="whitespace-nowrap">
                          <Plus className="h-4 w-4 mr-2" />
@@ -869,38 +912,52 @@ const Inventory = () => {
                   ) : (
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead>SKU</TableHead>
-                          <TableHead>ชื่อสินค้า</TableHead>
-                          <TableHead>หมวดหมู่</TableHead>
-                          <TableHead>ยี่ห้อ</TableHead>
-                          <TableHead className="text-right">ราคาขาย</TableHead>
-                          <TableHead className="text-right">สต๊อค</TableHead>
-                          <TableHead>สถานะ</TableHead>
-                          {canManageInventory() && <TableHead className="text-center">จัดการ</TableHead>}
-                        </TableRow>
+                         <TableRow>
+                           <TableHead>SKU</TableHead>
+                           <TableHead>ชื่อสินค้า</TableHead>
+                           <TableHead>หมวดหมู่</TableHead>
+                           <TableHead>สภาพ</TableHead>
+                           <TableHead>ยี่ห้อ</TableHead>
+                           <TableHead className="text-right">ราคาขาย</TableHead>
+                           <TableHead className="text-right">สต๊อค</TableHead>
+                           <TableHead>สถานะ</TableHead>
+                           {canManageInventory() && <TableHead className="text-center">จัดการ</TableHead>}
+                         </TableRow>
                       </TableHeader>
                       <TableBody>
                          {filteredProducts.length === 0 ? (
                            <TableRow>
-                             <TableCell colSpan={canManageInventory() ? 8 : 7} className="text-center py-8 text-muted-foreground">
-                               {searchTerm || selectedCategory !== "all" ? "ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา" : "ยังไม่มีสินค้าในระบบ"}
-                             </TableCell>
+                              <TableCell colSpan={canManageInventory() ? 9 : 8} className="text-center py-8 text-muted-foreground">
+                                {searchTerm || selectedCategory !== "all" || selectedCondition !== "all" ? "ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา" : "ยังไม่มีสินค้าในระบบ"}
+                              </TableCell>
                            </TableRow>
                         ) : (
                           filteredProducts.map((product) => (
                             <TableRow key={product.id}>
-                              <TableCell className="font-medium">{product.sku}</TableCell>
+                               <TableCell className="font-medium">{product.sku}</TableCell>
+                                <TableCell>
+                                  <div className="font-medium">{product.name}</div>
+                                  {product.description && (
+                                    <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                      {product.description}
+                                    </div>
+                                  )}
+                                  {product.repair_notes && (
+                                    <div className="text-xs text-blue-600 mt-1">
+                                      บันทึกการซ่อม: {product.repair_notes}
+                                    </div>
+                                  )}
+                                </TableCell>
+                               <TableCell>{product.category || "-"}</TableCell>
                                <TableCell>
-                                 <div className="font-medium">{product.name}</div>
-                                 {product.description && (
-                                   <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                     {product.description}
+                                 {getConditionBadge(product.item_condition || "new")}
+                                 {product.repaired_date && (
+                                   <div className="text-xs text-muted-foreground mt-1">
+                                     ซ่อมเมื่อ: {new Date(product.repaired_date).toLocaleDateString('th-TH')}
                                    </div>
                                  )}
                                </TableCell>
-                              <TableCell>{product.category || "-"}</TableCell>
-                              <TableCell>{product.brand || "-"}</TableCell>
+                               <TableCell>{product.brand || "-"}</TableCell>
                               <TableCell className="text-right">฿{product.price.toLocaleString()}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-2">
