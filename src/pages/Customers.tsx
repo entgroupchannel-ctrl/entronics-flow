@@ -4,12 +4,15 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Search, MoreHorizontal, Phone, Mail, MapPin } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Search, MoreHorizontal, Phone, Mail, MapPin, Upload, Download, FileSpreadsheet } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { AddCustomerForm } from '@/components/customers/AddCustomerForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import * as XLSX from 'xlsx';
 
 interface Customer {
   id: string;
@@ -30,6 +33,12 @@ export default function Customers() {
   const [activeTab, setActiveTab] = useState("customers");
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importPreview, setImportPreview] = useState<any[]>([]);
+  const [importErrors, setImportErrors] = useState<{row: number, errors: string[]}[]>([]);
+  const [validCustomers, setValidCustomers] = useState<any[]>([]);
+  const [invalidCustomers, setInvalidCustomers] = useState<any[]>([]);
   const { toast } = useToast();
 
   // Fetch customers from database
@@ -50,6 +59,200 @@ export default function Customers() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Download template function
+  const downloadTemplate = () => {
+    const templateData = [
+      {
+        'Name': 'บริษัท ตัวอย่าง จำกัด',
+        'ContactPerson': 'คุณสมชาย ใจดี',
+        'Phone': '02-123-4567',
+        'Email': 'contact@example.com',
+        'Address': '123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองตัน กรุงเทพฯ 10110',
+        'CustomerType': 'ลูกค้า',
+        'Status': 'ปกติ',
+        'TaxID': '0123456789012',
+        'LineID': '@companyline'
+      },
+      {
+        'Name': 'บริษัท ผู้จำหน่าย จำกัด', 
+        'ContactPerson': 'คุณสมหญิง รักษ์ดี',
+        'Phone': '02-987-6543',
+        'Email': 'supplier@example.com',
+        'Address': '456 ถนนพระราม 4 แขวงสุริยวงศ์ เขตบางรัก กรุงเทพฯ 10500',
+        'CustomerType': 'ผู้จำหน่าย',
+        'Status': 'สำคัญ',
+        'TaxID': '9876543210987',
+        'LineID': '@supplierline'
+      }
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(templateData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'ลูกค้า Template');
+    
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 25 }, // Name
+      { wch: 20 }, // ContactPerson
+      { wch: 15 }, // Phone
+      { wch: 25 }, // Email
+      { wch: 50 }, // Address
+      { wch: 15 }, // CustomerType
+      { wch: 10 }, // Status
+      { wch: 15 }, // TaxID
+      { wch: 15 }  // LineID
+    ];
+    
+    XLSX.writeFile(wb, 'Customer_Template.xlsx');
+  };
+
+  // Handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportFile(file);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        // Validate and separate valid/invalid data
+        const errors: {row: number, errors: string[]}[] = [];
+        const validData: any[] = [];
+        const invalidData: any[] = [];
+        const existingEmails = customers.map(c => c.email).filter(Boolean);
+
+        jsonData.forEach((row: any, index: number) => {
+          const rowNum = index + 2; // Account for header row
+          const name = row.Name?.toString().trim();
+          const contactPerson = row.ContactPerson?.toString().trim() || "";
+          const phone = row.Phone?.toString().trim() || "";
+          const email = row.Email?.toString().trim() || "";
+          const address = row.Address?.toString().trim() || "";
+          const customerType = row.CustomerType?.toString().trim() || "ลูกค้า";
+          const status = row.Status?.toString().trim() || "ปกติ";
+          const taxId = row.TaxID?.toString().trim() || "";
+          const lineId = row.LineID?.toString().trim() || "";
+
+          // Validation errors for this row
+          const rowErrors: string[] = [];
+
+          if (!name) {
+            rowErrors.push("ต้องระบุชื่อ");
+          }
+
+          if (email && existingEmails.includes(email)) {
+            rowErrors.push("อีเมลซ้ำกับข้อมูลในระบบ");
+          }
+
+          if (customerType && !['ลูกค้า', 'ผู้จำหน่าย', 'ผู้จำหน่าย/ลูกค้า'].includes(customerType)) {
+            rowErrors.push("ประเภทไม่ถูกต้อง (ลูกค้า, ผู้จำหน่าย, ผู้จำหน่าย/ลูกค้า)");
+          }
+
+          if (status && !['ปกติ', 'สำคัญ', 'ระงับ'].includes(status)) {
+            rowErrors.push("สถานะไม่ถูกต้อง (ปกติ, สำคัญ, ระงับ)");
+          }
+
+          const customerData = {
+            rowNumber: rowNum,
+            name: name || '',
+            contact_person: contactPerson,
+            phone: phone,
+            email: email,
+            address: address,
+            customer_type: customerType,
+            status: status,
+            tax_id: taxId,
+            line_id: lineId,
+            originalRow: row
+          };
+
+          if (rowErrors.length > 0) {
+            errors.push({ row: rowNum, errors: rowErrors });
+            invalidData.push(customerData);
+          } else {
+            validData.push(customerData);
+          }
+        });
+
+        setImportErrors(errors);
+        setValidCustomers(validData);
+        setInvalidCustomers(invalidData);
+        setImportPreview([...validData, ...invalidData]);
+      } catch (error) {
+        console.error('Error reading file:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถอ่านไฟล์ Excel ได้",
+          variant: "destructive"
+        });
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // Handle import customers
+  const handleImportCustomers = async () => {
+    if (validCustomers.length === 0) {
+      toast({
+        title: "ไม่มีข้อมูลที่ถูกต้อง",
+        description: "ไม่มีลูกค้าที่สามารถนำเข้าได้",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const customersToInsert = validCustomers.map(customer => ({
+        name: customer.name,
+        contact_person: customer.contact_person || null,
+        phone: customer.phone || null,
+        email: customer.email || null,
+        address: customer.address || null,
+        customer_type: customer.customer_type,
+        status: customer.status,
+        tax_id: customer.tax_id || null,
+        line_id: customer.line_id || null,
+        person_type: 'นิติบุคคล',
+        contact_type: 'ลูกค้า'
+      }));
+
+      const { error } = await supabase
+        .from('customers')
+        .insert(customersToInsert);
+
+      if (error) throw error;
+
+      toast({
+        title: "นำเข้าข้อมูลสำเร็จ",
+        description: `นำเข้าลูกค้า ${validCustomers.length} รายการเรียบร้อยแล้ว`,
+      });
+
+      // Reset state and refresh data
+      setShowImportDialog(false);
+      setImportFile(null);
+      setImportPreview([]);
+      setImportErrors([]);
+      setValidCustomers([]);
+      setInvalidCustomers([]);
+      fetchCustomers();
+
+    } catch (error: any) {
+      console.error('Error importing customers:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถนำเข้าข้อมูลลูกค้าได้",
+        variant: "destructive"
+      });
     }
   };
 
@@ -128,7 +331,116 @@ export default function Customers() {
                   <h1 className="text-3xl font-bold text-foreground">รายชื่อลูกค้า</h1>
                   <p className="text-muted-foreground">จัดการข้อมูลลูกค้าและผู้จำหน่าย</p>
                 </div>
-                <AddCustomerForm onSuccess={fetchCustomers} />
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={downloadTemplate}
+                    className="gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    ดาวน์โหลด Template
+                  </Button>
+                  <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <Upload className="h-4 w-4" />
+                        นำเข้า Excel
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>นำเข้าข้อมูลลูกค้าจาก Excel</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Input
+                            type="file"
+                            accept=".xlsx,.xls"
+                            onChange={handleFileSelect}
+                            className="w-full"
+                          />
+                          <p className="text-sm text-muted-foreground mt-2">
+                            รองรับไฟล์ .xlsx และ .xls เท่านั้น
+                          </p>
+                        </div>
+                        
+                        {importPreview.length > 0 && (
+                          <div className="space-y-4">
+                            {importErrors.length > 0 && (
+                              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                                <h4 className="font-semibold text-destructive mb-2">พบข้อผิดพลาด:</h4>
+                                <div className="space-y-1 text-sm">
+                                  {importErrors.map((error, index) => (
+                                    <div key={index} className="text-destructive">
+                                      แถว {error.row}: {error.errors.join(', ')}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="border rounded-lg">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>แถว</TableHead>
+                                    <TableHead>ชื่อ</TableHead>
+                                    <TableHead>ชื่อผู้ติดต่อ</TableHead>
+                                    <TableHead>เบอร์โทร</TableHead>
+                                    <TableHead>อีเมล</TableHead>
+                                    <TableHead>ประเภท</TableHead>
+                                    <TableHead>สถานะ</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {importPreview.map((customer, index) => (
+                                    <TableRow 
+                                      key={index} 
+                                      className={importErrors.some(e => e.row === customer.rowNumber) ? "bg-destructive/5" : ""}
+                                    >
+                                      <TableCell>{customer.rowNumber}</TableCell>
+                                      <TableCell>{customer.name || '-'}</TableCell>
+                                      <TableCell>{customer.contact_person || '-'}</TableCell>
+                                      <TableCell>{customer.phone || '-'}</TableCell>
+                                      <TableCell>{customer.email || '-'}</TableCell>
+                                      <TableCell>{customer.customer_type || '-'}</TableCell>
+                                      <TableCell>
+                                        {importErrors.some(e => e.row === customer.rowNumber) ? (
+                                          <Badge variant="destructive">ข้อผิดพลาด</Badge>
+                                        ) : (
+                                          <Badge variant="secondary">ถูกต้อง</Badge>
+                                        )}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                            
+                            <div className="flex justify-between items-center">
+                              <div className="text-sm text-muted-foreground">
+                                ข้อมูลที่ถูกต้อง: {validCustomers.length} รายการ | 
+                                ข้อมูลที่ผิดพลาด: {invalidCustomers.length} รายการ
+                              </div>
+                              <div className="flex gap-2">
+                                <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+                                  ยกเลิก
+                                </Button>
+                                <Button 
+                                  onClick={handleImportCustomers}
+                                  disabled={validCustomers.length === 0}
+                                >
+                                  นำเข้า {validCustomers.length} รายการ
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <AddCustomerForm onSuccess={fetchCustomers} />
+                </div>
               </div>
 
               {/* Search and Filters */}
