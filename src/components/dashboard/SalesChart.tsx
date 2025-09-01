@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, AlertCircle, Shield } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
 
 // ข้อมูลยอดขาย YoY comparison
 const salesData = [
@@ -25,6 +27,40 @@ const growthRate = ((currentYearTotal - lastYearTotal) / lastYearTotal * 100).to
 const isPositiveGrowth = parseFloat(growthRate) > 0;
 
 export function SalesChart() {
+  const { canManageInventory } = useUserRole();
+
+  // ตรวจสอบสิทธิ์การเข้าถึงข้อมูลยอดขาย
+  if (!canManageInventory()) {
+    return (
+      <Card className="col-span-1">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                ยอดขาย YoY
+              </CardTitle>
+              <CardDescription className="text-sm">
+                ข้อมูลสำหรับผู้บริหารเท่านั้น
+              </CardDescription>
+            </div>
+            <Badge variant="secondary">จำกัดการเข้าถึง</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="pb-4">
+          <div className="flex items-center justify-center h-64 text-muted-foreground bg-muted/30 rounded-lg">
+            <div className="text-center">
+              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+              <h3 className="font-semibold mb-2">ข้อมูลถูกจำกัดการเข้าถึง</h3>
+              <p className="text-sm mb-1">ข้อมูลยอดขายเป็นความลับทางธุรกิจ</p>
+              <p className="text-xs">เฉพาะผู้ที่มีสิทธิ์ admin หรือ accountant เท่านั้น</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="col-span-1">
       <CardHeader className="pb-4">
