@@ -632,38 +632,38 @@ export default function ServiceDashboard() {
     const statusConfig = {
       pending: {
         variant: "secondary" as const,
-        className: "bg-gradient-to-r from-slate to-slate-light text-white border-0 shadow-md",
-        label: "⏳ รอดำเนินการ"
+        className: "bg-muted text-muted-foreground",
+        label: "รอดำเนินการ"
       },
       assigned: {
         variant: "outline" as const,
-        className: "bg-gradient-to-r from-violet/10 to-violet-light/10 text-violet border-violet/30 shadow-sm",
-        label: "👤 มอบหมายแล้ว"
+        className: "border-primary/50 text-primary",
+        label: "มอบหมายแล้ว"
       },
       in_progress: {
         variant: "default" as const,
-        className: "bg-gradient-to-r from-amber to-amber-light text-white border-0 shadow-md",
-        label: "🔧 กำลังดำเนินการ"
+        className: "bg-primary text-primary-foreground",
+        label: "กำลังดำเนินการ"
       },
       waiting_parts: {
-        variant: "destructive" as const,
-        className: "bg-gradient-to-r from-orange-500 to-rose text-white border-0 shadow-md",
-        label: "📦 รออะไหล่"
+        variant: "secondary" as const,
+        className: "bg-orange-100 text-orange-800 border-orange-300",
+        label: "รออะไหล่"
       },
       waiting_approval: {
-        variant: "destructive" as const,
-        className: "bg-gradient-to-r from-rose to-rose-light text-white border-0 shadow-md",
-        label: "⏱️ รออนุมัติ"
+        variant: "secondary" as const,
+        className: "bg-amber-100 text-amber-800 border-amber-300",
+        label: "รออนุมัติ"
       },
       completed: {
         variant: "default" as const,
-        className: "bg-gradient-to-r from-emerald to-emerald-light text-white border-0 shadow-md",
-        label: "✅ เสร็จสิ้น"
+        className: "bg-green-100 text-green-800 border-green-300",
+        label: "เสร็จสิ้น"
       },
       cancelled: {
         variant: "secondary" as const,
-        className: "bg-gradient-to-r from-slate/20 to-slate-light/20 text-slate border-slate/30 shadow-sm",
-        label: "❌ ยกเลิก"
+        className: "bg-muted text-muted-foreground",
+        label: "ยกเลิก"
       }
     };
 
@@ -674,11 +674,9 @@ export default function ServiceDashboard() {
     };
 
     return (
-      <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
-        <Badge variant={config.variant} className={config.className}>
-          {config.label}
-        </Badge>
-      </div>
+      <Badge variant={config.variant} className={config.className}>
+        {config.label}
+      </Badge>
     );
   };
 
@@ -686,23 +684,23 @@ export default function ServiceDashboard() {
     const priorityConfig = {
       low: {
         variant: "secondary" as const,
-        className: "bg-gradient-to-r from-muted to-muted/70 text-muted-foreground border-0 shadow-sm",
-        label: "🟢 ปกติ"
+        className: "bg-muted text-muted-foreground",
+        label: "ปกติ"
       },
       medium: {
         variant: "outline" as const,
-        className: "bg-gradient-to-r from-amber/10 to-amber-light/10 text-amber border-amber/30 shadow-sm",
-        label: "🟡 ปานกลาง"
+        className: "border-border text-foreground",
+        label: "ปานกลาง"
       },
       high: {
-        variant: "destructive" as const,
-        className: "bg-gradient-to-r from-orange-500 to-rose text-white border-0 shadow-md",
-        label: "🟠 สูง"
+        variant: "secondary" as const,
+        className: "bg-orange-100 text-orange-800 border-orange-300",
+        label: "สูง"
       },
       urgent: {
         variant: "destructive" as const,
-        className: "bg-gradient-to-r from-rose to-rose-light text-white border-0 shadow-md animate-pulse",
-        label: "🔴 เร่งด่วน"
+        className: "bg-red-100 text-red-800 border-red-300",
+        label: "เร่งด่วน"
       }
     };
 
@@ -713,11 +711,9 @@ export default function ServiceDashboard() {
     };
 
     return (
-      <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
-        <Badge variant={config.variant} className={config.className}>
-          {config.label}
-        </Badge>
-      </div>
+      <Badge variant={config.variant} className={config.className}>
+        {config.label}
+      </Badge>
     );
   };
 
@@ -788,23 +784,21 @@ export default function ServiceDashboard() {
       />
       
       <div className="flex-1 flex flex-col">
-        <main className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-br from-background via-background to-muted/30">
+        <main className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Header Section */}
-          <div className="flex justify-between items-center p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+          <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-                🔧 Service Dashboard
+              <h1 className="text-3xl font-bold text-foreground">
+                Service Dashboard
               </h1>
-              <p className="text-muted-foreground mt-2">จัดการงานซ่อมและบริการลูกค้า</p>
+              <p className="text-muted-foreground mt-1">จัดการงานซ่อมและบริการลูกค้า</p>
             </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
-                  <Button className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary shadow-md">
-                    <Plus className="mr-2 h-4 w-4" />
-                    เปิดเคส/แจ้งปัญหา
-                  </Button>
-                </div>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  เปิดเคส/แจ้งปัญหา
+                </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
@@ -821,92 +815,39 @@ export default function ServiceDashboard() {
             </Dialog>
           </div>
 
-          {/* Enhanced Metrics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-gradient-to-br from-white to-blue-50/50 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-blue-600">งานทั้งหมด</p>
-                    <p className="text-3xl font-bold text-blue-700">{totalRequests}</p>
-                  </div>
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <ClipboardList className="h-6 w-6 text-blue-600" />
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center text-xs">
-                  <TrendingUp className="h-3 w-3 text-blue-500 mr-1" />
-                  <span className="text-blue-600">+12% จากเดือนที่แล้ว</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-gradient-to-br from-white to-orange-50/50 border-orange-200 shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-orange-600">รอดำเนินการ</p>
-                    <p className="text-3xl font-bold text-orange-700">{pendingRequests}</p>
-                  </div>
-                  <div className="p-3 bg-orange-100 rounded-full">
-                    <Timer className="h-6 w-6 text-orange-600" />
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center text-xs">
-                  <AlertCircle className="h-3 w-3 text-orange-500 mr-1" />
-                  <span className="text-orange-600">ต้องดำเนินการด่วน</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-gradient-to-br from-white to-amber-50/50 border-amber-200 shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-amber-600">กำลังซ่อม</p>
-                    <p className="text-3xl font-bold text-amber-700">{inProgressRequests}</p>
-                  </div>
-                  <div className="p-3 bg-amber-100 rounded-full">
-                    <Activity className="h-6 w-6 text-amber-600" />
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center text-xs">
-                  <Clock className="h-3 w-3 text-amber-500 mr-1" />
-                  <span className="text-amber-600">อยู่ระหว่างดำเนินการ</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-gradient-to-br from-white to-emerald-50/50 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-emerald-600">เสร็จสิ้น</p>
-                    <p className="text-3xl font-bold text-emerald-700">{completedRequests}</p>
-                  </div>
-                  <div className="p-3 bg-emerald-100 rounded-full">
-                    <CheckCircle className="h-6 w-6 text-emerald-600" />
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center text-xs">
-                  <Star className="h-3 w-3 text-emerald-500 mr-1" />
-                  <span className="text-emerald-600">งานที่สำเร็จแล้ว</span>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Metrics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <MetricCard
+              title="งานทั้งหมด"
+              value={totalRequests}
+              icon={ClipboardList}
+              className="border-border"
+            />
+            <MetricCard
+              title="รอดำเนินการ"
+              value={pendingRequests}
+              icon={Timer}
+              className="border-border"
+            />
+            <MetricCard
+              title="กำลังซ่อม"
+              value={inProgressRequests}
+              icon={Activity}
+              className="border-border"
+            />
+            <MetricCard
+              title="เสร็จสิ้น"
+              value={completedRequests}
+              icon={CheckCircle}
+              className="border-border"
+            />
           </div>
 
           <Tabs defaultValue="requests" className="w-full">
-            <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm inline-block">
-              <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-muted/50 to-muted/30">
-                <TabsTrigger value="requests" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-glow data-[state=active]:text-white">
-                  🛠️ งานซ่อม
-                </TabsTrigger>
-                <TabsTrigger value="technicians" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-teal-light data-[state=active]:text-white">
-                  👨‍🔧 ช่างเทคนิค
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="requests">งานซ่อม</TabsTrigger>
+              <TabsTrigger value="technicians">ช่างเทคนิค</TabsTrigger>
+            </TabsList>
 
         <TabsContent value="requests" className="space-y-4">
           {/* Filters */}
@@ -1334,12 +1275,10 @@ export default function ServiceDashboard() {
                       {/* View Details Button */}
                       <Dialog>
                         <DialogTrigger asChild>
-                          <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-2" />
-                              ดูรายละเอียด
-                            </Button>
-                          </div>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4 mr-2" />
+                            ดูรายละเอียด
+                          </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
                           <DialogHeader>
@@ -1415,9 +1354,9 @@ export default function ServiceDashboard() {
                         <Button 
                           size="sm" 
                           onClick={() => autoAssignTechnician(request.id)}
-                          className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary"
+                          variant="default"
                         >
-                          🚀 มอบหมายช่าง
+                          มอบหมายช่าง
                         </Button>
                       )}
                       
@@ -1425,9 +1364,9 @@ export default function ServiceDashboard() {
                         <Button 
                           size="sm" 
                           onClick={() => acknowledgeJob(request.id)}
-                          className="bg-gradient-to-r from-teal to-teal-light"
+                          variant="default"
                         >
-                          ✅ รับทราบงาน
+                          รับทราบงาน
                         </Button>
                       )}
                     </div>

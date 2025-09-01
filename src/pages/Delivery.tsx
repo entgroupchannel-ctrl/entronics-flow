@@ -255,37 +255,37 @@ const Delivery = () => {
     const statusConfig = {
       preparing: {
         variant: "secondary" as const,
-        className: "bg-gradient-to-r from-slate to-slate-light text-white border-0 shadow-md",
+        className: "bg-muted text-muted-foreground",
         label: "เตรียมสินค้า"
       },
       ready_to_ship: {
         variant: "outline" as const,
-        className: "bg-gradient-to-r from-violet/10 to-violet-light/10 text-violet border-violet/30 shadow-sm",
+        className: "border-primary/50 text-primary",
         label: "พร้อมจัดส่ง"
       },
       shipped: {
         variant: "default" as const,
-        className: "bg-gradient-to-r from-teal to-teal-light text-white border-0 shadow-md",
+        className: "bg-primary text-primary-foreground",
         label: "จัดส่งแล้ว"
       },
       in_transit: {
         variant: "default" as const,
-        className: "bg-gradient-to-r from-amber to-amber-light text-white border-0 shadow-md",
+        className: "bg-orange-100 text-orange-800 border-orange-300",
         label: "กำลังจัดส่ง"
       },
       delivered: {
         variant: "default" as const,
-        className: "bg-gradient-to-r from-emerald to-emerald-light text-white border-0 shadow-md",
+        className: "bg-green-100 text-green-800 border-green-300",
         label: "จัดส่งสำเร็จ"
       },
       failed: {
         variant: "destructive" as const,
-        className: "bg-gradient-to-r from-destructive to-rose text-white border-0 shadow-md",
+        className: "bg-red-100 text-red-800 border-red-300",
         label: "จัดส่งไม่สำเร็จ"
       },
       returned: {
         variant: "secondary" as const,
-        className: "bg-gradient-to-r from-rose/20 to-rose-light/20 text-rose border-rose/30 shadow-sm",
+        className: "bg-muted text-muted-foreground",
         label: "ส่งคืน"
       }
     };
@@ -297,11 +297,9 @@ const Delivery = () => {
     };
 
     return (
-      <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
-        <Badge variant={config.variant} className={config.className}>
-          {config.label}
-        </Badge>
-      </div>
+      <Badge variant={config.variant} className={config.className}>
+        {config.label}
+      </Badge>
     );
   };
 
@@ -309,13 +307,13 @@ const Delivery = () => {
     const priorityConfig = {
       normal: {
         variant: "secondary" as const,
-        className: "bg-gradient-to-r from-muted to-muted/70 text-muted-foreground border-0 shadow-sm",
+        className: "bg-muted text-muted-foreground",
         label: "ปกติ"
       },
       urgent: {
         variant: "destructive" as const,
-        className: "bg-gradient-to-r from-rose to-rose-light text-white border-0 shadow-md animate-pulse",
-        label: "⚡ เร่งด่วน"
+        className: "bg-red-100 text-red-800 border-red-300",
+        label: "เร่งด่วน"
       }
     };
 
@@ -968,53 +966,41 @@ const Delivery = () => {
               title="ใบจัดส่งทั้งหมด"
               value={totalOrders}
               icon={Package}
-              className="border-0 bg-gradient-to-br from-primary/10 to-primary-light/10 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-primary"
+              className="border-border"
             />
             <MetricCard
               title="เตรียมสินค้า"
               value={preparingOrders}
               icon={Clock}
-              className="border-0 bg-gradient-to-br from-amber/10 to-amber-light/10 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-amber"
+              className="border-border"
             />
             <MetricCard
               title="กำลังจัดส่ง"
               value={inTransitOrders}
               icon={Truck}
-              className="border-0 bg-gradient-to-br from-teal/10 to-teal-light/10 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-teal"
+              className="border-border"
             />
             <MetricCard
               title="จัดส่งสำเร็จ"
               value={deliveredOrders}
               icon={CheckCircle}
-              className="border-0 bg-gradient-to-br from-emerald/10 to-emerald-light/10 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-emerald"
+              className="border-border"
             />
           </div>
 
           <Tabs defaultValue="orders" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-violet/10 via-teal/10 to-emerald/10 p-1 rounded-lg border shadow-md">
-              <TabsTrigger 
-                value="orders" 
-                className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary-dark data-[state=active]:text-white data-[state=active]:shadow-lg font-medium transition-all hover:bg-gradient-to-br hover:from-primary/20 hover:to-primary-dark/20 rounded-md"
-              >
-                📦 ใบจัดส่ง
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="orders">
+                ใบจัดส่ง
               </TabsTrigger>
-              <TabsTrigger 
-                value="warranty" 
-                className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal data-[state=active]:to-teal-light data-[state=active]:text-white data-[state=active]:shadow-lg font-medium transition-all hover:bg-gradient-to-br hover:from-teal/20 hover:to-teal-light/20 rounded-md"
-              >
-                🛡️ ติดตามประกัน
+              <TabsTrigger value="warranty">
+                ติดตามประกัน
               </TabsTrigger>
-              <TabsTrigger 
-                value="tracking" 
-                className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber data-[state=active]:to-amber-light data-[state=active]:text-white data-[state=active]:shadow-lg font-medium transition-all hover:bg-gradient-to-br hover:from-amber/20 hover:to-amber-light/20 rounded-md"
-              >
-                📍 ติดตามสถานะ
+              <TabsTrigger value="tracking">
+                ติดตามสถานะ
               </TabsTrigger>
-              <TabsTrigger 
-                value="drivers" 
-                className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald data-[state=active]:to-emerald-light data-[state=active]:text-white data-[state=active]:shadow-lg font-medium transition-all hover:bg-gradient-to-br hover:from-emerald/20 hover:to-emerald-light/20 rounded-md"
-              >
-                🚗 คนขับ
+              <TabsTrigger value="drivers">
+                คนขับ
               </TabsTrigger>
             </TabsList>
 
@@ -1324,11 +1310,9 @@ const Delivery = () => {
                         </Button>
                         <Dialog>
                           <DialogTrigger asChild>
-                            <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
-                              <Button variant="outline" size="sm">
-                                ดูรายละเอียด
-                              </Button>
-                            </div>
+                            <Button variant="outline" size="sm">
+                              ดูรายละเอียด
+                            </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
