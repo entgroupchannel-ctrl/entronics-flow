@@ -304,18 +304,13 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
 
   return (
     <div className="flex items-center gap-2">
-      <Badge className={statusInfo.color}>
-        {statusInfo.icon}
-        <span className="ml-1">{statusInfo.label}</span>
-      </Badge>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" disabled={loading}>
-              จัดการ
-              <ChevronDown className="w-4 h-4 ml-1" />
-            </Button>
-          </DropdownMenuTrigger>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" disabled={loading}>
+            รออนุมัติ
+            <ChevronDown className="w-4 h-4 ml-1" />
+          </Button>
+        </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64 bg-white border shadow-lg">
             <DropdownMenuItem
               onClick={() => {
