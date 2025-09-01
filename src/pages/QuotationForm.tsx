@@ -490,6 +490,52 @@ export default function QuotationForm() {
       
       // Summary background
       doc.setFillColor(250, 250, 250);
+      doc.rect(summaryStartX, yPos - 3, 60, 35, 'F');
+      
+      // Summary borders
+      doc.setLineWidth(0.5);
+      doc.rect(summaryStartX, yPos - 3, 60, 35);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('ยอดรวม:', summaryStartX + 5, yPos + 5);
+      doc.text('ภาษีมูลค่าเพิ่ม 7%:', summaryStartX + 5, yPos + 12);
+      doc.text('หัก ณ ที่จ่าย 3%:', summaryStartX + 5, yPos + 19);
+      doc.text('ยอดชำระ:', summaryStartX + 5, yPos + 26);
+      
+      doc.setFont('helvetica', 'normal');
+      const subtotalAfterDiscount = quotation.subtotal - quotation.discount_amount;
+      doc.text(subtotalAfterDiscount.toLocaleString('th-TH', { minimumFractionDigits: 2 }), summaryStartX + 35, yPos + 5);
+      doc.text(quotation.vat_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 }), summaryStartX + 35, yPos + 12);
+      doc.text(quotation.withholding_tax_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 }), summaryStartX + 35, yPos + 19);
+      doc.text(quotation.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 }), summaryStartX + 35, yPos + 26);
+
+      // Signature Section
+      yPos += 60;
+      
+      // ลายเซ็นผู้ออกใบเสนอราคา
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text('ผู้รับงาน บริษัท เอกรายี คอมพิวเตอร์ จำกัด', 20, yPos);
+      doc.text('วันที่', 130, yPos);
+      doc.text('ผู้รับงาน', 130, yPos + 15);
+      doc.text('วันที่', 130, yPos + 30);
+      
+      // เส้นสำหรับลายเซ็น
+      doc.setLineWidth(0.3);
+      doc.line(20, yPos + 8, 70, yPos + 8); // เส้นลายเซ็นซ้าย
+      doc.line(150, yPos + 8, 190, yPos + 8); // เส้นวันที่ขวา
+      doc.line(130, yPos + 23, 180, yPos + 23); // เส้นลายเซ็นขวา
+      doc.line(150, yPos + 38, 190, yPos + 38); // เส้นวันที่ขวาล่าง
+      
+      // พื้นที่สำหรับตราบริษัท
+      yPos += 50;
+      doc.setFont('helvetica', 'bold');
+      doc.text('ตราบริษัท', 20, yPos);
+      
+      // กรอบสำหรับตราบริษัท
+      doc.setLineWidth(0.5);
+      doc.rect(20, yPos + 5, 50, 30);
       doc.rect(summaryStartX, yPos - 5, 60, 40, 'F');
       doc.rect(summaryStartX, yPos - 5, 60, 40); // Border
       
