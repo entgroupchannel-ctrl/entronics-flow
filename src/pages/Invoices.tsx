@@ -40,6 +40,7 @@ export default function Invoices() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedInvoiceToDelete, setSelectedInvoiceToDelete] = useState<{id: string, number: string} | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 
   useEffect(() => {
     loadInvoices();
@@ -119,8 +120,14 @@ export default function Invoices() {
   };
 
   const openDeleteDialog = (invoiceId: string, invoiceNumber: string) => {
-    setSelectedInvoiceToDelete({ id: invoiceId, number: invoiceNumber });
-    setDeleteDialogOpen(true);
+    console.log('Opening delete dialog for:', invoiceNumber);
+    // ปิด dropdown ทันที
+    setDropdownOpen(null);
+    // เปิด dialog หลังจาก dropdown ปิดแล้ว
+    setTimeout(() => {
+      setSelectedInvoiceToDelete({ id: invoiceId, number: invoiceNumber });
+      setDeleteDialogOpen(true);
+    }, 100);
   };
 
   const handleDeleteConfirm = async () => {
@@ -341,26 +348,56 @@ export default function Invoices() {
                             {invoice.due_date ? format(new Date(invoice.due_date), 'dd/MM/yyyy') : '-'}
                           </TableCell>
                           <TableCell>
-                            <DropdownMenu>
+                            <DropdownMenu 
+                              open={dropdownOpen === invoice.id} 
+                              onOpenChange={(isOpen) => {
+                                console.log('Dropdown state change:', invoice.id, isOpen);
+                                setDropdownOpen(isOpen ? invoice.id : null);
+                              }}
+                            >
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="w-8 h-8 p-0 border border-border rounded-md hover:bg-accent">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="w-8 h-8 p-0 border border-border rounded-md hover:bg-accent"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log('Dropdown trigger clicked:', invoice.id);
+                                  }}
+                                >
                                   <MoreHorizontal className="w-4 h-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-                                <DropdownMenuItem onClick={() => navigate(`/invoices/${invoice.id}`)}>
+                              <DropdownMenuContent 
+                                align="end" 
+                                className="bg-background border shadow-lg z-[100]"
+                                onCloseAutoFocus={(e) => e.preventDefault()}
+                              >
+                                <DropdownMenuItem onClick={() => {
+                                  setDropdownOpen(null);
+                                  navigate(`/invoices/${invoice.id}`);
+                                }}>
                                   <Edit className="w-4 h-4 mr-2" />
                                   แก้ไข
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => window.print()}>
+                                <DropdownMenuItem onClick={() => {
+                                  setDropdownOpen(null);
+                                  window.print();
+                                }}>
                                   <Printer className="w-4 h-4 mr-2" />
                                   พิมพ์
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => console.log('Download', invoice.id)}>
+                                <DropdownMenuItem onClick={() => {
+                                  setDropdownOpen(null);
+                                  console.log('Download', invoice.id);
+                                }}>
                                   <Download className="w-4 h-4 mr-2" />
                                   ดาวน์โหลด
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => console.log('Share', invoice.id)}>
+                                <DropdownMenuItem onClick={() => {
+                                  setDropdownOpen(null);
+                                  console.log('Share', invoice.id);
+                                }}>
                                   <Share2 className="w-4 h-4 mr-2" />
                                   แชร์
                                 </DropdownMenuItem>
@@ -369,7 +406,7 @@ export default function Invoices() {
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log('Opening delete dialog for:', invoice.invoice_number);
+                                    console.log('Delete clicked for:', invoice.invoice_number);
                                     openDeleteDialog(invoice.id, invoice.invoice_number);
                                   }}
                                   className="text-red-600 hover:bg-red-50 focus:bg-red-50"

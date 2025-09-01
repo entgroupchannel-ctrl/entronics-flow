@@ -44,6 +44,7 @@ export default function Quotations() {
   const [currentView, setCurrentView] = useState('quotations');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedQuotationToDelete, setSelectedQuotationToDelete] = useState<{id: string, number: string} | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 
   useEffect(() => {
     loadQuotations();
@@ -141,8 +142,14 @@ export default function Quotations() {
   };
 
   const openDeleteDialog = (quotationId: string, quotationNumber: string) => {
-    setSelectedQuotationToDelete({ id: quotationId, number: quotationNumber });
-    setDeleteDialogOpen(true);
+    console.log('Opening delete dialog for:', quotationNumber);
+    // ปิด dropdown ทันที
+    setDropdownOpen(null);
+    // เปิด dialog หลังจาก dropdown ปิดแล้ว
+    setTimeout(() => {
+      setSelectedQuotationToDelete({ id: quotationId, number: quotationNumber });
+      setDeleteDialogOpen(true);
+    }, 100);
   };
 
   const handleDeleteConfirm = async () => {
@@ -302,34 +309,63 @@ export default function Quotations() {
                       />
                     </TableCell>
                      <TableCell>
-                       <DropdownMenu>
+                       <DropdownMenu 
+                         open={dropdownOpen === quotation.id} 
+                         onOpenChange={(isOpen) => {
+                           console.log('Dropdown state change:', quotation.id, isOpen);
+                           setDropdownOpen(isOpen ? quotation.id : null);
+                         }}
+                       >
                          <DropdownMenuTrigger asChild>
                            <Button 
                              variant="outline" 
                              size="sm" 
                              className="h-8 w-8 p-0 rounded-lg border border-border hover:bg-accent hover:text-accent-foreground"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               console.log('Dropdown trigger clicked:', quotation.id);
+                             }}
                            >
                              <MoreHorizontal className="w-4 h-4" />
                            </Button>
                          </DropdownMenuTrigger>
-                         <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-                           <DropdownMenuItem onClick={() => navigate(`/quotations/${quotation.id}/edit`)}>
+                         <DropdownMenuContent 
+                           align="end" 
+                           className="bg-background border shadow-lg z-[100]"
+                           onCloseAutoFocus={(e) => e.preventDefault()}
+                         >
+                           <DropdownMenuItem onClick={() => {
+                             setDropdownOpen(null);
+                             navigate(`/quotations/${quotation.id}/edit`);
+                           }}>
                              <Edit className="w-4 h-4 mr-2" />
                              แก้ไข
                            </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => console.log('View history:', quotation.id)}>
+                           <DropdownMenuItem onClick={() => {
+                             setDropdownOpen(null);
+                             console.log('View history:', quotation.id);
+                           }}>
                              <History className="w-4 h-4 mr-2" />
                              ประวัติการเปลี่ยนแปลง
                            </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => window.print()}>
+                           <DropdownMenuItem onClick={() => {
+                             setDropdownOpen(null);
+                             window.print();
+                           }}>
                              <Printer className="w-4 h-4 mr-2" />
                              พิมพ์
                            </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => console.log('Share:', quotation.id)}>
+                           <DropdownMenuItem onClick={() => {
+                             setDropdownOpen(null);
+                             console.log('Share:', quotation.id);
+                           }}>
                              <Share2 className="w-4 h-4 mr-2" />
                              แชร์
                            </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => console.log('Download:', quotation.id)}>
+                           <DropdownMenuItem onClick={() => {
+                             setDropdownOpen(null);
+                             console.log('Download:', quotation.id);
+                           }}>
                              <Download className="w-4 h-4 mr-2" />
                              ดาวน์โหลด PDF
                            </DropdownMenuItem>
@@ -338,7 +374,7 @@ export default function Quotations() {
                              onClick={(e) => {
                                e.preventDefault();
                                e.stopPropagation();
-                               console.log('Opening delete dialog for:', quotation.quotation_number);
+                               console.log('Delete clicked for:', quotation.quotation_number);
                                openDeleteDialog(quotation.id, quotation.quotation_number);
                              }}
                              className="text-red-600 hover:bg-red-50 focus:bg-red-50"
