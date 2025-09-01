@@ -77,6 +77,7 @@ export default function InvoiceForm() {
     vat_amount: 0,
     withholding_tax_amount: 0,
     total_amount: 0,
+    partial_payment_amount: 0,
     partial_payment_percentage: 60,
     taxable_amount: 0,
     non_taxable_amount: 0,
@@ -212,21 +213,25 @@ export default function InvoiceForm() {
     
     const priceAfterDiscount = rawSubtotal - totalDiscount;
     
-    // คำนวณมูลค่าที่มีภาษีและไม่มีภาษี
+    // คำนวณมูลค่าที่มีภาษีและไม่มีภาษี ให้ใช้ line_total หลังหักส่วนลดแล้ว
     const nonTaxableAmount = items
-      .filter(item => !item.is_software) // สินค้าที่ไม่มีภาษี
+      .filter(item => !item.is_software) // สินค้าที่ไม่เสียภาษี
       .reduce((sum, item) => sum + item.line_total, 0);
-    const taxableAmount = priceAfterDiscount - nonTaxableAmount;
+    const taxableAmount = items
+      .filter(item => item.is_software) // สินค้าที่เสียภาษี (ซอฟต์แวร์)
+      .reduce((sum, item) => sum + item.line_total, 0);
     
+    // คำนวณ VAT 7% จากมูลค่าที่เสียภาษีเท่านั้น
     const vatAmount = includeVat ? taxableAmount * 0.07 : 0;
-    const softwareItems = items.filter(item => item.is_software);
-    const softwareSubtotal = softwareItems.reduce((sum, item) => sum + item.line_total, 0);
-    const withholdingTaxAmount = softwareSubtotal * 0.03;
     
-    // คำนวณแบ่งชำระ
-    const partialPaymentAmount = priceAfterDiscount * (invoice.partial_payment_percentage / 100);
+    // คำนวณหัก ณ ที่จ่าย 3% จากซอฟต์แวร์เท่านั้น
+    const withholdingTaxAmount = taxableAmount * 0.03;
     
+    // ยอดรวมสุดท้าย = มูลค่าหลังหักส่วนลด + VAT - หัก ณ ที่จ่าย
     const totalAmount = priceAfterDiscount + vatAmount - withholdingTaxAmount;
+    
+    // คำนวณแบ่งชำระจากยอดสุดท้าย (หลัง VAT และหัก ณ ที่จ่าย)
+    const partialPaymentAmount = totalAmount * (invoice.partial_payment_percentage / 100);
 
     setInvoice(prev => ({
       ...prev,
@@ -236,7 +241,8 @@ export default function InvoiceForm() {
       withholding_tax_amount: withholdingTaxAmount,
       taxable_amount: taxableAmount,
       non_taxable_amount: nonTaxableAmount,
-      total_amount: totalAmount
+      total_amount: totalAmount,
+      partial_payment_amount: partialPaymentAmount
     }));
   };
 
@@ -717,8 +723,16 @@ export default function InvoiceForm() {
                       placeholder="60.00"
                       step="0.01"
                     />
-                  </div>
-                </div>
+                   </div>
+                 </div>
+                 
+                 {/* แสดงยอดแบ่งชำระ */}
+                 {invoice.partial_payment_percentage > 0 && (
+                   <div className="flex justify-between text-blue-600">
+                     <span>ยอดแบ่งชำระ ({invoice.partial_payment_percentage}%):</span>
+                     <span>{invoice.partial_payment_amount?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'} บาท</span>
+                   </div>
+                 )}
                 
                 <div className="flex justify-between">
                   <span>มูลค่าที่ไม่มี/ยกเว้นภาษี:</span>
