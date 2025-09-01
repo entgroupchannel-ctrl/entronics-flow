@@ -104,10 +104,12 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
   const currentPath = location.pathname;
 
   const handleMenuClick = (item: typeof menuItems[0]) => {
+    // Always use navigate for consistent behavior
+    navigate(item.href);
+    
+    // Also call onMenuClick if provided (for legacy support)
     if (onMenuClick && item.view) {
       onMenuClick(item.view);
-    } else {
-      navigate(item.href);
     }
   };
 
