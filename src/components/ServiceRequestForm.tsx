@@ -429,9 +429,9 @@ export function ServiceRequestForm({
       </Card>
 
       {/* Problem Description */}
-      <Card className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 border-orange-200">
+      <Card className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 border-purple-200">
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
+          <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
             <AlertTriangle className="h-5 w-5" />
             รายละเอียดปัญหา
           </CardTitle>
