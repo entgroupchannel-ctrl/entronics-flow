@@ -495,13 +495,61 @@ export default function TaxInvoiceForm() {
     if (invoiceFromQuotation) {
       try {
         const data = JSON.parse(invoiceFromQuotation);
+        
+        // Update tax invoice data
         setTaxInvoice(prev => ({
           ...prev,
-          ...data
+          customer_name: data.customer_name,
+          customer_address: data.customer_address,
+          customer_phone: data.customer_phone,
+          customer_email: data.customer_email,
+          project_name: data.project_name,
+          po_number: data.po_number,
+          payment_terms: data.payment_terms,
+          notes: data.notes,
+          terms_conditions: data.terms_conditions,
+          subtotal: data.subtotal,
+          discount_amount: data.discount_amount,
+          discount_percentage: data.discount_percentage,
+          vat_amount: data.vat_amount,
+          withholding_tax_amount: data.withholding_tax_amount,
+          total_amount: data.total_amount
         }));
+
+        // Set selected invoice
+        setSelectedInvoice({
+          id: data.invoice_id,
+          invoice_number: data.invoice_number,
+          invoice_date: '',
+          customer_name: data.customer_name,
+          total_amount: data.total_amount,
+          status: ''
+        });
+
+        // Load items from invoice
+        if (data.items && data.items.length > 0) {
+          setItems(data.items);
+        }
+
+        // Find and set selected customer
+        const customer = customers.find(c => c.name === data.customer_name);
+        if (customer) {
+          setSelectedCustomer(customer);
+        }
+
         sessionStorage.removeItem('tax_invoice_from_invoice');
+        
+        toast({
+          title: "โหลดข้อมูลสำเร็จ",
+          description: `โหลดข้อมูลจากใบแจ้งหนี้ ${data.invoice_number} เรียบร้อยแล้ว`
+        });
       } catch (error) {
         console.error('Error parsing invoice data:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถโหลดข้อมูลจากใบแจ้งหนี้ได้",
+          variant: "destructive"
+        });
       }
     }
   };
