@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -320,23 +320,64 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
             {availableActions.length === 0 ? (
               <DropdownMenuItem disabled>ไม่มีตัวเลือก</DropdownMenuItem>
             ) : (
-              availableActions.map((action) => (
-                <DropdownMenuItem
-                  key={action.id}
-                  onClick={() => {
-                    const needsInput = action.id === 'reject' || action.id === 'approve' || action.id === 'create_invoice';
-                    if (needsInput) {
-                      setIsDialogOpen(true);
-                    } else {
-                      handleAction(action.id);
-                    }
-                  }}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-accent"
-                >
-                  {action.icon}
-                  <span>{action.label}</span>
-                </DropdownMenuItem>
-              ))
+              availableActions.map((action) => {
+                // Create submenu for invoice-related actions
+                if (['create_invoice', 'downpayment_invoice', 'split_payment_invoice'].includes(action.id)) {
+                  if (action.id === 'create_invoice') {
+                    return (
+                      <DropdownMenuSub key="invoice_submenu">
+                        <DropdownMenuSubTrigger className="flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          <span>ใบวางบิล/ใบแจ้งหนี้</span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="w-48">
+                          <DropdownMenuItem
+                            onClick={() => handleAction('create_invoice')}
+                            className="flex items-center gap-2 cursor-pointer hover:bg-accent"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>สร้างใบวางบิล/ใบแจ้งหนี้</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleAction('downpayment_invoice')}
+                            className="flex items-center gap-2 cursor-pointer hover:bg-accent"
+                          >
+                            <CreditCard className="w-4 h-4" />
+                            <span>มัดจำใบวางบิล/ใบแจ้งหนี้</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleAction('split_payment_invoice')}
+                            className="flex items-center gap-2 cursor-pointer hover:bg-accent"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                            <span>แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    );
+                  }
+                  // Skip rendering individual invoice items as they're now in submenu
+                  return null;
+                }
+                
+                return (
+                  <DropdownMenuItem
+                    key={action.id}
+                    onClick={() => {
+                      const needsInput = action.id === 'reject' || action.id === 'approve';
+                      if (needsInput) {
+                        setIsDialogOpen(true);
+                      } else {
+                        handleAction(action.id);
+                      }
+                    }}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-accent"
+                  >
+                    {action.icon}
+                    <span>{action.label}</span>
+                  </DropdownMenuItem>
+                );
+              })
             )}
           </DropdownMenuContent>
         </DropdownMenu>
