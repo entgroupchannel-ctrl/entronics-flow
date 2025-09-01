@@ -437,14 +437,21 @@ export default function TaxInvoices() {
                                <Printer className="w-4 h-4 mr-2" />
                                พิมพ์
                              </DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => {
-                               setDropdownOpen(null);
-                               console.log('Download', taxInvoice.id);
-                             }}>
-                               <Download className="w-4 h-4 mr-2" />
-                               ดาวน์โหลด PDF
-                             </DropdownMenuItem>
-                             <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => {
+                                setDropdownOpen(null);
+                                console.log('Download', taxInvoice.id);
+                              }}>
+                                <Download className="w-4 h-4 mr-2" />
+                                ดาวน์โหลด PDF
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                setDropdownOpen(null);
+                                navigate(`/receipts/new?tax_invoice_id=${taxInvoice.id}`);
+                              }}>
+                                <FileText className="w-4 h-4 mr-2" />
+                                สร้างใบเสร็จรับเงิน
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
                              <DropdownMenuItem 
                                onClick={(e) => {
                                  e.preventDefault();
