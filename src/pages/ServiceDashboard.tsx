@@ -402,13 +402,12 @@ export default function ServiceDashboard() {
 
       if (error) throw error;
 
-      // Add to status history
-      const historyStatus = newStatus === 'completed' ? 'completed' : newStatus;
+      // Add to status history - fix type issues
       await supabase
         .from('service_status_history')
         .insert({
           service_request_id: requestId,
-          new_status: historyStatus as any,
+          new_status: (newStatus === 'completed' ? 'completed' : newStatus) as any,
           old_status: undefined,
           changed_by: user?.id,
           notes: notes || `อัพเดทสถานะเป็น ${newStatus}`,
