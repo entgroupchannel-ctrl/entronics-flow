@@ -28,6 +28,7 @@ import Delivery from "./pages/Delivery";
 import SalesDocuments from "./pages/SalesDocuments";
 import StaffManagement from "./pages/StaffManagement";
 import Receipts from "./pages/Receipts";
+import ReceiptForm from "./pages/ReceiptForm";
 
 const queryClient = new QueryClient();
 
@@ -148,17 +149,17 @@ const App = () => (
             } />
             <Route path="/receipts/new" element={
               <ProtectedRoute>
-                <Receipts />
+                <ReceiptForm />
               </ProtectedRoute>
             } />
             <Route path="/receipts/:id" element={
               <ProtectedRoute>
-                <Receipts />
+                <ReceiptForm />
               </ProtectedRoute>
             } />
             <Route path="/receipts/:id/edit" element={
               <ProtectedRoute>
-                <Receipts />
+                <ReceiptForm />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
