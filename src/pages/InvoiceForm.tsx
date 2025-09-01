@@ -658,10 +658,10 @@ export default function InvoiceForm() {
                   <div className="flex items-center gap-2">
                     <Select value="percentage">
                       <SelectTrigger className="w-32 text-sm border-gray-300">
-                        <SelectValue placeholder="เปอร์เซ็นต์" />
+                        <SelectValue placeholder="เปอร์เซ็นต์ %" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="percentage">เปอร์เซ็นต์</SelectItem>
+                        <SelectItem value="percentage">เปอร์เซ็นต์ %</SelectItem>
                       </SelectContent>
                     </Select>
                     <Input
