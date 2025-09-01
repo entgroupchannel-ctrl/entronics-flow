@@ -471,7 +471,7 @@ export default function QuotationForm() {
                 <TableBody>
                   {items.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell className="w-[45%]">
+                      <TableCell className="w-[35%]">
                         <div className="space-y-2">
                           <Select onValueChange={(value) => selectProduct(item.id, value)}>
                             <SelectTrigger className="text-sm">
@@ -493,15 +493,16 @@ export default function QuotationForm() {
                           />
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="w-28">
                         <Input
                           type="number"
                           value={item.quantity}
                           onChange={(e) => updateItem(item.id, 'quantity', Number(e.target.value))}
                           min="1"
+                          className="text-center"
                         />
                       </TableCell>
-                      <TableCell className="w-32">
+                      <TableCell className="w-40">
                         <Input
                           type="number"
                           value={item.unit_price}
@@ -509,15 +510,17 @@ export default function QuotationForm() {
                           min="0"
                           step="0.01"
                           className="text-right"
+                          placeholder="0.00"
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="w-28">
                         <Input
                           type="number"
                           value={item.discount_amount}
                           onChange={(e) => updateItem(item.id, 'discount_amount', Number(e.target.value))}
                           min="0"
                           step="0.01"
+                          className="text-right"
                         />
                       </TableCell>
                       <TableCell className="font-medium">
