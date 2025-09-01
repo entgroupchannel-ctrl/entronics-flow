@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2 } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Receipt, X, RotateCcw } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -386,9 +386,42 @@ export default function TaxInvoices() {
                       <TableCell className="text-right font-medium">
                         ฿{taxInvoice.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </TableCell>
-                      <TableCell className="text-center">
-                        {getStatusBadge(taxInvoice.status)}
-                      </TableCell>
+                       <TableCell className="text-center">
+                         <DropdownMenu>
+                           <DropdownMenuTrigger asChild>
+                             <Button 
+                               variant="outline" 
+                               size="sm" 
+                               className="bg-background border hover:bg-accent"
+                             >
+                               สถานะ
+                             </Button>
+                           </DropdownMenuTrigger>
+                           <DropdownMenuContent 
+                             align="center" 
+                             className="bg-background border shadow-lg z-[100]"
+                           >
+                             <DropdownMenuItem onClick={() => {
+                               navigate(`/receipts/new?tax_invoice_id=${taxInvoice.id}`);
+                             }}>
+                               <Receipt className="w-4 h-4 mr-2" />
+                               สร้างใบเสร็จรับเงิน
+                             </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               console.log('Cancel', taxInvoice.id);
+                             }}>
+                               <X className="w-4 h-4 mr-2" />
+                               ยกเลิก
+                             </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               console.log('Reset', taxInvoice.id);
+                             }}>
+                               <RotateCcw className="w-4 h-4 mr-2" />
+                               รีเซ็ต
+                             </DropdownMenuItem>
+                           </DropdownMenuContent>
+                         </DropdownMenu>
+                       </TableCell>
                       <TableCell>
                          <DropdownMenu
                            open={dropdownOpen === taxInvoice.id} 
@@ -445,28 +478,6 @@ export default function TaxInvoices() {
                               }}>
                                 <Download className="w-4 h-4 mr-2" />
                                 ดาวน์โหลด PDF
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => {
-                                setDropdownOpen(null);
-                                navigate(`/receipts/new?tax_invoice_id=${taxInvoice.id}`);
-                              }}>
-                                <FileText className="w-4 h-4 mr-2" />
-                                สร้างใบเสร็จรับเงิน
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => {
-                                setDropdownOpen(null);
-                                console.log('Cancel', taxInvoice.id);
-                              }}>
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                ยกเลิก
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => {
-                                setDropdownOpen(null);
-                                console.log('Reset', taxInvoice.id);
-                              }}>
-                                <History className="w-4 h-4 mr-2" />
-                                รีเซ็ต
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
