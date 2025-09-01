@@ -76,7 +76,7 @@ export default function InvoiceForm() {
     vat_amount: 0,
     withholding_tax_amount: 0,
     total_amount: 0,
-    partial_payment_percentage: 0,
+    partial_payment_percentage: 60,
     taxable_amount: 0,
     non_taxable_amount: 0,
     notes: '',
@@ -667,7 +667,7 @@ export default function InvoiceForm() {
                       value={invoice.partial_payment_percentage}
                       onChange={(e) => setInvoice(prev => ({ ...prev, partial_payment_percentage: parseFloat(e.target.value) || 0 }))}
                       className="w-20 text-right text-sm border-gray-300"
-                      placeholder="40.00"
+                      placeholder="60.00"
                       step="0.01"
                     />
                   </div>
