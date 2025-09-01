@@ -146,20 +146,19 @@ export default function Customers() {
           // Validation errors for this row
           const rowErrors: string[] = [];
 
-          if (!company) {
-            rowErrors.push("ต้องระบุชื่อบริษัท");
+          // เฉพาะฟิลด์ที่จำเป็นจริงๆ เท่านั้น
+          if (!company && !contact) {
+            rowErrors.push("ต้องระบุชื่อบริษัทหรือชื่อผู้ติดต่อ");
           }
 
-          if (!contact) {
-            rowErrors.push("ต้องระบุชื่อผู้ติดต่อ");
-          }
-
-          if (!address) {
-            rowErrors.push("ต้องระบุที่อยู่");
-          }
-
+          // ตรวจสอบอีเมลซ้ำ เฉพาะกรณีที่มีอีเมล
           if (email && existingEmails.includes(email)) {
             rowErrors.push("อีเมลซ้ำกับข้อมูลในระบบ");
+          }
+
+          // ตรวจสอบ Tax ID format หากมีข้อมูล
+          if (taxId && taxId.length !== 13) {
+            rowErrors.push("เลขผู้เสียภาษีต้องมี 13 หลัก");
           }
 
           const customerData = {
