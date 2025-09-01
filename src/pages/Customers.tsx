@@ -322,7 +322,7 @@ export default function Customers() {
       setImportErrors([]);
       setValidCustomers([]);
       setInvalidCustomers([]);
-      fetchCustomers();
+      fetchCustomers(1, "", "all");
 
     } catch (error: any) {
       console.error('Error importing customers:', error);
@@ -349,7 +349,7 @@ export default function Customers() {
         description: "ลบข้อมูลลูกค้าเรียบร้อยแล้ว",
       });
 
-      fetchCustomers();
+      fetchCustomers(currentPage, searchTerm, activeTab);
     } catch (error: any) {
       toast({
         title: "เกิดข้อผิดพลาด",
@@ -394,7 +394,7 @@ export default function Customers() {
 
       setShowEditDialog(false);
       setEditingCustomer(null);
-      fetchCustomers();
+      fetchCustomers(currentPage, searchTerm, activeTab);
     } catch (error: any) {
       toast({
         title: "เกิดข้อผิดพลาด",
@@ -601,7 +601,7 @@ export default function Customers() {
                     </DialogContent>
                   </Dialog>
                   <AddCustomerForm onSuccess={() => {
-                    fetchCustomers(); // รีเฟรชข้อมูลและ reset หน้าไป 1
+                    fetchCustomers(1, "", "all"); // รีเฟรชข้อมูลและ reset หน้าไป 1
                   }} />
                 </div>
               </div>
