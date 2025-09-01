@@ -256,12 +256,12 @@ export default function TaxInvoices() {
                         onCheckedChange={handleSelectAll}
                       />
                     </TableHead>
-                    <TableHead>เลขที่ใบส่งสินค้า/ใบกำกับภาษี</TableHead>
                     <TableHead>วันที่</TableHead>
-                    <TableHead>ลูกค้า</TableHead>
-                    <TableHead className="text-right">ยอดเงิน</TableHead>
-                    <TableHead className="text-center">สถานะ</TableHead>
+                    <TableHead>เลขที่ใบส่งสินค้า/ใบกำกับภาษี</TableHead>
+                    <TableHead>ชื่อลูกค้า/ชื่อโปรเจ็ค</TableHead>
                     <TableHead>วันครบกำหนด</TableHead>
+                    <TableHead className="text-right">ยอดรวมสุทธิ</TableHead>
+                    <TableHead className="text-center">สถานะ</TableHead>
                     <TableHead className="w-12"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -274,6 +274,9 @@ export default function TaxInvoices() {
                           onCheckedChange={(checked) => handleSelectItem(taxInvoice.id, checked as boolean)}
                         />
                       </TableCell>
+                      <TableCell>
+                        {format(new Date(taxInvoice.tax_invoice_date), 'dd/MM/yyyy')}
+                      </TableCell>
                       <TableCell className="font-medium">
                         <button 
                           onClick={() => navigate(`/tax-invoices/${taxInvoice.id}`)}
@@ -282,18 +285,15 @@ export default function TaxInvoices() {
                           {taxInvoice.tax_invoice_number}
                         </button>
                       </TableCell>
-                      <TableCell>
-                        {format(new Date(taxInvoice.tax_invoice_date), 'dd/MM/yyyy')}
-                      </TableCell>
                       <TableCell>{taxInvoice.customer_name}</TableCell>
+                      <TableCell>
+                        {taxInvoice.due_date ? format(new Date(taxInvoice.due_date), 'dd/MM/yyyy') : '-'}
+                      </TableCell>
                       <TableCell className="text-right font-medium">
                         ฿{taxInvoice.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </TableCell>
                       <TableCell className="text-center">
                         {getStatusBadge(taxInvoice.status)}
-                      </TableCell>
-                      <TableCell>
-                        {taxInvoice.due_date ? format(new Date(taxInvoice.due_date), 'dd/MM/yyyy') : '-'}
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
