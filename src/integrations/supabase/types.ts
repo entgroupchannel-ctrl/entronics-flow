@@ -1662,6 +1662,154 @@ export type Database = {
         }
         Relationships: []
       }
+      tax_invoice_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          discount_amount: number
+          discount_type: string
+          id: string
+          is_software: boolean
+          line_total: number
+          product_id: string | null
+          product_name: string
+          product_sku: string | null
+          quantity: number
+          tax_invoice_id: string | null
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          discount_amount?: number
+          discount_type?: string
+          id?: string
+          is_software?: boolean
+          line_total?: number
+          product_id?: string | null
+          product_name: string
+          product_sku?: string | null
+          quantity?: number
+          tax_invoice_id?: string | null
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          discount_amount?: number
+          discount_type?: string
+          id?: string
+          is_software?: boolean
+          line_total?: number
+          product_id?: string | null
+          product_name?: string
+          product_sku?: string | null
+          quantity?: number
+          tax_invoice_id?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_invoice_items_tax_invoice_id_fkey"
+            columns: ["tax_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "tax_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_invoices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_address: string | null
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          discount_amount: number
+          discount_percentage: number
+          due_date: string | null
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          payment_terms: string | null
+          po_number: string | null
+          project_name: string | null
+          status: string
+          subtotal: number
+          tax_invoice_date: string
+          tax_invoice_number: string
+          terms_conditions: string | null
+          total_amount: number
+          updated_at: string
+          vat_amount: number
+          withholding_tax_amount: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          discount_amount?: number
+          discount_percentage?: number
+          due_date?: string | null
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          payment_terms?: string | null
+          po_number?: string | null
+          project_name?: string | null
+          status?: string
+          subtotal?: number
+          tax_invoice_date?: string
+          tax_invoice_number: string
+          terms_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          vat_amount?: number
+          withholding_tax_amount?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          discount_amount?: number
+          discount_percentage?: number
+          due_date?: string | null
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          payment_terms?: string | null
+          po_number?: string | null
+          project_name?: string | null
+          status?: string
+          subtotal?: number
+          tax_invoice_date?: string
+          tax_invoice_number?: string
+          terms_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          vat_amount?: number
+          withholding_tax_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_invoices_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       technicians: {
         Row: {
           created_at: string
@@ -1874,6 +2022,10 @@ export type Database = {
         Returns: string
       }
       generate_repair_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_tax_invoice_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }

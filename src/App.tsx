@@ -13,6 +13,8 @@ import Quotations from "./pages/Quotations";
 import QuotationForm from "./pages/QuotationForm";
 import Invoices from "./pages/Invoices";
 import InvoiceForm from "./pages/InvoiceForm";
+import TaxInvoices from "./pages/TaxInvoices";
+import TaxInvoiceForm from "./pages/TaxInvoiceForm";
 import Settings from "./pages/Settings";
 import Financial from "./pages/Financial";
 import Analytics from "./pages/Analytics";
@@ -66,6 +68,16 @@ const App = () => (
             <Route path="/invoices/new" element={
               <ProtectedRoute>
                 <InvoiceForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/tax-invoices" element={
+              <ProtectedRoute>
+                <TaxInvoices />
+              </ProtectedRoute>
+            } />
+            <Route path="/tax-invoices/new" element={
+              <ProtectedRoute>
+                <TaxInvoiceForm />
               </ProtectedRoute>
             } />
             <Route path="/inventory" element={

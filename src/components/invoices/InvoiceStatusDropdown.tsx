@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from 'react-router-dom';
 import { 
   Clock, 
   FileText, 
@@ -26,6 +27,7 @@ interface InvoiceStatusDropdownProps {
 
 const InvoiceStatusDropdown: React.FC<InvoiceStatusDropdownProps> = ({ invoice, onStatusUpdate }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const getStatusInfo = (status: string) => {
@@ -77,11 +79,81 @@ const InvoiceStatusDropdown: React.FC<InvoiceStatusDropdownProps> = ({ invoice, 
     { value: 'ยกเลิก', label: 'ยกเลิก', icon: <XCircle className="w-4 h-4" /> }
   ];
 
+  const createTaxInvoiceFromInvoice = async (invoiceId: string) => {
+    try {
+      // Get invoice details with items
+      const { data: invoiceData, error: invoiceError } = await supabase
+        .from('invoices' as any)
+        .select(`
+          *,
+          invoice_items (*)
+        `)
+        .eq('id', invoiceId)
+        .single();
+
+      if (invoiceError) throw invoiceError;
+
+      // Store invoice data in sessionStorage for the tax invoice form
+      const taxInvoiceData = {
+        from_invoice: true,
+        invoice_id: invoiceId,
+        invoice_number: (invoiceData as any).invoice_number,
+        customer_name: (invoiceData as any).customer_name,
+        customer_address: (invoiceData as any).customer_address,
+        customer_phone: (invoiceData as any).customer_phone,
+        customer_email: (invoiceData as any).customer_email,
+        items: (invoiceData as any).invoice_items?.map((item: any) => ({
+          id: `from-invoice-${item.id}`,
+          product_name: item.product_name,
+          product_sku: item.product_sku,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount_amount: item.discount_amount,
+          discount_type: item.discount_type,
+          line_total: item.line_total,
+          is_software: item.is_software
+        })) || [],
+        subtotal: (invoiceData as any).subtotal,
+        discount_amount: (invoiceData as any).discount_amount,
+        discount_percentage: (invoiceData as any).discount_percentage,
+        vat_amount: (invoiceData as any).vat_amount,
+        withholding_tax_amount: (invoiceData as any).withholding_tax_amount,
+        total_amount: (invoiceData as any).total_amount,
+        notes: (invoiceData as any).notes,
+        terms_conditions: (invoiceData as any).terms_conditions,
+        payment_terms: (invoiceData as any).payment_terms,
+        project_name: (invoiceData as any).project_name,
+        po_number: (invoiceData as any).po_number
+      };
+
+      sessionStorage.setItem('tax_invoice_from_invoice', JSON.stringify(taxInvoiceData));
+      
+      // Navigate to tax invoice form
+      navigate('/tax-invoices/new');
+
+    } catch (error: any) {
+      console.error('Error creating tax invoice from invoice:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถสร้างใบส่งสินค้า/ใบกำกับภาษีจากใบแจ้งหนี้ได้",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleStatusChange = async (newStatus: string) => {
     if (newStatus === invoice.status) return;
 
     setLoading(true);
     try {
+      // Special handling for creating tax invoice
+      if (newStatus === 'สร้างใบส่งสินค้า/ใบกำกับภาษี') {
+        await createTaxInvoiceFromInvoice(invoice.id);
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase
         .from('invoices' as any)
         .update({ status: newStatus })
