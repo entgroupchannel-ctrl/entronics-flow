@@ -12,6 +12,9 @@ import Customers from "./pages/Customers";
 import Quotations from "./pages/Quotations";
 import QuotationForm from "./pages/QuotationForm";
 import Settings from "./pages/Settings";
+import Financial from "./pages/Financial";
+import Analytics from "./pages/Analytics";
+import Reports from "./pages/Reports";
 import InvitationAccept from "./pages/InvitationAccept";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -69,6 +72,21 @@ const App = () => (
             <Route path="/settings" element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="/financial" element={
+              <ProtectedRoute>
+                <Financial />
+              </ProtectedRoute>
+            } />
+            <Route path="/analytics" element={
+              <ProtectedRoute>
+                <Analytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/reports" element={
+              <ProtectedRoute>
+                <Reports />
               </ProtectedRoute>
             } />
             <Route path="/sales-documents" element={
