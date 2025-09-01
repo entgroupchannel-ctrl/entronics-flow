@@ -427,29 +427,30 @@ export default function QuotationForm() {
 
               <div className="space-y-3">
                 <div>
-                  <Label className="text-sm font-medium">เลขที่เอกสาร</Label>
+                  <Label className="text-sm font-medium text-right block">เลขที่เอกสาร</Label>
                   <Input 
                     value={quotation.quotation_number} 
                     onChange={(e) => setQuotation(prev => ({ ...prev, quotation_number: e.target.value }))}
-                    className="mt-1"
+                    className="mt-1 text-right w-48"
+                    placeholder="QT202400001"
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">วันที่</Label>
+                  <Label className="text-sm font-medium text-right block">วันที่</Label>
                   <Input 
                     type="date"
                     value={quotation.quotation_date} 
                     onChange={(e) => setQuotation(prev => ({ ...prev, quotation_date: e.target.value }))}
-                    className="mt-1"
+                    className="mt-1 text-right w-40"
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">วันที่หมดอายุ</Label>
+                  <Label className="text-sm font-medium text-right block">วันที่หมดอายุ</Label>
                   <Input 
                     type="date"
                     value={quotation.valid_until} 
                     onChange={(e) => setQuotation(prev => ({ ...prev, valid_until: e.target.value }))}
-                    className="mt-1"
+                    className="mt-1 text-right w-40"
                   />
                 </div>
               </div>
