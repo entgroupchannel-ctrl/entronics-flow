@@ -149,6 +149,15 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
               </div>
             </div>
           )}
+          
+          {/* Logo E when collapsed */}
+          {collapsed && (
+            <div className="flex items-center justify-center flex-1">
+              <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center">
+                <span className="text-xl font-bold text-red-500">E</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Navigation */}
