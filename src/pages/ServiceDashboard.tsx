@@ -768,7 +768,7 @@ export default function ServiceDashboard() {
                       </DialogTrigger>
                        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
                          <DialogHeader>
-                           <div className="flex items-start justify-between">
+                           <div className="flex items-start justify-between pr-8">
                              <div className="flex items-center gap-2">
                                {request.ticket_number}
                                {getStatusBadge(request.status)}
@@ -776,16 +776,16 @@ export default function ServiceDashboard() {
                                {getSourceBadge(request.source)}
                              </div>
                              
-                             {/* Top right corner information */}
-                             <div className="text-right space-y-1">
-                               <div className="text-sm">
+                             {/* Top right corner information - single line */}
+                             <div className="text-right text-sm space-x-6 flex">
+                               <div>
                                  <span className="font-medium text-gray-600">เวลาเปิดเคส:</span>
-                                 <div className="font-semibold text-blue-600">{formatDateTime(request.created_at)}</div>
+                                 <span className="font-semibold text-blue-600 ml-2">{formatDateTime(request.created_at)}</span>
                                </div>
                                {request.technicians && (
-                                 <div className="text-sm">
+                                 <div>
                                    <span className="font-medium text-gray-600">ช่างที่รับผิดชอบ:</span>
-                                   <div className="font-semibold text-green-600">{request.technicians.name}</div>
+                                   <span className="font-semibold text-green-600 ml-2">{request.technicians.name}</span>
                                  </div>
                                )}
                              </div>
