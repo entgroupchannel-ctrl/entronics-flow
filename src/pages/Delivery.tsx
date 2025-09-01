@@ -927,17 +927,17 @@ const Delivery = () => {
       <div className="flex-1 flex flex-col">
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
           <div className="flex justify-between items-center">
-            <div className="bg-gradient-to-r from-violet/5 via-teal/5 to-emerald/5 p-1 rounded-lg">
-              <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg border shadow-sm">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-violet to-teal bg-clip-text text-transparent">
+            <div className="p-1 rounded-lg">
+              <div className="bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-sm">
+                <h1 className="text-3xl font-bold text-foreground">
                   ระบบจัดส่งสินค้า / Delivery
                 </h1>
-                <p className="text-slate-light">จัดการการจัดส่งและติดตามสถานะ</p>
+                <p className="text-muted-foreground">จัดการการจัดส่งและติดตามสถานะ</p>
               </div>
             </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-emerald to-emerald-light hover:from-emerald-light hover:to-emerald shadow-lg hover:shadow-xl transition-all duration-300 border-0 text-white">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
                   <Plus className="mr-2 h-4 w-4" />
                   สร้างใบจัดส่งใหม่
                 </Button>
