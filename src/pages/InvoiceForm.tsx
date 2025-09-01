@@ -734,15 +734,10 @@ export default function InvoiceForm() {
                    </div>
                  )}
                 
-                <div className="flex justify-between">
-                  <span>มูลค่าที่ไม่มี/ยกเว้นภาษี:</span>
-                  <span>{invoice.non_taxable_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span>มูลค่าที่คำนวณภาษี:</span>
-                  <span>{invoice.taxable_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
-                </div>
+                 <div className="flex justify-between">
+                   <span>มูลค่าที่คำนวณภาษี:</span>
+                   <span>{invoice.taxable_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
+                 </div>
                 
                 {includeVat && (
                   <div className="flex justify-between">
