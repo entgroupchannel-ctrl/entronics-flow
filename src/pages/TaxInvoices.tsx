@@ -43,6 +43,7 @@ export default function TaxInvoices() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedTaxInvoiceToDelete, setSelectedTaxInvoiceToDelete] = useState<{id: string, number: string} | null>(null);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 
   useEffect(() => {
@@ -133,18 +134,14 @@ export default function TaxInvoices() {
 
   const handleBulkAction = (action: string) => {
     if (action === 'delete') {
-      handleBulkDelete();
+      setBulkDeleteDialogOpen(true);
     } else {
       console.log(`Bulk action: ${action} for items:`, selectedItems);
     }
   };
 
-  const handleBulkDelete = async () => {
+  const handleBulkDeleteConfirm = async () => {
     if (selectedItems.length === 0) return;
-    
-    const confirmDelete = window.confirm(`คุณต้องการลบใบส่งสินค้า/ใบกำกับภาษี ${selectedItems.length} รายการใช่หรือไม่?\n\n⚠️ การกระทำนี้ไม่สามารถยกเลิกได้`);
-    
-    if (!confirmDelete) return;
     
     try {
       for (const taxInvoiceId of selectedItems) {
@@ -177,6 +174,8 @@ export default function TaxInvoices() {
         description: "ไม่สามารถลบใบส่งสินค้า/ใบกำกับภาษีได้",
         variant: "destructive",
       });
+    } finally {
+      setBulkDeleteDialogOpen(false);
     }
   };
 
@@ -603,6 +602,57 @@ export default function TaxInvoices() {
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 ลบข้อมูล
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Bulk Delete Confirmation Dialog */}
+        <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+          <AlertDialogContent className="sm:max-w-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                ยืนยันการลบใบส่งสินค้า/ใบกำกับภาษีหลายรายการ
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
+                คุณต้องการลบใบส่งสินค้า/ใบกำกับภาษี {selectedItems.length} รายการต่อไปนี้ใช่หรือไม่?
+                <div className="mt-4 max-h-60 overflow-y-auto border rounded-md bg-muted/30 p-3">
+                  <div className="space-y-2">
+                    {selectedItems.map((itemId) => {
+                      const taxInvoice = taxInvoices.find(inv => inv.id === itemId);
+                      return taxInvoice ? (
+                        <div key={itemId} className="flex items-center justify-between p-2 bg-background rounded border">
+                          <div>
+                            <span className="font-medium">{taxInvoice.tax_invoice_number}</span>
+                            <span className="text-sm text-muted-foreground ml-2">- {taxInvoice.customer_name}</span>
+                          </div>
+                          <span className="text-sm font-medium">
+                            ฿{taxInvoice.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+                <span className="text-sm text-destructive mt-3 block">
+                  ⚠️ การกระทำนี้ไม่สามารถยกเลิกได้ และข้อมูลจะถูกลบถาวร
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2">
+              <AlertDialogCancel 
+                onClick={() => setBulkDeleteDialogOpen(false)}
+                className="bg-secondary hover:bg-secondary/80"
+              >
+                ยกเลิก
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleBulkDeleteConfirm}
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                ลบ {selectedItems.length} รายการ
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

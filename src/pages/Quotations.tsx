@@ -51,6 +51,7 @@ export default function Quotations() {
   const [currentView, setCurrentView] = useState('quotations');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedQuotationToDelete, setSelectedQuotationToDelete] = useState<{id: string, number: string} | null>(null);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('quotations');
 
@@ -287,6 +288,51 @@ export default function Quotations() {
     }
   };
 
+  const handleBulkDeleteConfirm = async () => {
+    if (selectedItems.length === 0) return;
+
+    try {
+      for (const quotationId of selectedItems) {
+        // ลบ quotation items ก่อน
+        await supabase
+          .from('quotation_items')
+          .delete()
+          .eq('quotation_id', quotationId);
+
+        // ลบ quotation workflow history
+        await supabase
+          .from('quotation_workflow_history')
+          .delete()
+          .eq('quotation_id', quotationId);
+
+        // ลบ quotation
+        await supabase
+          .from('quotations')
+          .delete()
+          .eq('id', quotationId);
+      }
+
+      toast({
+        title: "ลบสำเร็จ",
+        description: `ลบใบเสนอราคา ${selectedItems.length} รายการเรียบร้อยแล้ว`,
+      });
+
+      // Clear selections and reload data
+      setSelectedItems([]);
+      loadQuotations();
+
+    } catch (error: any) {
+      console.error('Error bulk deleting quotations:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบใบเสนอราคาได้",
+        variant: "destructive",
+      });
+    } finally {
+      setBulkDeleteDialogOpen(false);
+    }
+  };
+
   // This function is no longer needed as we're using tabs
 
   return (
@@ -352,6 +398,34 @@ export default function Quotations() {
                             <SelectItem value="rejected">ปฏิเสธ</SelectItem>
                           </SelectContent>
                         </Select>
+                        
+                        {selectedItems.length > 0 && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline">
+                                การดำเนินการ ({selectedItems.length})
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem onClick={() => console.log('Bulk print')}>
+                                <Printer className="w-4 h-4 mr-2" />
+                                พิมพ์
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => console.log('Bulk export')}>
+                                <Download className="w-4 h-4 mr-2" />
+                                ส่งออก
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => setBulkDeleteDialogOpen(true)}
+                                className="text-red-600 hover:bg-red-50 focus:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                ลบที่เลือก
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -658,6 +732,57 @@ export default function Quotations() {
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 ลบใบเสนอราคา
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Bulk Delete Confirmation Dialog */}
+        <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+          <AlertDialogContent className="sm:max-w-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                ยืนยันการลบใบเสนอราคาหลายรายการ
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
+                คุณต้องการลบใบเสนอราคา {selectedItems.length} รายการต่อไปนี้ใช่หรือไม่?
+                <div className="mt-4 max-h-60 overflow-y-auto border rounded-md bg-muted/30 p-3">
+                  <div className="space-y-2">
+                    {selectedItems.map((itemId) => {
+                      const quotation = quotations.find(q => q.id === itemId);
+                      return quotation ? (
+                        <div key={itemId} className="flex items-center justify-between p-2 bg-background rounded border">
+                          <div>
+                            <span className="font-medium">{quotation.quotation_number}</span>
+                            <span className="text-sm text-muted-foreground ml-2">- {quotation.customer_name}</span>
+                          </div>
+                          <span className="text-sm font-medium">
+                            ฿{quotation.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+                <span className="text-sm text-destructive mt-3 block">
+                  ⚠️ การกระทำนี้ไม่สามารถยกเลิกได้ และข้อมูลจะถูกลบถาวร
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2">
+              <AlertDialogCancel 
+                onClick={() => setBulkDeleteDialogOpen(false)}
+                className="bg-secondary hover:bg-secondary/80"
+              >
+                ยกเลิก
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleBulkDeleteConfirm}
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                ลบ {selectedItems.length} รายการ
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
