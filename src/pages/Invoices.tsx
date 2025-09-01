@@ -34,6 +34,10 @@ interface Invoice {
     id: string;
     tax_invoice_number: string;
   }>;
+  related_receipts?: Array<{
+    id: string;
+    receipt_number: string;
+  }>;
 }
 
 export default function Invoices() {
@@ -69,11 +73,13 @@ export default function Invoices() {
         throw error;
       }
 
-      // Load related tax invoices separately for invoices that have them
+      // Load related tax invoices and receipts separately for invoices that have them
       const invoiceIds = data?.map(inv => inv.id) || [];
       let taxInvoicesData: any[] = [];
+      let receiptsData: any[] = [];
       
       if (invoiceIds.length > 0) {
+        // Load tax invoices
         const { data: taxInvoices, error: taxInvoicesError } = await supabase
           .from('tax_invoices')
           .select('id, tax_invoice_number, invoice_id')
@@ -82,15 +88,27 @@ export default function Invoices() {
         if (!taxInvoicesError && taxInvoices) {
           taxInvoicesData = taxInvoices;
         }
+
+        // Load receipts (note: you'll need to create receipts table with invoice_id reference)
+        // For now, we'll simulate it with an empty array
+        // const { data: receipts, error: receiptsError } = await supabase
+        //   .from('receipts')
+        //   .select('id, receipt_number, invoice_id')
+        //   .in('invoice_id', invoiceIds);
+        
+        // if (!receiptsError && receipts) {
+        //   receiptsData = receipts;
+        // }
       }
 
       // Combine data
-      const invoicesWithTaxInvoices = data?.map(invoice => ({
+      const invoicesWithRelatedDocs = data?.map(invoice => ({
         ...invoice,
-        related_tax_invoices: taxInvoicesData.filter(taxInv => taxInv.invoice_id === invoice.id)
+        related_tax_invoices: taxInvoicesData.filter(taxInv => taxInv.invoice_id === invoice.id),
+        related_receipts: receiptsData.filter(receipt => receipt.invoice_id === invoice.id)
       })) || [];
 
-      setInvoices(invoicesWithTaxInvoices);
+      setInvoices(invoicesWithRelatedDocs);
     } catch (error: any) {
       console.error('Error loading invoices:', error);
       toast({
@@ -391,12 +409,14 @@ export default function Invoices() {
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent
                                     align="start"
-                                    className="bg-background border shadow-lg z-[100] min-w-[200px]"
+                                    className="bg-background border shadow-lg z-[100] min-w-[250px]"
                                     onSelect={(e) => e.preventDefault()}
                                   >
                                     <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
                                       เอกสารที่เกี่ยวข้อง
                                     </div>
+                                    
+                                    {/* ใบส่งสินค้า/ใบกำกับภาษี */}
                                     <div className="px-3 py-1 text-xs text-muted-foreground">
                                       ใบส่งสินค้า/ใบกำกับภาษี
                                     </div>
@@ -409,7 +429,7 @@ export default function Invoices() {
                                             e.stopPropagation();
                                             navigate(`/tax-invoices/${taxInvoice.id}`);
                                           }}
-                                          className="hover:bg-accent cursor-pointer"
+                                          className="hover:bg-accent cursor-pointer pl-6"
                                         >
                                           <ExternalLink className="w-4 h-4 mr-2 text-blue-600" />
                                           <span className="text-blue-600 hover:underline">
@@ -418,8 +438,35 @@ export default function Invoices() {
                                         </DropdownMenuItem>
                                       ))
                                     ) : (
-                                      <div className="px-3 py-2 text-sm text-muted-foreground">
-                                        ยังไม่มีเอกสารที่เกี่ยวข้อง
+                                      <div className="px-6 py-1 text-xs text-muted-foreground">
+                                        ยังไม่มีใบกำกับภาษี
+                                      </div>
+                                    )}
+
+                                    {/* ใบเสร็จรับเงิน */}
+                                    <div className="px-3 py-1 text-xs text-muted-foreground mt-2">
+                                      ใบเสร็จรับเงิน
+                                    </div>
+                                    {invoice.related_receipts && invoice.related_receipts.length > 0 ? (
+                                      invoice.related_receipts.map((receipt) => (
+                                        <DropdownMenuItem
+                                          key={receipt.id}
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            navigate(`/receipts/${receipt.id}`);
+                                          }}
+                                          className="hover:bg-accent cursor-pointer pl-6"
+                                        >
+                                          <ExternalLink className="w-4 h-4 mr-2 text-green-600" />
+                                          <span className="text-green-600 hover:underline">
+                                            {receipt.receipt_number}
+                                          </span>
+                                        </DropdownMenuItem>
+                                      ))
+                                    ) : (
+                                      <div className="px-6 py-1 text-xs text-muted-foreground">
+                                        ยังไม่มีใบเสร็จ
                                       </div>
                                     )}
                                   </DropdownMenuContent>
