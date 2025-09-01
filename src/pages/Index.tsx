@@ -943,6 +943,24 @@ const Index = () => {
 
   const navigate = useNavigate();
 
+  // Handle navigation for specific views
+  useEffect(() => {
+    switch (currentView) {
+      case 'inventory':
+        navigate('/inventory');
+        break;
+      case 'customers':
+        navigate('/customers');
+        break;
+      case 'quotations':
+        navigate('/quotations');
+        break;
+      case 'settings':
+        navigate('/settings');
+        break;
+    }
+  }, [currentView, navigate]);
+
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
@@ -950,17 +968,11 @@ const Index = () => {
       case 'service':
         return renderServiceView();
       case 'inventory':
-        navigate('/inventory');
-        return null;
       case 'customers':
-        navigate('/customers');
-        return null;
       case 'quotations':
-        navigate('/quotations');
-        return null;
       case 'settings':
-        navigate('/settings');
-        return null;
+        // These will be handled by useEffect above
+        return renderDashboardView(); // Show dashboard while navigating
       default:
         return renderDashboardView();
     }
