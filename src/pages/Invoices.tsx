@@ -30,6 +30,10 @@ interface Invoice {
   invoice_items?: any[];
   quotations?: { quotation_number: string } | null;
   tax_invoices?: { tax_invoice_number: string }[] | null;
+  related_tax_invoices?: Array<{
+    id: string;
+    tax_invoice_number: string;
+  }>;
 }
 
 export default function Invoices() {
@@ -65,7 +69,28 @@ export default function Invoices() {
         throw error;
       }
 
-      setInvoices((data as any) || []);
+      // Load related tax invoices separately for invoices that have them
+      const invoiceIds = data?.map(inv => inv.id) || [];
+      let taxInvoicesData: any[] = [];
+      
+      if (invoiceIds.length > 0) {
+        const { data: taxInvoices, error: taxInvoicesError } = await supabase
+          .from('tax_invoices')
+          .select('id, tax_invoice_number, invoice_id')
+          .in('invoice_id', invoiceIds);
+
+        if (!taxInvoicesError && taxInvoices) {
+          taxInvoicesData = taxInvoices;
+        }
+      }
+
+      // Combine data
+      const invoicesWithTaxInvoices = data?.map(invoice => ({
+        ...invoice,
+        related_tax_invoices: taxInvoicesData.filter(taxInv => taxInv.invoice_id === invoice.id)
+      })) || [];
+
+      setInvoices(invoicesWithTaxInvoices);
     } catch (error: any) {
       console.error('Error loading invoices:', error);
       toast({
@@ -344,28 +369,54 @@ export default function Invoices() {
                             {format(new Date(invoice.invoice_date), 'dd/MM/yyyy')}
                           </TableCell>
                           <TableCell className="font-medium text-primary">
-                            <div className="flex items-center gap-2">
-                              {invoice.invoice_number}
-                              <div className="flex items-center gap-1">
-                                {/* ไอคอนอ้างอิงใบเสนอราคา - แสดงเมื่อมี quotation_id */}
-                                {invoice.quotation_id && (
-                                  <div className="flex items-center gap-1" title="อ้างอิงจากใบเสนอราคา">
-                                    <ArrowLeft className="w-3 h-3 text-blue-500" />
-                                    <span className="text-xs text-blue-500">QT</span>
-                                  </div>
-                                )}
-                                {/* ไอคอนอ้างอิงใบส่งสินค้า - แสดงเมื่อสถานะเป็น วางบิลแล้ว หรือ สร้างใบส่งสินค้า/ใบกำกับภาษี */}
-                                {(invoice.status === 'วางบิลแล้ว' || invoice.status === 'สร้างใบส่งสินค้า/ใบกำกับภาษี') && (
-                                  <div className="flex items-center gap-1" title="สร้างใบส่งสินค้า/ใบกำกับภาษีแล้ว">
-                                    <ArrowRight className="w-3 h-3 text-green-500" />
-                                    <span className="text-xs text-green-500">INV</span>
-                                  </div>
-                                )}
-                                {/* Debug: แสดงสถานะปัจจุบัน */}
-                                <span className="text-xs text-gray-400" title={`สถานะ: ${invoice.status}`}>
-                                  ({invoice.status})
-                                </span>
-                              </div>
+                            <div className="flex items-center space-x-2">
+                              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                              <span>{invoice.invoice_number}</span>
+                              {invoice.related_tax_invoices && invoice.related_tax_invoices.length > 0 && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                      }}
+                                    >
+                                      <FileText className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent
+                                    align="start"
+                                    className="bg-background border shadow-lg z-[100] min-w-[200px]"
+                                    onSelect={(e) => e.preventDefault()}
+                                  >
+                                    <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
+                                      เอกสารที่เกี่ยวข้อง
+                                    </div>
+                                    <div className="px-3 py-1 text-xs text-muted-foreground">
+                                      ใบส่งสินค้า/ใบกำกับภาษี
+                                    </div>
+                                    {invoice.related_tax_invoices.map((taxInvoice) => (
+                                      <DropdownMenuItem
+                                        key={taxInvoice.id}
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          navigate(`/tax-invoices`);
+                                        }}
+                                        className="hover:bg-accent cursor-pointer"
+                                      >
+                                        <ExternalLink className="w-4 h-4 mr-2 text-blue-600" />
+                                        <span className="text-blue-600 hover:underline">
+                                          {taxInvoice.tax_invoice_number}
+                                        </span>
+                                      </DropdownMenuItem>
+                                    ))}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>
