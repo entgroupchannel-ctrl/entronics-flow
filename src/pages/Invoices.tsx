@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2 } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, ExternalLink } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -369,13 +369,14 @@ export default function Invoices() {
                                 <Button
                                   variant="link"
                                   size="sm"
-                                  className="h-auto p-0 text-blue-600 hover:text-blue-800 text-xs"
+                                  className="h-auto p-0 text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate(`/quotations`);
                                   }}
                                 >
-                                  📄 {invoice.quotations.quotation_number}
+                                  <ExternalLink className="w-3 h-3" />
+                                  {invoice.quotations.quotation_number}
                                 </Button>
                               )}
                               
@@ -390,13 +391,14 @@ export default function Invoices() {
                                   key={index}
                                   variant="link"
                                   size="sm"
-                                  className="h-auto p-0 text-blue-600 hover:text-blue-800 text-xs block"
+                                  className="h-auto p-0 text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate(`/tax-invoices`);
                                   }}
                                 >
-                                  📄 {taxInv.tax_invoice_number}
+                                  <ExternalLink className="w-3 h-3" />
+                                  {taxInv.tax_invoice_number}
                                 </Button>
                               ))}
                             </div>
