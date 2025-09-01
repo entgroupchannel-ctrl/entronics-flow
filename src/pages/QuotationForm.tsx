@@ -97,7 +97,7 @@ export default function QuotationForm() {
       vat_amount: 0,
       withholding_tax_amount: 0,
       total_amount: 0,
-      status: 'draft',
+      status: 'pending',
       notes: '',
       terms_conditions: ''
     };
