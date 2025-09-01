@@ -487,7 +487,7 @@ export default function Settings() {
       <Tabs defaultValue="users" className="space-y-4">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users">จัดการผู้ใช้</TabsTrigger>
-          <TabsTrigger value="staff">จัดการพนักงาน</TabsTrigger>
+          <TabsTrigger value="staff">พนักงานขับรถ</TabsTrigger>
           <TabsTrigger value="security">ความปลอดภัย</TabsTrigger>
           <TabsTrigger value="company">ข้อมูลบริษัท</TabsTrigger>
           <TabsTrigger value="announcements">ข่าวสารประกาศ</TabsTrigger>
