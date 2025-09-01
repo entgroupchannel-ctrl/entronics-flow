@@ -989,18 +989,50 @@ const Delivery = () => {
           </div>
 
           <Tabs defaultValue="orders" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="orders">
-                ใบจัดส่ง
+            <TabsList className="grid w-full grid-cols-4 bg-muted/30 p-2 rounded-xl border border-border/50 shadow-sm">
+              <TabsTrigger 
+                value="orders" 
+                className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 
+                          data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+                          data-[state=active]:shadow-md data-[state=active]:scale-105
+                          hover:bg-accent/50 hover:text-accent-foreground
+                          text-sm md:text-base"
+              >
+                <Package className="w-4 h-4" />
+                <span className="hidden sm:inline">ใบจัดส่ง</span>
               </TabsTrigger>
-              <TabsTrigger value="warranty">
-                ติดตามประกัน
+              <TabsTrigger 
+                value="warranty" 
+                className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 
+                          data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+                          data-[state=active]:shadow-md data-[state=active]:scale-105
+                          hover:bg-accent/50 hover:text-accent-foreground
+                          text-sm md:text-base"
+              >
+                <Shield className="w-4 h-4" />
+                <span className="hidden sm:inline">ติดตามประกัน</span>
               </TabsTrigger>
-              <TabsTrigger value="tracking">
-                ติดตามสถานะ
+              <TabsTrigger 
+                value="tracking" 
+                className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 
+                          data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+                          data-[state=active]:shadow-md data-[state=active]:scale-105
+                          hover:bg-accent/50 hover:text-accent-foreground
+                          text-sm md:text-base"
+              >
+                <MapPin className="w-4 h-4" />
+                <span className="hidden sm:inline">ติดตามสถานะ</span>
               </TabsTrigger>
-              <TabsTrigger value="drivers">
-                คนขับ
+              <TabsTrigger 
+                value="drivers" 
+                className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 
+                          data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+                          data-[state=active]:shadow-md data-[state=active]:scale-105
+                          hover:bg-accent/50 hover:text-accent-foreground
+                          text-sm md:text-base"
+              >
+                <Truck className="w-4 h-4" />
+                <span className="hidden sm:inline">คนขับ</span>
               </TabsTrigger>
             </TabsList>
 
