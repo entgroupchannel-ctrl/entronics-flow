@@ -91,6 +91,8 @@ export default function Invoices() {
       })) || [];
 
       setInvoices(invoicesWithTaxInvoices);
+      console.log('Debug - Invoices with tax invoices:', invoicesWithTaxInvoices);
+      console.log('Debug - Tax invoices data:', taxInvoicesData);
     } catch (error: any) {
       console.error('Error loading invoices:', error);
       toast({
@@ -372,6 +374,10 @@ export default function Invoices() {
                             <div className="flex items-center space-x-2">
                               <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                               <span>{invoice.invoice_number}</span>
+                              {/* Debug info */}
+                              <span className="text-xs text-gray-400">
+                                (Status: {invoice.status}, Tax Invs: {invoice.related_tax_invoices?.length || 0})
+                              </span>
                               {invoice.related_tax_invoices && invoice.related_tax_invoices.length > 0 && (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
