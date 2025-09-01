@@ -194,6 +194,339 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_items: {
+        Row: {
+          barcode: string | null
+          condition_notes: string | null
+          created_at: string
+          delivery_order_id: string
+          id: string
+          is_warranty_active: boolean
+          item_name: string
+          item_sku: string | null
+          product_id: string | null
+          qr_code: string | null
+          quantity: number
+          serial_numbers: string[] | null
+          total_price: number | null
+          unit_price: number | null
+          warranty_end_date: string | null
+          warranty_period_days: number | null
+          warranty_start_date: string | null
+        }
+        Insert: {
+          barcode?: string | null
+          condition_notes?: string | null
+          created_at?: string
+          delivery_order_id: string
+          id?: string
+          is_warranty_active?: boolean
+          item_name: string
+          item_sku?: string | null
+          product_id?: string | null
+          qr_code?: string | null
+          quantity?: number
+          serial_numbers?: string[] | null
+          total_price?: number | null
+          unit_price?: number | null
+          warranty_end_date?: string | null
+          warranty_period_days?: number | null
+          warranty_start_date?: string | null
+        }
+        Update: {
+          barcode?: string | null
+          condition_notes?: string | null
+          created_at?: string
+          delivery_order_id?: string
+          id?: string
+          is_warranty_active?: boolean
+          item_name?: string
+          item_sku?: string | null
+          product_id?: string | null
+          qr_code?: string | null
+          quantity?: number
+          serial_numbers?: string[] | null
+          total_price?: number | null
+          unit_price?: number | null
+          warranty_end_date?: string | null
+          warranty_period_days?: number | null
+          warranty_start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_items_delivery_order_id_fkey"
+            columns: ["delivery_order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_media: {
+        Row: {
+          created_at: string
+          delivery_item_id: string | null
+          delivery_order_id: string
+          description: string | null
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          media_stage: string
+          media_type: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          delivery_item_id?: string | null
+          delivery_order_id: string
+          description?: string | null
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          media_stage: string
+          media_type: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          delivery_item_id?: string | null
+          delivery_order_id?: string
+          description?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          media_stage?: string
+          media_type?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_media_delivery_item_id_fkey"
+            columns: ["delivery_item_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_media_delivery_order_id_fkey"
+            columns: ["delivery_order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_methods: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          tracking_url_template: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          tracking_url_template?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          tracking_url_template?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      delivery_orders: {
+        Row: {
+          cod_amount: number | null
+          created_at: string
+          created_by: string | null
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string
+          delivered_date: string | null
+          delivery_address: string
+          delivery_method_id: string
+          delivery_notes: string | null
+          delivery_number: string
+          dimensions_cm: string | null
+          has_insurance: boolean
+          id: string
+          insurance_cost: number | null
+          insurance_value: number | null
+          order_type: string
+          priority: string
+          purchase_order_id: string | null
+          repair_order_id: string | null
+          scheduled_date: string | null
+          shipped_date: string | null
+          shipping_cost: number | null
+          signature_required: boolean
+          special_instructions: string | null
+          status: string
+          tracking_number: string | null
+          tracking_url: string | null
+          updated_at: string
+          weight_kg: number | null
+        }
+        Insert: {
+          cod_amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone: string
+          delivered_date?: string | null
+          delivery_address: string
+          delivery_method_id: string
+          delivery_notes?: string | null
+          delivery_number: string
+          dimensions_cm?: string | null
+          has_insurance?: boolean
+          id?: string
+          insurance_cost?: number | null
+          insurance_value?: number | null
+          order_type: string
+          priority?: string
+          purchase_order_id?: string | null
+          repair_order_id?: string | null
+          scheduled_date?: string | null
+          shipped_date?: string | null
+          shipping_cost?: number | null
+          signature_required?: boolean
+          special_instructions?: string | null
+          status?: string
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Update: {
+          cod_amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string
+          delivered_date?: string | null
+          delivery_address?: string
+          delivery_method_id?: string
+          delivery_notes?: string | null
+          delivery_number?: string
+          dimensions_cm?: string | null
+          has_insurance?: boolean
+          id?: string
+          insurance_cost?: number | null
+          insurance_value?: number | null
+          order_type?: string
+          priority?: string
+          purchase_order_id?: string | null
+          repair_order_id?: string | null
+          scheduled_date?: string | null
+          shipped_date?: string | null
+          shipping_cost?: number | null
+          signature_required?: boolean
+          special_instructions?: string | null
+          status?: string
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_orders_delivery_method_id_fkey"
+            columns: ["delivery_method_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_orders_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_orders_repair_order_id_fkey"
+            columns: ["repair_order_id"]
+            isOneToOne: false
+            referencedRelation: "repair_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_tracking: {
+        Row: {
+          created_at: string
+          delivery_order_id: string
+          id: string
+          is_internal: boolean
+          location: string | null
+          status: string
+          status_message: string
+          tracking_date: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          delivery_order_id: string
+          id?: string
+          is_internal?: boolean
+          location?: string | null
+          status: string
+          status_message: string
+          tracking_date?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          delivery_order_id?: string
+          id?: string
+          is_internal?: boolean
+          location?: string | null
+          status?: string
+          status_message?: string
+          tracking_date?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_tracking_delivery_order_id_fkey"
+            columns: ["delivery_order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       device_brands: {
         Row: {
           created_at: string
@@ -296,6 +629,71 @@ export type Database = {
         }
         Relationships: []
       }
+      product_warranties: {
+        Row: {
+          claim_count: number
+          created_at: string
+          customer_id: string | null
+          delivery_item_id: string
+          id: string
+          notes: string | null
+          product_name: string
+          registered_by_customer: boolean
+          registration_code: string | null
+          registration_date: string | null
+          serial_number: string | null
+          status: string
+          updated_at: string
+          warranty_end_date: string
+          warranty_start_date: string
+          warranty_type: string
+        }
+        Insert: {
+          claim_count?: number
+          created_at?: string
+          customer_id?: string | null
+          delivery_item_id: string
+          id?: string
+          notes?: string | null
+          product_name: string
+          registered_by_customer?: boolean
+          registration_code?: string | null
+          registration_date?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string
+          warranty_end_date: string
+          warranty_start_date: string
+          warranty_type?: string
+        }
+        Update: {
+          claim_count?: number
+          created_at?: string
+          customer_id?: string | null
+          delivery_item_id?: string
+          id?: string
+          notes?: string | null
+          product_name?: string
+          registered_by_customer?: boolean
+          registration_code?: string | null
+          registration_date?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string
+          warranty_end_date?: string
+          warranty_start_date?: string
+          warranty_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_warranties_delivery_item_id_fkey"
+            columns: ["delivery_item_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand: string | null
@@ -368,6 +766,54 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      purchase_orders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_company: string | null
+          customer_id: string | null
+          customer_name: string
+          delivery_date: string | null
+          id: string
+          notes: string | null
+          po_date: string
+          po_number: string
+          status: string
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_company?: string | null
+          customer_id?: string | null
+          customer_name: string
+          delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          po_date?: string
+          po_number: string
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_company?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          po_date?: string
+          po_number?: string
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -513,6 +959,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      repair_orders: {
+        Row: {
+          actual_completion_date: string | null
+          completed_by: string | null
+          created_at: string
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string
+          expected_completion_date: string | null
+          id: string
+          item_description: string
+          parts_cost: number | null
+          problem_description: string | null
+          received_by: string | null
+          received_date: string
+          repair_cost: number | null
+          repair_notes: string | null
+          repair_number: string
+          status: string
+          total_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          actual_completion_date?: string | null
+          completed_by?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone: string
+          expected_completion_date?: string | null
+          id?: string
+          item_description: string
+          parts_cost?: number | null
+          problem_description?: string | null
+          received_by?: string | null
+          received_date?: string
+          repair_cost?: number | null
+          repair_notes?: string | null
+          repair_number: string
+          status?: string
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          actual_completion_date?: string | null
+          completed_by?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string
+          expected_completion_date?: string | null
+          id?: string
+          item_description?: string
+          parts_cost?: number | null
+          problem_description?: string | null
+          received_by?: string | null
+          received_date?: string
+          repair_cost?: number | null
+          repair_notes?: string | null
+          repair_number?: string
+          status?: string
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       service_images: {
         Row: {
@@ -873,6 +1388,72 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      warranty_claims: {
+        Row: {
+          claim_date: string
+          claim_number: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          id: string
+          problem_description: string
+          processed_by: string | null
+          replacement_delivery_id: string | null
+          resolution: string | null
+          status: string
+          updated_at: string
+          warranty_id: string
+        }
+        Insert: {
+          claim_date?: string
+          claim_number: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          id?: string
+          problem_description: string
+          processed_by?: string | null
+          replacement_delivery_id?: string | null
+          resolution?: string | null
+          status?: string
+          updated_at?: string
+          warranty_id: string
+        }
+        Update: {
+          claim_date?: string
+          claim_number?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          problem_description?: string
+          processed_by?: string | null
+          replacement_delivery_id?: string | null
+          resolution?: string | null
+          status?: string
+          updated_at?: string
+          warranty_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warranty_claims_replacement_delivery_id_fkey"
+            columns: ["replacement_delivery_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "warranty_claims_warranty_id_fkey"
+            columns: ["warranty_id"]
+            isOneToOne: false
+            referencedRelation: "product_warranties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
