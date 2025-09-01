@@ -45,7 +45,7 @@ const menuItems = [
     iconColor: "text-blue-500"
   },
   {
-    title: "เอกสารการขาย / Sale Doc.",
+    title: "เอกสารการขาย / Sale Docs",
     icon: FileText,
     href: "/quotations",
     view: "sales-documents",
