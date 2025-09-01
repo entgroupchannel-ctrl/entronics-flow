@@ -68,7 +68,7 @@ interface Technician {
   name: string;
   phone?: string;
   email?: string;
-  specialization: string;
+  specialization: 'general' | 'electrical' | 'mechanical' | 'software' | 'hardware';
   is_available: boolean;
   current_workload: number;
   rating: number;
