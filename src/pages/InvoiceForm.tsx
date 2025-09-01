@@ -567,8 +567,7 @@ export default function InvoiceForm() {
                     <TableHead className="text-primary-foreground w-20">จำนวน</TableHead>
                     <TableHead className="text-primary-foreground w-24">ราคาต่อหน่วย</TableHead>
                     <TableHead className="text-primary-foreground w-20">ส่วนลด</TableHead>
-                    <TableHead className="text-primary-foreground w-16">ประเภท</TableHead>
-                    <TableHead className="text-primary-foreground w-24">ยอดรวม</TableHead>
+                    <TableHead className="text-primary-foreground w-24">รวม</TableHead>
                     <TableHead className="text-primary-foreground w-12"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -638,28 +637,28 @@ export default function InvoiceForm() {
                         />
                       </TableCell>
                       <TableCell>
-                        <Input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={item.discount_amount}
-                          onChange={(e) => updateItem(item.id, 'discount_amount', parseFloat(e.target.value) || 0)}
-                          className="w-20 text-right"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Select
-                          value={item.discount_type}
-                          onValueChange={(value: 'amount' | 'percentage') => updateItem(item.id, 'discount_type', value)}
-                        >
-                          <SelectTrigger className="w-16">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="amount">บาท</SelectItem>
-                            <SelectItem value="percentage">%</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.discount_amount}
+                            onChange={(e) => updateItem(item.id, 'discount_amount', parseFloat(e.target.value) || 0)}
+                            className="w-20 text-right"
+                          />
+                          <Select
+                            value={item.discount_type}
+                            onValueChange={(value: 'amount' | 'percentage') => updateItem(item.id, 'discount_type', value)}
+                          >
+                            <SelectTrigger className="w-16">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="amount">บาท</SelectItem>
+                              <SelectItem value="percentage">%</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </TableCell>
                       <TableCell className="w-24 font-medium text-right">
                         {item.line_total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
