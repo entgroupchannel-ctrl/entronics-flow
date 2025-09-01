@@ -474,7 +474,7 @@ export default function QuotationForm() {
                     <Input 
                       value={quotation.quotation_number} 
                       onChange={(e) => setQuotation(prev => ({ ...prev, quotation_number: e.target.value }))}
-                      className="text-right text-3xl font-extrabold border-2 border-gray-400 h-14"
+                      className="text-right text-3xl font-extrabold text-blue-600 border-0 shadow-none bg-transparent h-14 focus:ring-0 focus:border-0"
                       placeholder="QT202400001"
                     />
                   </div>
