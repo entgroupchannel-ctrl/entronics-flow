@@ -142,8 +142,10 @@ const menuItems = [
 ];
 
 export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(true); // เริ่มต้นให้หุบแล้ว
-  const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({});
+  const [collapsed, setCollapsed] = useState(false); // เปิดไซด์บาร์เป็นค่าเริ่มต้น
+  const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({
+    quotations: true // เปิดเมนูใบเสนอราคาไว้เป็น default
+  });
   const location = useLocation();
   const navigate = useNavigate();
 
