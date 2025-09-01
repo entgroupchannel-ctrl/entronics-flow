@@ -71,7 +71,9 @@ const Inventory = () => {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<any[]>([]);
-  const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [importErrors, setImportErrors] = useState<{row: number, errors: string[]}[]>([]);
+  const [validProducts, setValidProducts] = useState<any[]>([]);
+  const [invalidProducts, setInvalidProducts] = useState<any[]>([]);
   const { toast } = useToast();
   const { canManageInventory, loading: roleLoading } = useUserRole();
 
@@ -411,6 +413,8 @@ const Inventory = () => {
     setImportFile(file);
     setImportErrors([]);
     setImportPreview([]);
+    setValidProducts([]);
+    setInvalidProducts([]);
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -421,9 +425,11 @@ const Inventory = () => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        // Validate and preview data
-        const errors: string[] = [];
-        const validatedData: any[] = [];
+        // Validate and separate valid/invalid data
+        const errors: {row: number, errors: string[]}[] = [];
+        const validData: any[] = [];
+        const invalidData: any[] = [];
+        const existingSkus = products.map(p => p.sku);
 
         jsonData.forEach((row: any, index: number) => {
           const rowNum = index + 2; // Account for header row
@@ -434,40 +440,63 @@ const Inventory = () => {
           const unitPrice = parseFloat(row.UnitPrice) || 0;
           const stock = parseInt(row.Stock) || 0;
 
-          // Validation
+          // Validation errors for this row
+          const rowErrors: string[] = [];
+
           if (!productCode) {
-            errors.push(`แถว ${rowNum}: ต้องระบุ ProductCode`);
+            rowErrors.push("ต้องระบุ ProductCode");
+          } else if (existingSkus.includes(productCode)) {
+            rowErrors.push("ProductCode ซ้ำกับข้อมูลในระบบ");
           }
+          
           if (!name) {
-            errors.push(`แถว ${rowNum}: ต้องระบุ Name`);
+            rowErrors.push("ต้องระบุ Name");
           }
+          
           if (category && !categories.includes(category)) {
-            errors.push(`แถว ${rowNum}: หมวดหมู่ '${category}' ไม่ถูกต้อง`);
+            rowErrors.push(`หมวดหมู่ '${category}' ไม่ถูกต้อง`);
           }
 
-          if (productCode && name) {
-            // Determine status based on stock
-            let status = "In Stock";
-            if (stock === 0) {
-              status = "Out of Stock";
-            } else if (stock <= 5) {
-              status = "Low Stock";
-            }
+          if (isNaN(unitPrice) || unitPrice < 0) {
+            rowErrors.push("ราคาต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0");
+          }
 
-            validatedData.push({
-              sku: productCode,
-              name: name,
-              category: category || null,
-              description: description || null,
-              price: unitPrice,
-              stock: stock,
-              status: status
-            });
+          if (isNaN(stock) || stock < 0) {
+            rowErrors.push("จำนวนสต๊อคต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0");
+          }
+
+          // Determine status based on stock
+          let status = "In Stock";
+          if (stock === 0) {
+            status = "Out of Stock";
+          } else if (stock <= 5) {
+            status = "Low Stock";
+          }
+
+          const productData = {
+            rowNumber: rowNum,
+            sku: productCode || '',
+            name: name || '',
+            category: category || null,
+            description: description || null,
+            price: unitPrice,
+            stock: stock,
+            status: status,
+            originalRow: row
+          };
+
+          if (rowErrors.length > 0) {
+            errors.push({ row: rowNum, errors: rowErrors });
+            invalidData.push(productData);
+          } else {
+            validData.push(productData);
           }
         });
 
         setImportErrors(errors);
-        setImportPreview(validatedData);
+        setValidProducts(validData);
+        setInvalidProducts(invalidData);
+        setImportPreview([...validData, ...invalidData]);
         setShowImportDialog(true);
       } catch (error) {
         console.error('Error reading file:', error);
@@ -482,25 +511,30 @@ const Inventory = () => {
   };
 
   const handleImportProducts = async () => {
-    if (importPreview.length === 0) return;
+    if (validProducts.length === 0) {
+      toast({
+        title: "ไม่มีข้อมูลที่ถูกต้อง",
+        description: "ไม่มีสินค้าที่สามารถนำเข้าได้",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
-      // Check for duplicate SKUs
-      const existingSkus = products.map(p => p.sku);
-      const duplicateSkus = importPreview.filter(p => existingSkus.includes(p.sku));
-      
-      if (duplicateSkus.length > 0) {
-        toast({
-          title: "พบ SKU ซ้ำ",
-          description: `SKU ที่ซ้ำ: ${duplicateSkus.map(p => p.sku).join(', ')}`,
-          variant: "destructive"
-        });
-        return;
-      }
+      // Prepare data for import (remove metadata fields)
+      const productsToImport = validProducts.map(p => ({
+        sku: p.sku,
+        name: p.name,
+        category: p.category,
+        description: p.description,
+        price: p.price,
+        stock: p.stock,
+        status: p.status
+      }));
 
       const { data, error } = await supabase
         .from('products')
-        .insert(importPreview);
+        .insert(productsToImport);
 
       if (error) {
         console.error('Error importing products:', error);
@@ -517,10 +551,16 @@ const Inventory = () => {
       setImportFile(null);
       setImportPreview([]);
       setImportErrors([]);
+      setValidProducts([]);
+      setInvalidProducts([]);
+
+      const successMessage = invalidProducts.length > 0 
+        ? `นำเข้าสินค้า ${validProducts.length} รายการสำเร็จ (ข้าม ${invalidProducts.length} รายการที่มีข้อผิดพลาด)`
+        : `นำเข้าสินค้า ${validProducts.length} รายการเรียบร้อยแล้ว`;
 
       toast({
         title: "นำเข้าสำเร็จ",
-        description: `นำเข้าสินค้า ${importPreview.length} รายการเรียบร้อยแล้ว`
+        description: successMessage
       });
     } catch (error) {
       console.error('Error importing products:', error);
@@ -1131,46 +1171,63 @@ const Inventory = () => {
 
           {/* Import Preview Dialog */}
           <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-            <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>ตรวจสอบข้อมูลก่อนนำเข้า</DialogTitle>
                 <DialogDescription>
-                  ตรวจสอบข้อมูลสินค้าที่จะนำเข้าและแก้ไขข้อผิดพลาด (หากมี)
+                  ตรวจสอบข้อมูลสินค้าที่จะนำเข้า - สินค้าที่ถูกต้องจะถูกนำเข้า สินค้าที่มีข้อผิดพลาดจะถูกข้าม
                 </DialogDescription>
               </DialogHeader>
 
+              {/* Summary */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                  <div className="text-green-800 font-medium">สินค้าที่สามารถนำเข้าได้</div>
+                  <div className="text-2xl font-bold text-green-600">{validProducts.length}</div>
+                </div>
+                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                  <div className="text-red-800 font-medium">สินค้าที่มีข้อผิดพลาด</div>
+                  <div className="text-2xl font-bold text-red-600">{invalidProducts.length}</div>
+                </div>
+              </div>
+
+              {/* Errors */}
               {importErrors.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-destructive">พบข้อผิดพลาด:</h4>
-                  <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                  <h4 className="text-sm font-medium text-destructive">รายการข้อผิดพลาด:</h4>
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3 max-h-32 overflow-y-auto">
                     <ul className="text-sm text-destructive space-y-1">
-                      {importErrors.map((error, index) => (
-                        <li key={index}>• {error}</li>
+                      {importErrors.map((errorItem, index) => (
+                        <li key={index}>
+                          <strong>แถว {errorItem.row}:</strong> {errorItem.errors.join(', ')}
+                        </li>
                       ))}
                     </ul>
                   </div>
                 </div>
               )}
 
-              {importPreview.length > 0 && (
+              {/* Valid Products */}
+              {validProducts.length > 0 && (
                 <div className="space-y-4">
-                  <h4 className="text-sm font-medium">ข้อมูลที่จะนำเข้า ({importPreview.length} รายการ):</h4>
-                  <div className="border rounded-md max-h-60 overflow-y-auto">
+                  <h4 className="text-sm font-medium text-green-700">สินค้าที่จะนำเข้า ({validProducts.length} รายการ):</h4>
+                  <div className="border border-green-200 rounded-md max-h-60 overflow-y-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead>แถว</TableHead>
                           <TableHead>SKU</TableHead>
                           <TableHead>ชื่อสินค้า</TableHead>
                           <TableHead>หมวดหมู่</TableHead>
                           <TableHead>ราคาขาย</TableHead>
                           <TableHead>สต๊อค</TableHead>
                           <TableHead>สถานะ</TableHead>
-                          <TableHead>รายละเอียด</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {importPreview.map((product, index) => (
-                          <TableRow key={index}>
+                        {validProducts.map((product, index) => (
+                          <TableRow key={index} className="bg-green-50/50">
+                            <TableCell className="font-medium">{product.rowNumber}</TableCell>
                             <TableCell className="font-medium">{product.sku}</TableCell>
                             <TableCell>{product.name}</TableCell>
                             <TableCell>{product.category || "-"}</TableCell>
@@ -1181,9 +1238,48 @@ const Inventory = () => {
                                 {product.status === "In Stock" ? "มีสต๊อค" : product.status === "Low Stock" ? "สต๊อคต่ำ" : "หมดสต๊อค"}
                               </Badge>
                             </TableCell>
-                            <TableCell className="max-w-xs truncate">{product.description || "-"}</TableCell>
                           </TableRow>
                         ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+
+              {/* Invalid Products */}
+              {invalidProducts.length > 0 && (
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-red-700">สินค้าที่จะถูกข้าม ({invalidProducts.length} รายการ):</h4>
+                  <div className="border border-red-200 rounded-md max-h-60 overflow-y-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>แถว</TableHead>
+                          <TableHead>SKU</TableHead>
+                          <TableHead>ชื่อสินค้า</TableHead>
+                          <TableHead>หมวดหมู่</TableHead>
+                          <TableHead>ราคาขาย</TableHead>
+                          <TableHead>สต๊อค</TableHead>
+                          <TableHead>ข้อผิดพลาด</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {invalidProducts.map((product, index) => {
+                          const errorItem = importErrors.find(e => e.row === product.rowNumber);
+                          return (
+                            <TableRow key={index} className="bg-red-50/50">
+                              <TableCell className="font-medium">{product.rowNumber}</TableCell>
+                              <TableCell className="font-medium">{product.sku || "-"}</TableCell>
+                              <TableCell>{product.name || "-"}</TableCell>
+                              <TableCell>{product.category || "-"}</TableCell>
+                              <TableCell>฿{product.price.toLocaleString()}</TableCell>
+                              <TableCell>{product.stock}</TableCell>
+                              <TableCell className="text-red-600 text-xs">
+                                {errorItem?.errors.join(', ') || "ข้อผิดพลาดไม่ทราบสาเหตุ"}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
@@ -1196,9 +1292,10 @@ const Inventory = () => {
                 </Button>
                 <Button 
                   onClick={handleImportProducts}
-                  disabled={importErrors.length > 0 || importPreview.length === 0}
+                  disabled={validProducts.length === 0}
+                  className={validProducts.length > 0 ? "bg-green-600 hover:bg-green-700" : ""}
                 >
-                  นำเข้าสินค้า ({importPreview.length} รายการ)
+                  นำเข้าสินค้าที่ถูกต้อง ({validProducts.length} รายการ)
                 </Button>
               </DialogFooter>
             </DialogContent>
