@@ -45,12 +45,6 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
 
   const getStatusInfo = (status: string) => {
     switch (status) {
-      case 'draft':
-        return { 
-          label: 'ร่าง', 
-          color: 'bg-gray-100 text-gray-800',
-          icon: <FileText className="w-4 h-4" />
-        };
       case 'wait_for_approve':
         return { 
           label: 'รออนุมัติ', 
@@ -110,10 +104,6 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
 
   const getAvailableActions = (currentStatus: string) => {
     switch (currentStatus) {
-      case 'draft':
-        return [
-          { id: 'send_for_approval', label: 'ส่งเพื่อขออนุมัติ', icon: <ArrowRight className="w-4 h-4" /> }
-        ];
       case 'wait_for_approve':
         return [
           { id: 'approve', label: '✅ อนุมัติ', icon: <CheckCircle className="w-4 h-4" /> },
