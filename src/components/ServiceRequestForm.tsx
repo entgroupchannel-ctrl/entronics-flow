@@ -465,6 +465,10 @@ export function ServiceRequestForm({
                   <SelectItem value="medium">ปานกลาง (1-2 วันทำการ)</SelectItem>
                   <SelectItem value="high">สูง (ภายในวันเดียว)</SelectItem>
                   <SelectItem value="urgent">เร่งด่วน (ภายใน 4 ชั่วโมง)</SelectItem>
+                  <SelectItem value="critical">วิกฤต (ทันที)</SelectItem>
+                  <SelectItem value="vip">VIP ลูกค้า</SelectItem>
+                  <SelectItem value="warranty">ภายใต้การรับประกัน</SelectItem>
+                  <SelectItem value="business_critical">ธุรกิจหยุดชะงัก</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -483,7 +487,7 @@ export function ServiceRequestForm({
             </div>
           </div>
 
-          {(formData.priority === "high" || formData.priority === "urgent") && (
+          {(formData.priority === "high" || formData.priority === "urgent" || formData.priority === "critical" || formData.priority === "vip" || formData.priority === "business_critical") && (
             <div className="space-y-2">
               <Label htmlFor="urgency_reason" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 เหตุผลความเร่งด่วน
