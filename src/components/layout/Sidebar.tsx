@@ -97,13 +97,11 @@ const menuItems = [
 ];
 
 export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
-  const [hoveredOnCollapsed, setHoveredOnCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true); // เริ่มต้นให้หุบแล้ว
   const location = useLocation();
   const navigate = useNavigate();
 
   const currentPath = location.pathname;
-  const showExpanded = !collapsed || hoveredOnCollapsed;
 
   const handleMenuClick = (item: typeof menuItems[0]) => {
     if (onMenuClick && item.view) {
@@ -124,65 +122,11 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
     <TooltipProvider>
       <div 
         className={cn(
-          "flex h-full flex-col bg-card border-r border-border transition-all duration-300 ease-in-out relative",
-          showExpanded ? "w-64" : "w-16",
+          "flex h-full flex-col bg-card border-r border-border transition-all duration-300 ease-in-out",
+          collapsed ? "w-16" : "w-64",
           className
         )}
-        onMouseEnter={() => collapsed && setHoveredOnCollapsed(true)}
-        onMouseLeave={() => setHoveredOnCollapsed(false)}
       >
-        {/* Expanded overlay when hovering on collapsed state */}
-        {collapsed && hoveredOnCollapsed && (
-          <div className="absolute left-16 top-0 w-48 h-full bg-card border-r border-border shadow-lg z-50 animate-slide-in-right">
-            {/* Logo */}
-            <div className="flex h-16 items-center px-6 border-b border-border">
-              <div>
-                <h1 className="text-lg font-bold text-foreground">ENT GROUP</h1>
-                <p className="text-xs text-muted-foreground">Industrial PC ERP</p>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="flex-1 space-y-1 p-4">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item);
-                
-                return (
-                  <Button
-                    key={item.href}
-                    variant={active ? "default" : "ghost"}
-                    className={cn(
-                      "w-full justify-start h-10 px-3",
-                      active 
-                        ? "bg-primary text-primary-foreground shadow-sm" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                    onClick={() => handleMenuClick(item)}
-                  >
-                    <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
-                    <span className="text-sm">{item.title}</span>
-                  </Button>
-                );
-              })}
-            </nav>
-
-            {/* User Info */}
-            <div className="border-t border-border p-4">
-              <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
-                  <Users className="h-4 w-4 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">Admin User</p>
-                  <p className="text-xs text-muted-foreground truncate">admin@entgroup.com</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Main sidebar content */}
         {/* Toggle Button */}
         <div className="flex h-16 items-center border-b border-border">
           <Button
@@ -194,7 +138,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
             {collapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
           
-          {showExpanded && (
+          {!collapsed && (
             <div className="flex items-center space-x-2 ml-2">
               <div className="h-8 w-8 rounded bg-gradient-primary flex items-center justify-center">
                 <Building2 className="h-5 w-5 text-white" />
@@ -213,7 +157,8 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
             const Icon = item.icon;
             const active = isActive(item);
             
-            if (showExpanded) {
+            if (!collapsed) {
+              // Expanded view
               return (
                 <Button
                   key={item.href}
@@ -259,7 +204,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
         </nav>
 
         {/* User Info */}
-        {showExpanded && (
+        {!collapsed && (
           <div className="border-t border-border p-4">
             <div className="flex items-center space-x-3">
               <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
@@ -274,7 +219,7 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
         )}
 
         {/* Collapsed user avatar */}
-        {!showExpanded && (
+        {collapsed && (
           <div className="border-t border-border p-2">
             <Tooltip>
               <TooltipTrigger asChild>
