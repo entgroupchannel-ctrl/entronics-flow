@@ -297,9 +297,11 @@ const Delivery = () => {
     };
 
     return (
-      <Badge variant={config.variant} className={config.className}>
-        {config.label}
-      </Badge>
+      <div className="p-2 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
+        <Badge variant={config.variant} className={config.className}>
+          {config.label}
+        </Badge>
+      </div>
     );
   };
 
