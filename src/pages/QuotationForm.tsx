@@ -469,10 +469,10 @@ export default function QuotationForm() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-primary hover:bg-primary">
-                    <TableHead className="w-[45%] text-primary-foreground font-semibold">รายการสินค้า</TableHead>
-                    <TableHead className="w-20 text-primary-foreground font-semibold text-center">จำนวน</TableHead>
-                    <TableHead className="w-32 text-primary-foreground font-semibold text-center">ราคา/หน่วย</TableHead>
-                    <TableHead className="w-20 text-primary-foreground font-semibold text-center">ส่วนลด</TableHead>
+                    <TableHead className="w-[35%] text-primary-foreground font-semibold">รายการสินค้า</TableHead>
+                    <TableHead className="w-28 text-primary-foreground font-semibold text-center">จำนวน</TableHead>
+                    <TableHead className="w-40 text-primary-foreground font-semibold text-center">ราคาต่อหน่วย</TableHead>
+                    <TableHead className="w-36 text-primary-foreground font-semibold text-center">ส่วนลด</TableHead>
                     <TableHead className="w-24 text-primary-foreground font-semibold text-center">รวม</TableHead>
                     <TableHead className="w-12 text-primary-foreground"></TableHead>
                   </TableRow>
@@ -522,7 +522,7 @@ export default function QuotationForm() {
                           placeholder="0.00"
                         />
                       </TableCell>
-                      <TableCell className="w-28">
+                      <TableCell className="w-36">
                         <div className="flex gap-1">
                           <Input
                             type="number"
@@ -530,7 +530,8 @@ export default function QuotationForm() {
                             onChange={(e) => updateItem(item.id, 'discount_amount', Number(e.target.value))}
                             min="0"
                             step="0.01"
-                            className="text-right flex-1"
+                            className="text-right flex-1 min-w-[80px]"
+                            placeholder="0"
                           />
                           <Select
                             value={item.discount_type}
