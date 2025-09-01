@@ -380,10 +380,23 @@ export default function Invoices() {
                             <div className="flex items-center space-x-2">
                               <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                               <span>{invoice.invoice_number}</span>
-                              {/* Debug info */}
-                              <span className="text-xs text-gray-400">
-                                (Status: {invoice.status}, Tax Invs: {invoice.related_tax_invoices?.length || 0})
-                              </span>
+                              {/* แสดงไอคอนเมื่อสถานะเป็น วางบิลแล้ว หรือ สร้างใบส่งสินค้า/ใบกำกับภาษี */}
+                              {(invoice.status === 'วางบิลแล้ว' || invoice.status === 'สร้างใบส่งสินค้า/ใบกำกับภาษี') && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
+                                  title="มีใบส่งสินค้า/ใบกำกับภาษีที่เกี่ยวข้อง"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    navigate('/tax-invoices');
+                                  }}
+                                >
+                                  <FileText className="w-4 h-4" />
+                                </Button>
+                              )}
+                              {/* แสดงไอคอนสำหรับ tax invoices ที่มีจริงในฐานข้อมูล */}
                               {invoice.related_tax_invoices && invoice.related_tax_invoices.length > 0 && (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
