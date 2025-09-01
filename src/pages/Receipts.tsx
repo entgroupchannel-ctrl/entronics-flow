@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, Receipt, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, FileText, ExternalLink } from 'lucide-react';
+import { Plus, Search, Receipt, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, FileText, ExternalLink, Clock, CheckCircle, X } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -348,9 +348,42 @@ export default function Receipts() {
                           <TableCell className="font-medium">
                             ฿{receipt.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                           </TableCell>
-                          <TableCell onClick={(e) => e.stopPropagation()}>
-                            {getStatusBadge(receipt.status)}
-                          </TableCell>
+                           <TableCell onClick={(e) => e.stopPropagation()}>
+                             <DropdownMenu>
+                               <DropdownMenuTrigger asChild>
+                                 <Button 
+                                   variant="outline" 
+                                   size="sm" 
+                                   className="bg-background border hover:bg-accent"
+                                 >
+                                   สถานะ
+                                 </Button>
+                               </DropdownMenuTrigger>
+                               <DropdownMenuContent 
+                                 align="center" 
+                                 className="bg-background border shadow-lg z-[100]"
+                               >
+                                 <DropdownMenuItem onClick={() => {
+                                   console.log('Set pending status', receipt.id);
+                                 }}>
+                                   <Clock className="w-4 h-4 mr-2" />
+                                   รอดำเนินการ
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem onClick={() => {
+                                   console.log('Set collected status', receipt.id);
+                                 }}>
+                                   <CheckCircle className="w-4 h-4 mr-2" />
+                                   เก็บเงินแล้ว
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem onClick={() => {
+                                   console.log('Set cancelled status', receipt.id);
+                                 }}>
+                                   <X className="w-4 h-4 mr-2" />
+                                   ยกเลิก
+                                 </DropdownMenuItem>
+                               </DropdownMenuContent>
+                             </DropdownMenu>
+                           </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <DropdownMenu 
                               open={dropdownOpen === receipt.id} 
