@@ -544,9 +544,10 @@ const StaffManagement = () => {
                               )}
                             </div>
                             {staffMember.vehicle_type && (
-                              <p className="text-sm text-muted-foreground">
-                                🚗 {staffMember.vehicle_type} {staffMember.vehicle_plate}
-                              </p>
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                <VehicleIcon className="h-4 w-4" />
+                                <span>{staffMember.vehicle_type} {staffMember.vehicle_plate}</span>
+                              </div>
                             )}
                           </div>
                         </div>
