@@ -156,6 +156,11 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
       { id: 'complete', label: 'เสร็จสิ้น', icon: <CheckCircle className="w-4 h-4" /> }
     ];
 
+    // Always show some actions for all statuses
+    const allActions = baseActions.filter(action => 
+      ['wait_for_approve', 'approve', 'reject', 'create_invoice', 'downpayment_invoice', 'split_payment_invoice', 'create_purchase_order'].includes(action.id)
+    );
+
     // Filter actions based on current status to show relevant options
     switch (currentStatus) {
       case 'wait_for_approve':
@@ -185,7 +190,7 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
           ['create_tax_invoice', 'downpayment_receipt', 'split_payment_receipt', 'complete'].includes(action.id)
         );
       default:
-        return baseActions.slice(0, 6); // Show first 6 common actions
+        return allActions; // Always show common actions as fallback
     }
   };
 
@@ -304,88 +309,84 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
         <span className="ml-1">{statusInfo.label}</span>
       </Badge>
 
-      {availableActions.length > 0 && (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" disabled={loading}>
-                จัดการ
-                <ChevronDown className="w-4 h-4 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              {availableActions.map((action) => (
-                <DropdownMenuItem
-                  key={action.id}
-                  onClick={() => {
-                    const needsInput = action.id === 'reject' || action.id === 'approve' || action.id === 'create_invoice';
-                    if (needsInput) {
-                      setIsDialogOpen(true);
-                    } else {
-                      handleAction(action.id);
-                    }
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  {action.icon}
-                  {action.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" disabled={loading}>
+              จัดการ
+              <ChevronDown className="w-4 h-4 ml-1" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            {availableActions.map((action) => (
+              <DropdownMenuItem
+                key={action.id}
+                onClick={() => {
+                  const needsInput = action.id === 'reject' || action.id === 'approve' || action.id === 'create_invoice';
+                  if (needsInput) {
+                    setIsDialogOpen(true);
+                  } else {
+                    handleAction(action.id);
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                {action.icon}
+                {action.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>จัดการใบเสนอราคา {quotation.quotation_number}</DialogTitle>
-              </DialogHeader>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">ประเภทกระบวนการ</label>
-                  <Select value={processType} onValueChange={setProcessType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="standard">Standard Process</SelectItem>
-                      <SelectItem value="downpayment">Down Payment Process</SelectItem>
-                      <SelectItem value="conversion">Conversion Process</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">หมายเหตุ</label>
-                  <Textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="หมายเหตุเพิ่มเติม..."
-                    className="mt-1"
-                  />
-                </div>
-
-                <div className="flex gap-2 pt-4">
-                  <Button 
-                    onClick={handleDialogConfirm}
-                    disabled={loading}
-                    className="flex-1"
-                  >
-                    {loading ? 'กำลังดำเนินการ...' : 'ยืนยัน'}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsDialogOpen(false)}
-                    className="flex-1"
-                  >
-                    ยกเลิก
-                  </Button>
-                </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>จัดการใบเสนอราคา {quotation.quotation_number}</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">ประเภทกระบวนการ</label>
+                <Select value={processType} onValueChange={setProcessType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="standard">Standard Process</SelectItem>
+                    <SelectItem value="downpayment">Down Payment Process</SelectItem>
+                    <SelectItem value="conversion">Conversion Process</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </DialogContent>
-          </Dialog>
-        </>
-      )}
+
+              <div>
+                <label className="text-sm font-medium">หมายเหตุ</label>
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="หมายเหตุเพิ่มเติม..."
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={handleDialogConfirm}
+                  disabled={loading}
+                  className="flex-1"
+                >
+                  {loading ? 'กำลังดำเนินการ...' : 'ยืนยัน'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsDialogOpen(false)}
+                  className="flex-1"
+                >
+                  ยกเลิก
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
     </div>
   );
 };
