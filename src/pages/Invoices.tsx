@@ -349,18 +349,22 @@ export default function Invoices() {
                               <div className="flex items-center gap-1">
                                 {/* ไอคอนอ้างอิงใบเสนอราคา - แสดงเมื่อมี quotation_id */}
                                 {invoice.quotation_id && (
-                                  <div className="flex items-center gap-1">
+                                  <div className="flex items-center gap-1" title="อ้างอิงจากใบเสนอราคา">
                                     <ArrowLeft className="w-3 h-3 text-blue-500" />
                                     <span className="text-xs text-blue-500">QT</span>
                                   </div>
                                 )}
-                                {/* ไอคอนอ้างอิงใบส่งสินค้า - แสดงเมื่อสถานะเป็น วางบิลแล้ว */}
-                                {invoice.status === 'วางบิลแล้ว' && (
-                                  <div className="flex items-center gap-1">
+                                {/* ไอคอนอ้างอิงใบส่งสินค้า - แสดงเมื่อสถานะเป็น วางบิลแล้ว หรือ สร้างใบส่งสินค้า/ใบกำกับภาษี */}
+                                {(invoice.status === 'วางบิลแล้ว' || invoice.status === 'สร้างใบส่งสินค้า/ใบกำกับภาษี') && (
+                                  <div className="flex items-center gap-1" title="สร้างใบส่งสินค้า/ใบกำกับภาษีแล้ว">
                                     <ArrowRight className="w-3 h-3 text-green-500" />
                                     <span className="text-xs text-green-500">INV</span>
                                   </div>
                                 )}
+                                {/* Debug: แสดงสถานะปัจจุบัน */}
+                                <span className="text-xs text-gray-400" title={`สถานะ: ${invoice.status}`}>
+                                  ({invoice.status})
+                                </span>
                               </div>
                             </div>
                           </TableCell>
