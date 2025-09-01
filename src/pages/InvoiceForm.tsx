@@ -88,6 +88,7 @@ export default function InvoiceForm() {
     loadCustomers();
     loadProducts();
     generateInvoiceNumber();
+    loadQuotationData();
   }, []);
 
   useEffect(() => {
@@ -101,6 +102,48 @@ export default function InvoiceForm() {
     const random = Math.floor(Math.random() * 9999) + 1;
     const invoiceNumber = `INV${year}${month}${String(random).padStart(4, '0')}`;
     setInvoice(prev => ({ ...prev, invoice_number: invoiceNumber }));
+  };
+
+  const loadQuotationData = () => {
+    try {
+      const quotationData = sessionStorage.getItem('invoice_from_quotation');
+      if (quotationData) {
+        const data = JSON.parse(quotationData);
+        
+        // Set invoice data from quotation
+        setInvoice(prev => ({
+          ...prev,
+          customer_name: data.customer_name || '',
+          customer_address: data.customer_address || '',
+          customer_phone: data.customer_phone || '',
+          customer_email: data.customer_email || '',
+          subtotal: data.subtotal || 0,
+          discount_amount: data.discount_amount || 0,
+          discount_percentage: data.discount_percentage || 0,
+          vat_amount: data.vat_amount || 0,
+          withholding_tax_amount: data.withholding_tax_amount || 0,
+          total_amount: data.total_amount || 0,
+          notes: data.notes || '',
+          terms_conditions: data.terms_conditions || 'ชำระเงินภายใน 30 วัน นับจากวันที่ออกใบแจ้งหนี้\nกรณีชำระเงินช้ากว่ากำหนด ทางบริษัทฯ ขอสงวนสิทธิ์ในการคิดดอกเบี้ยในอัตราร้อยละ 1.25 ต่อเดือน'
+        }));
+
+        // Set items from quotation
+        if (data.items && data.items.length > 0) {
+          setItems(data.items);
+        }
+
+        // Show notification
+        toast({
+          title: "นำเข้าข้อมูลจากใบเสนอราคาสำเร็จ",
+          description: `นำเข้าข้อมูลจากใบเสนอราคา ${data.quotation_number} เรียบร้อยแล้ว`,
+        });
+
+        // Clear the session storage after loading
+        sessionStorage.removeItem('invoice_from_quotation');
+      }
+    } catch (error) {
+      console.error('Error loading quotation data:', error);
+    }
   };
 
   const loadCustomers = async () => {

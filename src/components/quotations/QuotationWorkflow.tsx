@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { 
   CheckCircle, 
@@ -38,6 +39,7 @@ interface QuotationWorkflowProps {
 
 const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStatusUpdate }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [processType, setProcessType] = useState<string>('standard');
   const [notes, setNotes] = useState('');
@@ -194,6 +196,67 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
     }
   };
 
+  const createInvoiceFromQuotation = async (quotationId: string, type: 'standard' | 'downpayment' | 'split_payment') => {
+    try {
+      // Get quotation details with items
+      const { data: quotationData, error: quotationError } = await supabase
+        .from('quotations')
+        .select(`
+          *,
+          quotation_items (*)
+        `)
+        .eq('id', quotationId)
+        .single();
+
+      if (quotationError) throw quotationError;
+
+      // Store quotation data in sessionStorage for the invoice form
+      const invoiceData = {
+        from_quotation: true,
+        quotation_id: quotationId,
+        quotation_number: quotationData.quotation_number,
+        customer_name: quotationData.customer_name,
+        customer_address: quotationData.customer_address,
+        customer_phone: quotationData.customer_phone,
+        customer_email: quotationData.customer_email,
+        items: quotationData.quotation_items?.map((item: any) => ({
+          id: `from-quotation-${item.id}`,
+          product_name: item.product_name,
+          product_sku: item.product_sku,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount_amount: item.discount_amount,
+          discount_type: item.discount_percentage > 0 ? 'percentage' : 'amount',
+          line_total: item.line_total,
+          is_software: item.is_software
+        })) || [],
+        subtotal: quotationData.subtotal,
+        discount_amount: quotationData.discount_amount,
+        discount_percentage: quotationData.discount_percentage,
+        vat_amount: quotationData.vat_amount,
+        withholding_tax_amount: quotationData.withholding_tax_amount,
+        total_amount: quotationData.total_amount,
+        notes: quotationData.notes,
+        terms_conditions: quotationData.terms_conditions,
+        invoice_type: type
+      };
+
+      sessionStorage.setItem('invoice_from_quotation', JSON.stringify(invoiceData));
+      
+      // Navigate to invoice form
+      navigate('/invoices/new');
+
+    } catch (error: any) {
+      console.error('Error creating invoice from quotation:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถสร้างใบวางบิลจากใบเสนอราคาได้",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleAction = async (actionType: string, needsInput: boolean = false) => {
     if (needsInput) {
       setIsDialogOpen(true);
@@ -223,14 +286,20 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
         case 'create_invoice':
           newStatus = 'invoice_created';
           updateData.process_type = 'standard';
+          // Create invoice and navigate
+          await createInvoiceFromQuotation(quotation.id, 'standard');
           break;
         case 'downpayment_invoice':
           newStatus = 'downpayment_invoice';
           updateData.process_type = 'downpayment';
+          // Create downpayment invoice and navigate
+          await createInvoiceFromQuotation(quotation.id, 'downpayment');
           break;
         case 'split_payment_invoice':
           newStatus = 'split_payment_invoice';
           updateData.process_type = 'split_payment';
+          // Create split payment invoice and navigate
+          await createInvoiceFromQuotation(quotation.id, 'split_payment');
           break;
         case 'create_purchase_order':
           newStatus = 'purchase_order_created';
@@ -273,10 +342,13 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
 
       if (error) throw error;
 
-      toast({
-        title: "อัปเดตสถานะสำเร็จ",
-        description: `เปลี่ยนสถานะเป็น "${getStatusInfo(newStatus).label}" เรียบร้อยแล้ว`
-      });
+      // Only show toast if not navigating to invoice form
+      if (!['create_invoice', 'downpayment_invoice', 'split_payment_invoice'].includes(actionType)) {
+        toast({
+          title: "อัปเดตสถานะสำเร็จ",
+          description: `เปลี่ยนสถานะเป็น "${getStatusInfo(newStatus).label}" เรียบร้อยแล้ว`
+        });
+      }
 
       setIsDialogOpen(false);
       setNotes('');
