@@ -55,6 +55,8 @@ interface DeliveryOrder {
   assignment_notes?: string;
   courier_contact_name?: string;
   courier_contact_phone?: string;
+  staff_phone?: string;
+  vehicle_info?: string;
 }
 
 const Delivery = () => {
@@ -224,7 +226,8 @@ const Delivery = () => {
         .from('delivery_orders')
         .select(`
           *,
-          delivery_methods(name)
+          delivery_methods(name),
+          staff(name, phone, vehicle_type, vehicle_plate)
         `)
         .order('created_at', { ascending: false });
       
@@ -249,7 +252,10 @@ const Delivery = () => {
         assignment_date: order.assignment_date,
         assignment_notes: order.assignment_notes,
         courier_contact_name: order.courier_contact_name,
-        courier_contact_phone: order.courier_contact_phone
+        courier_contact_phone: order.courier_contact_phone,
+        driver_name: order.staff?.name || null,
+        staff_phone: order.staff?.phone || null,
+        vehicle_info: order.staff ? `${order.staff.vehicle_type} ${order.staff.vehicle_plate}` : null
       })) || [];
       
       setDeliveryOrders(transformedData);
@@ -814,15 +820,27 @@ const Delivery = () => {
                            </p>
                            
                             {/* Assignment Info */}
-                            {order.assigned_staff_id && (
+                            {order.assigned_staff_id && order.driver_name && (
                               <div className="flex items-center gap-2 text-sm">
                                 <div className="flex items-center gap-1">
                                   <Users className="h-4 w-4 text-blue-500" />
                                   <span className="text-lg">👨‍💼</span>
                                 </div>
-                                <span className="text-blue-600 font-medium">
-                                  มอบหมายให้พนักงานขับรถแล้ว
-                                </span>
+                                <div className="flex flex-col">
+                                  <span className="text-blue-600 font-medium">
+                                    มอบหมายให้: {order.driver_name}
+                                  </span>
+                                  {order.staff_phone && (
+                                    <span className="text-xs text-muted-foreground">
+                                      📞 {order.staff_phone}
+                                    </span>
+                                  )}
+                                  {order.vehicle_info && (
+                                    <span className="text-xs text-muted-foreground">
+                                      🚗 {order.vehicle_info}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             )}
                             {order.courier_contact_name && (
