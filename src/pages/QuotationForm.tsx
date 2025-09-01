@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, format } from 'date-fns';
 import { cn } from "@/lib/utils";
+import entGroupLogo from "@/assets/ent-group-logo.png";
 
 interface Customer {
   id: string;
@@ -664,6 +665,17 @@ export default function QuotationForm() {
                   <span>รวมทั้งสิ้น:</span>
                   <span>{quotation.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Company Logo - Bottom Right */}
+            <div className="flex justify-end mt-8">
+              <div className="relative">
+                <img 
+                  src={entGroupLogo} 
+                  alt="ENT GROUP" 
+                  className="h-12 w-auto opacity-80 hover:opacity-100 transition-opacity duration-200"
+                />
               </div>
             </div>
           </CardContent>
