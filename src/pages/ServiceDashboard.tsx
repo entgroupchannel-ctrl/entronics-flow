@@ -35,7 +35,8 @@ import {
   Star,
   AlertCircle,
   TrendingUp,
-  Activity
+  Activity,
+  BookOpen
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
@@ -793,6 +794,20 @@ export default function ServiceDashboard() {
               </h1>
               <p className="text-muted-foreground mt-1">จัดการงานซ่อมและบริการลูกค้า</p>
             </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // Navigate to knowledge base or open knowledge base dialog
+                  toast({
+                    title: "Knowledge Base",
+                    description: "ฟีเจอร์ Knowledge Base กำลังพัฒนา",
+                  });
+                }}
+              >
+                <BookOpen className="mr-2 h-4 w-4" />
+                Knowledge Base
+              </Button>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -813,6 +828,7 @@ export default function ServiceDashboard() {
                 />
               </DialogContent>
             </Dialog>
+            </div>
           </div>
 
           {/* Metrics Cards */}
