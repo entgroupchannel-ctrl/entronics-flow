@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files, Receipt } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files, Receipt, ExternalLink } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,12 @@ interface Quotation {
   rejected_at?: string;
   rejection_reason?: string;
   quotation_items?: any[];
+  related_invoices?: Array<{
+    id: string;
+    invoice_number: string;
+    status: string;
+    total_amount: number;
+  }>;
 }
 
 export default function Quotations() {
@@ -58,16 +64,29 @@ export default function Quotations() {
         .select(`
           *,
           quotation_items (*),
-          quotation_workflow_history (*)
+          invoices!quotation_id (
+            id,
+            invoice_number,
+            status,
+            total_amount
+          )
         `)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      setQuotations(data || []);
-    } catch (error) {
+      // Transform data to include related invoices
+      const quotationsWithInvoices = data?.map(quotation => {
+        // Handle the case where invoices might be an error or empty
+        const invoices = Array.isArray(quotation.invoices) ? quotation.invoices : [];
+        return {
+          ...quotation,
+          related_invoices: invoices
+        };
+      }) || [];
+
+      setQuotations(quotationsWithInvoices as Quotation[]);
+    } catch (error: any) {
       console.error('Error loading quotations:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
@@ -343,6 +362,47 @@ export default function Quotations() {
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                         <span>{quotation.quotation_number}</span>
+                        {quotation.related_invoices && quotation.related_invoices.length > 0 && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <FileText className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="start"
+                              className="bg-background border shadow-lg z-[100] min-w-[200px]"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
+                                เอกสารที่เกี่ยวข้อง
+                              </div>
+                              <div className="px-3 py-1 text-xs text-muted-foreground">
+                                เอกสารอ้างอิง
+                              </div>
+                              {quotation.related_invoices.map((invoice) => (
+                                <DropdownMenuItem
+                                  key={invoice.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/invoices/${invoice.id}`);
+                                  }}
+                                  className="hover:bg-accent"
+                                >
+                                  <ExternalLink className="w-4 h-4 mr-2 text-blue-600" />
+                                  <span className="text-blue-600 hover:underline">
+                                    {invoice.invoice_number}
+                                  </span>
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
