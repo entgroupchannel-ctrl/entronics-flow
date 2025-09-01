@@ -501,6 +501,25 @@ export default function QuotationForm() {
   };
 
   const exportToPDF = async () => {
+    // ตรวจสอบข้อมูลก่อน export
+    if (!quotation.quotation_number) {
+      toast({
+        title: "ไม่สามารถส่งออก PDF ได้",
+        description: "กรุณากรอกหมายเลขใบเสนอราคาก่อน",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.length === 0) {
+      toast({
+        title: "ไม่สามารถส่งออก PDF ได้", 
+        description: "กรุณาเพิ่มรายการสินค้าอย่างน้อย 1 รายการ",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { jsPDF } = await import('jspdf');
       
@@ -515,8 +534,12 @@ export default function QuotationForm() {
       doc.setFont('helvetica');
       doc.setFontSize(12);
 
-      // Company Logo
-      doc.addImage(entGroupLogo, 'PNG', 15, 10, 40, 20);
+      // Logo space reserved (จองพื้นที่สำหรับโลโก้)
+      doc.setFillColor(240, 240, 240);
+      doc.rect(15, 10, 40, 20, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text('LOGO', 35, 20, { align: 'center' });
 
       // Document Header - Red triangle with number
       doc.setFillColor(220, 53, 69);
