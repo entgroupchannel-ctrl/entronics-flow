@@ -76,6 +76,9 @@ export default function InvoiceForm() {
     vat_amount: 0,
     withholding_tax_amount: 0,
     total_amount: 0,
+    partial_payment_percentage: 0,
+    taxable_amount: 0,
+    non_taxable_amount: 0,
     notes: '',
     terms_conditions: 'ชำระเงินภายใน 30 วัน นับจากวันที่ออกใบแจ้งหนี้\nกรณีชำระเงินช้ากว่ากำหนด ทางบริษัทฯ ขอสงวนสิทธิ์ในการคิดดอกเบี้ยในอัตราร้อยละ 1.25 ต่อเดือน',
     status: 'รอวางบิล'
@@ -164,10 +167,21 @@ export default function InvoiceForm() {
     }, 0);
     
     const priceAfterDiscount = rawSubtotal - totalDiscount;
-    const vatAmount = includeVat ? priceAfterDiscount * 0.07 : 0;
+    
+    // คำนวณมูลค่าที่มีภาษีและไม่มีภาษี
+    const nonTaxableAmount = items
+      .filter(item => !item.is_software) // สินค้าที่ไม่มีภาษี
+      .reduce((sum, item) => sum + item.line_total, 0);
+    const taxableAmount = priceAfterDiscount - nonTaxableAmount;
+    
+    const vatAmount = includeVat ? taxableAmount * 0.07 : 0;
     const softwareItems = items.filter(item => item.is_software);
     const softwareSubtotal = softwareItems.reduce((sum, item) => sum + item.line_total, 0);
     const withholdingTaxAmount = softwareSubtotal * 0.03;
+    
+    // คำนวณแบ่งชำระ
+    const partialPaymentAmount = priceAfterDiscount * (invoice.partial_payment_percentage / 100);
+    
     const totalAmount = priceAfterDiscount + vatAmount - withholdingTaxAmount;
 
     setInvoice(prev => ({
@@ -176,6 +190,8 @@ export default function InvoiceForm() {
       discount_amount: totalDiscount,
       vat_amount: vatAmount,
       withholding_tax_amount: withholdingTaxAmount,
+      taxable_amount: taxableAmount,
+      non_taxable_amount: nonTaxableAmount,
       total_amount: totalAmount
     }));
   };
@@ -633,18 +649,51 @@ export default function InvoiceForm() {
                   <span>ราคาหลังหักส่วนลด:</span>
                   <span>{(invoice.subtotal - invoice.discount_amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                 </div>
+                
+                {/* แบ่งชำระ */}
+                <div className="flex justify-between items-center">
+                  <span>แบ่งชำระ:</span>
+                  <div className="flex items-center gap-2">
+                    <select 
+                      value="เปอร์เซ็นต์"
+                      className="text-sm border rounded px-2 py-1"
+                    >
+                      <option>เปอร์เซ็นต์</option>
+                    </select>
+                    <Input
+                      type="number"
+                      value={invoice.partial_payment_percentage}
+                      onChange={(e) => setInvoice(prev => ({ ...prev, partial_payment_percentage: parseFloat(e.target.value) || 0 }))}
+                      className="w-20 text-right text-sm"
+                      placeholder="40.00"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span>มูลค่าที่ไม่มี/ยกเว้นภาษี:</span>
+                  <span>{invoice.non_taxable_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span>มูลค่าที่คำนวณภาษี:</span>
+                  <span>{invoice.taxable_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
+                </div>
+                
                 {includeVat && (
                   <div className="flex justify-between">
-                    <span>ภาษีมูลค่าเพิ่ม 7%:</span>
+                    <span>ภาษีมูลค่าเพิ่ม:</span>
                     <span>{invoice.vat_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                   </div>
                 )}
+                
                 {invoice.withholding_tax_amount > 0 && (
                   <div className="flex justify-between text-orange-600">
                     <span>หักภาษี ณ ที่จ่าย:</span>
                     <span>-{invoice.withholding_tax_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</span>
                   </div>
                 )}
+                
                 <hr />
                 <div className="flex justify-between font-bold text-lg">
                   <span>จำนวนเงินรวมทั้งสิ้น:</span>
