@@ -94,6 +94,7 @@ const Index = () => {
   const { user } = useAuth();
   const { canManageInventory } = useUserRole();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [currentView, setCurrentView] = useState('dashboard');
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
@@ -941,7 +942,6 @@ const Index = () => {
     </>
   );
 
-  const navigate = useNavigate();
 
   // Handle navigation for specific views
   useEffect(() => {
