@@ -202,7 +202,10 @@ export default function ServiceDashboard() {
           table: 'service_requests'
         },
         () => {
-          fetchData(); // Refresh data on any change
+          // Debounce the refresh to prevent multiple rapid updates
+          setTimeout(() => {
+            fetchData();
+          }, 500);
         }
       )
       .subscribe();
@@ -282,6 +285,11 @@ export default function ServiceDashboard() {
         description: "กรุณากรอกชื่อลูกค้า, เบอร์โทร, ประเภทอุปกรณ์ และอาการเสีย",
         variant: "destructive"
       });
+      return;
+    }
+
+    // Prevent duplicate submissions
+    if (isLoading) {
       return;
     }
 
@@ -1016,7 +1024,7 @@ export default function ServiceDashboard() {
                                           {technicians
                                             .filter(tech => tech.is_available)
                                             .map(tech => (
-                                              <SelectItem key={tech.id} value={tech.id}>
+                                              <SelectItem key={`${tech.id}-${tech.name}-${tech.email}`} value={tech.id}>
                                                 <div className="flex items-center justify-between w-full">
                                                   <span>{tech.name}</span>
                                                   <div className="flex items-center gap-2 ml-2">
