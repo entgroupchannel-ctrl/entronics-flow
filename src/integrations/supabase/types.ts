@@ -1239,6 +1239,184 @@ export type Database = {
           },
         ]
       }
+      receipt_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          discount_amount: number
+          discount_type: string
+          id: string
+          is_software: boolean
+          line_total: number
+          product_id: string | null
+          product_name: string
+          product_sku: string | null
+          quantity: number
+          receipt_id: string | null
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          discount_amount?: number
+          discount_type?: string
+          id?: string
+          is_software?: boolean
+          line_total?: number
+          product_id?: string | null
+          product_name: string
+          product_sku?: string | null
+          quantity?: number
+          receipt_id?: string | null
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          discount_amount?: number
+          discount_type?: string
+          id?: string
+          is_software?: boolean
+          line_total?: number
+          product_id?: string | null
+          product_name?: string
+          product_sku?: string | null
+          quantity?: number
+          receipt_id?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipt_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_items_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "receipts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receipts: {
+        Row: {
+          amount_change: number
+          amount_paid: number
+          bank_account: string | null
+          bank_name: string | null
+          created_at: string
+          created_by: string | null
+          customer_address: string | null
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          discount_amount: number
+          discount_percentage: number
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          payment_method: string
+          payment_reference: string | null
+          payment_status: string
+          receipt_date: string
+          receipt_number: string
+          subtotal: number
+          tax_invoice_id: string | null
+          terms_conditions: string | null
+          total_amount: number
+          updated_at: string
+          vat_amount: number
+          withholding_tax_amount: number
+        }
+        Insert: {
+          amount_change?: number
+          amount_paid?: number
+          bank_account?: string | null
+          bank_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          discount_amount?: number
+          discount_percentage?: number
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          payment_method?: string
+          payment_reference?: string | null
+          payment_status?: string
+          receipt_date?: string
+          receipt_number: string
+          subtotal?: number
+          tax_invoice_id?: string | null
+          terms_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          vat_amount?: number
+          withholding_tax_amount?: number
+        }
+        Update: {
+          amount_change?: number
+          amount_paid?: number
+          bank_account?: string | null
+          bank_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          discount_amount?: number
+          discount_percentage?: number
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          payment_method?: string
+          payment_reference?: string | null
+          payment_status?: string
+          receipt_date?: string
+          receipt_number?: string
+          subtotal?: number
+          tax_invoice_id?: string | null
+          terms_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          vat_amount?: number
+          withholding_tax_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_tax_invoice_id_fkey"
+            columns: ["tax_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "tax_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       repair_orders: {
         Row: {
           actual_completion_date: string | null
@@ -2018,6 +2196,10 @@ export type Database = {
         Returns: string
       }
       generate_quotation_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_receipt_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
