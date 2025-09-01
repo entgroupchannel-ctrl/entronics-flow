@@ -292,6 +292,36 @@ export default function ServiceDashboard() {
     }
   };
 
+  const autoAssignTechnician = async (requestId: string) => {
+    try {
+      const { data, error } = await supabase
+        .rpc('auto_assign_technician', { request_id: requestId });
+
+      if (error) throw error;
+
+      if (data) {
+        toast({
+          title: "มอบหมายงานสำเร็จ",
+          description: "มอบหมายงานให้ช่างเทคนิคอัตโนมัติแล้ว",
+        });
+        fetchData();
+      } else {
+        toast({
+          title: "ไม่สามารถมอบหมายงานได้",
+          description: "ไม่มีช่างเทคนิคที่ว่างในขณะนี้",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('Error auto-assigning technician:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถมอบหมายงานอัตโนมัติได้",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredRequests = serviceRequests.filter(request => {
     const matchesSearch = 
       request.ticket_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -541,18 +571,53 @@ export default function ServiceDashboard() {
                           
                           {canManageInventory() && (
                             <div className="flex gap-2 pt-4 border-t">
-                              <Select onValueChange={(value) => updateRequestStatus(request.id, value)}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="อัพเดทสถานะ" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="assigned">มอบหมายช่าง</SelectItem>
-                                  <SelectItem value="in_progress">เริ่มซ่อม</SelectItem>
-                                  <SelectItem value="waiting_parts">รออะไหล่</SelectItem>
-                                  <SelectItem value="completed">เสร็จสิ้น</SelectItem>
-                                  <SelectItem value="cancelled">ยกเลิก</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              {!request.assigned_technician_id ? (
+                                <div className="flex gap-2 w-full">
+                                  <Select onValueChange={(techId) => updateRequestStatus(request.id, 'assigned', techId)}>
+                                    <SelectTrigger className="flex-1">
+                                      <SelectValue placeholder="เลือกช่างเทคนิค" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {technicians
+                                        .filter(tech => tech.is_available)
+                                        .map(tech => (
+                                          <SelectItem key={tech.id} value={tech.id}>
+                                            <div className="flex items-center justify-between w-full">
+                                              <span>{tech.name}</span>
+                                              <div className="flex items-center gap-2 ml-2">
+                                                <Badge variant="outline" className="text-xs">
+                                                  {tech.specialization}
+                                                </Badge>
+                                                <span className="text-xs text-muted-foreground">
+                                                  งาน: {tech.current_workload}
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => autoAssignTechnician(request.id)}
+                                  >
+                                    มอบหมายอัตโนมัติ
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Select onValueChange={(value) => updateRequestStatus(request.id, value)}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="อัพเดทสถานะ" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="in_progress">เริ่มซ่อม</SelectItem>
+                                    <SelectItem value="waiting_parts">รออะไหล่</SelectItem>
+                                    <SelectItem value="completed">เสร็จสิ้น</SelectItem>
+                                    <SelectItem value="cancelled">ยกเลิก</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              )}
                             </div>
                           )}
                         </div>
