@@ -382,7 +382,7 @@ const Index = () => {
           <p className="text-muted-foreground">ภาพรวมระบบ / ENTGROUP Overview</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => window.location.href = '/service-request'}>
+          <Button onClick={() => window.open('/service-request', '_blank')}>
             แจ้งซ่อมใหม่
           </Button>
           <Button variant="outline" onClick={() => setCurrentView('service')}>
@@ -606,7 +606,7 @@ const Index = () => {
               <Button 
                 className="w-full justify-start" 
                 variant="outline"
-                onClick={() => window.location.href = '/service-request'}
+                onClick={() => window.open('/service-request', '_blank')}
               >
                 <ClipboardList className="mr-2 h-4 w-4" />
                 แจ้งซ่อมใหม่
@@ -654,7 +654,7 @@ const Index = () => {
     <>
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Service Dashboard</h1>
-        <Button onClick={() => window.location.href = '/service-request'}>
+        <Button onClick={() => window.open('/service-request', '_blank')}>
           แจ้งซ่อมใหม่
         </Button>
       </div>

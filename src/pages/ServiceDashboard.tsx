@@ -276,7 +276,7 @@ export default function ServiceDashboard() {
     <div className="min-h-screen bg-background p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Service Dashboard</h1>
-        <Button onClick={() => window.location.href = '/service-request'}>
+        <Button onClick={() => window.open('/service-request', '_blank')}>
           แจ้งซ่อมใหม่
         </Button>
       </div>
