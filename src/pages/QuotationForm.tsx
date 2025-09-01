@@ -879,36 +879,50 @@ export default function QuotationForm() {
                           variant="outline"
                           role="combobox"
                           aria-expanded={customerSearchOpen}
-                          className="w-full justify-between mt-1 border-gray-300"
+                          className="w-full justify-between mt-1 border-gray-300 bg-background"
+                          onClick={() => {
+                            console.log('Customer dropdown clicked');
+                            setCustomerSearchOpen(!customerSearchOpen);
+                          }}
                         >
-                          {selectedCustomer ? selectedCustomer.name : "เลือกลูกค้า"}
+                          {selectedCustomer ? selectedCustomer.name : "เลือกลูกค้า..."}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-full p-0 bg-background border shadow-lg z-[100]">
-                        <Command>
+                      <PopoverContent className="w-[400px] p-0 bg-background border shadow-lg z-[1000]" align="start">
+                        <Command className="bg-background">
                           <CommandInput 
-                            placeholder="ค้นหาลูกค้า..." 
+                            placeholder="พิมพ์เพื่อค้นหาลูกค้า..." 
                             value={customerSearchValue}
-                            onValueChange={setCustomerSearchValue}
+                            onValueChange={(value) => {
+                              console.log('Search value:', value);
+                              setCustomerSearchValue(value);
+                            }}
+                            className="bg-background"
                           />
-                          <CommandEmpty>ไม่พบลูกค้า</CommandEmpty>
-                          <CommandGroup>
-                            <CommandList className="max-h-64 overflow-y-auto">
+                          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+                            ไม่พบลูกค้าที่ค้นหา
+                          </CommandEmpty>
+                          <CommandGroup className="bg-background">
+                            <CommandList className="max-h-64 overflow-y-auto bg-background">
                               {customers
-                                .filter(customer =>
-                                  customer.name.toLowerCase().includes(customerSearchValue.toLowerCase()) ||
-                                  (customer.tax_id && customer.tax_id.includes(customerSearchValue))
-                                )
+                                .filter(customer => {
+                                  const searchLower = customerSearchValue.toLowerCase();
+                                  return customer.name.toLowerCase().includes(searchLower) ||
+                                         (customer.tax_id && customer.tax_id.includes(searchLower)) ||
+                                         (customer.phone && customer.phone.includes(searchLower));
+                                })
                                 .map((customer) => (
                                   <CommandItem
                                     key={customer.id}
-                                    value={customer.id}
+                                    value={customer.name}
                                     onSelect={() => {
+                                      console.log('Selected customer:', customer.name);
                                       selectCustomer(customer.id);
                                       setCustomerSearchOpen(false);
                                       setCustomerSearchValue("");
                                     }}
+                                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground bg-background"
                                   >
                                     <Check
                                       className={cn(
@@ -917,10 +931,15 @@ export default function QuotationForm() {
                                       )}
                                     />
                                     <div className="flex flex-col">
-                                      <span>{customer.name}</span>
+                                      <span className="font-medium">{customer.name}</span>
                                       {customer.tax_id && (
                                         <span className="text-xs text-muted-foreground">
                                           เลขประจำตัวผู้เสียภาษี: {customer.tax_id}
+                                        </span>
+                                      )}
+                                      {customer.phone && (
+                                        <span className="text-xs text-muted-foreground">
+                                          โทร: {customer.phone}
                                         </span>
                                       )}
                                     </div>
