@@ -714,23 +714,23 @@ export default function ReceiptForm() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>ยอดรวมก่อนภาษี:</span>
-                    <span>฿{formData.subtotal.toFixed(2)}</span>
+                    <span>฿{(formData.subtotal || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>ส่วนลด:</span>
-                    <span>฿{formData.discount_amount.toFixed(2)}</span>
+                    <span>฿{(formData.discount_amount || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>ภาษีมูลค่าเพิ่ม (7%):</span>
-                    <span>฿{formData.vat_amount.toFixed(2)}</span>
+                    <span>฿{(formData.vat_amount || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>หัก ณ ที่จ่าย:</span>
-                    <span>฿{formData.withholding_tax_amount.toFixed(2)}</span>
+                    <span>฿{(formData.withholding_tax_amount || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold border-t pt-2">
                     <span>ยอดรวมสุทธิ:</span>
-                    <span>฿{formData.total_amount.toFixed(2)}</span>
+                    <span>฿{(formData.total_amount || 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
