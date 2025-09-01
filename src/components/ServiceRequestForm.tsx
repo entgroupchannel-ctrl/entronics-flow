@@ -96,19 +96,12 @@ export function ServiceRequestForm({
       // For now, use hardcoded data to prevent loading issues
       // TODO: Replace with database queries once stable
       const hardcodedTypes = [
-        { id: '1', name: 'Industrial Panel PC' },
-        { id: '2', name: 'Industrial PC' },
-        { id: '3', name: 'Mini PC' },
-        { id: '4', name: 'Rugged Tablet' },
-        { id: '5', name: 'Water Proof PC' },
-        { id: '6', name: 'Touch Monitor' },
-        { id: '7', name: 'สมาร์ทโฟน' },
-        { id: '8', name: 'แท็บเล็ต' },
-        { id: '9', name: 'แล็ปท็อป' },
-        { id: '10', name: 'คอมพิวเตอร์' },
-        { id: '11', name: 'เครื่องปริ้นท์' },
-        { id: '12', name: 'กล้อง' },
-        { id: '13', name: 'อื่นๆ' }
+        { id: '1', name: 'สมาร์ทโฟน' },
+        { id: '2', name: 'แท็บเล็ต' },
+        { id: '3', name: 'แล็ปท็อป' },
+        { id: '4', name: 'คอมพิวเตอร์' },
+        { id: '5', name: 'เครื่องปรินท์' },
+        { id: '6', name: 'กล้อง' }
       ];
 
       const hardcodedBrands = [
