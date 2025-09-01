@@ -468,13 +468,13 @@ export default function QuotationForm() {
                 <div className="space-y-3 flex flex-col items-end">
                   <div className="w-full max-w-xs">
                     <div className="flex items-center justify-end gap-2 mb-1">
-                      <Edit className="w-4 h-4 text-blue-500" />
+                      <Edit className="w-4 h-4 text-gray-500" />
                       <Label className="text-sm font-medium text-right">เลขที่เอกสาร</Label>
                     </div>
                     <Input 
                       value={quotation.quotation_number} 
                       onChange={(e) => setQuotation(prev => ({ ...prev, quotation_number: e.target.value }))}
-                      className="text-right text-lg font-bold text-blue-600 border-gray-300"
+                      className="text-right text-2xl font-bold border-gray-300"
                       placeholder="QT202400001"
                     />
                   </div>
@@ -545,6 +545,24 @@ export default function QuotationForm() {
                         />
                       </PopoverContent>
                     </Popover>
+                  </div>
+                  <div className="w-full max-w-xs">
+                    <Label className="text-sm font-medium block text-right mb-1">สถานะเอกสาร</Label>
+                    <Select 
+                      value={quotation.status} 
+                      onValueChange={(value) => setQuotation(prev => ({ ...prev, status: value }))}
+                    >
+                      <SelectTrigger className="border-gray-300">
+                        <SelectValue placeholder="เลือกสถานะ" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">ร่าง</SelectItem>
+                        <SelectItem value="pending">รอการอนุมัติ</SelectItem>
+                        <SelectItem value="approved">อนุมัติแล้ว</SelectItem>
+                        <SelectItem value="rejected">ถูกปฏิเสธ</SelectItem>
+                        <SelectItem value="expired">หมดอายุ</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
