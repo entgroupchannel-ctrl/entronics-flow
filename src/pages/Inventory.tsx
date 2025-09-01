@@ -27,6 +27,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
+import * as XLSX from 'xlsx';
 
 interface Product {
   id: string;
@@ -291,6 +292,103 @@ const Inventory = () => {
         return <Badge variant="destructive">หมดสต๊อค</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const downloadTemplate = () => {
+    try {
+      // Create sample data for template
+      const templateData = [
+        {
+          'SKU*': 'ADV-PPC-3150',
+          'ชื่อสินค้า*': 'Advantech PPC-3150 15 inch Panel PC',
+          'หมวดหมู่': 'Computers',
+          'ยี่ห้อ': 'TechBrand',
+          'ราคาขาย (บาท)': 45000,
+          'จำนวนสต๊อค': 12
+        },
+        {
+          'SKU*': 'TBR-TAB-101',
+          'ชื่อสินค้า*': 'TechBrand Rugged Tablet 10.1 inch',
+          'หมวดหมู่': 'Tablets',
+          'ยี่ห้อ': 'TechBrand',
+          'ราคาขาย (บาท)': 25000,
+          'จำนวนสต๊อค': 8
+        },
+        {
+          'SKU*': 'DPR-MON-24',
+          'ชื่อสินค้า*': 'DisplayPro 24 inch Industrial Monitor',
+          'หมวดหมู่': 'Monitors',
+          'ยี่ห้อ': 'DisplayPro',
+          'ราคาขาย (บาท)': 18000,
+          'จำนวนสต๊อค': 15
+        }
+      ];
+
+      // Create instructions sheet
+      const instructions = [
+        ['คำแนะนำการใช้งาน Template การนำเข้าสินค้า'],
+        [''],
+        ['คอลัมน์ที่จำเป็น (มีเครื่องหมาย * ต้องกรอก):'],
+        ['- SKU*: รหัสสินค้า (ห้ามซ้ำ)'],
+        ['- ชื่อสินค้า*: ชื่อเต็มของสินค้า'],
+        [''],
+        ['คอลัมน์เพิ่มเติม:'],
+        ['- หมวดหมู่: ' + categories.join(', ')],
+        ['- ยี่ห้อ: ' + brands.join(', ')],
+        ['- ราคาขาย (บาท): ตัวเลขเท่านั้น'],
+        ['- จำนวนสต๊อค: ตัวเลขเท่านั้น'],
+        [''],
+        ['หมายเหตุ:'],
+        ['- สถานะสินค้าจะถูกกำหนดอัตโนมัติ ตามจำนวนสต๊อค'],
+        ['- สต๊อค 0 = หมดสต๊อค, สต๊อค 1-5 = สต๊อคต่ำ, สต๊อค >5 = มีสต๊อค'],
+        ['- ลบแถวตัวอย่างออกก่อนนำเข้าข้อมูลจริง']
+      ];
+
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+      
+      // Add instructions sheet
+      const wsInstructions = XLSX.utils.aoa_to_sheet(instructions);
+      XLSX.utils.book_append_sheet(wb, wsInstructions, 'คำแนะนำ');
+
+      // Add template sheet
+      const wsTemplate = XLSX.utils.json_to_sheet(templateData);
+      XLSX.utils.book_append_sheet(wb, wsTemplate, 'Template สินค้า');
+
+      // Set column widths for template sheet
+      const colWidths = [
+        { wch: 15 }, // SKU
+        { wch: 40 }, // ชื่อสินค้า
+        { wch: 15 }, // หมวดหมู่
+        { wch: 15 }, // ยี่ห้อ
+        { wch: 18 }, // ราคาขาย
+        { wch: 15 }  // จำนวนสต๊อค
+      ];
+      wsTemplate['!cols'] = colWidths;
+
+      // Set column widths for instructions sheet
+      wsInstructions['!cols'] = [{ wch: 60 }];
+
+      // Generate filename with current date
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0];
+      const filename = `Product_Import_Template_${dateStr}.xlsx`;
+
+      // Save file
+      XLSX.writeFile(wb, filename);
+
+      toast({
+        title: "ดาวน์โหลดสำเร็จ",
+        description: `ดาวน์โหลด ${filename} เรียบร้อยแล้ว`
+      });
+    } catch (error) {
+      console.error('Error generating template:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถสร้าง Template ได้",
+        variant: "destructive"
+      });
     }
   };
 
@@ -787,8 +885,9 @@ const Inventory = () => {
                       <p className="text-muted-foreground mb-4">
                         ดาวน์โหลด Excel template สำหรับนำเข้าสินค้า
                       </p>
-                      <Button variant="outline">
-                        ดาวน์โหลด
+                      <Button variant="outline" onClick={downloadTemplate}>
+                        <Download className="h-4 w-4 mr-2" />
+                        ดาวน์โหลด Template
                       </Button>
                     </CardContent>
                   </Card>
