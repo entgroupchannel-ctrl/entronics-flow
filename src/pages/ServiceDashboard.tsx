@@ -734,21 +734,32 @@ export default function ServiceDashboard() {
                         {getPriorityBadge(request.priority)}
                         {getSourceBadge(request.source)}
                       </div>
-                      
-                      {/* Time information */}
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          <span>เปิดเคส: {formatDateTime(request.created_at)}</span>
-                        </div>
-                        {request.acknowledged_at && (
-                          <div className="flex items-center gap-1 text-green-600">
-                            <CheckCircle2 className="h-4 w-4" />
-                            <span>รับทราบ: {formatDateTime(request.acknowledged_at)}</span>
-                          </div>
-                        )}
-                      </div>
                     </div>
+                    
+                    {/* Time information - moved to top right and made prominent */}
+                    <div className="text-right space-y-1">
+                      <div className="flex items-center gap-2 justify-end">
+                        <Clock className="h-5 w-5 text-blue-600" />
+                        <div className="text-right">
+                          <div className="text-xs text-muted-foreground">เวลาเปิดเคส</div>
+                          <div className="font-semibold text-lg text-blue-600">
+                            {formatDateTime(request.created_at)}
+                          </div>
+                        </div>
+                      </div>
+                      {request.acknowledged_at && (
+                        <div className="flex items-center gap-2 justify-end mt-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <div className="text-right">
+                            <div className="text-xs text-muted-foreground">เวลารับทราบ</div>
+                            <div className="font-medium text-sm text-green-600">
+                              {formatDateTime(request.acknowledged_at)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="outline" size="sm">
