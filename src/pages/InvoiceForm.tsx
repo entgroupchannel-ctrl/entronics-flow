@@ -639,11 +639,20 @@ export default function InvoiceForm() {
                       <TableCell>
                         <div className="flex gap-2">
                           <Input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={item.discount_amount}
-                            onChange={(e) => updateItem(item.id, 'discount_amount', parseFloat(e.target.value) || 0)}
+                            type="text"
+                            value={item.discount_amount === 0 ? '' : item.discount_amount.toString()}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                updateItem(item.id, 'discount_amount', value === '' ? 0 : parseFloat(value) || 0);
+                              }
+                            }}
+                            onFocus={(e) => {
+                              if (e.target.value === '0') {
+                                e.target.select();
+                              }
+                            }}
+                            placeholder="0"
                             className="w-20 text-right"
                           />
                           <Select
