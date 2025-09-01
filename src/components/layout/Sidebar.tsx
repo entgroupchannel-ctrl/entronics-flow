@@ -7,6 +7,7 @@ import {
   Package, 
   ShoppingCart, 
   Wrench, 
+  Truck,
   DollarSign,
   Settings,
   Building2,
@@ -51,6 +52,13 @@ const menuItems = [
     href: "/service-dashboard",
     view: "service",
     iconColor: "text-orange-500"
+  },
+  {
+    title: "ระบบจัดส่งสินค้า / Delivery",
+    icon: Truck,
+    href: "/delivery",
+    view: "delivery",
+    iconColor: "text-blue-600"
   },
   {
     title: "รายชื่อลูกค้า / Customers",

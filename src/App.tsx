@@ -20,6 +20,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ServiceRequest from "./pages/ServiceRequest";
 import ServiceDashboard from "./pages/ServiceDashboard";
+import Delivery from "./pages/Delivery";
 import SalesDocuments from "./pages/SalesDocuments";
 
 const queryClient = new QueryClient();
@@ -67,6 +68,11 @@ const App = () => (
             <Route path="/service-dashboard" element={
               <ProtectedRoute>
                 <ServiceDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/delivery" element={
+              <ProtectedRoute>
+                <Delivery />
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
