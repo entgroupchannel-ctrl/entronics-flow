@@ -433,12 +433,12 @@ export default function TaxInvoiceForm() {
           .update({
             tax_invoice_number: taxInvoice.tax_invoice_number,
             tax_invoice_date: taxInvoice.tax_invoice_date,
-            due_date: taxInvoice.due_date,
-            customer_id: taxInvoice.customer_id,
+            due_date: taxInvoice.due_date || null,
+            customer_id: taxInvoice.customer_id || null,
             customer_name: taxInvoice.customer_name,
-            customer_email: taxInvoice.customer_email,
-            customer_phone: taxInvoice.customer_phone,
-            customer_address: taxInvoice.customer_address,
+            customer_email: taxInvoice.customer_email || null,
+            customer_phone: taxInvoice.customer_phone || null,
+            customer_address: taxInvoice.customer_address || null,
             subtotal: itemSubtotal,
             discount_amount: taxInvoice.discount_amount,
             discount_percentage: taxInvoice.discount_percentage,
@@ -446,12 +446,12 @@ export default function TaxInvoiceForm() {
             withholding_tax_amount: taxInvoice.withholding_tax_amount,
             total_amount: totalAmount,
             status: taxInvoice.status,
-            notes: taxInvoice.notes,
-            terms_conditions: taxInvoice.terms_conditions,
-            payment_terms: taxInvoice.payment_terms,
-            project_name: taxInvoice.project_name,
-            po_number: taxInvoice.po_number,
-            invoice_id: taxInvoice.invoice_id
+            notes: taxInvoice.notes || null,
+            terms_conditions: taxInvoice.terms_conditions || null,
+            payment_terms: taxInvoice.payment_terms || null,
+            project_name: taxInvoice.project_name || null,
+            po_number: taxInvoice.po_number || null,
+            invoice_id: taxInvoice.invoice_id || null
           })
           .eq('id', id);
 
@@ -469,10 +469,10 @@ export default function TaxInvoiceForm() {
         if (items.length > 0) {
           const itemsToSave = items.map(item => ({
             tax_invoice_id: id,
-            product_id: item.product_id,
+            product_id: item.product_id || null,
             product_name: item.product_name,
-            product_sku: item.product_sku,
-            description: item.description,
+            product_sku: item.product_sku || null,
+            description: item.description || null,
             quantity: item.quantity,
             unit_price: item.unit_price,
             discount_amount: item.discount_amount,
@@ -500,12 +500,12 @@ export default function TaxInvoiceForm() {
           .insert({
             tax_invoice_number: taxInvoice.tax_invoice_number,
             tax_invoice_date: taxInvoice.tax_invoice_date,
-            due_date: taxInvoice.due_date,
-            customer_id: taxInvoice.customer_id,
+            due_date: taxInvoice.due_date || null,
+            customer_id: taxInvoice.customer_id || null,
             customer_name: taxInvoice.customer_name,
-            customer_email: taxInvoice.customer_email,
-            customer_phone: taxInvoice.customer_phone,
-            customer_address: taxInvoice.customer_address,
+            customer_email: taxInvoice.customer_email || null,
+            customer_phone: taxInvoice.customer_phone || null,
+            customer_address: taxInvoice.customer_address || null,
             subtotal: itemSubtotal,
             discount_amount: taxInvoice.discount_amount,
             discount_percentage: taxInvoice.discount_percentage,
@@ -513,12 +513,12 @@ export default function TaxInvoiceForm() {
             withholding_tax_amount: taxInvoice.withholding_tax_amount,
             total_amount: totalAmount,
             status: 'draft',
-            notes: taxInvoice.notes,
-            terms_conditions: taxInvoice.terms_conditions,
-            payment_terms: taxInvoice.payment_terms,
-            project_name: taxInvoice.project_name,
-            po_number: taxInvoice.po_number,
-            invoice_id: taxInvoice.invoice_id,
+            notes: taxInvoice.notes || null,
+            terms_conditions: taxInvoice.terms_conditions || null,
+            payment_terms: taxInvoice.payment_terms || null,
+            project_name: taxInvoice.project_name || null,
+            po_number: taxInvoice.po_number || null,
+            invoice_id: taxInvoice.invoice_id || null,
             created_by: user?.id
           })
           .select()
@@ -529,10 +529,10 @@ export default function TaxInvoiceForm() {
         if (items.length > 0) {
           const itemsToSave = items.map(item => ({
             tax_invoice_id: savedTaxInvoice.id,
-            product_id: item.product_id,
+            product_id: item.product_id || null,
             product_name: item.product_name,
-            product_sku: item.product_sku,
-            description: item.description,
+            product_sku: item.product_sku || null,
+            description: item.description || null,
             quantity: item.quantity,
             unit_price: item.unit_price,
             discount_amount: item.discount_amount,
