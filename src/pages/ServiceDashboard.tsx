@@ -86,6 +86,8 @@ export default function ServiceDashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
   
+  console.log('ServiceDashboard: Component rendered with user:', user?.id);
+  
   const [currentView, setCurrentView] = useState('service-dashboard');
   const [isCompanyInfoOpen, setIsCompanyInfoOpen] = useState(false);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
@@ -121,22 +123,34 @@ export default function ServiceDashboard() {
   });
 
   useEffect(() => {
-    fetchData();
-    setupRealtimeSubscription();
-  }, []);
+    console.log('ServiceDashboard: useEffect triggered, user:', user);
+    if (user) {
+      fetchData();
+      setupRealtimeSubscription();
+    } else {
+      console.log('ServiceDashboard: No user found, not fetching data');
+    }
+  }, [user]);
 
   const fetchData = async () => {
     if (loading) return; // Prevent multiple simultaneous fetches
     try {
+      console.log('ServiceDashboard: Starting to fetch data...');
+      
       // Check if current user is a technician
       const { data: techData, error: techError } = await supabase
         .from('technicians')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to avoid error when no data
+
+      console.log('ServiceDashboard: Technician data:', { techData, techError });
 
       if (techData && !techError) {
         setCurrentTechnician(techData);
+        console.log('ServiceDashboard: User is a technician:', techData.name);
+      } else {
+        console.log('ServiceDashboard: User is not a technician or error occurred');
       }
 
       // Fetch service requests with technician info (use left join to include requests without technicians)
@@ -156,25 +170,35 @@ export default function ServiceDashboard() {
         requestsQuery = requestsQuery.or(`assigned_technician_id.eq.${techData.id},assigned_technician_id.is.null`);
       }
 
+      console.log('ServiceDashboard: Fetching service requests...');
       const { data: requests, error: requestsError } = await requestsQuery
         .order('created_at', { ascending: false });
 
-      if (requestsError) throw requestsError;
+      if (requestsError) {
+        console.error('ServiceDashboard: Error fetching service requests:', requestsError);
+        throw requestsError;
+      }
+
+      console.log('ServiceDashboard: Service requests fetched:', requests?.length || 0);
 
       // Fetch unique technicians only - Use DISTINCT to prevent duplicates at database level
+      console.log('ServiceDashboard: Fetching technicians...');
       const { data: allTechnicians, error: allTechError } = await supabase
         .from('technicians')
         .select('id, name, phone, email, specialization, is_available, current_workload, rating, total_jobs')
         .eq('is_available', true)
         .order('name');
 
+      if (allTechError) {
+        console.error('ServiceDashboard: Error fetching technicians:', allTechError);
+        throw allTechError;
+      }
+
       // Additional filtering to ensure absolute uniqueness by name+email combination
       const uniqueTechnicians = allTechnicians?.filter((tech, index, arr) => {
         const firstIndex = arr.findIndex(t => t.name === tech.name && t.email === tech.email);
         return firstIndex === index; // Keep only the first occurrence
       }) || [];
-
-      if (allTechError) throw allTechError;
 
       // Process and clean service requests data
       const processedRequests = (requests || []).map(req => ({
@@ -183,20 +207,23 @@ export default function ServiceDashboard() {
       }));
 
       // Log for debugging duplicate issues
-      console.log('Unique technicians count:', uniqueTechnicians.length);
-      console.log('Service requests count:', processedRequests.length);
+      console.log('ServiceDashboard: Unique technicians count:', uniqueTechnicians.length);
+      console.log('ServiceDashboard: Service requests count:', processedRequests.length);
       
       setServiceRequests(processedRequests);
       setTechnicians(uniqueTechnicians);
+      
+      console.log('ServiceDashboard: Data fetching completed successfully');
     } catch (error: any) {
-      console.error('Error fetching data:', error);
+      console.error('ServiceDashboard: Error fetching data:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโหลดข้อมูลได้",
+        description: `ไม่สามารถโหลดข้อมูลได้: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
+      console.log('ServiceDashboard: Loading set to false');
     }
   };
 
@@ -681,7 +708,24 @@ export default function ServiceDashboard() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">กำลังโหลด...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">กำลังโหลดข้อมูล...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-gray-600">กรุณาเข้าสู่ระบบก่อนใช้งาน</p>
+        </div>
+      </div>
+    );
   }
 
   return (
