@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +41,8 @@ export default function TaxInvoices() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedTaxInvoiceToDelete, setSelectedTaxInvoiceToDelete] = useState<{id: string, number: string} | null>(null);
 
   useEffect(() => {
     loadTaxInvoices();
@@ -116,6 +119,52 @@ export default function TaxInvoices() {
   const handleBulkAction = (action: string) => {
     console.log(`Bulk action: ${action} for items:`, selectedItems);
     // Implement bulk actions here
+  };
+
+  const openDeleteDialog = (taxInvoiceId: string, taxInvoiceNumber: string) => {
+    setSelectedTaxInvoiceToDelete({ id: taxInvoiceId, number: taxInvoiceNumber });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedTaxInvoiceToDelete) return;
+
+    try {
+      // ลบ tax invoice items ก่อน
+      const { error: itemsError } = await supabase
+        .from('tax_invoice_items')
+        .delete()
+        .eq('tax_invoice_id', selectedTaxInvoiceToDelete.id);
+
+      if (itemsError) throw itemsError;
+
+      // ลบ tax invoice
+      const { error: taxInvoiceError } = await supabase
+        .from('tax_invoices' as any)
+        .delete()
+        .eq('id', selectedTaxInvoiceToDelete.id);
+
+      if (taxInvoiceError) throw taxInvoiceError;
+
+      toast({
+        title: "ลบสำเร็จ",
+        description: `ลบใบส่งสินค้า/ใบกำกับภาษี ${selectedTaxInvoiceToDelete.number} เรียบร้อยแล้ว`,
+      });
+
+      // รีโหลดข้อมูล
+      loadTaxInvoices();
+
+    } catch (error: any) {
+      console.error('Error deleting tax invoice:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบใบส่งสินค้า/ใบกำกับภาษีได้",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedTaxInvoiceToDelete(null);
+    }
   };
 
   if (loading) {
@@ -321,28 +370,36 @@ export default function TaxInvoices() {
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate(`/tax-invoices/${taxInvoice.id}`)}>
-                              <FileText className="w-4 h-4 mr-2" />
-                              ดูรายละเอียด
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => navigate(`/tax-invoices/${taxInvoice.id}/edit`)}>
-                              <Edit className="w-4 h-4 mr-2" />
-                              แก้ไข
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Share2 className="w-4 h-4 mr-2" />
-                              แชร์
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Printer className="w-4 h-4 mr-2" />
-                              พิมพ์
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Download className="w-4 h-4 mr-2" />
-                              ดาวน์โหลด PDF
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
+                           <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                             <DropdownMenuItem onClick={() => navigate(`/tax-invoices/${taxInvoice.id}`)}>
+                               <FileText className="w-4 h-4 mr-2" />
+                               ดูรายละเอียด
+                             </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => navigate(`/tax-invoices/${taxInvoice.id}/edit`)}>
+                               <Edit className="w-4 h-4 mr-2" />
+                               แก้ไข
+                             </DropdownMenuItem>
+                             <DropdownMenuItem>
+                               <Share2 className="w-4 h-4 mr-2" />
+                               แชร์
+                             </DropdownMenuItem>
+                             <DropdownMenuItem>
+                               <Printer className="w-4 h-4 mr-2" />
+                               พิมพ์
+                             </DropdownMenuItem>
+                             <DropdownMenuItem>
+                               <Download className="w-4 h-4 mr-2" />
+                               ดาวน์โหลด PDF
+                             </DropdownMenuItem>
+                             <DropdownMenuSeparator />
+                             <DropdownMenuItem 
+                               onClick={() => openDeleteDialog(taxInvoice.id, taxInvoice.tax_invoice_number)}
+                               className="text-red-600 hover:bg-red-50 focus:bg-red-50"
+                             >
+                               <Trash2 className="w-4 h-4 mr-2" />
+                               ลบ
+                             </DropdownMenuItem>
+                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
@@ -383,9 +440,42 @@ export default function TaxInvoices() {
                 </Button>
               </div>
             </div>
-          )}
+            )}
+          </div>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                ยืนยันการลบใบส่งสินค้า/ใบกำกับภาษี
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
+                คุณต้องการลบใบส่งสินค้า/ใบกำกับภาษี{' '}
+                <span className="font-medium text-foreground">
+                  {selectedTaxInvoiceToDelete?.number}
+                </span>{' '}
+                ใช่หรือไม่?
+                <br />
+                <span className="text-sm text-destructive mt-2 block">
+                  ⚠️ การกระทำนี้ไม่สามารถยกเลิกได้ และข้อมูลจะถูกลบถาวร
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteConfirm}
+                className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                ลบข้อมูล
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-    </div>
-  );
-}
+    );
+  }
