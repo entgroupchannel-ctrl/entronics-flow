@@ -299,7 +299,18 @@ const Delivery = () => {
   };
 
   const handleCustomerSelect = async (customerId: string) => {
-    if (!customerId) return;
+    if (!customerId || customerId === "new") {
+      // Clear form if "new" is selected
+      setFormData(prev => ({
+        ...prev,
+        customer_id: "",
+        customer_name: "",
+        customer_phone: "",
+        customer_email: "",
+        delivery_address: ""
+      }));
+      return;
+    }
     
     const customer = customers.find(c => c.id === customerId);
     if (customer) {
@@ -354,7 +365,7 @@ const Delivery = () => {
                           <SelectValue placeholder="เลือกลูกค้าที่มีอยู่" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">ไม่เลือก (กรอกข้อมูลใหม่)</SelectItem>
+                          <SelectItem value="new">ไม่เลือก (กรอกข้อมูลใหม่)</SelectItem>
                           {customers.map((customer) => (
                             <SelectItem key={customer.id} value={customer.id}>
                               {customer.name}
