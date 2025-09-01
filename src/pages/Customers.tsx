@@ -61,21 +61,42 @@ export default function Customers() {
       console.log('🚀 Starting to fetch customers...');
       setLoading(true);
       
-      // ดึงข้อมูลทั้งหมดโดยไม่จำกัดจำนวน
-      const { data, error, count } = await supabase
-        .from('customers')
-        .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false });
+      // ดึงข้อมูลทั้งหมดโดยใช้ range() แทน limit()
+      let allCustomers: any[] = [];
+      let from = 0;
+      const batchSize = 1000;
+      let hasMoreData = true;
+
+      while (hasMoreData) {
+        const { data, error, count } = await supabase
+          .from('customers')
+          .select('*', { count: 'exact' })
+          .order('created_at', { ascending: false })
+          .range(from, from + batchSize - 1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          allCustomers = [...allCustomers, ...data];
+          from += batchSize;
+          hasMoreData = data.length === batchSize; // ถ้าได้ข้อมูลเต็ม batch แสดงว่าอาจมีข้อมูลเพิ่ม
+        } else {
+          hasMoreData = false;
+        }
+
+        // ป้องกันไม่ให้เกิด infinite loop
+        if (allCustomers.length > 100000) break;
+      }
+
+      console.log('📊 Final fetch results:');
+      console.log('- Total customers fetched:', allCustomers.length);
+      
+      const data = allCustomers;
+      const count = allCustomers.length;
 
       console.log('📊 Database response:');
       console.log('- Total count in DB:', count);
       console.log('- Fetched data length:', data?.length);
-      console.log('- Error:', error);
-
-      if (error) {
-        console.error('❌ Supabase error:', error);
-        throw error;
-      }
 
       if (data) {
         console.log('✅ Successfully fetched', data.length, 'customers');
