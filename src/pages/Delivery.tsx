@@ -25,7 +25,12 @@ import {
   Route,
   Plus,
   Edit,
-  Save
+  Save,
+  UserPlus,
+  Users,
+  Car,
+  Bike,
+  Building
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,7 +41,7 @@ interface DeliveryOrder {
   customer_name: string;
   customer_phone: string;
   delivery_address: string;
-  status: 'pending' | 'assigned' | 'in_transit' | 'delivered' | 'failed';
+  status: 'pending' | 'assigned' | 'in_transit' | 'delivered' | 'failed' | 'preparing';
   priority: 'normal' | 'urgent';
   delivery_date: string;
   driver_name?: string;
@@ -45,6 +50,11 @@ interface DeliveryOrder {
   total_weight: number;
   delivery_notes?: string;
   created_at: string;
+  assigned_staff_id?: string;
+  assignment_date?: string;
+  assignment_notes?: string;
+  courier_contact_name?: string;
+  courier_contact_phone?: string;
 }
 
 const Delivery = () => {
@@ -52,9 +62,12 @@ const Delivery = () => {
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<any>(null);
+  const [assigningOrder, setAssigningOrder] = useState<any>(null);
   const [deliveryMethods, setDeliveryMethods] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [staff, setStaff] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
   // Form state
@@ -170,6 +183,7 @@ const Delivery = () => {
     loadDeliveryMethods();
     loadCustomers();
     loadDeliveryOrders();
+    loadStaff();
   }, []);
 
   const loadDeliveryMethods = async () => {
@@ -232,6 +246,21 @@ const Delivery = () => {
       setDeliveryOrders(transformedData);
     } catch (error) {
       console.error('Error loading delivery orders:', error);
+    }
+  };
+
+  const loadStaff = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('staff')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (error) throw error;
+      setStaff(data || []);
+    } catch (error) {
+      console.error('Error loading staff:', error);
     }
   };
 
@@ -333,6 +362,56 @@ const Delivery = () => {
         customer_line_id: customer.line_id || "",
         delivery_address: customer.address || ""
       }));
+    }
+  };
+
+  const handleAssignDelivery = async (assignmentType: 'staff' | 'courier', assignmentData: any) => {
+    if (!assigningOrder) return;
+
+    setIsLoading(true);
+    try {
+      const updateData: any = {
+        status: 'assigned',
+        assignment_date: new Date().toISOString()
+      };
+
+      if (assignmentType === 'staff') {
+        updateData.assigned_staff_id = assignmentData.staffId;
+        updateData.assignment_notes = assignmentData.notes;
+      } else if (assignmentType === 'courier') {
+        updateData.courier_contact_name = assignmentData.contactName;
+        updateData.courier_contact_phone = assignmentData.contactPhone;
+        updateData.assignment_notes = assignmentData.notes;
+        updateData.tracking_number = assignmentData.trackingNumber;
+      }
+
+      const { error } = await supabase
+        .from('delivery_orders')
+        .update(updateData)
+        .eq('id', assigningOrder.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "มอบหมายงานสำเร็จ",
+        description: assignmentType === 'staff' 
+          ? `มอบหมายงานให้พนักงานแล้ว`
+          : `มอบหมายงานให้ Courier แล้ว`
+      });
+
+      // Reload data
+      loadDeliveryOrders();
+      loadStaff();
+      setIsAssignDialogOpen(false);
+      setAssigningOrder(null);
+    } catch (error: any) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: error.message || "ไม่สามารถมอบหมายงานได้",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -667,18 +746,52 @@ const Delivery = () => {
                 {filteredOrders.map((order) => (
                   <Card key={order.id} className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-lg">{order.order_number}</h3>
-                            {getStatusBadge(order.status)}
-                            {getPriorityBadge(order.priority)}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            สร้างเมื่อ: {new Date(order.created_at).toLocaleDateString('th-TH')}
-                          </p>
+                       <div className="flex justify-between items-start mb-4">
+                         <div className="space-y-1">
+                           <div className="flex items-center gap-2">
+                             <h3 className="font-semibold text-lg">{order.order_number}</h3>
+                             {getStatusBadge(order.status)}
+                             {getPriorityBadge(order.priority)}
+                           </div>
+                           <p className="text-sm text-muted-foreground">
+                             สร้างเมื่อ: {new Date(order.created_at).toLocaleDateString('th-TH')}
+                           </p>
+                           
+                           {/* Assignment Info */}
+                           {order.assigned_staff_id && (
+                             <div className="flex items-center gap-2 text-sm">
+                               <Users className="h-4 w-4 text-blue-500" />
+                               <span className="text-blue-600 font-medium">
+                                 มอบหมายให้พนักงานแล้ว
+                               </span>
+                             </div>
+                           )}
+                           {order.courier_contact_name && (
+                             <div className="flex items-center gap-2 text-sm">
+                               <Truck className="h-4 w-4 text-green-500" />
+                               <span className="text-green-600 font-medium">
+                                 Courier: {order.courier_contact_name}
+                               </span>
+                               {order.courier_contact_phone && (
+                                 <span className="text-muted-foreground">
+                                   ({order.courier_contact_phone})
+                                 </span>
+                               )}
+                             </div>
+                           )}
                          </div>
                          <div className="flex gap-2">
+                           <Button 
+                             variant="outline" 
+                             size="sm"
+                             onClick={() => {
+                               setAssigningOrder(order);
+                               setIsAssignDialogOpen(true);
+                             }}
+                           >
+                             <UserPlus className="h-4 w-4 mr-1" />
+                             มอบหมายงาน
+                           </Button>
                            <Button 
                              variant="outline" 
                              size="sm"
@@ -903,10 +1016,214 @@ const Delivery = () => {
               )}
             </DialogContent>
           </Dialog>
+
+          {/* Assignment Dialog */}
+          <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>มอบหมายการจัดส่ง</DialogTitle>
+              </DialogHeader>
+              {assigningOrder && <AssignmentForm />}
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     </div>
   );
+
+  // Assignment Form Component
+  function AssignmentForm() {
+    const [assignmentType, setAssignmentType] = useState<'staff' | 'courier'>('staff');
+    const [selectedStaff, setSelectedStaff] = useState('');
+    const [courierData, setCourierData] = useState({
+      contactName: '',
+      contactPhone: '',
+      trackingNumber: ''
+    });
+    const [notes, setNotes] = useState('');
+
+    const handleSubmit = () => {
+      if (assignmentType === 'staff') {
+        if (!selectedStaff) {
+          toast({
+            title: "กรุณาเลือกพนักงาน",
+            variant: "destructive"
+          });
+          return;
+        }
+        handleAssignDelivery('staff', {
+          staffId: selectedStaff,
+          notes
+        });
+      } else {
+        if (!courierData.contactName || !courierData.contactPhone) {
+          toast({
+            title: "กรุณากรอกข้อมูล Courier",
+            description: "กรุณากรอกชื่อผู้ติดต่อและเบอร์โทร",
+            variant: "destructive"
+          });
+          return;
+        }
+        handleAssignDelivery('courier', {
+          ...courierData,
+          notes
+        });
+      }
+    };
+
+    const getAvailableStaff = () => staff.filter(s => s.is_available && s.current_workload < s.max_workload);
+    const getStaffWorkloadDisplay = (staffMember: any) => `${staffMember.current_workload}/${staffMember.max_workload}`;
+    const getVehicleIcon = (vehicleType: string) => {
+      if (vehicleType?.includes('รถจักรยานยนต์')) return Bike;
+      if (vehicleType?.includes('รถยนต์') || vehicleType?.includes('รถกระบะ')) return Car;
+      return Building;
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            ใบจัดส่ง: <span className="font-medium">{assigningOrder?.order_number}</span>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            ลูกค้า: <span className="font-medium">{assigningOrder?.customer_name}</span>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            ที่อยู่: <span className="font-medium">{assigningOrder?.delivery_address}</span>
+          </p>
+        </div>
+
+        {/* Assignment Type Selection */}
+        <div className="space-y-3">
+          <Label>เลือกประเภทการมอบหมาย</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              variant={assignmentType === 'staff' ? "default" : "outline"}
+              onClick={() => setAssignmentType('staff')}
+              className="h-20 flex-col space-y-2"
+            >
+              <Users className="h-6 w-6" />
+              <span>พนักงานบริษัท</span>
+            </Button>
+            <Button
+              variant={assignmentType === 'courier' ? "default" : "outline"}
+              onClick={() => setAssignmentType('courier')}
+              className="h-20 flex-col space-y-2"
+            >
+              <Truck className="h-6 w-6" />
+              <span>Courier Service</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Staff Assignment */}
+        {assignmentType === 'staff' && (
+          <div className="space-y-4">
+            <Label>เลือกพนักงาน</Label>
+            <div className="grid gap-3">
+              {getAvailableStaff().length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  ไม่มีพนักงานที่ว่างในขณะนี้
+                </p>
+              ) : (
+                getAvailableStaff().map((staffMember) => {
+                  const VehicleIcon = getVehicleIcon(staffMember.vehicle_type);
+                  return (
+                    <Card 
+                      key={staffMember.id} 
+                      className={`cursor-pointer transition-colors ${
+                        selectedStaff === staffMember.id ? 'border-primary bg-primary/5' : ''
+                      }`}
+                      onClick={() => setSelectedStaff(staffMember.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <VehicleIcon className="h-5 w-5 text-muted-foreground" />
+                            <div>
+                              <p className="font-medium">{staffMember.name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {staffMember.staff_code} | {staffMember.vehicle_type} {staffMember.vehicle_plate}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium">
+                              งาน: {getStaffWorkloadDisplay(staffMember)}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              ⭐ {staffMember.rating || 0}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Courier Assignment */}
+        {assignmentType === 'courier' && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="courier-contact">ชื่อผู้ติดต่อ *</Label>
+                <Input
+                  id="courier-contact"
+                  value={courierData.contactName}
+                  onChange={(e) => setCourierData(prev => ({...prev, contactName: e.target.value}))}
+                  placeholder="ชื่อคนขับ/ผู้ติดต่อ"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="courier-phone">เบอร์โทร *</Label>
+                <Input
+                  id="courier-phone"
+                  value={courierData.contactPhone}
+                  onChange={(e) => setCourierData(prev => ({...prev, contactPhone: e.target.value}))}
+                  placeholder="0xx-xxx-xxxx"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tracking-number">Tracking Number</Label>
+              <Input
+                id="tracking-number"
+                value={courierData.trackingNumber}
+                onChange={(e) => setCourierData(prev => ({...prev, trackingNumber: e.target.value}))}
+                placeholder="หมายเลขติดตาม (ถ้ามี)"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Notes */}
+        <div className="space-y-2">
+          <Label htmlFor="assignment-notes">หมายเหตุการมอบหมาย</Label>
+          <Textarea
+            id="assignment-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="หมายเหตุเพิ่มเติม..."
+            rows={3}
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-2 pt-4">
+          <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
+            ยกเลิก
+          </Button>
+          <Button onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? "กำลังมอบหมาย..." : "มอบหมายงาน"}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default Delivery;
