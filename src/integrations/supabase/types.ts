@@ -1472,7 +1472,19 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      generate_claim_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_delivery_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_quotation_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_repair_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
