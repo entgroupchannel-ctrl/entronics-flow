@@ -71,12 +71,16 @@ export default function Invoices() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'paid':
-        return <Badge variant="default" className="bg-green-100 text-green-800">ชำระแล้ว</Badge>;
-      case 'pending':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">รอชำระ</Badge>;
-      case 'overdue':
-        return <Badge variant="destructive">เลยกำหนด</Badge>;
+      case 'รอวางบิล':
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">รอวางบิล</Badge>;
+      case 'วางบิลแล้ว':
+        return <Badge variant="secondary" className="bg-purple-100 text-purple-800">วางบิลแล้ว</Badge>;
+      case 'เปิดบิลแล้ว':
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">เปิดบิลแล้ว</Badge>;
+      case 'สร้างใบส่งสินค้า/ใบกำกับภาษี':
+        return <Badge variant="default" className="bg-green-100 text-green-800">สร้างใบส่งสินค้า/ใบกำกับภาษี</Badge>;
+      case 'ยกเลิก':
+        return <Badge variant="destructive">ยกเลิก</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -143,22 +147,22 @@ export default function Invoices() {
               
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">รอชำระ</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">รอวางบิล</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">
-                    {invoices.filter(inv => inv.status === 'pending').length}
+                  <div className="text-2xl font-bold text-blue-600">
+                    {invoices.filter(inv => inv.status === 'รอวางบิล').length}
                   </div>
                 </CardContent>
               </Card>
               
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">ชำระแล้ว</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">เปิดบิลแล้ว</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">
-                    {invoices.filter(inv => inv.status === 'paid').length}
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {invoices.filter(inv => inv.status === 'เปิดบิลแล้ว').length}
                   </div>
                 </CardContent>
               </Card>
@@ -196,9 +200,11 @@ export default function Invoices() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">ทั้งหมด</SelectItem>
-                        <SelectItem value="pending">รอชำระ</SelectItem>
-                        <SelectItem value="paid">ชำระแล้ว</SelectItem>
-                        <SelectItem value="overdue">เลยกำหนด</SelectItem>
+                        <SelectItem value="รอวางบิล">รอวางบิล</SelectItem>
+                        <SelectItem value="วางบิลแล้ว">วางบิลแล้ว</SelectItem>
+                        <SelectItem value="เปิดบิลแล้ว">เปิดบิลแล้ว</SelectItem>
+                        <SelectItem value="สร้างใบส่งสินค้า/ใบกำกับภาษี">สร้างใบส่งสินค้า/ใบกำกับภาษี</SelectItem>
+                        <SelectItem value="ยกเลิก">ยกเลิก</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

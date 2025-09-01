@@ -339,7 +339,7 @@ export default function InvoiceForm() {
           vat_amount: invoice.vat_amount,
           withholding_tax_amount: invoice.withholding_tax_amount,
           total_amount: invoice.total_amount,
-          status: 'draft',
+          status: 'รอวางบิล',
           notes: invoice.notes || null,
           terms_conditions: invoice.terms_conditions || null,
           payment_terms: invoice.payment_terms || '30 วัน',
@@ -604,7 +604,7 @@ export default function InvoiceForm() {
                         <SelectItem value="รอวางบิล">รอวางบิล</SelectItem>
                         <SelectItem value="วางบิลแล้ว">วางบิลแล้ว</SelectItem>
                         <SelectItem value="เปิดบิลแล้ว">เปิดบิลแล้ว</SelectItem>
-                        <SelectItem value="สร้างใบสั่งสินค้า/ใบกำกับภาษี">สร้างใบสั่งสินค้า/ใบกำกับภาษี</SelectItem>
+                        <SelectItem value="สร้างใบส่งสินค้า/ใบกำกับภาษี">สร้างใบส่งสินค้า/ใบกำกับภาษี</SelectItem>
                         <SelectItem value="ยกเลิก">ยกเลิก</SelectItem>
                       </SelectContent>
                     </Select>
