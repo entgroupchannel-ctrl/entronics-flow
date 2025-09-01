@@ -198,27 +198,61 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
 
   const createInvoiceFromQuotation = async (quotationId: string, type: 'standard' | 'downpayment' | 'split_payment') => {
     try {
-      // Get quotation details with items
+      console.log('Creating invoice from quotation:', quotationId, 'type:', type);
+      
+      // Get quotation details with items and customer information
       const { data: quotationData, error: quotationError } = await supabase
         .from('quotations')
         .select(`
           *,
-          quotation_items (*)
+          quotation_items (*),
+          customers (
+            id,
+            name,
+            address,
+            phone,
+            email,
+            tax_id
+          )
         `)
         .eq('id', quotationId)
         .single();
 
-      if (quotationError) throw quotationError;
+      if (quotationError) {
+        console.error('Error fetching quotation:', quotationError);
+        throw quotationError;
+      }
+
+      console.log('Quotation data:', quotationData);
+
+      // Prepare customer data - use customer relation first, then fallback to quotation fields
+      let customerData = {
+        customer_id: null,
+        customer_name: quotationData.customer_name,
+        customer_address: quotationData.customer_address || '',
+        customer_phone: quotationData.customer_phone || '',
+        customer_email: quotationData.customer_email || ''
+      };
+
+      // If we have customer relation, use that data
+      if (quotationData.customers) {
+        customerData = {
+          customer_id: quotationData.customers.id,
+          customer_name: quotationData.customers.name,
+          customer_address: quotationData.customers.address || quotationData.customer_address || '',
+          customer_phone: quotationData.customers.phone || quotationData.customer_phone || '',
+          customer_email: quotationData.customers.email || quotationData.customer_email || ''
+        };
+      }
+
+      console.log('Customer data for invoice:', customerData);
 
       // Store quotation data in sessionStorage for the invoice form
       const invoiceData = {
         from_quotation: true,
         quotation_id: quotationId,
         quotation_number: quotationData.quotation_number,
-        customer_name: quotationData.customer_name,
-        customer_address: quotationData.customer_address,
-        customer_phone: quotationData.customer_phone,
-        customer_email: quotationData.customer_email,
+        ...customerData,
         items: quotationData.quotation_items?.map((item: any) => ({
           id: `from-quotation-${item.id}`,
           product_name: item.product_name,
@@ -241,6 +275,8 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
         terms_conditions: quotationData.terms_conditions,
         invoice_type: type
       };
+
+      console.log('Invoice data to store:', invoiceData);
 
       sessionStorage.setItem('invoice_from_quotation', JSON.stringify(invoiceData));
       
