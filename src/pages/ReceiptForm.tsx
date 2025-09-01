@@ -102,6 +102,14 @@ export default function ReceiptForm() {
     const initializeData = async () => {
       await loadInitialData();
       
+      // Check for tax_invoice_id in query parameters
+      const urlParams = new URLSearchParams(location.search);
+      const taxInvoiceIdFromUrl = urlParams.get('tax_invoice_id');
+      
+      if (taxInvoiceIdFromUrl) {
+        await loadTaxInvoiceData(taxInvoiceIdFromUrl);
+      }
+      
       // Load from location state if coming from tax invoice
       if (location.state) {
         const { taxInvoiceId, customerName, totalAmount, taxInvoiceNumber, taxInvoiceDate, dueDate } = location.state;
@@ -136,7 +144,7 @@ export default function ReceiptForm() {
     };
 
     initializeData();
-  }, [id, location.state]);
+  }, [id, location.search, location.state]);
 
   const checkCanIssueReceipt = async (taxInvoiceId: string): Promise<boolean> => {
     try {
@@ -153,6 +161,79 @@ export default function ReceiptForm() {
     } catch (error) {
       console.error('Error checking receipt eligibility:', error);
       return false;
+    }
+  };
+
+  const loadTaxInvoiceData = async (taxInvoiceId: string) => {
+    try {
+      // Fetch complete tax invoice data with items
+      const { data: taxInvoice, error } = await supabase
+        .from('tax_invoices')
+        .select(`
+          *,
+          tax_invoice_items (*),
+          customers (*)
+        `)
+        .eq('id', taxInvoiceId)
+        .single();
+
+      if (error) {
+        console.error('Error loading tax invoice:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถโหลดข้อมูลใบส่งสินค้า/ใบกำกับภาษีได้",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (taxInvoice) {
+        // Check if this tax invoice can issue receipt
+        const canIssueReceipt = await checkCanIssueReceipt(taxInvoiceId);
+        
+        // Populate form data with tax invoice data
+        setFormData(prev => ({
+          ...prev,
+          tax_invoice_id: taxInvoice.id,
+          customer_name: taxInvoice.customer_name || "",
+          customer_address: taxInvoice.customer_address || "",
+          customer_phone: taxInvoice.customer_phone || "",
+          customer_email: taxInvoice.customer_email || "",
+          subtotal: taxInvoice.subtotal || 0,
+          discount_amount: taxInvoice.discount_amount || 0,
+          discount_percentage: taxInvoice.discount_percentage || 0,
+          vat_amount: taxInvoice.vat_amount || 0,
+          withholding_tax_amount: taxInvoice.withholding_tax_amount || 0,
+          total_amount: taxInvoice.total_amount || 0,
+          amount_paid: taxInvoice.total_amount || 0, // Default to total amount
+          can_issue_receipt: canIssueReceipt
+        }));
+
+        // Pre-populate with single document entry for tax invoice
+        if (canIssueReceipt) {
+          setItems([{
+            document_number: taxInvoice.tax_invoice_number || "",
+            document_date: taxInvoice.tax_invoice_date || new Date().toISOString().split('T')[0],
+            due_date: taxInvoice.due_date || "",
+            subtotal_before_tax: taxInvoice.subtotal || 0,
+            payment_amount: taxInvoice.total_amount || 0,
+            sequence_number: 1,
+          }]);
+        } else {
+          toast({
+            title: "ไม่สามารถสร้างใบเสร็จได้",
+            description: "ใบส่งสินค้า/ใบกำกับภาษีนี้ยังไม่มีการชำระเงินที่ได้รับการยืนยันครบถ้วน",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading tax invoice data:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลใบส่งสินค้า/ใบกำกับภาษีได้",
+        variant: "destructive",
+      });
     }
   };
 
