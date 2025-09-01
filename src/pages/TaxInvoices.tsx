@@ -80,10 +80,22 @@ export default function TaxInvoices() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'ดำเนินการแล้ว':
-        return <Badge variant="default" className="bg-green-100 text-green-800">ดำเนินการแล้ว</Badge>;
+      case 'รอเก็บเงิน':
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">รอเก็บเงิน</Badge>;
+      case 'สร้างใบเสร็จรับเงิน':
+        return <Badge variant="default" className="bg-green-100 text-green-800">สร้างใบเสร็จรับเงิน</Badge>;
+      case 'สร้างใบวางบิลรวม':
+        return <Badge variant="secondary" className="bg-purple-100 text-purple-800">สร้างใบวางบิลรวม</Badge>;
+      case 'สร้างใบเสร็จรวม':
+        return <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">สร้างใบเสร็จรวม</Badge>;
+      case 'แบ่งรับชำระเงิน':
+        return <Badge variant="secondary" className="bg-orange-100 text-orange-800">แบ่งรับชำระเงิน</Badge>;
       case 'ยกเลิก':
         return <Badge variant="destructive">ยกเลิก</Badge>;
+      case 'รีเซ็ต':
+        return <Badge variant="outline" className="bg-gray-100 text-gray-800">รีเซ็ต</Badge>;
+      case 'ดำเนินการแล้ว':
+        return <Badge variant="default" className="bg-green-100 text-green-800">ดำเนินการแล้ว</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -209,22 +221,22 @@ export default function TaxInvoices() {
             
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">ดำเนินการแล้ว</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">รอเก็บเงิน</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {taxInvoices.filter(inv => inv.status === 'ดำเนินการแล้ว').length}
+                <div className="text-2xl font-bold text-blue-600">
+                  {taxInvoices.filter(inv => inv.status === 'รอเก็บเงิน').length}
                 </div>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">ยกเลิก</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">สร้างใบเสร็จรับเงิน</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600">
-                  {taxInvoices.filter(inv => inv.status === 'ยกเลิก').length}
+                <div className="text-2xl font-bold text-green-600">
+                  {taxInvoices.filter(inv => inv.status === 'สร้างใบเสร็จรับเงิน').length}
                 </div>
               </CardContent>
             </Card>
@@ -262,8 +274,14 @@ export default function TaxInvoices() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">ทั้งหมด</SelectItem>
+                      <SelectItem value="รอเก็บเงิน">รอเก็บเงิน</SelectItem>
+                      <SelectItem value="สร้างใบเสร็จรับเงิน">สร้างใบเสร็จรับเงิน</SelectItem>
+                      <SelectItem value="สร้างใบวางบิลรวม">สร้างใบวางบิลรวม</SelectItem>
+                      <SelectItem value="สร้างใบเสร็จรวม">สร้างใบเสร็จรวม</SelectItem>
+                      <SelectItem value="แบ่งรับชำระเงิน">แบ่งรับชำระเงิน</SelectItem>
                       <SelectItem value="ดำเนินการแล้ว">ดำเนินการแล้ว</SelectItem>
                       <SelectItem value="ยกเลิก">ยกเลิก</SelectItem>
+                      <SelectItem value="รีเซ็ต">รีเซ็ต</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
