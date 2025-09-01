@@ -112,7 +112,12 @@ export default function ServiceDashboard() {
     device_brand: "",
     device_model: "",
     problem_description: "",
-    priority: "medium"
+    priority: "medium",
+    service_type: "send_in",
+    needs_onsite_service: false,
+    estimated_cost: "",
+    warranty_status: "unknown",
+    urgency_reason: ""
   });
 
   useEffect(() => {
@@ -338,7 +343,14 @@ export default function ServiceDashboard() {
           priority: formData.priority as 'low' | 'medium' | 'high' | 'urgent',
           status: 'pending',
           source: (currentTechnician ? 'technician' : 'staff') as 'staff' | 'technician' | 'customer',
-          created_by: user?.id
+          created_by: user?.id,
+          estimated_cost: formData.estimated_cost ? parseFloat(formData.estimated_cost) : null,
+          internal_notes: JSON.stringify({
+            service_type: formData.service_type,
+            warranty_status: formData.warranty_status,
+            urgency_reason: formData.urgency_reason || null,
+            needs_onsite_service: formData.service_type === 'onsite'
+          })
         })
         .select()
         .single();
@@ -360,7 +372,12 @@ export default function ServiceDashboard() {
         device_brand: "",
         device_model: "",
         problem_description: "",
-        priority: "medium"
+        priority: "medium",
+        service_type: "send_in",
+        needs_onsite_service: false,
+        estimated_cost: "",
+        warranty_status: "unknown",
+        urgency_reason: ""
       });
       setIsCreateDialogOpen(false);
       
