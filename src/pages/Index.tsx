@@ -946,6 +946,14 @@ const Index = () => {
         return renderDashboardView();
       case 'service':
         return renderServiceView();
+      case 'inventory':
+        return <div className="p-6">Inventory Management - Under Development</div>;
+      case 'customers':
+        return <div className="p-6">Customer Management - Under Development</div>;
+      case 'quotations':
+        return <div className="p-6">Quotations Management - Under Development</div>;
+      case 'settings':
+        return <div className="p-6">Settings - Under Development</div>;
       default:
         return renderDashboardView();
     }

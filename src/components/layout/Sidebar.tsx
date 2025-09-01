@@ -122,7 +122,14 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                     ? "bg-primary text-primary-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
-                onClick={() => window.location.href = '/inventory'}
+                onClick={() => {
+                  // Use React Router navigation instead of page reload
+                  if (onMenuClick) {
+                    onMenuClick('inventory');
+                  } else {
+                    window.location.href = '/inventory';
+                  }
+                }}
               >
                 <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}
@@ -141,7 +148,14 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                     ? "bg-primary text-primary-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
-                onClick={() => window.location.href = '/customers'}
+                onClick={() => {
+                  // Use React Router navigation instead of page reload  
+                  if (onMenuClick) {
+                    onMenuClick('customers');
+                  } else {
+                    window.location.href = '/customers';
+                  }
+                }}
               >
                 <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}
@@ -158,7 +172,14 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                   "w-full justify-start h-10 px-3",
                   "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
-                onClick={() => window.location.href = '/quotations'}
+                onClick={() => {
+                  // Use React Router navigation instead of page reload
+                  if (onMenuClick) {
+                    onMenuClick('quotations');
+                  } else {
+                    window.location.href = '/quotations';
+                  }
+                }}
               >
                 <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}
@@ -214,7 +235,14 @@ export function Sidebar({ className, onMenuClick, currentView }: SidebarProps) {
                   "w-full justify-start h-10 px-3",
                   "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
-                onClick={() => window.location.href = '/settings'}
+                onClick={() => {
+                  // Use React Router navigation instead of page reload
+                  if (onMenuClick) {
+                    onMenuClick('settings');
+                  } else {
+                    window.location.href = '/settings';
+                  }
+                }}
               >
                 <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
                 {item.title}
