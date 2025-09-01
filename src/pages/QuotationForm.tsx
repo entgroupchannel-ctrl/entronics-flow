@@ -573,11 +573,13 @@ export default function QuotationForm() {
                               ))}
                             </SelectContent>
                           </Select>
-                          <Input
-                            placeholder="รายละเอียดเพิ่มเติม"
+                          <Textarea
+                            placeholder="รายละเอียดเพิ่มเติม (สามารถกรอกได้สูงสุด 500 ตัวอักษร)"
                             value={item.description}
                             onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                            className="text-sm"
+                            className="text-sm min-h-[60px] resize-y"
+                            maxLength={500}
+                            rows={3}
                           />
                         </div>
                       </TableCell>
