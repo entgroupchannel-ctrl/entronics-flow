@@ -137,7 +137,7 @@ export default function ServiceDashboard() {
         .from('service_requests')
         .select(`
           *,
-          technicians (
+          technicians!inner (
             name,
             phone,
             specialization
@@ -154,11 +154,22 @@ export default function ServiceDashboard() {
 
       if (requestsError) throw requestsError;
 
-      // Fetch all technicians (for managers)
+      // Fetch unique technicians only (remove duplicates by name and email)
       const { data: allTechnicians, error: allTechError } = await supabase
         .from('technicians')
         .select('*')
         .order('name');
+
+      // Filter out duplicates based on name and email
+      const uniqueTechnicians = allTechnicians?.reduce((acc, current) => {
+        const isDuplicate = acc.find(tech => 
+          tech.name === current.name && tech.email === current.email
+        );
+        if (!isDuplicate) {
+          acc.push(current);
+        }
+        return acc;
+      }, [] as any[]) || [];
 
       if (allTechError) throw allTechError;
 
@@ -166,7 +177,7 @@ export default function ServiceDashboard() {
         ...req,
         source: req.source as 'staff' | 'technician' | 'customer'
       })));
-      setTechnicians(allTechnicians || []);
+      setTechnicians(uniqueTechnicians || []);
     } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
