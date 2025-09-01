@@ -827,114 +827,101 @@ const Delivery = () => {
                             </p>
                            
                             {/* Assignment Info */}
-                            {order.assigned_staff_id && order.driver_name && (
-                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 my-2">
-                                <div className="flex items-start gap-3">
-                                  <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full">
-                                    <Users className="h-5 w-5 text-blue-600" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className="text-lg">👨‍💼</span>
-                                      <span className="text-sm font-semibold text-blue-700">
-                                        มอบหมายแล้ว
-                                      </span>
-                                    </div>
-                                     <div className="space-y-1">
-                                       <div className="flex items-center gap-2">
-                                         <span className="text-sm font-medium text-gray-700">
-                                           พนักงาน:
-                                         </span>
-                                         <span className="text-sm text-blue-600 font-semibold">
-                                           {order.driver_name}
+                             {order.assigned_staff_id && order.driver_name && (
+                               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 my-2">
+                                 <div className="flex items-center gap-2 flex-wrap">
+                                   <div className="flex items-center gap-2">
+                                     <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
+                                       <Users className="h-4 w-4 text-blue-600" />
+                                     </div>
+                                     <span className="text-sm font-semibold text-blue-700">มอบหมายแล้ว</span>
+                                   </div>
+                                   <span className="text-gray-300">|</span>
+                                   <div className="flex items-center gap-1">
+                                     <span className="text-sm">👨‍💼</span>
+                                     <span className="text-sm font-medium text-blue-600">{order.driver_name}</span>
+                                   </div>
+                                   {order.staff_phone && (
+                                     <>
+                                       <span className="text-gray-300">|</span>
+                                       <div className="flex items-center gap-1">
+                                         <span className="text-sm">📞</span>
+                                         <span className="text-sm text-gray-600">{order.staff_phone}</span>
+                                       </div>
+                                     </>
+                                   )}
+                                   {order.vehicle_info && (
+                                     <>
+                                       <span className="text-gray-300">|</span>
+                                       <div className="flex items-center gap-1">
+                                         <span className="text-sm">🚗</span>
+                                         <span className="text-sm text-gray-600">{order.vehicle_info}</span>
+                                       </div>
+                                     </>
+                                   )}
+                                   {order.assignment_date && (
+                                     <>
+                                       <span className="text-gray-300">|</span>
+                                       <div className="flex items-center gap-1">
+                                         <span className="text-sm">📅</span>
+                                         <span className="text-sm text-gray-600">
+                                           {new Date(order.assignment_date).toLocaleDateString('th-TH', {
+                                             day: 'numeric',
+                                             month: 'short',
+                                             hour: '2-digit',
+                                             minute: '2-digit',
+                                             timeZone: 'Asia/Bangkok'
+                                           })}
                                          </span>
                                        </div>
-                                       {order.staff_phone && (
-                                         <div className="flex items-center gap-2">
-                                           <span className="text-sm text-gray-500">📞</span>
-                                           <span className="text-sm text-gray-600">
-                                             {order.staff_phone}
-                                           </span>
-                                         </div>
-                                       )}
-                                       {order.vehicle_info && (
-                                         <div className="flex items-center gap-2">
-                                           <span className="text-sm text-gray-500">🚗</span>
-                                           <span className="text-sm text-gray-600">
-                                             {order.vehicle_info}
-                                           </span>
-                                         </div>
-                                       )}
-                                       {order.assignment_date && (
-                                         <div className="flex items-center gap-2">
-                                           <span className="text-sm text-gray-500">📅</span>
-                                           <span className="text-sm text-gray-600">
-                                             มอบหมายเมื่อ: {new Date(order.assignment_date).toLocaleDateString('th-TH', {
-                                               year: 'numeric',
-                                               month: 'long',
-                                               day: 'numeric',
-                                               hour: '2-digit',
-                                               minute: '2-digit',
-                                               timeZone: 'Asia/Bangkok'
-                                             })}
-                                           </span>
-                                         </div>
-                                       )}
+                                     </>
+                                   )}
+                                 </div>
+                               </div>
+                             )}
+                             {order.courier_contact_name && (
+                               <div className="bg-green-50 border border-green-200 rounded-lg p-3 my-2">
+                                 <div className="flex items-center gap-2 flex-wrap">
+                                   <div className="flex items-center gap-2">
+                                     <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                                       <Truck className="h-4 w-4 text-green-600" />
                                      </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            {order.courier_contact_name && (
-                              <div className="bg-green-50 border border-green-200 rounded-lg p-3 my-2">
-                                <div className="flex items-start gap-3">
-                                  <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full">
-                                    <Truck className="h-5 w-5 text-green-600" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className="text-lg">🚚</span>
-                                      <span className="text-sm font-semibold text-green-700">
-                                        Courier Service
-                                      </span>
-                                    </div>
-                                     <div className="space-y-1">
-                                       <div className="flex items-center gap-2">
-                                         <span className="text-sm font-medium text-gray-700">
-                                           ผู้ติดต่อ:
-                                         </span>
-                                         <span className="text-sm text-green-600 font-semibold">
-                                           {order.courier_contact_name}
+                                     <span className="text-sm font-semibold text-green-700">Courier Service</span>
+                                   </div>
+                                   <span className="text-gray-300">|</span>
+                                   <div className="flex items-center gap-1">
+                                     <span className="text-sm">👨‍💼</span>
+                                     <span className="text-sm font-medium text-green-600">{order.courier_contact_name}</span>
+                                   </div>
+                                   {order.courier_contact_phone && (
+                                     <>
+                                       <span className="text-gray-300">|</span>
+                                       <div className="flex items-center gap-1">
+                                         <span className="text-sm">📞</span>
+                                         <span className="text-sm text-gray-600">{order.courier_contact_phone}</span>
+                                       </div>
+                                     </>
+                                   )}
+                                   {order.assignment_date && (
+                                     <>
+                                       <span className="text-gray-300">|</span>
+                                       <div className="flex items-center gap-1">
+                                         <span className="text-sm">📅</span>
+                                         <span className="text-sm text-gray-600">
+                                           {new Date(order.assignment_date).toLocaleDateString('th-TH', {
+                                             day: 'numeric',
+                                             month: 'short',
+                                             hour: '2-digit',
+                                             minute: '2-digit',
+                                             timeZone: 'Asia/Bangkok'
+                                           })}
                                          </span>
                                        </div>
-                                       {order.courier_contact_phone && (
-                                         <div className="flex items-center gap-2">
-                                           <span className="text-sm text-gray-500">📞</span>
-                                           <span className="text-sm text-gray-600">
-                                             {order.courier_contact_phone}
-                                           </span>
-                                         </div>
-                                       )}
-                                       {order.assignment_date && (
-                                         <div className="flex items-center gap-2">
-                                           <span className="text-sm text-gray-500">📅</span>
-                                           <span className="text-sm text-gray-600">
-                                             มอบหมายเมื่อ: {new Date(order.assignment_date).toLocaleDateString('th-TH', {
-                                               year: 'numeric',
-                                               month: 'long',
-                                               day: 'numeric',
-                                               hour: '2-digit',
-                                               minute: '2-digit',
-                                               timeZone: 'Asia/Bangkok'
-                                             })}
-                                           </span>
-                                         </div>
-                                       )}
-                                     </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
+                                     </>
+                                   )}
+                                 </div>
+                               </div>
+                             )}
                          </div>
                          <div className="flex gap-2">
                            <Button 
