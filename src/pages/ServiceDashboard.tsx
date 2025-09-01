@@ -763,42 +763,109 @@ export default function ServiceDashboard() {
                           </DialogTitle>
                         </DialogHeader>
                         <div className="space-y-6">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4" />
-                                <span className="font-medium">{request.customer_name}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Phone className="h-4 w-4" />
-                                <span>{request.customer_phone}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Mail className="h-4 w-4" />
-                                <span>{request.customer_email}</span>
-                              </div>
-                              <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                                <MapPin className="h-4 w-4 mt-0.5" />
-                                <span>{request.customer_address}</span>
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <div>
-                                <span className="font-medium">อุปกรณ์: </span>
-                                <span>{request.device_type} {request.device_brand} {request.device_model}</span>
-                              </div>
-                              <div>
-                                <span className="font-medium">ปัญหา: </span>
-                                <p className="text-sm mt-1">{request.problem_description}</p>
-                              </div>
-                              {request.technicians && (
-                                <div>
-                                  <span className="font-medium">ช่างที่รับผิดชอบ: </span>
-                                  <span>{request.technicians.name}</span>
+                          {/* Customer Information Card */}
+                          <Card className="bg-white border border-gray-200">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <User className="h-5 w-5" />
+                                ข้อมูลลูกค้า
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded border">
+                                    <User className="h-4 w-4 text-gray-500" />
+                                    <span className="font-medium text-sm text-gray-700">ชื่อ:</span>
+                                    <span className="text-sm">{request.customer_name}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded border">
+                                    <Phone className="h-4 w-4 text-gray-500" />
+                                    <span className="font-medium text-sm text-gray-700">โทร:</span>
+                                    <span className="text-sm">{request.customer_phone}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded border">
+                                    <Mail className="h-4 w-4 text-gray-500" />
+                                    <span className="font-medium text-sm text-gray-700">อีเมล:</span>
+                                    <span className="text-sm">{request.customer_email}</span>
+                                  </div>
                                 </div>
-                              )}
-                            </div>
-                          </div>
+                                <div className="space-y-2">
+                                  <div className="flex items-start gap-2 p-2 bg-gray-50 rounded border">
+                                    <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                                    <div>
+                                      <span className="font-medium text-sm text-gray-700">ที่อยู่:</span>
+                                      <p className="text-sm mt-1">{request.customer_address}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Device Information Card */}
+                          <Card className="bg-white border border-gray-200">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <Wrench className="h-5 w-5" />
+                                ข้อมูลอุปกรณ์
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <div className="p-2 bg-gray-50 rounded border">
+                                    <span className="font-medium text-sm text-gray-700">ประเภทอุปกรณ์:</span>
+                                    <p className="text-sm mt-1">{request.device_type}</p>
+                                  </div>
+                                  <div className="p-2 bg-gray-50 rounded border">
+                                    <span className="font-medium text-sm text-gray-700">ยี่ห้อ:</span>
+                                    <p className="text-sm mt-1">{request.device_brand || 'ไม่ระบุ'}</p>
+                                  </div>
+                                  <div className="p-2 bg-gray-50 rounded border">
+                                    <span className="font-medium text-sm text-gray-700">รุ่น:</span>
+                                    <p className="text-sm mt-1">{request.device_model || 'ไม่ระบุ'}</p>
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="p-2 bg-gray-50 rounded border">
+                                    <span className="font-medium text-sm text-gray-700">อาการเสีย:</span>
+                                    <p className="text-sm mt-1">{request.problem_description}</p>
+                                  </div>
+                                  {request.technicians && (
+                                    <div className="p-2 bg-blue-50 rounded border border-blue-200">
+                                      <span className="font-medium text-sm text-blue-700">ช่างที่รับผิดชอบ:</span>
+                                      <p className="text-sm mt-1 text-blue-600">{request.technicians.name}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Time Information Card */}
+                          <Card className="bg-white border border-gray-200">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <Clock className="h-5 w-5" />
+                                ข้อมูลเวลา
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="p-2 bg-gray-50 rounded border">
+                                  <span className="font-medium text-sm text-gray-700">เวลาเปิดเคส:</span>
+                                  <p className="text-sm mt-1">{formatDateTime(request.created_at)}</p>
+                                </div>
+                                {request.acknowledged_at && (
+                                  <div className="p-2 bg-green-50 rounded border border-green-200">
+                                    <span className="font-medium text-sm text-green-700">เวลารับทราบ:</span>
+                                    <p className="text-sm mt-1 text-green-600">{formatDateTime(request.acknowledged_at)}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
                            
                            {canManageInventory() && (
                              <div className="flex gap-2 pt-4 border-t">
