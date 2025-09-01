@@ -9,8 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, MoreHorizontal, Clock, Printer, Share, Download } from 'lucide-react';
+import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, MoreHorizontal, Clock, Printer, Share, Download, Check, ChevronsUpDown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
@@ -61,6 +62,8 @@ export default function InvoiceForm() {
   const [items, setItems] = useState<InvoiceItem[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [includeVat, setIncludeVat] = useState(true);
+  const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
+  const [customerSearchValue, setCustomerSearchValue] = useState("");
   const { toast } = useToast();
 
   const [invoice, setInvoice] = useState({
@@ -517,18 +520,83 @@ export default function InvoiceForm() {
                 <div className="space-y-3">
                   <div>
                     <Label className="text-sm font-medium">ชื่อลูกค้า</Label>
-                    <Select value={invoice.customer_id} onValueChange={selectCustomer}>
-                      <SelectTrigger className="mt-1 border-gray-300">
-                        <SelectValue placeholder="เลือกลูกค้า" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {customers.map(customer => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Popover open={customerSearchOpen} onOpenChange={setCustomerSearchOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={customerSearchOpen}
+                          className="w-full justify-between mt-1 border-gray-300 bg-background"
+                          onClick={() => {
+                            console.log('Customer dropdown clicked');
+                            setCustomerSearchOpen(!customerSearchOpen);
+                          }}
+                        >
+                          {selectedCustomer ? selectedCustomer.name : "เลือกลูกค้า..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[400px] p-0 bg-background border shadow-lg z-[1000]" align="start">
+                        <Command className="bg-background">
+                          <CommandInput 
+                            placeholder="พิมพ์เพื่อค้นหาลูกค้า..." 
+                            value={customerSearchValue}
+                            onValueChange={(value) => {
+                              console.log('Search value:', value);
+                              setCustomerSearchValue(value);
+                            }}
+                            className="bg-background"
+                          />
+                          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+                            ไม่พบลูกค้าที่ค้นหา
+                          </CommandEmpty>
+                          <CommandGroup className="bg-background">
+                            <CommandList className="max-h-64 overflow-y-auto bg-background">
+                              {customers
+                                .filter(customer => {
+                                  const searchLower = customerSearchValue.toLowerCase();
+                                  return customer.name.toLowerCase().includes(searchLower) ||
+                                         (customer.tax_id && customer.tax_id.includes(searchLower)) ||
+                                         (customer.phone && customer.phone.includes(searchLower));
+                                })
+                                .map((customer) => (
+                                  <CommandItem
+                                    key={customer.id}
+                                    value={customer.name}
+                                    onSelect={() => {
+                                      console.log('Selected customer:', customer.name);
+                                      selectCustomer(customer.id);
+                                      setCustomerSearchOpen(false);
+                                      setCustomerSearchValue("");
+                                    }}
+                                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground bg-background"
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedCustomer?.id === customer.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    <div className="flex flex-col">
+                                      <span className="font-medium">{customer.name}</span>
+                                      {customer.tax_id && (
+                                        <span className="text-xs text-muted-foreground">
+                                          เลขประจำตัวผู้เสียภาษี: {customer.tax_id}
+                                        </span>
+                                      )}
+                                      {customer.phone && (
+                                        <span className="text-xs text-muted-foreground">
+                                          โทร: {customer.phone}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </CommandItem>
+                                ))}
+                            </CommandList>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     
                     {selectedCustomer && (
                       <div className="mt-2 p-2 bg-muted rounded-md">
