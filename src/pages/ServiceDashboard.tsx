@@ -862,105 +862,125 @@ export default function ServiceDashboard() {
                                     <span className="font-medium text-sm text-gray-700">อาการเสีย:</span>
                                     <p className="text-sm mt-1 text-red-600 font-medium">{request.problem_description}</p>
                                   </div>
-                                 </div>
+                                </div>
                               </div>
+                              
+                              {/* Status Update Section */}
+                              {canManageInventory() && (
+                                <div className="mt-4 pt-3 border-t border-gray-200">
+                                  <h4 className="font-medium text-sm text-gray-700 mb-3">แจ้งสถานะงาน</h4>
+                                  {!request.assigned_technician_id ? (
+                                    <div className="flex gap-2 w-full">
+                                      <Select onValueChange={(techId) => updateRequestStatus(request.id, 'assigned', techId)}>
+                                        <SelectTrigger className="flex-1">
+                                          <SelectValue placeholder="เลือกช่างเทคนิค" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {technicians
+                                            .filter(tech => tech.is_available)
+                                            .map(tech => (
+                                              <SelectItem key={tech.id} value={tech.id}>
+                                                <div className="flex items-center justify-between w-full">
+                                                  <span>{tech.name}</span>
+                                                  <div className="flex items-center gap-2 ml-2">
+                                                    <Badge variant="outline" className="text-xs">
+                                                      {tech.specialization}
+                                                    </Badge>
+                                                    <span className="text-xs text-muted-foreground">
+                                                      งาน: {tech.current_workload}
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                              </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        onClick={() => autoAssignTechnician(request.id)}
+                                      >
+                                        มอบหมายอัตโนมัติ
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-wrap gap-2 w-full">
+                                      {request.status !== 'in_progress' && (
+                                        <Button 
+                                          size="sm" 
+                                          onClick={() => updateRequestStatus(request.id, 'in_progress')}
+                                          className="bg-blue-600 hover:bg-blue-700"
+                                        >
+                                          เริ่มซ่อม
+                                        </Button>
+                                      )}
+                                      {request.status !== 'waiting_parts' && (
+                                        <Button 
+                                          size="sm" 
+                                          onClick={() => updateRequestStatus(request.id, 'waiting_parts')}
+                                          variant="outline"
+                                          className="border-orange-500 text-orange-600 hover:bg-orange-50"
+                                        >
+                                          รออะไหล่
+                                        </Button>
+                                      )}
+                                      {request.status !== 'completed' && (
+                                        <Button 
+                                          size="sm" 
+                                          onClick={() => updateRequestStatus(request.id, 'completed')}
+                                          className="bg-green-600 hover:bg-green-700"
+                                        >
+                                          เสร็จสิ้น
+                                        </Button>
+                                      )}
+                                      {request.status !== 'cancelled' && (
+                                        <Button 
+                                          size="sm" 
+                                          onClick={() => updateRequestStatus(request.id, 'cancelled')}
+                                          variant="destructive"
+                                        >
+                                          ยกเลิก
+                                        </Button>
+                                      )}
+                                      {request.status === 'completed' && (
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline"
+                                          onClick={() => {
+                                            setSelectedRequestForItem(request.id);
+                                            setShowAddItemDialog(true);
+                                          }}
+                                        >
+                                          <Package className="h-4 w-4 mr-1" />
+                                          เพิ่มเข้าคลัง
+                                        </Button>
+                                      )}
+                                    </div>
+                                  )}
+                                  
+                                  {/* Manager Actions for Approval */}
+                                  {request.status === 'waiting_approval' && (
+                                    <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
+                                      <Button 
+                                        size="sm" 
+                                        onClick={() => approveJob(request.id, false)}
+                                        variant="outline"
+                                      >
+                                        ส่งกลับแก้ไข
+                                      </Button>
+                                      <Button 
+                                        size="sm" 
+                                        onClick={() => approveJob(request.id, true)}
+                                      >
+                                        อนุมัติงาน
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
 
-                           
-                           {canManageInventory() && (
-                             <div className="flex gap-2 pt-4 border-t">
-                               {!request.assigned_technician_id ? (
-                                 <div className="flex gap-2 w-full">
-                                   <Select onValueChange={(techId) => updateRequestStatus(request.id, 'assigned', techId)}>
-                                     <SelectTrigger className="flex-1">
-                                       <SelectValue placeholder="เลือกช่างเทคนิค" />
-                                     </SelectTrigger>
-                                     <SelectContent>
-                                       {technicians
-                                         .filter(tech => tech.is_available)
-                                         .map(tech => (
-                                           <SelectItem key={tech.id} value={tech.id}>
-                                             <div className="flex items-center justify-between w-full">
-                                               <span>{tech.name}</span>
-                                               <div className="flex items-center gap-2 ml-2">
-                                                 <Badge variant="outline" className="text-xs">
-                                                   {tech.specialization}
-                                                 </Badge>
-                                                 <span className="text-xs text-muted-foreground">
-                                                   งาน: {tech.current_workload}
-                                                 </span>
-                                               </div>
-                                             </div>
-                                           </SelectItem>
-                                         ))}
-                                     </SelectContent>
-                                   </Select>
-                                   <Button 
-                                     size="sm" 
-                                     variant="outline"
-                                     onClick={() => autoAssignTechnician(request.id)}
-                                   >
-                                     มอบหมายอัตโนมัติ
-                                   </Button>
-                                 </div>
-                               ) : (
-                                  <div className="flex flex-wrap gap-2 w-full">
-                                    {request.status !== 'in_progress' && (
-                                      <Button 
-                                        size="sm" 
-                                        onClick={() => updateRequestStatus(request.id, 'in_progress')}
-                                        className="bg-blue-600 hover:bg-blue-700"
-                                      >
-                                        เริ่มซ่อม
-                                      </Button>
-                                    )}
-                                    {request.status !== 'waiting_parts' && (
-                                      <Button 
-                                        size="sm" 
-                                        onClick={() => updateRequestStatus(request.id, 'waiting_parts')}
-                                        variant="outline"
-                                        className="border-orange-500 text-orange-600 hover:bg-orange-50"
-                                      >
-                                        รออะไหล่
-                                      </Button>
-                                    )}
-                                    {request.status !== 'completed' && (
-                                      <Button 
-                                        size="sm" 
-                                        onClick={() => updateRequestStatus(request.id, 'completed')}
-                                        className="bg-green-600 hover:bg-green-700"
-                                      >
-                                        เสร็จสิ้น
-                                      </Button>
-                                    )}
-                                    {request.status !== 'cancelled' && (
-                                      <Button 
-                                        size="sm" 
-                                        onClick={() => updateRequestStatus(request.id, 'cancelled')}
-                                        variant="destructive"
-                                      >
-                                        ยกเลิก
-                                      </Button>
-                                    )}
-                                   {request.status === 'completed' && (
-                                     <Button 
-                                       size="sm" 
-                                       variant="outline"
-                                       onClick={() => {
-                                         setSelectedRequestForItem(request.id);
-                                         setShowAddItemDialog(true);
-                                       }}
-                                     >
-                                       <Package className="h-4 w-4 mr-1" />
-                                       เพิ่มเข้าคลัง
-                                     </Button>
-                                   )}
-                                 </div>
-                               )}
-                             </div>
-                           )}
-                           
                            {/* Technician Actions */}
                            {currentTechnician && request.assigned_technician_id === currentTechnician.id && (
                              <div className="flex gap-2 pt-4 border-t">
@@ -1010,25 +1030,6 @@ export default function ServiceDashboard() {
                                    ซ่อมต่อ
                                  </Button>
                                )}
-                             </div>
-                           )}
-                           
-                           {/* Manager Actions for Approval */}
-                           {canManageInventory() && request.status === 'waiting_approval' && (
-                             <div className="flex gap-2 pt-4 border-t">
-                               <Button 
-                                 size="sm" 
-                                 onClick={() => approveJob(request.id, false)}
-                                 variant="outline"
-                               >
-                                 ส่งกลับแก้ไข
-                               </Button>
-                               <Button 
-                                 size="sm" 
-                                 onClick={() => approveJob(request.id, true)}
-                               >
-                                 อนุมัติงาน
-                               </Button>
                              </div>
                            )}
                         </div>
