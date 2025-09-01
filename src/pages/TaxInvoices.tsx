@@ -22,7 +22,12 @@ interface TaxInvoice {
   total_amount: number;
   status: string;
   due_date?: string;
+  invoice_id?: string;
   tax_invoice_items?: any[];
+  invoice?: {
+    id: string;
+    invoice_number: string;
+  };
 }
 
 export default function TaxInvoices() {
@@ -47,7 +52,8 @@ export default function TaxInvoices() {
         .from('tax_invoices' as any)
         .select(`
           *,
-          tax_invoice_items (*)
+          tax_invoice_items (*),
+          invoices(id, invoice_number)
         `)
         .order('created_at', { ascending: false });
 
@@ -258,6 +264,7 @@ export default function TaxInvoices() {
                     </TableHead>
                     <TableHead>วันที่</TableHead>
                     <TableHead>เลขที่ใบส่งสินค้า/ใบกำกับภาษี</TableHead>
+                    <TableHead>ใบวางบิลอ้างอิง</TableHead>
                     <TableHead>ชื่อลูกค้า/ชื่อโปรเจ็ค</TableHead>
                     <TableHead>วันครบกำหนด</TableHead>
                     <TableHead className="text-right">ยอดรวมสุทธิ</TableHead>
@@ -284,6 +291,18 @@ export default function TaxInvoices() {
                         >
                           {taxInvoice.tax_invoice_number}
                         </button>
+                      </TableCell>
+                      <TableCell>
+                        {taxInvoice.invoice ? (
+                          <button 
+                            onClick={() => navigate(`/invoices/${taxInvoice.invoice.id}`)}
+                            className="text-primary hover:underline font-medium"
+                          >
+                            {taxInvoice.invoice.invoice_number}
+                          </button>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                       <TableCell>{taxInvoice.customer_name}</TableCell>
                       <TableCell>
