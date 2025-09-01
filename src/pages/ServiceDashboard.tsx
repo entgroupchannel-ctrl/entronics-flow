@@ -860,7 +860,7 @@ export default function ServiceDashboard() {
                                 <div className="space-y-2">
                                   <div className="p-2 bg-gray-50 rounded border">
                                     <span className="font-medium text-sm text-gray-700">อาการเสีย:</span>
-                                    <p className="text-sm mt-1">{request.problem_description}</p>
+                                    <p className="text-sm mt-1 text-red-600 font-medium">{request.problem_description}</p>
                                   </div>
                                  </div>
                               </div>
