@@ -331,31 +331,17 @@ export default function TaxInvoices() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={selectedItems.length === currentItems.length && currentItems.length > 0}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </TableHead>
                     <TableHead>วันที่</TableHead>
-                    <TableHead>เลขที่ใบส่งสินค้า/ใบกำกับภาษี</TableHead>
-                    <TableHead>ใบวางบิลอ้างอิง</TableHead>
+                    <TableHead>เลขที่เอกสาร</TableHead>
                     <TableHead>ชื่อลูกค้า/ชื่อโปรเจ็ค</TableHead>
                     <TableHead>วันครบกำหนด</TableHead>
                     <TableHead className="text-right">ยอดรวมสุทธิ</TableHead>
                     <TableHead className="text-center">สถานะ</TableHead>
-                    <TableHead className="w-12"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {currentItems.map((taxInvoice) => (
                     <TableRow key={taxInvoice.id} className="hover:bg-muted/50">
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedItems.includes(taxInvoice.id)}
-                          onCheckedChange={(checked) => handleSelectItem(taxInvoice.id, checked as boolean)}
-                        />
-                      </TableCell>
                       <TableCell>
                         {format(new Date(taxInvoice.tax_invoice_date), 'dd/MM/yyyy')}
                       </TableCell>
@@ -367,18 +353,6 @@ export default function TaxInvoices() {
                           {taxInvoice.tax_invoice_number}
                         </button>
                       </TableCell>
-                      <TableCell>
-                        {taxInvoice.invoice ? (
-                          <button 
-                            onClick={() => navigate(`/invoices/${taxInvoice.invoice.id}`)}
-                            className="text-primary hover:underline font-medium"
-                          >
-                            {taxInvoice.invoice.invoice_number}
-                          </button>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
                       <TableCell>{taxInvoice.customer_name}</TableCell>
                       <TableCell>
                         {taxInvoice.due_date ? format(new Date(taxInvoice.due_date), 'dd/MM/yyyy') : '-'}
@@ -386,112 +360,40 @@ export default function TaxInvoices() {
                       <TableCell className="text-right font-medium">
                         ฿{taxInvoice.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </TableCell>
-                       <TableCell className="text-center">
-                         <DropdownMenu>
-                           <DropdownMenuTrigger asChild>
-                             <Button 
-                               variant="outline" 
-                               size="sm" 
-                               className="bg-background border hover:bg-accent"
-                             >
-                               สถานะ
-                             </Button>
-                           </DropdownMenuTrigger>
-                           <DropdownMenuContent 
-                             align="center" 
-                             className="bg-background border shadow-lg z-[100]"
-                           >
-                             <DropdownMenuItem onClick={() => {
-                               navigate(`/receipts/new?tax_invoice_id=${taxInvoice.id}`);
-                             }}>
-                               <Receipt className="w-4 h-4 mr-2" />
-                               สร้างใบเสร็จรับเงิน
-                             </DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => {
-                               console.log('Cancel', taxInvoice.id);
-                             }}>
-                               <X className="w-4 h-4 mr-2" />
-                               ยกเลิก
-                             </DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => {
-                               console.log('Reset', taxInvoice.id);
-                             }}>
-                               <RotateCcw className="w-4 h-4 mr-2" />
-                               รีเซ็ต
-                             </DropdownMenuItem>
-                           </DropdownMenuContent>
-                         </DropdownMenu>
-                       </TableCell>
-                      <TableCell>
-                         <DropdownMenu
-                           open={dropdownOpen === taxInvoice.id} 
-                           onOpenChange={(isOpen) => {
-                             setDropdownOpen(isOpen ? taxInvoice.id : null);
-                           }}
-                         >
-                           <DropdownMenuTrigger asChild>
-                             <Button 
-                               variant="ghost" 
-                               size="sm" 
-                               className="w-8 h-8 p-0 border border-border rounded-md hover:bg-accent"
-                               onClick={(e) => e.stopPropagation()}
-                             >
-                              <MoreHorizontal className="w-4 h-4" />
+                      <TableCell className="text-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="bg-background border hover:bg-accent"
+                            >
+                              สถานะ
                             </Button>
-                           </DropdownMenuTrigger>
-                           <DropdownMenuContent 
-                             align="end" 
-                             className="bg-background border shadow-lg z-[100]"
-                             onCloseAutoFocus={(e) => e.preventDefault()}
-                           >
-                             <DropdownMenuItem onClick={() => {
-                               setDropdownOpen(null);
-                               navigate(`/tax-invoices/${taxInvoice.id}`);
-                             }}>
-                               <FileText className="w-4 h-4 mr-2" />
-                               ดูรายละเอียด
-                             </DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => {
-                               setDropdownOpen(null);
-                               navigate(`/tax-invoices/${taxInvoice.id}/edit`);
-                             }}>
-                               <Edit className="w-4 h-4 mr-2" />
-                               แก้ไข
-                             </DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => {
-                               setDropdownOpen(null);
-                               console.log('Share', taxInvoice.id);
-                             }}>
-                               <Share2 className="w-4 h-4 mr-2" />
-                               แชร์
-                             </DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => {
-                               setDropdownOpen(null);
-                               window.print();
-                             }}>
-                               <Printer className="w-4 h-4 mr-2" />
-                               พิมพ์
-                             </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => {
-                                setDropdownOpen(null);
-                                console.log('Download', taxInvoice.id);
-                              }}>
-                                <Download className="w-4 h-4 mr-2" />
-                                ดาวน์โหลด PDF
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                               onClick={(e) => {
-                                 e.preventDefault();
-                                 e.stopPropagation();
-                                 openDeleteDialog(taxInvoice.id, taxInvoice.tax_invoice_number);
-                               }}
-                               className="text-red-600 hover:bg-red-50 focus:bg-red-50"
-                             >
-                               <Trash2 className="w-4 h-4 mr-2" />
-                               ลบ
-                             </DropdownMenuItem>
-                           </DropdownMenuContent>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent 
+                            align="center" 
+                            className="bg-background border shadow-lg z-[100]"
+                          >
+                            <DropdownMenuItem onClick={() => {
+                              navigate(`/receipts/new?tax_invoice_id=${taxInvoice.id}`);
+                            }}>
+                              <Receipt className="w-4 h-4 mr-2" />
+                              สร้างใบเสร็จรับเงิน
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              console.log('Cancel', taxInvoice.id);
+                            }}>
+                              <X className="w-4 h-4 mr-2" />
+                              ยกเลิก
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              console.log('Reset', taxInvoice.id);
+                            }}>
+                              <RotateCcw className="w-4 h-4 mr-2" />
+                              รีเซ็ต
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
