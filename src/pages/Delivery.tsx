@@ -67,7 +67,7 @@ const Delivery = () => {
     customer_line_id: "",
     delivery_address: "",
     delivery_method_id: "",
-    order_type: "delivery",
+    order_type: "new_product",
     priority: "normal",
     scheduled_date: new Date().toISOString().split('T')[0], // Default to today
     delivery_notes: "",
@@ -256,7 +256,7 @@ const Delivery = () => {
           customer_email: formData.customer_email || null,
           delivery_address: formData.delivery_address,
           delivery_method_id: formData.delivery_method_id,
-          order_type: formData.order_type,
+          order_type: 'new_product', // Changed to match database constraint
           priority: formData.priority,
           scheduled_date: formData.scheduled_date || null,
           delivery_notes: formData.delivery_notes || null,
@@ -283,7 +283,7 @@ const Delivery = () => {
         customer_line_id: "",
         delivery_address: "",
         delivery_method_id: "",
-        order_type: "delivery",
+        order_type: "new_product",
         priority: "normal",
         scheduled_date: new Date().toISOString().split('T')[0],
         delivery_notes: "",
@@ -523,11 +523,11 @@ const Delivery = () => {
                         <SelectTrigger>
                           <SelectValue placeholder="ประเภท" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="delivery">จัดส่งสินค้า</SelectItem>
-                          <SelectItem value="repair">ส่งของซ่อม</SelectItem>
-                          <SelectItem value="return">คืนสินค้า</SelectItem>
-                        </SelectContent>
+                         <SelectContent>
+                           <SelectItem value="new_product">จัดส่งสินค้าใหม่</SelectItem>
+                           <SelectItem value="repair_return">ส่งคืนของซ่อม</SelectItem>
+                           <SelectItem value="warranty_claim">เคลมสินค้า</SelectItem>
+                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
