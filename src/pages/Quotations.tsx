@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +42,8 @@ export default function Quotations() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentView, setCurrentView] = useState('quotations');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedQuotationToDelete, setSelectedQuotationToDelete] = useState<{id: string, number: string} | null>(null);
 
   useEffect(() => {
     loadQuotations();
@@ -135,6 +138,60 @@ export default function Quotations() {
 
   const createNewQuotation = () => {
     navigate('/quotations/new');
+  };
+
+  const openDeleteDialog = (quotationId: string, quotationNumber: string) => {
+    setSelectedQuotationToDelete({ id: quotationId, number: quotationNumber });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedQuotationToDelete) return;
+
+    try {
+      // ลบ quotation items ก่อน
+      const { error: itemsError } = await supabase
+        .from('quotation_items')
+        .delete()
+        .eq('quotation_id', selectedQuotationToDelete.id);
+
+      if (itemsError) throw itemsError;
+
+      // ลบ quotation workflow history
+      const { error: historyError } = await supabase
+        .from('quotation_workflow_history')
+        .delete()
+        .eq('quotation_id', selectedQuotationToDelete.id);
+
+      if (historyError) throw historyError;
+
+      // ลบ quotation
+      const { error: quotationError } = await supabase
+        .from('quotations')
+        .delete()
+        .eq('id', selectedQuotationToDelete.id);
+
+      if (quotationError) throw quotationError;
+
+      toast({
+        title: "ลบสำเร็จ",
+        description: `ลบใบเสนอราคา ${selectedQuotationToDelete.number} เรียบร้อยแล้ว`,
+      });
+
+      // รีโหลดข้อมูล
+      loadQuotations();
+
+    } catch (error: any) {
+      console.error('Error deleting quotation:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบใบเสนอราคาได้",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedQuotationToDelete(null);
+    }
   };
 
   const renderQuotationsContent = () => (
@@ -255,27 +312,40 @@ export default function Quotations() {
                              <MoreHorizontal className="w-4 h-4" />
                            </Button>
                          </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Edit className="w-4 h-4 mr-2" />
-                            แก้ไข
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <History className="w-4 h-4 mr-2" />
-                            ประวัติการเปลี่ยนแปลง
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Printer className="w-4 h-4 mr-2" />
-                            พิมพ์
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Share2 className="w-4 h-4 mr-2" />
-                            แชร์
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Download className="w-4 h-4 mr-2" />
-                            ดาวน์โหลด PDF
-                          </DropdownMenuItem>
+                         <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                           <DropdownMenuItem onClick={() => navigate(`/quotations/${quotation.id}/edit`)}>
+                             <Edit className="w-4 h-4 mr-2" />
+                             แก้ไข
+                           </DropdownMenuItem>
+                           <DropdownMenuItem onClick={() => console.log('View history:', quotation.id)}>
+                             <History className="w-4 h-4 mr-2" />
+                             ประวัติการเปลี่ยนแปลง
+                           </DropdownMenuItem>
+                           <DropdownMenuItem onClick={() => window.print()}>
+                             <Printer className="w-4 h-4 mr-2" />
+                             พิมพ์
+                           </DropdownMenuItem>
+                           <DropdownMenuItem onClick={() => console.log('Share:', quotation.id)}>
+                             <Share2 className="w-4 h-4 mr-2" />
+                             แชร์
+                           </DropdownMenuItem>
+                           <DropdownMenuItem onClick={() => console.log('Download:', quotation.id)}>
+                             <Download className="w-4 h-4 mr-2" />
+                             ดาวน์โหลด PDF
+                           </DropdownMenuItem>
+                           <DropdownMenuSeparator />
+                           <DropdownMenuItem 
+                             onClick={(e) => {
+                               e.preventDefault();
+                               e.stopPropagation();
+                               console.log('Opening delete dialog for:', quotation.quotation_number);
+                               openDeleteDialog(quotation.id, quotation.quotation_number);
+                             }}
+                             className="text-red-600 hover:bg-red-50 focus:bg-red-50"
+                           >
+                             <Trash2 className="w-4 h-4 mr-2" />
+                             ลบ
+                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -346,6 +416,47 @@ export default function Quotations() {
             {renderQuotationsContent()}
           </div>
         </main>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                ยืนยันการลบใบเสนอราคา
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
+                คุณต้องการลบใบเสนอราคา{' '}
+                <span className="font-medium text-foreground">
+                  {selectedQuotationToDelete?.number}
+                </span>{' '}
+                ใช่หรือไม่?
+                <br />
+                <span className="text-sm text-destructive mt-2 block">
+                  ⚠️ การกระทำนี้ไม่สามารถยกเลิกได้ และข้อมูลจะถูกลบถาวร
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2">
+              <AlertDialogCancel 
+                onClick={() => {
+                  setDeleteDialogOpen(false);
+                  setSelectedQuotationToDelete(null);
+                }}
+                className="bg-secondary hover:bg-secondary/80"
+              >
+                ยกเลิก
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                ลบใบเสนอราคา
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
