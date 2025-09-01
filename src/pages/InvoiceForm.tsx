@@ -78,7 +78,7 @@ export default function InvoiceForm() {
     total_amount: 0,
     notes: '',
     terms_conditions: 'ชำระเงินภายใน 30 วัน นับจากวันที่ออกใบแจ้งหนี้\nกรณีชำระเงินช้ากว่ากำหนด ทางบริษัทฯ ขอสงวนสิทธิ์ในการคิดดอกเบี้ยในอัตราร้อยละ 1.25 ต่อเดือน',
-    status: 'pending'
+    status: 'รอวางบิล'
   });
 
   useEffect(() => {
@@ -469,12 +469,11 @@ export default function InvoiceForm() {
                         <SelectValue placeholder="เลือกสถานะ" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="draft">ร่าง</SelectItem>
-                        <SelectItem value="pending">รอการอนุมัติ</SelectItem>
-                        <SelectItem value="sent">ส่งแล้ว</SelectItem>
-                        <SelectItem value="paid">ชำระแล้ว</SelectItem>
-                        <SelectItem value="overdue">เลยกำหนด</SelectItem>
-                        <SelectItem value="cancelled">ยกเลิก</SelectItem>
+                        <SelectItem value="รอวางบิล">รอวางบิล</SelectItem>
+                        <SelectItem value="วางบิลแล้ว">วางบิลแล้ว</SelectItem>
+                        <SelectItem value="เปิดบิลแล้ว">เปิดบิลแล้ว</SelectItem>
+                        <SelectItem value="สร้างใบสั่งสินค้า/ใบกำกับภาษี">สร้างใบสั่งสินค้า/ใบกำกับภาษี</SelectItem>
+                        <SelectItem value="ยกเลิก">ยกเลิก</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
