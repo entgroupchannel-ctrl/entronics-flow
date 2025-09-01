@@ -1769,6 +1769,14 @@ export type Database = {
         | "conversion_invoice"
         | "purchase_order_created"
         | "completed"
+        | "delivery_note_created"
+        | "tax_invoice_created"
+        | "cash_receipt_created"
+        | "split_payment_invoice"
+        | "split_payment_delivery"
+        | "split_payment_receipt"
+        | "downpayment_delivery"
+        | "downpayment_receipt"
       service_status:
         | "pending"
         | "assigned"
@@ -1922,6 +1930,14 @@ export const Constants = {
         "conversion_invoice",
         "purchase_order_created",
         "completed",
+        "delivery_note_created",
+        "tax_invoice_created",
+        "cash_receipt_created",
+        "split_payment_invoice",
+        "split_payment_delivery",
+        "split_payment_receipt",
+        "downpayment_delivery",
+        "downpayment_receipt",
       ],
       service_status: [
         "pending",

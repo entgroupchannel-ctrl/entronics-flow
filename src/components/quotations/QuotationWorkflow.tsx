@@ -53,7 +53,7 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
         };
       case 'approved':
         return { 
-          label: 'อนุมัติแล้ว', 
+          label: 'อนุมัติ', 
           color: 'bg-green-100 text-green-800',
           icon: <CheckCircle className="w-4 h-4" />
         };
@@ -65,25 +65,61 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
         };
       case 'invoice_created':
         return { 
-          label: 'สร้างใบแจ้งหนี้แล้ว', 
+          label: 'สร้างใบวางบิล/ใบแจ้งหนี้', 
           color: 'bg-blue-100 text-blue-800',
+          icon: <FileText className="w-4 h-4" />
+        };
+      case 'delivery_note_created':
+        return { 
+          label: 'สร้างใบส่งสินค้า/ใบกำกับภาษี', 
+          color: 'bg-teal-100 text-teal-800',
+          icon: <FileText className="w-4 h-4" />
+        };
+      case 'tax_invoice_created':
+        return { 
+          label: 'สร้างใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', 
+          color: 'bg-cyan-100 text-cyan-800',
           icon: <FileText className="w-4 h-4" />
         };
       case 'downpayment_invoice':
         return { 
-          label: 'มัดจำใบแจ้งหนี้', 
+          label: 'มัดจำใบวางบิล/ใบแจ้งหนี้', 
           color: 'bg-purple-100 text-purple-800',
           icon: <CreditCard className="w-4 h-4" />
         };
-      case 'conversion_invoice':
+      case 'downpayment_delivery':
         return { 
-          label: 'แปลงเป็นใบแจ้งหนี้', 
-          color: 'bg-indigo-100 text-indigo-800',
+          label: 'มัดจำใบส่งสินค้า/ใบกำกับภาษี', 
+          color: 'bg-violet-100 text-violet-800',
+          icon: <CreditCard className="w-4 h-4" />
+        };
+      case 'downpayment_receipt':
+        return { 
+          label: 'มัดจำใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', 
+          color: 'bg-fuchsia-100 text-fuchsia-800',
+          icon: <CreditCard className="w-4 h-4" />
+        };
+      case 'split_payment_invoice':
+        return { 
+          label: 'แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้', 
+          color: 'bg-amber-100 text-amber-800',
+          icon: <RefreshCw className="w-4 h-4" />
+        };
+      case 'split_payment_delivery':
+        return { 
+          label: 'แบ่งจ่ายใบส่งสินค้า/ใบกำกับภาษี', 
+          color: 'bg-orange-100 text-orange-800',
+          icon: <RefreshCw className="w-4 h-4" />
+        };
+      case 'split_payment_receipt':
+        return { 
+          label: 'แบ่งจ่ายใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', 
+          color: 'bg-red-100 text-red-800',
           icon: <RefreshCw className="w-4 h-4" />
         };
       case 'purchase_order_created':
         return { 
-          label: 'สร้างใบสั่งซื้อแล้ว', 
+          label: 'สร้างใบสั่งซื้อ', 
           color: 'bg-orange-100 text-orange-800',
           icon: <ShoppingCart className="w-4 h-4" />
         };
@@ -113,8 +149,38 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
         return [
           { id: 'create_invoice', label: '📄 สร้างใบวางบิล/ใบแจ้งหนี้', icon: <FileText className="w-4 h-4" /> },
           { id: 'downpayment_invoice', label: '💰 มัดจำใบวางบิล/ใบแจ้งหนี้', icon: <CreditCard className="w-4 h-4" /> },
-          { id: 'conversion_invoice', label: '🔄 แปลงเป็นใบวางบิล/ใบแจ้งหนี้', icon: <RefreshCw className="w-4 h-4" /> },
+          { id: 'split_payment_invoice', label: '🔄 แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้', icon: <RefreshCw className="w-4 h-4" /> },
           { id: 'create_purchase_order', label: '🛒 สร้างใบสั่งซื้อ', icon: <ShoppingCart className="w-4 h-4" /> }
+        ];
+      case 'invoice_created':
+        return [
+          { id: 'create_delivery_note', label: '📦 สร้างใบส่งสินค้า/ใบกำกับภาษี', icon: <FileText className="w-4 h-4" /> }
+        ];
+      case 'downpayment_invoice':
+        return [
+          { id: 'create_downpayment_delivery', label: '📦 มัดจำใบส่งสินค้า/ใบกำกับภาษี', icon: <FileText className="w-4 h-4" /> }
+        ];
+      case 'split_payment_invoice':
+        return [
+          { id: 'create_split_payment_delivery', label: '📦 แบ่งจ่ายใบส่งสินค้า/ใบกำกับภาษี', icon: <FileText className="w-4 h-4" /> }
+        ];
+      case 'delivery_note_created':
+        return [
+          { id: 'create_tax_invoice', label: '💰 สร้างใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', icon: <FileText className="w-4 h-4" /> }
+        ];
+      case 'downpayment_delivery':
+        return [
+          { id: 'create_downpayment_receipt', label: '💰 มัดจำใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', icon: <FileText className="w-4 h-4" /> }
+        ];
+      case 'split_payment_delivery':
+        return [
+          { id: 'create_split_payment_receipt', label: '💰 แบ่งจ่ายใบกำกับภาษี/ใบเสร็จรับเงิน (เงินสด)', icon: <FileText className="w-4 h-4" /> }
+        ];
+      case 'tax_invoice_created':
+      case 'downpayment_receipt':
+      case 'split_payment_receipt':
+        return [
+          { id: 'complete', label: '✅ เสร็จสิ้น', icon: <CheckCircle className="w-4 h-4" /> }
         ];
       default:
         return [];
@@ -133,9 +199,6 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
       let updateData: any = {};
 
       switch (actionType) {
-        case 'send_for_approval':
-          newStatus = 'wait_for_approve';
-          break;
         case 'approve':
           newStatus = 'approved';
           updateData.approved_at = new Date().toISOString();
@@ -149,19 +212,40 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
           break;
         case 'create_invoice':
           newStatus = 'invoice_created';
-          updateData.process_type = processType;
+          updateData.process_type = 'standard';
           break;
         case 'downpayment_invoice':
           newStatus = 'downpayment_invoice';
           updateData.process_type = 'downpayment';
           break;
-        case 'conversion_invoice':
-          newStatus = 'conversion_invoice';
-          updateData.process_type = 'conversion';
+        case 'split_payment_invoice':
+          newStatus = 'split_payment_invoice';
+          updateData.process_type = 'split_payment';
           break;
         case 'create_purchase_order':
           newStatus = 'purchase_order_created';
           updateData.process_type = 'purchase_order';
+          break;
+        case 'create_delivery_note':
+          newStatus = 'delivery_note_created';
+          break;
+        case 'create_downpayment_delivery':
+          newStatus = 'downpayment_delivery';
+          break;
+        case 'create_split_payment_delivery':
+          newStatus = 'split_payment_delivery';
+          break;
+        case 'create_tax_invoice':
+          newStatus = 'tax_invoice_created';
+          break;
+        case 'create_downpayment_receipt':
+          newStatus = 'downpayment_receipt';
+          break;
+        case 'create_split_payment_receipt':
+          newStatus = 'split_payment_receipt';
+          break;
+        case 'complete':
+          newStatus = 'completed';
           break;
       }
 
