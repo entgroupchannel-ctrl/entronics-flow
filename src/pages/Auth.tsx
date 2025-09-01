@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,87 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Test Supabase connection on component mount
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        console.log('Testing Supabase connection...');
+        const { data, error } = await supabase.auth.getSession();
+        console.log('Supabase connection test result:', { data, error });
+        
+        if (error) {
+          console.error('Supabase connection error:', error);
+          setConnectionError(true);
+          toast({
+            title: 'เกิดข้อผิดพลาด',
+            description: 'ไม่สามารถเชื่อมต่อกับระบบได้ กรุณาลองใหม่อีกครั้ง',
+            variant: 'destructive',
+          });
+        } else {
+          // If already authenticated, redirect to home
+          if (data.session) {
+            navigate('/');
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Auth component error:', err);
+        setConnectionError(true);
+        toast({
+          title: 'เกิดข้อผิดพลาด',
+          description: 'เกิดข้อผิดพลาดในการโหลดหน้า กรุณาลองใหม่อีกครั้ง',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    testConnection();
+  }, [navigate, toast]);
+
+  // Show loading screen while initializing
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-sm text-muted-foreground">กำลังโหลด...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error screen if connection failed
+  if (connectionError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-destructive">เกิดข้อผิดพลาด</CardTitle>
+            <CardDescription>ไม่สามารถเชื่อมต่อกับระบบได้</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="w-full"
+            >
+              ลองใหม่อีกครั้ง
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
