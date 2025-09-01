@@ -343,7 +343,7 @@ export default function Invoices() {
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="w-8 h-8 p-0 border border-gray-300 rounded-md">
+                                <Button variant="ghost" size="sm" className="w-8 h-8 p-0 border border-border rounded-md hover:bg-accent">
                                   <MoreHorizontal className="w-4 h-4" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -352,21 +352,27 @@ export default function Invoices() {
                                   <Edit className="w-4 h-4 mr-2" />
                                   แก้ไข
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => window.print()}>
                                   <Printer className="w-4 h-4 mr-2" />
                                   พิมพ์
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => console.log('Download', invoice.id)}>
                                   <Download className="w-4 h-4 mr-2" />
                                   ดาวน์โหลด
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => console.log('Share', invoice.id)}>
                                   <Share2 className="w-4 h-4 mr-2" />
                                   แชร์
                                 </DropdownMenuItem>
+                                <DropdownMenuSeparator />
                                 <DropdownMenuItem 
-                                  onClick={() => openDeleteDialog(invoice.id, invoice.invoice_number)}
-                                  className="text-red-600 hover:bg-red-50"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('Opening delete dialog for:', invoice.invoice_number);
+                                    openDeleteDialog(invoice.id, invoice.invoice_number);
+                                  }}
+                                  className="text-red-600 hover:bg-red-50 focus:bg-red-50"
                                 >
                                   <Trash2 className="w-4 h-4 mr-2" />
                                   ลบ
