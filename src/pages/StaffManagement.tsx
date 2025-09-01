@@ -357,7 +357,7 @@ const StaffManagement = () => {
 
   const getVehicleIcon = (vehicleType: string) => {
     if (vehicleType?.includes('รถจักรยานยนต์')) return Bike;
-    if (vehicleType?.includes('รถยนต์') || vehicleType?.includes('รถกระบะ')) return Car;
+    if (vehicleType?.includes('รถยนต์') || vehicleType?.includes('รถกระบะ') || vehicleType?.includes('รถบรรทุก')) return Car;
     return Building;
   };
 
