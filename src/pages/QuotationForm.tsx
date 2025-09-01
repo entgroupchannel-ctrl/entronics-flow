@@ -514,14 +514,28 @@ export default function QuotationForm() {
                         />
                       </TableCell>
                       <TableCell className="w-28">
-                        <Input
-                          type="number"
-                          value={item.discount_amount}
-                          onChange={(e) => updateItem(item.id, 'discount_amount', Number(e.target.value))}
-                          min="0"
-                          step="0.01"
-                          className="text-right"
-                        />
+                        <div className="flex gap-1">
+                          <Input
+                            type="number"
+                            value={item.discount_amount}
+                            onChange={(e) => updateItem(item.id, 'discount_amount', Number(e.target.value))}
+                            min="0"
+                            step="0.01"
+                            className="text-right flex-1"
+                          />
+                          <Select
+                            value={item.discount_type}
+                            onValueChange={(value: 'amount' | 'percentage') => updateItem(item.id, 'discount_type', value)}
+                          >
+                            <SelectTrigger className="w-16 bg-background border border-border">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-background border border-border shadow-lg z-50">
+                              <SelectItem value="amount" className="hover:bg-accent">บาท</SelectItem>
+                              <SelectItem value="percentage" className="hover:bg-accent">%</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </TableCell>
                       <TableCell className="font-medium">
                         {item.line_total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
