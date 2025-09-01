@@ -100,6 +100,7 @@ export default function ServiceDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [showAddItemDialog, setShowAddItemDialog] = useState(false);
   const [selectedRequestForItem, setSelectedRequestForItem] = useState<string | null>(null);
+  const [submissionInProgress, setSubmissionInProgress] = useState(false);
   
   // Form state for new service request
   const [formData, setFormData] = useState({
@@ -212,6 +213,10 @@ export default function ServiceDashboard() {
   };
 
   const updateRequestStatus = async (requestId: string, newStatus: string, technicianId?: string) => {
+    // Prevent multiple simultaneous updates
+    if (submissionInProgress) return;
+    
+    setSubmissionInProgress(true);
     try {
       const updates: any = { status: newStatus };
       if (technicianId) {
@@ -265,6 +270,8 @@ export default function ServiceDashboard() {
         description: "ไม่สามารถอัพเดทสถานะได้",
         variant: "destructive",
       });
+    } finally {
+      setSubmissionInProgress(false);
     }
   };
 
@@ -278,8 +285,32 @@ export default function ServiceDashboard() {
       return;
     }
 
+    // Prevent multiple submissions
+    if (isLoading) return;
+
     setIsLoading(true);
     try {
+      // Check for duplicate requests in the last 5 minutes
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const { data: existingRequests } = await supabase
+        .from('service_requests')
+        .select('id')
+        .eq('customer_name', formData.customer_name)
+        .eq('customer_phone', formData.customer_phone)
+        .eq('device_type', formData.device_type)
+        .eq('problem_description', formData.problem_description)
+        .gte('created_at', fiveMinutesAgo);
+
+      if (existingRequests && existingRequests.length > 0) {
+        toast({
+          title: "พบข้อมูลซ้ำ",
+          description: "พบการแจ้งซ่อมที่คล้ายกันในช่วง 5 นาทีที่ผ่านมา",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('service_requests')
         .insert({
