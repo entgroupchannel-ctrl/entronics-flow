@@ -815,9 +815,16 @@ const Delivery = () => {
                              {getStatusBadge(order.status)}
                              {getPriorityBadge(order.priority)}
                            </div>
-                           <p className="text-sm text-muted-foreground">
-                             สร้างเมื่อ: {new Date(order.created_at).toLocaleDateString('th-TH')}
-                           </p>
+                            <p className="text-sm text-muted-foreground">
+                              สร้างเมื่อ: {new Date(order.created_at).toLocaleDateString('th-TH', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                timeZone: 'Asia/Bangkok'
+                              })}
+                            </p>
                            
                             {/* Assignment Info */}
                             {order.assigned_staff_id && order.driver_name && (
