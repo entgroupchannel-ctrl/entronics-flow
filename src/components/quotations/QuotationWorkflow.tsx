@@ -316,69 +316,89 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
               <ChevronDown className="w-4 h-4 ml-1" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 bg-popover border shadow-md">
-            {availableActions.length === 0 ? (
-              <DropdownMenuItem disabled>ไม่มีตัวเลือก</DropdownMenuItem>
-            ) : (
-              availableActions.map((action) => {
-                // Create submenu for invoice-related actions
-                if (['create_invoice', 'downpayment_invoice', 'split_payment_invoice'].includes(action.id)) {
-                  if (action.id === 'create_invoice') {
-                    return (
-                      <DropdownMenuSub key="invoice_submenu">
-                        <DropdownMenuSubTrigger className="flex items-center gap-2">
-                          <FileText className="w-4 h-4" />
-                          <span>ใบวางบิล/ใบแจ้งหนี้</span>
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="w-48">
-                          <DropdownMenuItem
-                            onClick={() => handleAction('create_invoice')}
-                            className="flex items-center gap-2 cursor-pointer hover:bg-accent"
-                          >
-                            <FileText className="w-4 h-4" />
-                            <span>สร้างใบวางบิล/ใบแจ้งหนี้</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleAction('downpayment_invoice')}
-                            className="flex items-center gap-2 cursor-pointer hover:bg-accent"
-                          >
-                            <CreditCard className="w-4 h-4" />
-                            <span>มัดจำใบวางบิล/ใบแจ้งหนี้</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleAction('split_payment_invoice')}
-                            className="flex items-center gap-2 cursor-pointer hover:bg-accent"
-                          >
-                            <RefreshCw className="w-4 h-4" />
-                            <span>แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                    );
-                  }
-                  // Skip rendering individual invoice items as they're now in submenu
-                  return null;
-                }
-                
-                return (
-                  <DropdownMenuItem
-                    key={action.id}
-                    onClick={() => {
-                      const needsInput = action.id === 'reject' || action.id === 'approve';
-                      if (needsInput) {
-                        setIsDialogOpen(true);
-                      } else {
-                        handleAction(action.id);
-                      }
-                    }}
-                    className="flex items-center gap-2 cursor-pointer hover:bg-accent"
-                  >
-                    {action.icon}
-                    <span>{action.label}</span>
-                  </DropdownMenuItem>
-                );
-              })
-            )}
+          <DropdownMenuContent className="w-64 bg-white border shadow-lg">
+            <DropdownMenuItem
+              onClick={() => {
+                console.log('Clicked รออนุมัติ');
+                handleAction('wait_for_approve');
+              }}
+              className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+            >
+              <Clock className="w-4 h-4" />
+              <span>รออนุมัติ</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem
+              onClick={() => {
+                console.log('Clicked อนุมัติ');
+                setIsDialogOpen(true);
+              }}
+              className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+            >
+              <CheckCircle className="w-4 h-4" />
+              <span>อนุมัติ</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => {
+                console.log('Clicked ไม่อนุมัติ');
+                setIsDialogOpen(true);
+              }}
+              className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+            >
+              <XCircle className="w-4 h-4" />
+              <span>ไม่อนุมัติ</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                <span>ใบวางบิล/ใบแจ้งหนี้</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-56">
+                <DropdownMenuItem
+                  onClick={() => {
+                    console.log('Clicked สร้างใบวางบิล');
+                    handleAction('create_invoice');
+                  }}
+                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>สร้างใบวางบิล/ใบแจ้งหนี้</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    console.log('Clicked มัดจำใบวางบิล');
+                    handleAction('downpayment_invoice');
+                  }}
+                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span>มัดจำใบวางบิล/ใบแจ้งหนี้</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    console.log('Clicked แบ่งจ่ายใบวางบิล');
+                    handleAction('split_payment_invoice');
+                  }}
+                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>แบ่งจ่ายใบวางบิล/ใบแจ้งหนี้</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
+            <DropdownMenuItem
+              onClick={() => {
+                console.log('Clicked สร้างใบสั่งซื้อ');
+                handleAction('create_purchase_order');
+              }}
+              className="flex items-center gap-2 cursor-pointer hover:bg-gray-100"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span>สร้างใบสั่งซื้อ</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
