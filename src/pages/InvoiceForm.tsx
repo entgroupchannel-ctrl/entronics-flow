@@ -13,7 +13,7 @@ import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, MoreHorizontal, Cl
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, format } from 'date-fns';
@@ -56,6 +56,7 @@ interface InvoiceItem {
 
 export default function InvoiceForm() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const { user } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -101,11 +102,19 @@ export default function InvoiceForm() {
   });
 
   useEffect(() => {
-    loadCustomers();
-    loadProducts();
-    generateInvoiceNumber();
-    loadQuotationData();
-  }, []);
+    const loadData = async () => {
+      await loadCustomers();
+      await loadProducts();
+      
+      if (id) {
+        await loadInvoice(id);
+      } else {
+        generateInvoiceNumber();
+        loadQuotationData();
+      }
+    };
+    loadData();
+  }, [id]);
 
   useEffect(() => {
     calculateTotals();
@@ -207,6 +216,97 @@ export default function InvoiceForm() {
       toast({
         title: "เกิดข้อผิดพลาด", 
         description: "ไม่สามารถโหลดข้อมูลสินค้าได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadInvoice = async (invoiceId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select(`
+          *,
+          invoice_items (*)
+        `)
+        .eq('id', invoiceId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        // Set invoice data
+        setInvoice({
+          invoice_number: data.invoice_number,
+          invoice_date: new Date(data.invoice_date),
+          due_date: data.due_date ? new Date(data.due_date) : addDays(new Date(), 30),
+          quotation_id: data.quotation_id || '',
+          customer_id: data.customer_id || '',
+          customer_name: data.customer_name || '',
+          customer_address: data.customer_address || '',
+          customer_phone: data.customer_phone || '',
+          customer_email: data.customer_email || '',
+          customer_line_id: '',
+          subtotal: data.subtotal || 0,
+          discount_percentage: data.discount_percentage || 0,
+          discount_amount: data.discount_amount || 0,
+          vat_amount: data.vat_amount || 0,
+          withholding_tax_amount: data.withholding_tax_amount || 0,
+          total_amount: data.total_amount || 0,
+          partial_payment_amount: 0,
+          partial_payment_vat: 0,
+          partial_payment_total: 0,
+          remaining_amount: 0,
+          remaining_amount_before_vat: 0,
+          remaining_vat: 0,
+          partial_payment_percentage: 60,
+          taxable_amount: 0,
+          non_taxable_amount: 0,
+          notes: data.notes || '',
+          terms_conditions: data.terms_conditions || '',
+          status: data.status || 'รอวางบิล',
+          payment_terms: data.payment_terms || '30 วัน',
+          project_name: data.project_name || '',
+          po_number: data.po_number || ''
+        });
+
+        // Set invoice items
+        if (data.invoice_items) {
+          const loadedItems = data.invoice_items.map((item: any) => ({
+            id: item.id,
+            product_id: item.product_id,
+            product_name: item.product_name,
+            product_sku: item.product_sku,
+            description: item.description || '',
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            discount_amount: item.discount_amount,
+            discount_type: (item.discount_amount > 0 ? 'amount' : 'percentage') as 'amount' | 'percentage',
+            line_total: item.line_total,
+            is_software: item.is_software || false
+          }));
+          setItems(loadedItems);
+        }
+
+        // Set customer if available
+        if (data.customer_id) {
+          const { data: customerData, error: customerError } = await supabase
+            .from('customers')
+            .select('*')
+            .eq('id', data.customer_id)
+            .single();
+          
+          if (!customerError && customerData) {
+            setSelectedCustomer(customerData);
+            setCustomerSearchValue(customerData.name);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading invoice:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลใบแจ้งหนี้ได้",
         variant: "destructive",
       });
     }
