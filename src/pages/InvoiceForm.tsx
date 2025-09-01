@@ -70,6 +70,7 @@ export default function InvoiceForm() {
     invoice_number: '',
     invoice_date: new Date(),
     due_date: addDays(new Date(), 30),
+    quotation_id: '', // เพิ่ม quotation_id
     customer_id: '',
     customer_name: '',
     customer_address: '',
@@ -138,6 +139,7 @@ export default function InvoiceForm() {
         // Set invoice data from quotation
         setInvoice(prev => ({
           ...prev,
+          quotation_id: data.quotation_id || '', // เพิ่ม quotation_id เพื่อใช้ในการอัปเดตสถานะ
           customer_id: data.customer_id || '',
           customer_name: data.customer_name || '',
           customer_address: data.customer_address || '',
@@ -508,6 +510,7 @@ export default function InvoiceForm() {
           payment_terms: invoice.payment_terms || '30 วัน',
           project_name: invoice.project_name || null,
           po_number: invoice.po_number || null,
+          quotation_id: invoice.quotation_id || null,
           created_by: user?.id
         })
         .select()
@@ -540,11 +543,48 @@ export default function InvoiceForm() {
         throw itemsError;
       }
 
-      toast({
-        title: "บันทึกสำเร็จ",
-        description: `ใบแจ้งหนี้เลขที่ ${invoice.invoice_number} ได้รับการบันทึกเรียบร้อยแล้ว`,
-        variant: "default",
-      });
+      // อัปเดตสถานะใบเสนอราคาเป็น "อนุมัติแล้ว" หากสร้างจากใบเสนอราคา
+      if (invoice.quotation_id) {
+        try {
+          const { error: quotationUpdateError } = await supabase
+            .from('quotations')
+            .update({
+              workflow_status: 'approved',
+              status: 'approved',
+              approved_by: user?.id,
+              approved_at: new Date().toISOString()
+            })
+            .eq('id', invoice.quotation_id);
+
+          if (quotationUpdateError) {
+            console.error('Error updating quotation status:', quotationUpdateError);
+            // แสดงการแจ้งเตือนแต่ไม่ทำให้การบันทึก invoice ล้มเหลว
+            toast({
+              title: "บันทึกใบแจ้งหนี้สำเร็จ",
+              description: `ใบแจ้งหนี้เลขที่ ${invoice.invoice_number} ถูกบันทึกแล้ว แต่ไม่สามารถอัปเดตสถานะใบเสนอราคาได้`,
+              variant: "default",
+            });
+          } else {
+            toast({
+              title: "บันทึกสำเร็จ",
+              description: `ใบแจ้งหนี้เลขที่ ${invoice.invoice_number} ได้รับการบันทึกและอัปเดตสถานะใบเสนอราคาเป็น 'อนุมัติแล้ว' เรียบร้อยแล้ว`,
+            });
+          }
+        } catch (error) {
+          console.error('Error updating quotation:', error);
+          toast({
+            title: "บันทึกใบแจ้งหนี้สำเร็จ",
+            description: `ใบแจ้งหนี้เลขที่ ${invoice.invoice_number} ถูกบันทึกแล้ว แต่เกิดข้อผิดพลาดในการอัปเดตสถานะใบเสนอราคา`,
+            variant: "default",
+          });
+        }
+      } else {
+        toast({
+          title: "บันทึกสำเร็จ",
+          description: `ใบแจ้งหนี้เลขที่ ${invoice.invoice_number} ได้รับการบันทึกเรียบร้อยแล้ว`,
+          variant: "default",
+        });
+      }
 
       navigate('/invoices');
       

@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files, Receipt } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -139,6 +139,64 @@ export default function Quotations() {
 
   const createNewQuotation = () => {
     navigate('/quotations/new');
+  };
+
+  const createInvoiceFromQuotation = async (quotation: Quotation) => {
+    try {
+      // Load full quotation data with items
+      const { data: quotationData, error } = await supabase
+        .from('quotations')
+        .select(`
+          *,
+          quotation_items (*)
+        `)
+        .eq('id', quotation.id)
+        .single();
+
+      if (error) throw error;
+
+      if (!quotationData) {
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่พบข้อมูลใบเสนอราคา",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Store quotation data in session storage for invoice form
+      const invoiceData = {
+        quotation_id: quotationData.id,
+        quotation_number: quotationData.quotation_number,
+        customer_id: quotationData.customer_id,
+        customer_name: quotationData.customer_name,
+        customer_address: quotationData.customer_address,
+        customer_phone: quotationData.customer_phone,
+        customer_email: quotationData.customer_email,
+        subtotal: quotationData.subtotal,
+        discount_amount: quotationData.discount_amount,
+        discount_percentage: quotationData.discount_percentage,
+        vat_amount: quotationData.vat_amount,
+        withholding_tax_amount: quotationData.withholding_tax_amount,
+        total_amount: quotationData.total_amount,
+        notes: quotationData.notes,
+        terms_conditions: quotationData.terms_conditions,
+        items: quotationData.quotation_items || []
+      };
+
+      sessionStorage.setItem('invoice_from_quotation', JSON.stringify(invoiceData));
+      
+      // Navigate to invoice creation page
+      navigate('/invoices/new');
+
+    } catch (error: any) {
+      console.error('Error creating invoice from quotation:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถสร้างใบแจ้งหนี้จากใบเสนอราคาได้",
+        variant: "destructive",
+      });
+    }
   };
 
   const openDeleteDialog = (quotationId: string, quotationNumber: string) => {
@@ -373,13 +431,20 @@ export default function Quotations() {
                               <Files className="w-4 h-4 mr-2" />
                               พิมพ์จำหน่ายทอง
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                              setDropdownOpen(null);
-                              console.log('Duplicate:', quotation.id);
-                            }}>
-                              <Copy className="w-4 h-4 mr-2" />
-                              สร้างซ้ำ
-                           </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               createInvoiceFromQuotation(quotation);
+                             }}>
+                               <Receipt className="w-4 h-4 mr-2" />
+                               สร้างใบแจ้งหนี้
+                             </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => {
+                               setDropdownOpen(null);
+                               console.log('Duplicate:', quotation.id);
+                             }}>
+                               <Copy className="w-4 h-4 mr-2" />
+                               สร้างซ้ำ
+                            </DropdownMenuItem>
                            <DropdownMenuSeparator />
                            <DropdownMenuItem 
                              onClick={(e) => {
