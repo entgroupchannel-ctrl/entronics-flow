@@ -331,6 +331,7 @@ export default function PaymentRecords() {
               .from('receipts')
               .update({
                 payment_status: 'cancelled',
+                cancelled_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               })
               .eq('id', receipt.id);
@@ -448,6 +449,7 @@ export default function PaymentRecords() {
               .from('receipts')
               .update({
                 payment_status: 'cancelled',
+                cancelled_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               })
               .eq('id', receipt.id);
@@ -696,7 +698,7 @@ export default function PaymentRecords() {
                       วิธีชำระ: {payment.payment_method}
                     </Badge>
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                      วันที่ชำระ: {new Date(payment.payment_date).toLocaleDateString('th-TH')}
+                      วันเวลาชำระ: {new Date(payment.payment_date).toLocaleDateString('th-TH')} {new Date(payment.payment_date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                     </Badge>
                     {/* Receipt Link */}
                     {payment.receipts && payment.receipts.length > 0 && (

@@ -1361,6 +1361,7 @@ export type Database = {
           bank_account: string | null
           bank_name: string | null
           can_issue_receipt: boolean
+          cancelled_at: string | null
           created_at: string
           created_by: string | null
           customer_address: string | null
@@ -1393,6 +1394,7 @@ export type Database = {
           bank_account?: string | null
           bank_name?: string | null
           can_issue_receipt?: boolean
+          cancelled_at?: string | null
           created_at?: string
           created_by?: string | null
           customer_address?: string | null
@@ -1425,6 +1427,7 @@ export type Database = {
           bank_account?: string | null
           bank_name?: string | null
           can_issue_receipt?: boolean
+          cancelled_at?: string | null
           created_at?: string
           created_by?: string | null
           customer_address?: string | null
