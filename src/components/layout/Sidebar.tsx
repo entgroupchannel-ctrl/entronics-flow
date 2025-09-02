@@ -200,10 +200,17 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
   };
 
   const isActive = (item: any) => {
-    if (currentView) {
-      return currentView === item.view;
+    // First check exact path match for precise routing
+    if (currentPath === item.href) {
+      return true;
     }
-    return currentPath === item.href;
+    
+    // Fallback to view matching if provided
+    if (currentView && currentView === item.view) {
+      return true;
+    }
+    
+    return false;
   };
 
   const renderMenuItem = (item: any, level = 0) => {
