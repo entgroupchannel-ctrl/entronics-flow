@@ -293,6 +293,15 @@ export default function ReceiptForm() {
         setFormData({
           ...receipt,
           receipt_date: receipt.receipt_date,
+          customer_name: receipt.customer_name || "",
+          customer_address: receipt.customer_address || "",
+          customer_phone: receipt.customer_phone || "",
+          customer_email: receipt.customer_email || "",
+          payment_reference: receipt.payment_reference || "",
+          bank_name: receipt.bank_name || "",
+          bank_account: receipt.bank_account || "",
+          notes: receipt.notes || "",
+          terms_conditions: receipt.terms_conditions || "",
         });
 
         if (receipt.receipt_items && receipt.receipt_items.length > 0) {
