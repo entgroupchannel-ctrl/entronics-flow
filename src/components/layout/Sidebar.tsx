@@ -67,7 +67,7 @@ const menuItems = [
         iconColor: "text-blue-500"
       },
       {
-        title: "ใบส่งสินค้า/ใบกำกับภาษี",
+        title: "การชำระเงิน/ใบกำกับภาษี",
         icon: FileText,
         href: "/tax-invoices",
         view: "tax-invoices",
