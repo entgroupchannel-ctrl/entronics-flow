@@ -453,28 +453,84 @@ const Index = () => {
         </div>
       </div>
 
-      {/* ยอดขาย YoY - ย้ายมาไว้ตำแหน่งบนสุด */}
-      {canManageInventory() ? (
-        <SalesChart />
-      ) : (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
-              ยอดขาย YoY
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center h-40 text-muted-foreground">
-              <div className="text-center">
-                <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-                <p className="text-sm">ข้อมูลนี้เฉพาะผู้บริหารเท่านั้น</p>
-                <p className="text-xs">กรุณาติดต่อผู้ดูแลระบบหากต้องการเข้าถึงข้อมูล</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* ยอดขาย YoY และ การดำเนินการด่วน */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* ยอดขาย YoY */}
+        <div className="lg:col-span-2">
+          {canManageInventory() ? (
+            <SalesChart />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  ยอดขาย YoY
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-center h-40 text-muted-foreground">
+                  <div className="text-center">
+                    <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+                    <p className="text-sm">ข้อมูลนี้เฉพาะผู้บริหารเท่านั้น</p>
+                    <p className="text-xs">กรุณาติดต่อผู้ดูแลระบบหากต้องการเข้าถึงข้อมูล</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* การดำเนินการด่วน */}
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>การดำเนินการด่วน</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => window.open('/service-request', '_blank')}
+              >
+                <ClipboardList className="mr-2 h-4 w-4" />
+                แจ้งซ่อมใหม่
+              </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => setCurrentView('service')}
+              >
+                <Wrench className="mr-2 h-4 w-4" />
+                จัดการงานซ่อม
+              </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => window.location.href = '/customers'}
+              >
+                <Users className="mr-2 h-4 w-4" />
+                จัดการลูกค้า
+              </Button>
+               <Button 
+                 className="w-full justify-start" 
+                 variant="outline"
+                 onClick={() => window.location.href = '/inventory'}
+               >
+                 <DollarSign className="mr-2 h-4 w-4" />
+                 คลังสินค้า
+               </Button>
+               <Button 
+                 className="w-full justify-start" 
+                 variant="outline"
+                 onClick={() => navigate('/quotations')}
+               >
+                 <FileText className="mr-2 h-4 w-4" />
+                 สร้างใบเสนอราคา
+               </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Announcements Section */}
       <Card className="mb-6">
@@ -988,56 +1044,6 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>การดำเนินการด่วน</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button 
-                className="w-full justify-start" 
-                variant="outline"
-                onClick={() => window.open('/service-request', '_blank')}
-              >
-                <ClipboardList className="mr-2 h-4 w-4" />
-                แจ้งซ่อมใหม่
-              </Button>
-              <Button 
-                className="w-full justify-start" 
-                variant="outline"
-                onClick={() => setCurrentView('service')}
-              >
-                <Wrench className="mr-2 h-4 w-4" />
-                จัดการงานซ่อม
-              </Button>
-              <Button 
-                className="w-full justify-start" 
-                variant="outline"
-                onClick={() => window.location.href = '/customers'}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                จัดการลูกค้า
-              </Button>
-               <Button 
-                 className="w-full justify-start" 
-                 variant="outline"
-                 onClick={() => window.location.href = '/inventory'}
-               >
-                 <DollarSign className="mr-2 h-4 w-4" />
-                 คลังสินค้า
-               </Button>
-               <Button 
-                 className="w-full justify-start" 
-                 variant="outline"
-                 onClick={() => navigate('/quotations')}
-               >
-                 <FileText className="mr-2 h-4 w-4" />
-                 สร้างใบเสนอราคา
-               </Button>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </>
   );
