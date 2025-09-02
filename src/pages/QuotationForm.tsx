@@ -345,7 +345,7 @@ export default function QuotationForm() {
             product_name: product.name,
             product_sku: product.sku,
             unit_price: product.price,
-            description: `${product.brand ? product.brand + ' ' : ''}${product.name}`
+            description: `${product.brand ? product.brand + ' - ' : ''}${product.name}${product.sku ? '\nSKU: ' + product.sku : ''}${product.category ? '\nหมวดหมู่: ' + product.category : ''}${product.price ? '\nราคา: ' + product.price.toLocaleString('th-TH') + ' บาท' : ''}`
           };
           const subtotal = updatedItem.quantity * updatedItem.unit_price;
           let discountAmount = updatedItem.discount_amount;
