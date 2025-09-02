@@ -140,7 +140,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
       </div>
 
       {/* Items Table */}
-      <div className="bg-red-500 text-white text-center py-2 mb-4">
+      <div className="bg-blue-500 text-white text-center py-2 mb-4">
         <div className="grid grid-cols-12 gap-2 px-4 text-sm font-bold">
           <div className="col-span-1">ลำดับ</div>
           <div className="col-span-5">รายการ</div>
