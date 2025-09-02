@@ -86,7 +86,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
           <div className="w-24 h-24 bg-gray-100 border-2 border-gray-300 flex items-center justify-center text-gray-400 text-xs">
             {companyInfo.logo ? <img src={companyInfo.logo} alt="Logo" className="w-full h-full object-contain" /> : 'LOGO'}
           </div>
-          <div className="space-y-1 text-sm">
+          <div className="space-y-1 text-sm ml-8">
             <h1 className="font-bold text-lg">{companyInfo.name}</h1>
             <div className="text-gray-600 whitespace-pre-line">
               {companyInfo.address}
