@@ -1298,7 +1298,8 @@ export default function QuotationForm() {
                               placeholder="รายละเอียดเพิ่มเติม"
                               value={item.description}
                               onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                              className="text-sm text-right min-h-[100px] resize-y"
+                              className="text-sm text-right min-h-[100px] resize-y w-full"
+                              style={{ textAlign: 'right', direction: 'rtl' }}
                               rows={4}
                             />
                           </div>
