@@ -1276,7 +1276,7 @@ export default function QuotationForm() {
                   </div>
                   
                   <div>
-                    <Label className="text-sm font-medium mb-2 block">ใบความในบริษัท:</Label>
+                    <Label className="text-sm font-medium mb-2 block">โน๊ตภายในบริษัท:</Label>
                     <Textarea placeholder="เรื่องใบและข้อตกลงของบริษัท..." value={companyNotes} onChange={e => setCompanyNotes(e.target.value)} className="text-sm border-gray-300 bg-white" rows={4} />
                   </div>
                 </div>
