@@ -230,8 +230,8 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
               level > 0 && "ml-4 w-[calc(100%-1rem)]",
               level > 1 && "ml-8 w-[calc(100%-2rem)]",
               active 
-                ? "bg-primary/10 text-primary border border-primary/20" 
-                : "text-muted-foreground hover:text-foreground hover:bg-accent hover:border hover:border-accent"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-accent" 
+                : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 hover:border hover:border-sidebar-accent/50"
             )}
             onClick={() => handleMenuClick(item)}
           >
@@ -263,21 +263,21 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
             className={cn(
               "w-12 h-12 mx-auto",
               active 
-                ? "bg-primary/10 text-primary border border-primary/20" 
-                : "text-muted-foreground hover:text-foreground hover:bg-accent hover:border hover:border-accent"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-accent" 
+                : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 hover:border hover:border-sidebar-accent/50"
             )}
             onClick={() => handleMenuClick(item)}
           >
             <Icon className={cn("h-5 w-5", item.iconColor)} />
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="right" className="ml-2">
+        <TooltipContent side="right" className="ml-2 bg-sidebar-primary text-sidebar-primary-foreground">
           <div>
             <p>{item.title}</p>
             {hasSubmenu && (
               <div className="mt-2 space-y-1">
                 {item.submenu.map((subItem: any) => (
-                  <p key={subItem.view} className="text-xs text-muted-foreground">
+                  <p key={subItem.view} className="text-xs text-sidebar-primary-foreground/80">
                     • {subItem.title}
                   </p>
                 ))}
@@ -293,13 +293,13 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
     <TooltipProvider>
       <div 
         className={cn(
-          "flex h-full flex-col bg-card border-r border-border transition-all duration-300 ease-in-out",
+          "flex h-full flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out",
           collapsed ? "w-16" : "w-64",
           className
         )}
       >
         {/* Toggle Button */}
-        <div className="flex h-16 items-center border-b border-border">
+        <div className="flex h-16 items-center border-b border-sidebar-border">
           <Button
             variant="ghost"
             size="icon"
@@ -315,8 +315,8 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
                 <Building2 className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground">ENT GROUP</h1>
-                <p className="text-xs text-muted-foreground">Industrial PC ERP</p>
+                <h1 className="text-lg font-bold text-sidebar-foreground">ENT GROUP</h1>
+                <p className="text-xs text-sidebar-foreground/80">Industrial PC ERP</p>
               </div>
             </div>
           )}
@@ -342,10 +342,10 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
 
         {/* User Info */}
         {!collapsed && (
-          <div className="border-t border-border p-4">
+          <div className="border-t border-sidebar-border p-4">
             <button 
               onClick={onLogoClick}
-              className="w-full hover:bg-accent/50 rounded-lg p-2 transition-colors"
+              className="w-full hover:bg-sidebar-accent/50 rounded-lg p-2 transition-colors"
               title="ข้อมูลบริษัท"
             >
               <div className="flex items-center space-x-3">
@@ -353,8 +353,8 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
                   <Users className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-medium text-foreground truncate">Admin User</p>
-                  <p className="text-xs text-muted-foreground truncate">admin@entgroup.com</p>
+                  <p className="text-sm font-medium text-sidebar-foreground truncate">Admin User</p>
+                  <p className="text-xs text-sidebar-foreground/80 truncate">admin@entgroup.com</p>
                 </div>
               </div>
             </button>
@@ -363,7 +363,7 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
 
         {/* Collapsed user avatar */}
         {collapsed && (
-          <div className="border-t border-border p-2">
+          <div className="border-t border-sidebar-border p-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button 
@@ -374,10 +374,10 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
                   <Users className="h-5 w-5 text-white" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="right" className="ml-2">
+              <TooltipContent side="right" className="ml-2 bg-sidebar-primary text-sidebar-primary-foreground">
                 <p>Admin User</p>
-                <p className="text-xs text-muted-foreground">admin@entgroup.com</p>
-                <p className="text-xs text-muted-foreground mt-1">คลิกเพื่อดูข้อมูลบริษัท</p>
+                <p className="text-xs text-sidebar-primary-foreground/80">admin@entgroup.com</p>
+                <p className="text-xs text-sidebar-primary-foreground/80 mt-1">คลิกเพื่อดูข้อมูลบริษัท</p>
               </TooltipContent>
             </Tooltip>
           </div>
