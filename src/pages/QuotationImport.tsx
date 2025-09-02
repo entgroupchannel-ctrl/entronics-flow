@@ -252,7 +252,8 @@ export default function QuotationImport() {
               case 'subtotal':
               case 'vat_amount':
               case 'total_amount':
-                quotationData[systemField] = parseFloat(value) || 0;
+                const numValue = parseFloat(value);
+                quotationData[systemField] = isNaN(numValue) ? 0 : numValue;
                 break;
               
               default:
