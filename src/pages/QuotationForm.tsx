@@ -1098,12 +1098,15 @@ export default function QuotationForm() {
                     )}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {productFilter ? `พบ ${products.filter(product => 
-                      productFilter === "" || 
-                      product.name.toLowerCase().includes(productFilter.toLowerCase()) || 
-                      product.sku.toLowerCase().includes(productFilter.toLowerCase()) || 
-                      (product.brand && product.brand.toLowerCase().includes(productFilter.toLowerCase()))
-                    ).length} รายการ` : `ทั้งหมด ${products.length} รายการ`}
+                    {productFilter ? (
+                      <>พบ {products.filter(product => 
+                        product.name.toLowerCase().includes(productFilter.toLowerCase()) || 
+                        product.sku.toLowerCase().includes(productFilter.toLowerCase()) || 
+                        (product.brand && product.brand.toLowerCase().includes(productFilter.toLowerCase()))
+                      ).length} รายการ จากการค้นหา</>
+                    ) : (
+                      <>ทั้งหมด {products.length} รายการ</>
+                    )}
                   </div>
                   <Button onClick={addItem} size="sm">
                     <Plus className="w-4 h-4 mr-2" />
@@ -1154,13 +1157,21 @@ export default function QuotationForm() {
                                 position="popper"
                                 sideOffset={4}
                               >
-                                {filteredProducts.map(product => <SelectItem key={product.id} value={product.id} className="text-sm text-left hover:bg-accent">
-                                    <div className="text-left">
-                                      <div className="font-medium">{product.name}</div>
-                                      <div className="text-xs text-muted-foreground">SKU: {product.sku} | ราคา: {product.price.toLocaleString('th-TH')} บาท</div>
-                                      {product.brand && <div className="text-xs text-muted-foreground">แบรนด์: {product.brand}</div>}
-                                    </div>
-                                  </SelectItem>)}
+                                {filteredProducts.length === 0 ? (
+                                  <div className="py-6 text-center text-sm text-muted-foreground">
+                                    {productFilter ? `ไม่พบสินค้าที่ค้นหา "${productFilter}"` : 'ไม่มีสินค้าในระบบ'}
+                                  </div>
+                                ) : (
+                                  filteredProducts.map(product => (
+                                    <SelectItem key={product.id} value={product.id} className="text-sm text-left hover:bg-accent">
+                                      <div className="text-left">
+                                        <div className="font-medium">{product.name}</div>
+                                        <div className="text-xs text-muted-foreground">SKU: {product.sku} | ราคา: {product.price.toLocaleString('th-TH')} บาท</div>
+                                        {product.brand && <div className="text-xs text-muted-foreground">แบรนด์: {product.brand}</div>}
+                                      </div>
+                                    </SelectItem>
+                                  ))
+                                )}
                               </SelectContent>
                             </Select>
                             
