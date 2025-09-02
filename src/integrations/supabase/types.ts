@@ -114,6 +114,7 @@ export type Database = {
           facebook: string | null
           hq_branch: string | null
           id: string
+          last_synced_at: string | null
           line_id: string | null
           name: string
           notes: string | null
@@ -121,9 +122,11 @@ export type Database = {
           phone: string | null
           postal_code: string | null
           province: string | null
+          source_system: string | null
           status: string | null
           sub_district: string | null
           swift_code: string | null
+          sync_status: string | null
           tax_id: string | null
           updated_at: string
           website: string | null
@@ -146,6 +149,7 @@ export type Database = {
           facebook?: string | null
           hq_branch?: string | null
           id?: string
+          last_synced_at?: string | null
           line_id?: string | null
           name: string
           notes?: string | null
@@ -153,9 +157,11 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           province?: string | null
+          source_system?: string | null
           status?: string | null
           sub_district?: string | null
           swift_code?: string | null
+          sync_status?: string | null
           tax_id?: string | null
           updated_at?: string
           website?: string | null
@@ -178,6 +184,7 @@ export type Database = {
           facebook?: string | null
           hq_branch?: string | null
           id?: string
+          last_synced_at?: string | null
           line_id?: string | null
           name?: string
           notes?: string | null
@@ -185,9 +192,11 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           province?: string | null
+          source_system?: string | null
           status?: string | null
           sub_district?: string | null
           swift_code?: string | null
+          sync_status?: string | null
           tax_id?: string | null
           updated_at?: string
           website?: string | null
@@ -939,6 +948,7 @@ export type Database = {
           id: string
           is_software: boolean
           item_condition: string | null
+          last_synced_at: string | null
           name: string
           price: number
           repair_notes: string | null
@@ -946,8 +956,10 @@ export type Database = {
           repaired_date: string | null
           service_request_id: string | null
           sku: string
+          source_system: string | null
           status: string
           stock: number
+          sync_status: string | null
           updated_at: string
         }
         Insert: {
@@ -958,6 +970,7 @@ export type Database = {
           id?: string
           is_software?: boolean
           item_condition?: string | null
+          last_synced_at?: string | null
           name: string
           price?: number
           repair_notes?: string | null
@@ -965,8 +978,10 @@ export type Database = {
           repaired_date?: string | null
           service_request_id?: string | null
           sku: string
+          source_system?: string | null
           status?: string
           stock?: number
+          sync_status?: string | null
           updated_at?: string
         }
         Update: {
@@ -977,6 +992,7 @@ export type Database = {
           id?: string
           is_software?: boolean
           item_condition?: string | null
+          last_synced_at?: string | null
           name?: string
           price?: number
           repair_notes?: string | null
@@ -984,8 +1000,10 @@ export type Database = {
           repaired_date?: string | null
           service_request_id?: string | null
           sku?: string
+          source_system?: string | null
           status?: string
           stock?: number
+          sync_status?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1203,6 +1221,7 @@ export type Database = {
           customer_phone: string | null
           discount_amount: number
           discount_percentage: number
+          erp_reference_id: string | null
           id: string
           next_document_type: string | null
           notes: string | null
@@ -1213,8 +1232,11 @@ export type Database = {
           rejected_at: string | null
           rejected_by: string | null
           rejection_reason: string | null
+          source_system: string | null
           status: string
           subtotal: number
+          sync_status: string | null
+          synced_to_erp_at: string | null
           terms_conditions: string | null
           total_amount: number
           updated_at: string
@@ -1237,6 +1259,7 @@ export type Database = {
           customer_phone?: string | null
           discount_amount?: number
           discount_percentage?: number
+          erp_reference_id?: string | null
           id?: string
           next_document_type?: string | null
           notes?: string | null
@@ -1247,8 +1270,11 @@ export type Database = {
           rejected_at?: string | null
           rejected_by?: string | null
           rejection_reason?: string | null
+          source_system?: string | null
           status?: string
           subtotal?: number
+          sync_status?: string | null
+          synced_to_erp_at?: string | null
           terms_conditions?: string | null
           total_amount?: number
           updated_at?: string
@@ -1271,6 +1297,7 @@ export type Database = {
           customer_phone?: string | null
           discount_amount?: number
           discount_percentage?: number
+          erp_reference_id?: string | null
           id?: string
           next_document_type?: string | null
           notes?: string | null
@@ -1281,8 +1308,11 @@ export type Database = {
           rejected_at?: string | null
           rejected_by?: string | null
           rejection_reason?: string | null
+          source_system?: string | null
           status?: string
           subtotal?: number
+          sync_status?: string | null
+          synced_to_erp_at?: string | null
           terms_conditions?: string | null
           total_amount?: number
           updated_at?: string
@@ -1872,6 +1902,45 @@ export type Database = {
           user_id?: string | null
           vehicle_plate?: string | null
           vehicle_type?: string | null
+        }
+        Relationships: []
+      }
+      sync_logs: {
+        Row: {
+          action: string
+          created_at: string
+          error_message: string | null
+          id: string
+          payload: Json | null
+          record_id: string
+          source_system: string
+          sync_status: string
+          table_name: string
+          target_system: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          record_id: string
+          source_system: string
+          sync_status?: string
+          table_name: string
+          target_system: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          record_id?: string
+          source_system?: string
+          sync_status?: string
+          table_name?: string
+          target_system?: string
         }
         Relationships: []
       }
