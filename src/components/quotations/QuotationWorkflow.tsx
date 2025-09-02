@@ -299,6 +299,9 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
       return;
     }
 
+    // Prevent multiple clicks by checking if already loading
+    if (loading) return;
+
     setLoading(true);
     try {
       let newStatus = quotation.workflow_status;
@@ -311,31 +314,40 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
         case 'approve':
           newStatus = 'approved';
           updateData.approved_at = new Date().toISOString();
-          updateData.approved_by = (await supabase.auth.getUser()).data.user?.id;
+          // Get user safely with error handling
+          try {
+            const { data: userData, error: userError } = await supabase.auth.getUser();
+            if (!userError && userData.user) {
+              updateData.approved_by = userData.user.id;
+            }
+          } catch (userErr) {
+            console.warn('Could not get user for approval:', userErr);
+          }
           break;
         case 'reject':
           newStatus = 'rejected';
           updateData.rejected_at = new Date().toISOString();
-          updateData.rejected_by = (await supabase.auth.getUser()).data.user?.id;
+          try {
+            const { data: userData, error: userError } = await supabase.auth.getUser();
+            if (!userError && userData.user) {
+              updateData.rejected_by = userData.user.id;
+            }
+          } catch (userErr) {
+            console.warn('Could not get user for rejection:', userErr);
+          }
           updateData.rejection_reason = notes;
           break;
         case 'create_invoice':
           newStatus = 'invoice_created';
           updateData.process_type = 'standard';
-          // Create invoice and navigate
-          await createInvoiceFromQuotation(quotation.id, 'standard');
           break;
         case 'downpayment_invoice':
           newStatus = 'downpayment_invoice';
           updateData.process_type = 'downpayment';
-          // Create downpayment invoice and navigate
-          await createInvoiceFromQuotation(quotation.id, 'downpayment');
           break;
         case 'split_payment_invoice':
           newStatus = 'split_payment_invoice';
           updateData.process_type = 'split_payment';
-          // Create split payment invoice and navigate
-          await createInvoiceFromQuotation(quotation.id, 'split_payment');
           break;
         case 'create_purchase_order':
           newStatus = 'purchase_order_created';
@@ -368,6 +380,7 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
           break;
       }
 
+      // Update the quotation status first
       const { error } = await supabase
         .from('quotations')
         .update({
@@ -378,26 +391,46 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
 
       if (error) throw error;
 
-      // Only show toast if not navigating to invoice form
-      if (!['create_invoice', 'downpayment_invoice', 'split_payment_invoice'].includes(actionType)) {
+      // Handle navigation actions after successful update
+      if (['create_invoice', 'downpayment_invoice', 'split_payment_invoice'].includes(actionType)) {
+        const invoiceType = actionType === 'create_invoice' ? 'standard' : 
+                           actionType === 'downpayment_invoice' ? 'downpayment' : 'split_payment';
+        try {
+          await createInvoiceFromQuotation(quotation.id, invoiceType);
+        } catch (invoiceError) {
+          console.error('Error creating invoice:', invoiceError);
+          // Don't throw here, status was already updated successfully
+          toast({
+            title: "เตือน",
+            description: "อัปเดตสถานะสำเร็จแล้ว แต่เกิดข้อผิดพลาดในการสร้างใบแจ้งหนี้",
+            variant: "default"
+          });
+        }
+      } else {
+        // Show success toast for non-navigation actions
         toast({
           title: "อัปเดตสถานะสำเร็จ",
           description: `เปลี่ยนสถานะเป็น "${getStatusInfo(newStatus).label}" เรียบร้อยแล้ว`
         });
       }
 
+      // Reset dialog state
       setIsDialogOpen(false);
       setNotes('');
       setProcessType('standard');
+      
+      // Trigger parent update
       onStatusUpdate();
 
     } catch (error: any) {
+      console.error('Error in handleAction:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: error.message,
+        description: error.message || "ไม่สามารถอัปเดตสถานะได้",
         variant: "destructive"
       });
     } finally {
+      // Always reset loading state
       setLoading(false);
     }
   };
