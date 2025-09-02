@@ -1,86 +1,275 @@
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import 'jspdf-autotable';
 import { useToast } from '@/hooks/use-toast';
 
 interface PDFExportOptions {
   filename?: string;
-  elementId?: string;
+  quotationData?: any;
+  companyInfo?: any;
   scale?: number;
   quality?: number;
+}
+
+interface QuotationItem {
+  id: string;
+  product_name: string;
+  product_sku?: string;
+  description?: string;
+  quantity: number;
+  unit_price: number;
+  discount_amount: number;
+  line_total: number;
 }
 
 export const useQuotationPDF = () => {
   const { toast } = useToast();
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('th-TH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+    } catch {
+      return dateString;
+    }
+  };
+
+  const addQuotationHeader = (pdf: jsPDF, pageNumber: number, totalPages: number, quotationData: any, companyInfo: any) => {
+    // Company header
+    pdf.setFontSize(16);
+    pdf.setFont('Arial', 'bold');
+    pdf.text(companyInfo?.name || 'บริษัท อี เอ็น ที กรุ๊ป จำกัด (สำนักงานใหญ่)', 20, 20);
+    
+    pdf.setFontSize(9);
+    pdf.setFont('Arial', 'normal');
+    const companyAddress = companyInfo?.address || 'เลขที่ 70/5 หมู่บ้านเมทโทร บิซทาวน์แจ้งวัฒนะ 2 หมูที่ 4 ตำบลคลองพราอุดม อำเภอปากเกร็ด จังหวัดนนทบุรี 11120';
+    const addressLines = pdf.splitTextToSize(companyAddress, 160);
+    let yPos = 28;
+    addressLines.forEach((line: string) => {
+      pdf.text(line, 20, yPos);
+      yPos += 4;
+    });
+    
+    pdf.text(`เลขประจำตัวผู้เสียภาษี ${companyInfo?.taxId || '0135558013167'}`, 20, yPos);
+    yPos += 4;
+    pdf.text(`โทร. ${companyInfo?.phone || '02-045-6104'} โทรสาร ${companyInfo?.fax || '02-045-6105'}`, 20, yPos);
+    yPos += 4;
+    pdf.text(`เบอร์มือถือ ${companyInfo?.mobile || '095-7391053, 082-2497922'}`, 20, yPos);
+    yPos += 4;
+    pdf.text(`${companyInfo?.website || 'www.entgroup.co.th'} / ${companyInfo?.email || 'sales@entgroup.co.th'}`, 20, yPos);
+
+    // Quotation title
+    pdf.setFillColor(59, 130, 246);
+    pdf.rect(20, yPos + 10, 170, 8, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(14);
+    pdf.setFont('Arial', 'bold');
+    pdf.text('ใบเสนอราคา / Q U O T A T I O N', 105, yPos + 16, { align: 'center' });
+
+    // Reset text color
+    pdf.setTextColor(0, 0, 0);
+    
+    // Customer and quotation info box
+    const boxY = yPos + 25;
+    pdf.setDrawColor(0, 0, 0);
+    pdf.setLineWidth(1);
+    pdf.rect(20, boxY, 170, 25);
+    
+    // Customer info
+    pdf.setFontSize(10);
+    pdf.setFont('Arial', 'bold');
+    pdf.text('ข้อมูลลูกค้า / C U S T O M E R :', 25, boxY + 6);
+    pdf.setFont('Arial', 'normal');
+    pdf.setFontSize(9);
+    pdf.text(quotationData.customer_name || '', 25, boxY + 12);
+    
+    if (quotationData.customer_address) {
+      const custAddressLines = pdf.splitTextToSize(quotationData.customer_address, 80);
+      let custY = boxY + 16;
+      custAddressLines.slice(0, 2).forEach((line: string) => {
+        pdf.text(line, 25, custY);
+        custY += 4;
+      });
+    }
+
+    // Quotation info (right side)
+    pdf.setFont('Arial', 'bold');
+    pdf.setFontSize(10);
+    pdf.text(`REF: ${quotationData.quotation_number || 'QT2025XXXXXX'}`, 190, boxY + 6, { align: 'right' });
+    pdf.setFont('Arial', 'normal');
+    pdf.setFontSize(9);
+    pdf.text(`เลขที่: ${quotationData.quotation_number || ''}`, 190, boxY + 12, { align: 'right' });
+    pdf.text(`วันที่: ${formatDate(quotationData.quotation_date)}`, 190, boxY + 16, { align: 'right' });
+    if (quotationData.valid_until) {
+      pdf.text(`วันหมดอายุ: ${formatDate(quotationData.valid_until)}`, 190, boxY + 20, { align: 'right' });
+    }
+    pdf.text(`หน้า: ${pageNumber} จาก ${totalPages}`, 190, boxY + (quotationData.valid_until ? 24 : 20), { align: 'right' });
+
+    return boxY + 35; // Return Y position where content should start
+  };
+
   const exportToPDF = async (options: PDFExportOptions = {}) => {
-    const {
+    const { 
       filename = 'quotation.pdf',
-      elementId = 'quotation-preview',
-      scale = 2,
-      quality = 0.95
+      quotationData,
+      companyInfo
     } = options;
 
-    try {
-      const element = document.getElementById(elementId);
-      if (!element) {
-        throw new Error('ไม่พบองค์ประกอบที่จะส่งออก');
-      }
+    if (!quotationData) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่พบข้อมูลใบเสนอราคา",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      // Show loading toast
+    try {
       toast({
         title: "กำลังสร้าง PDF",
         description: "กรุณารอสักครู่...",
       });
 
-      // Configure html2canvas options
-      const canvas = await html2canvas(element, {
-        scale: scale,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: element.scrollWidth,
-        height: element.scrollHeight,
-        scrollX: 0,
-        scrollY: 0,
-      });
-
-      // Calculate PDF dimensions
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
-      // Create PDF
       const pdf = new jsPDF('p', 'mm', 'a4');
-      let position = 0;
+      const pageHeight = 297;
+      const pageWidth = 210;
+      const margin = 20;
+      const contentWidth = pageWidth - (margin * 2);
+      
+      // Calculate items per page (estimate based on average item height)
+      const itemHeight = 15; // Average height per item including description
+      const headerHeight = 70; // Height of header section
+      const footerHeight = 40; // Height for summary and signatures
+      const availableHeight = pageHeight - headerHeight - footerHeight;
+      const itemsPerPage = Math.floor(availableHeight / itemHeight);
+      
+      const items = quotationData.items || [];
+      const totalPages = Math.ceil(items.length / itemsPerPage) || 1;
+      
+      let currentPage = 1;
+      let itemIndex = 0;
 
-      // Add first page
-      pdf.addImage(
-        canvas.toDataURL('image/jpeg', quality),
-        'JPEG',
-        0,
-        position,
-        imgWidth,
-        imgHeight
-      );
-      heightLeft -= pageHeight;
+      while (currentPage <= totalPages) {
+        if (currentPage > 1) {
+          pdf.addPage();
+        }
 
-      // Add additional pages if needed
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(
-          canvas.toDataURL('image/jpeg', quality),
-          'JPEG',
-          0,
-          position,
-          imgWidth,
-          imgHeight
-        );
-        heightLeft -= pageHeight;
+        // Add header for each page
+        const contentStartY = addQuotationHeader(pdf, currentPage, totalPages, quotationData, companyInfo);
+
+        // Table header
+        pdf.setFillColor(59, 130, 246);
+        pdf.rect(20, contentStartY, 170, 8, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(9);
+        pdf.setFont('Arial', 'bold');
+        
+        // Column headers
+        pdf.text('ลำดับ', 25, contentStartY + 5, { align: 'center' });
+        pdf.text('รายการ', 60, contentStartY + 5, { align: 'center' });
+        pdf.text('จำนวน', 125, contentStartY + 5, { align: 'center' });
+        pdf.text('ราคาต่อหน่วย', 145, contentStartY + 5, { align: 'center' });
+        pdf.text('ส่วนลด', 165, contentStartY + 5, { align: 'center' });
+        pdf.text('จำนวนเงิน', 185, contentStartY + 5, { align: 'right' });
+
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFont('Arial', 'normal');
+
+        // Add items for this page
+        let yPos = contentStartY + 12;
+        const itemsOnThisPage = items.slice(itemIndex, itemIndex + itemsPerPage);
+        
+        itemsOnThisPage.forEach((item: QuotationItem, index: number) => {
+          const globalIndex = itemIndex + index + 1;
+          
+          // Draw item row
+          pdf.setDrawColor(200, 200, 200);
+          pdf.setLineWidth(0.5);
+          pdf.line(20, yPos + 8, 190, yPos + 8);
+          
+          pdf.setFontSize(8);
+          // Item number
+          pdf.text(globalIndex.toString(), 25, yPos + 3, { align: 'center' });
+          
+          // Item details
+          pdf.setFont('Arial', 'bold');
+          const itemNameLines = pdf.splitTextToSize(item.product_name, 55);
+          pdf.text(itemNameLines[0] || '', 30, yPos + 3);
+          
+          if (item.product_sku) {
+            pdf.setFont('Arial', 'normal');
+            pdf.setFontSize(7);
+            pdf.text(`SKU: ${item.product_sku}`, 30, yPos + 7);
+          }
+          
+          if (item.description) {
+            pdf.setFont('Arial', 'normal');
+            pdf.setFontSize(7);
+            const descLines = pdf.splitTextToSize(item.description, 55);
+            let descY = yPos + (item.product_sku ? 11 : 7);
+            descLines.slice(0, 2).forEach((line: string) => {
+              pdf.text(line, 30, descY);
+              descY += 3;
+            });
+          }
+          
+          pdf.setFont('Arial', 'normal');
+          pdf.setFontSize(8);
+          
+          // Quantity
+          pdf.text(item.quantity.toString(), 125, yPos + 3, { align: 'center' });
+          
+          // Unit price
+          pdf.text(formatCurrency(item.unit_price), 155, yPos + 3, { align: 'right' });
+          
+          // Discount
+          pdf.text(formatCurrency(item.discount_amount), 172, yPos + 3, { align: 'right' });
+          
+          // Line total
+          pdf.text(formatCurrency(item.line_total), 185, yPos + 3, { align: 'right' });
+          
+          yPos += itemHeight;
+        });
+
+        // Add summary on last page
+        if (currentPage === totalPages) {
+          yPos += 10;
+          
+          // Summary box
+          pdf.setFillColor(248, 249, 250);
+          pdf.rect(130, yPos, 60, 30, 'F');
+          pdf.setDrawColor(0, 0, 0);
+          pdf.rect(130, yPos, 60, 30);
+          
+          pdf.setFontSize(9);
+          pdf.text('ยอดรวม:', 135, yPos + 6);
+          pdf.text(formatCurrency(quotationData.subtotal), 185, yPos + 6, { align: 'right' });
+          
+          if (quotationData.discount_amount > 0) {
+            pdf.text(`ส่วนลด (${quotationData.discount_percentage}%):`, 135, yPos + 12);
+            pdf.text(`-${formatCurrency(quotationData.discount_amount)}`, 185, yPos + 12, { align: 'right' });
+          }
+          
+          pdf.text('ภาษีมูลค่าเพิ่ม 7%:', 135, yPos + (quotationData.discount_amount > 0 ? 18 : 12));
+          pdf.text(formatCurrency(quotationData.vat_amount), 185, yPos + (quotationData.discount_amount > 0 ? 18 : 12), { align: 'right' });
+          
+          pdf.setFont('Arial', 'bold');
+          const totalY = yPos + (quotationData.discount_amount > 0 ? 24 : 18);
+          pdf.line(130, totalY - 2, 190, totalY - 2);
+          pdf.text('ยอดรวมทั้งสิ้น:', 135, totalY + 2);
+          pdf.text(formatCurrency(quotationData.total_amount), 185, totalY + 2, { align: 'right' });
+        }
+
+        itemIndex += itemsPerPage;
+        currentPage++;
       }
 
-      // Save the PDF
       pdf.save(filename);
 
       toast({
