@@ -453,6 +453,29 @@ const Index = () => {
         </div>
       </div>
 
+      {/* ยอดขาย YoY - ย้ายมาไว้ตำแหน่งบนสุด */}
+      {canManageInventory() ? (
+        <SalesChart />
+      ) : (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              ยอดขาย YoY
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center h-40 text-muted-foreground">
+              <div className="text-center">
+                <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+                <p className="text-sm">ข้อมูลนี้เฉพาะผู้บริหารเท่านั้น</p>
+                <p className="text-xs">กรุณาติดต่อผู้ดูแลระบบหากต้องการเข้าถึงข้อมูล</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Announcements Section */}
       <Card className="mb-6">
         <CardHeader>
@@ -965,32 +988,8 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Sales Chart & Quick Actions */}
+        {/* Quick Actions */}
         <div className="space-y-4">
-          {/* ยอดขาย YoY - แสดงเฉพาะผู้บริหาร */}
-          {canManageInventory() ? (
-            <SalesChart />
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
-                  ยอดขาย YoY
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center h-40 text-muted-foreground">
-                  <div className="text-center">
-                    <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-                    <p className="text-sm">ข้อมูลนี้เฉพาะผู้บริหารเท่านั้น</p>
-                    <p className="text-xs">กรุณาติดต่อผู้ดูแลระบบหากต้องการเข้าถึงข้อมูล</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          {/* Quick Actions */}
           <Card>
             <CardHeader>
               <CardTitle>การดำเนินการด่วน</CardTitle>
