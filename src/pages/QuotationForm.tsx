@@ -925,12 +925,17 @@ export default function QuotationForm() {
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[400px] p-0 bg-background border shadow-lg z-[1000]" align="start">
+                      <PopoverContent className="w-[500px] p-0 bg-background border shadow-lg z-[1000]" align="start">
                         <Command className="bg-background">
-                          <CommandInput placeholder="พิมพ์เพื่อค้นหาลูกค้า..." value={customerSearchValue} onValueChange={value => {
-                          console.log('Search value:', value);
-                          setCustomerSearchValue(value);
-                        }} className="bg-background" />
+                          <CommandInput 
+                            placeholder="พิมพ์เพื่อค้นหาลูกค้า..." 
+                            value={customerSearchValue} 
+                            onValueChange={value => {
+                              console.log('Search value:', value);
+                              setCustomerSearchValue(value);
+                            }} 
+                            className="bg-background h-12 text-base px-4" 
+                          />
                           <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
                             ไม่พบลูกค้าที่ค้นหา
                           </CommandEmpty>
