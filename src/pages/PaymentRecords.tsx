@@ -545,25 +545,23 @@ export default function PaymentRecords() {
                   <Card key={payment.id} className="border border-slate-200 hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
                       {/* First Row - Main Information */}
-                      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center mb-3">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center mb-3">
                         <div className="space-y-1">
                           <div className="text-xs text-muted-foreground">หมายเลขการชำระ</div>
                           <div className="font-semibold text-blue-600">{payment.payment_number}</div>
+                          <div className="text-sm font-medium text-slate-700">{payment.tax_invoices?.customer_name}</div>
                         </div>
                         
                         <div className="space-y-1">
                           <div className="text-xs text-muted-foreground">ใบกำกับภาษี</div>
                           <div className="font-medium">{payment.tax_invoices?.tax_invoice_number}</div>
-                        </div>
-                        
-                        <div className="space-y-1">
-                          <div className="text-xs text-muted-foreground">ลูกค้า</div>
-                          <div className="font-medium">{payment.tax_invoices?.customer_name}</div>
+                          <div className="text-xs text-slate-500">{payment.payment_method}</div>
                         </div>
                         
                         <div className="space-y-1">
                           <div className="text-xs text-muted-foreground">จำนวนเงิน</div>
                           <div className="font-bold text-green-600 text-lg">฿{payment.amount_received.toLocaleString()}</div>
+                          <div className="text-xs text-slate-500">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</div>
                         </div>
                         
                         <div className="flex justify-end">
@@ -581,22 +579,10 @@ export default function PaymentRecords() {
                         </div>
                       </div>
 
-                      {/* Second Row - Additional Information & Actions */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center pt-3 border-t border-slate-100">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <div className="text-xs text-muted-foreground">วิธีการชำระ</div>
-                            <div className="text-sm">{payment.payment_method}</div>
-                          </div>
-                          
-                          <div className="space-y-1">
-                            <div className="text-xs text-muted-foreground">วันที่ชำระ</div>
-                            <div className="text-sm">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</div>
-                          </div>
-                        </div>
-
-                        {/* Status Actions */}
-                        <div className="flex flex-wrap gap-2">
+                      {/* Second Row - Actions & Status */}
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                        {/* Status Actions - All buttons in a horizontal row */}
+                        <div className="flex gap-2">
                           {payment.verification_status === 'pending' && (
                             <>
                               <Button
@@ -616,6 +602,15 @@ export default function PaymentRecords() {
                               >
                                 <XCircle className="w-4 h-4 mr-1.5" />
                                 ปฏิเสธ
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
+                                onClick={() => handleDeletePayment(payment.id)}
+                              >
+                                <Trash2 className="w-4 h-4 mr-1.5" />
+                                ลบ
                               </Button>
                             </>
                           )}
@@ -640,34 +635,44 @@ export default function PaymentRecords() {
                                 <RotateCcw className="w-4 h-4 mr-1.5" />
                                 รีเซ็ต
                               </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
+                                onClick={() => handleDeletePayment(payment.id)}
+                              >
+                                <Trash2 className="w-4 h-4 mr-1.5" />
+                                ลบ
+                              </Button>
                             </>
                           )}
                           
                           {payment.verification_status === 'rejected' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 hover:shadow-md transition-all duration-200 font-medium"
-                              onClick={() => handleResetPayment(payment.id)}
-                            >
-                              <RotateCcw className="w-4 h-4 mr-1.5" />
-                              รีเซ็ต
-                            </Button>
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 hover:shadow-md transition-all duration-200 font-medium"
+                                onClick={() => handleResetPayment(payment.id)}
+                              >
+                                <RotateCcw className="w-4 h-4 mr-1.5" />
+                                รีเซ็ต
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
+                                onClick={() => handleDeletePayment(payment.id)}
+                              >
+                                <Trash2 className="w-4 h-4 mr-1.5" />
+                                ลบ
+                              </Button>
+                            </>
                           )}
-                          
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
-                            onClick={() => handleDeletePayment(payment.id)}
-                          >
-                            <Trash2 className="w-4 h-4 mr-1.5" />
-                            ลบ
-                          </Button>
                         </div>
 
                         {/* Status Badge & Menu */}
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center gap-2">
                           {getStatusBadge(payment.verification_status)}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
