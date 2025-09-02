@@ -1,6 +1,9 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
+import { Button } from '@/components/ui/button';
+import { Download, Printer } from 'lucide-react';
+import { useQuotationPDF, generateQuotationFilename } from './QuotationPDF';
 interface QuotationItem {
   id: string;
   product_name: string;
@@ -45,6 +48,7 @@ interface QuotationPreviewProps {
   companyInfo?: CompanyInfo;
   printMode?: boolean;
   className?: string;
+  showExportButtons?: boolean;
 }
 const defaultCompanyInfo: CompanyInfo = {
   name: "บริษัท อี เอ็น ที กรุ๊ป จำกัด (สำนักงานใหญ่)",
@@ -60,8 +64,10 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
   quotationData,
   companyInfo = defaultCompanyInfo,
   printMode = false,
-  className = ""
+  className = "",
+  showExportButtons = true
 }) => {
+  const { exportToPDF, printQuotation } = useQuotationPDF();
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('th-TH', {
       minimumFractionDigits: 2,
@@ -78,7 +84,35 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
       return dateString;
     }
   };
-  return <div className={`bg-white ${printMode ? 'p-8' : 'p-6'} ${className}`} id="quotation-preview">
+  const handleExportPDF = async () => {
+    await exportToPDF({
+      filename: generateQuotationFilename(quotationData.quotation_number),
+      quotationData,
+      companyInfo
+    });
+  };
+
+  const handlePrint = async () => {
+    await printQuotation('quotation-preview');
+  };
+
+  return (
+    <div className={`${printMode ? '' : 'space-y-4'}`}>
+      {/* Export Buttons */}
+      {showExportButtons && !printMode && (
+        <div className="flex gap-4 mb-6 no-print">
+          <Button onClick={handleExportPDF} className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            ส่งออก PDF
+          </Button>
+          <Button onClick={handlePrint} variant="outline" className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            พิมพ์
+          </Button>
+        </div>
+      )}
+
+      <div className={`bg-white ${printMode ? 'p-8' : 'p-6'} ${className}`} id="quotation-preview">
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
         {/* Company Logo and Info */}
@@ -116,11 +150,11 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
       <div className="border-2 border-gray-500 rounded p-4 mb-6">
         <div className="grid grid-cols-2 gap-8">
           {/* Customer Info */}
-          <div className="space-y-2">
-            <div className="text-gray-500 font-bold">ข้อมูลลูกค้า / C U S T O M E R :</div>
-            <div className="text-sm space-y-1">
-              
-              {quotationData.customer_address && <div className="whitespace-pre-line">{quotationData.customer_address}</div>}
+            <div className="space-y-2">
+              <div className="text-gray-500 font-bold">ข้อมูลลูกค้า / C U S T O M E R :</div>
+              <div className="text-sm space-y-1">
+                <div>{quotationData.customer_name}</div>
+                {quotationData.customer_address && <div className="whitespace-pre-line">{quotationData.customer_address}</div>}
               {quotationData.customer_phone && <div>TEL: {quotationData.customer_phone}</div>}
               {quotationData.customer_email && <div>EMAIL: {quotationData.customer_email}</div>}
             </div>
@@ -226,6 +260,8 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
 
       {/* Footer */}
       <div className="text-center text-xs text-gray-500 mt-8 border-t pt-4">บริษัท อีเอ็น ทีกรุ๊ป จำกัด</div>
-    </div>;
+      </div>
+    </div>
+  );
 };
 export default QuotationPreview;
