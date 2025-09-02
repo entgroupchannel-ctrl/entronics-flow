@@ -230,8 +230,8 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
               level > 0 && "ml-4 w-[calc(100%-1rem)]",
               level > 1 && "ml-8 w-[calc(100%-2rem)]",
               active 
-                ? "bg-blue-600 text-white shadow-md border border-blue-700" 
-                : "text-slate-600 hover:text-slate-900 hover:bg-blue-50 hover:border hover:border-blue-200"
+                ? "bg-primary/10 text-primary border border-primary/20" 
+                : "text-muted-foreground hover:text-foreground hover:bg-accent hover:border hover:border-accent"
             )}
             onClick={() => handleMenuClick(item)}
           >
@@ -263,8 +263,8 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
             className={cn(
               "w-12 h-12 mx-auto",
               active 
-                ? "bg-blue-600 text-white shadow-md border border-blue-700" 
-                : "text-slate-600 hover:text-slate-900 hover:bg-blue-50 hover:border hover:border-blue-200"
+                ? "bg-primary/10 text-primary border border-primary/20" 
+                : "text-muted-foreground hover:text-foreground hover:bg-accent hover:border hover:border-accent"
             )}
             onClick={() => handleMenuClick(item)}
           >
