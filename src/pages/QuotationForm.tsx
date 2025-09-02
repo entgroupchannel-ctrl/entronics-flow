@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, Printer, Share, Download, MoreHorizontal, Check, ChevronsUpDown } from 'lucide-react';
+import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, Printer, Share, Download, MoreHorizontal, Check, ChevronsUpDown, ChevronUp, ChevronDown, Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
@@ -124,6 +124,7 @@ export default function QuotationForm() {
   const [includeVat, setIncludeVat] = useState(true);
   const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
   const [customerSearchValue, setCustomerSearchValue] = useState("");
+  const [productFilter, setProductFilter] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -332,6 +333,24 @@ export default function QuotationForm() {
 
   const removeItem = (id: string) => {
     setItems(items.filter(item => item.id !== id));
+  };
+
+  const moveItem = (id: string, direction: 'up' | 'down') => {
+    const currentIndex = items.findIndex(item => item.id === id);
+    if (currentIndex === -1) return;
+    
+    let newIndex;
+    if (direction === 'up' && currentIndex > 0) {
+      newIndex = currentIndex - 1;
+    } else if (direction === 'down' && currentIndex < items.length - 1) {
+      newIndex = currentIndex + 1;
+    } else {
+      return;
+    }
+    
+    const newItems = [...items];
+    [newItems[currentIndex], newItems[newIndex]] = [newItems[newIndex], newItems[currentIndex]];
+    setItems(newItems);
   };
 
   const selectProduct = (itemId: string, productId: string) => {
@@ -1184,113 +1203,159 @@ export default function QuotationForm() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">รายการสินค้า</h3>
-                <Button onClick={addItem} size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  เพิ่มรายการ
-                </Button>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-[300px]">
+                    <Search className="w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="ค้นหาสินค้า..."
+                      value={productFilter}
+                      onChange={(e) => setProductFilter(e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  <Button onClick={addItem} size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    เพิ่มรายการ
+                  </Button>
+                </div>
               </div>
 
               <Table>
                 <TableHeader>
                   <TableRow className="bg-primary hover:bg-primary">
                     <TableHead className="w-16 text-primary-foreground font-semibold text-center">ลำดับ</TableHead>
-                    <TableHead className="w-[30%] text-primary-foreground font-semibold">รายการสินค้า</TableHead>
-                    <TableHead className="w-28 text-primary-foreground font-semibold text-center">จำนวน</TableHead>
-                    <TableHead className="w-40 text-primary-foreground font-semibold text-center">ราคาต่อหน่วย</TableHead>
-                    <TableHead className="w-36 text-primary-foreground font-semibold text-center">ส่วนลด</TableHead>
+                    <TableHead className="w-[40%] text-primary-foreground font-semibold">รายการสินค้า</TableHead>
+                    <TableHead className="w-28 text-primary-foreground font-semibold text-center align-top">จำนวน</TableHead>
+                    <TableHead className="w-40 text-primary-foreground font-semibold text-center align-top">ราคาต่อหน่วย</TableHead>
+                    <TableHead className="w-36 text-primary-foreground font-semibold text-center align-top">ส่วนลด</TableHead>
                     <TableHead className="w-24 text-primary-foreground font-semibold text-center">รวม</TableHead>
-                    <TableHead className="w-12 text-primary-foreground"></TableHead>
+                    <TableHead className="w-20 text-primary-foreground"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {items.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="w-16 text-center">
-                        <div className="flex items-center justify-center h-full">
-                          <span className="font-medium text-muted-foreground">
-                            {index + 1}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="w-[30%]">
-                        <div className="space-y-2">
-                          <Select onValueChange={(value) => selectProduct(item.id, value)}>
-                            <SelectTrigger className="text-sm">
-                              <SelectValue placeholder="เลือกสินค้า" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {products.map(product => (
-                                <SelectItem key={product.id} value={product.id} className="text-sm">
-                                  {product.name} - {product.sku}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Textarea
-                            placeholder="รายละเอียดเพิ่มเติม (สามารถกรอกได้สูงสุด 1500 ตัวอักษร)"
-                            value={item.description}
-                            onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                            className="text-sm min-h-[60px] resize-y"
-                            maxLength={1500}
-                            rows={3}
-                          />
-                        </div>
-                      </TableCell>
-                      <TableCell className="w-28">
-                        <Input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(item.id, 'quantity', Number(e.target.value))}
-                          min="1"
-                          className="text-center"
-                        />
-                      </TableCell>
-                      <TableCell className="w-40">
-                        <Input
-                          type="number"
-                          value={item.unit_price}
-                          onChange={(e) => updateItem(item.id, 'unit_price', Number(e.target.value))}
-                          min="0"
-                          step="0.01"
-                          className="text-right"
-                          placeholder="0.00"
-                        />
-                      </TableCell>
-                      <TableCell className="w-36">
-                        <div className="flex gap-1">
+                  {items.map((item, index) => {
+                    const filteredProducts = products.filter(product => 
+                      productFilter === "" || 
+                      product.name.toLowerCase().includes(productFilter.toLowerCase()) ||
+                      product.sku.toLowerCase().includes(productFilter.toLowerCase()) ||
+                      (product.brand && product.brand.toLowerCase().includes(productFilter.toLowerCase()))
+                    );
+
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell className="w-16 text-center">
+                          <div className="flex flex-col items-center gap-1 h-full">
+                            <span className="font-medium text-muted-foreground">
+                              {index + 1}
+                            </span>
+                            <div className="flex flex-col gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => moveItem(item.id, 'up')}
+                                disabled={index === 0}
+                                className="h-6 w-6 p-0 hover:bg-accent"
+                              >
+                                <ChevronUp className="w-3 h-3" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => moveItem(item.id, 'down')}
+                                disabled={index === items.length - 1}
+                                className="h-6 w-6 p-0 hover:bg-accent"
+                              >
+                                <ChevronDown className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="w-[40%]">
+                          <div className="space-y-2">
+                            <Select onValueChange={(value) => selectProduct(item.id, value)}>
+                              <SelectTrigger className="text-sm text-left">
+                                <SelectValue placeholder="เลือกสินค้า" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-background border border-border shadow-lg z-50">
+                                {filteredProducts.map(product => (
+                                  <SelectItem key={product.id} value={product.id} className="text-sm text-left hover:bg-accent">
+                                    <div className="text-left">
+                                      <div className="font-medium">{product.name}</div>
+                                      <div className="text-xs text-muted-foreground">SKU: {product.sku}</div>
+                                      {product.brand && (
+                                        <div className="text-xs text-muted-foreground">แบรนด์: {product.brand}</div>
+                                      )}
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Textarea
+                              placeholder="รายละเอียดเพิ่มเติม (สามารถกรอกได้สูงสุด 1500 ตัวอักษร)"
+                              value={item.description}
+                              onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                              className="text-sm min-h-[100px] resize-y"
+                              maxLength={1500}
+                              rows={4}
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell className="w-28 align-top">
                           <Input
                             type="number"
-                            value={item.discount_amount}
-                            onChange={(e) => updateItem(item.id, 'discount_amount', Number(e.target.value))}
+                            value={item.quantity}
+                            onChange={(e) => updateItem(item.id, 'quantity', Number(e.target.value))}
+                            min="1"
+                            className="text-center"
+                          />
+                        </TableCell>
+                        <TableCell className="w-40 align-top">
+                          <Input
+                            type="number"
+                            value={item.unit_price}
+                            onChange={(e) => updateItem(item.id, 'unit_price', Number(e.target.value))}
                             min="0"
                             step="0.01"
-                            className="text-right flex-1 min-w-[80px]"
-                            placeholder="0"
+                            className="text-right"
+                            placeholder="0.00"
                           />
-                          <Select
-                            value={item.discount_type}
-                            onValueChange={(value: 'amount' | 'percentage') => updateItem(item.id, 'discount_type', value)}
-                          >
-                            <SelectTrigger className="w-16 bg-background border border-border">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-background border border-border shadow-lg z-50">
-                              <SelectItem value="amount" className="hover:bg-accent">บาท</SelectItem>
-                              <SelectItem value="percentage" className="hover:bg-accent">%</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </TableCell>
-                      <TableCell className="w-24 font-medium text-right">
-                        {item.line_total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-                      </TableCell>
-                      <TableCell className="w-12">
-                        <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell className="w-36 align-top">
+                          <div className="flex gap-1">
+                            <Input
+                              type="number"
+                              value={item.discount_amount}
+                              onChange={(e) => updateItem(item.id, 'discount_amount', Number(e.target.value))}
+                              min="0"
+                              step="0.01"
+                              className="text-right flex-1 min-w-[80px]"
+                              placeholder="0"
+                            />
+                            <Select
+                              value={item.discount_type}
+                              onValueChange={(value: 'amount' | 'percentage') => updateItem(item.id, 'discount_type', value)}
+                            >
+                              <SelectTrigger className="w-16 bg-background border border-border">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-background border border-border shadow-lg z-50">
+                                <SelectItem value="amount" className="hover:bg-accent">บาท</SelectItem>
+                                <SelectItem value="percentage" className="hover:bg-accent">%</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </TableCell>
+                        <TableCell className="w-24 font-medium text-right">
+                          {item.line_total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell className="w-20">
+                          <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
