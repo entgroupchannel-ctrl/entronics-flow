@@ -128,7 +128,43 @@ export default function TaxInvoices() {
       case 'ดำเนินการแล้ว':
         return <Badge variant="default" className="bg-green-100 text-green-800">ดำเนินการแล้ว</Badge>;
       case 'draft':
-        return <Badge variant="default" className="bg-green-100 text-green-800">สร้างใบเสร็จรับเงิน</Badge>;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-green-100 text-green-800 border-green-200 hover:bg-green-200 h-6 px-2 text-xs"
+              >
+                สร้างใบเสร็จรับเงิน
+                <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="z-50 bg-white border border-gray-200 shadow-lg" align="start">
+              <DropdownMenuItem className="cursor-pointer hover:bg-gray-100">
+                <Receipt className="w-4 h-4 mr-2" />
+                สร้างใบเสร็จรับเงิน
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer hover:bg-gray-100">
+                <FileText className="w-4 h-4 mr-2" />
+                สร้างใบวางบิลรวม
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer hover:bg-gray-100">
+                <Receipt className="w-4 h-4 mr-2" />
+                สร้างใบเสร็จรวม
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer hover:bg-gray-100">
+                <div className="flex items-center text-orange-600">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  แบ่งรับชำระเงิน
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
