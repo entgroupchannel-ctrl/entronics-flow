@@ -642,11 +642,18 @@ export default function QuotationImport() {
               {errors.length > 0 && (
                 <div className="mt-4">
                   <h4 className="font-medium mb-2">รายการข้อผิดพลาด:</h4>
-                  <div className="max-h-32 overflow-auto space-y-1">
-                    {errors.slice(0, 10).map((error, index) => (
-                      <div key={index} className="text-sm text-destructive">
-                        แถว {error.row}: {error.message}
-                        {error.value && <span className="text-xs ml-2">({error.value})</span>}
+                  <div className="max-h-48 overflow-auto space-y-2">
+                    {errors.slice(0, 20).map((error, index) => (
+                      <div key={index} className="p-2 bg-destructive/10 rounded text-sm">
+                        <div className="font-medium text-destructive">
+                          แถว {error.row} - {systemFields[error.field as keyof typeof systemFields] || error.field}:
+                        </div>
+                        <div className="text-destructive/80">{error.message}</div>
+                        {error.value !== undefined && error.value !== null && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            ค่าที่พบ: "{error.value}"
+                          </div>
+                        )}
                       </div>
                     ))}
                     {errors.length > 10 && (
