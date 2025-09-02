@@ -113,10 +113,17 @@ export default function PaymentRecords() {
       if (error) throw error;
       setTaxInvoices(data || []);
       
+      // Auto-fill form data if there's a preselected invoice
       if (preSelectedTaxInvoiceId && data) {
         const selectedInvoice = data.find(inv => inv.id === preSelectedTaxInvoiceId);
         if (selectedInvoice) {
           setSelectedTaxInvoice(selectedInvoice);
+          // Auto-fill the amount with invoice total
+          setFormData(prev => ({ 
+            ...prev, 
+            tax_invoice_id: preSelectedTaxInvoiceId,
+            amount_received: selectedInvoice.total_amount 
+          }));
         }
       }
     } catch (error) {
