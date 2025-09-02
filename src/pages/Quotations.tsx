@@ -360,15 +360,6 @@ export default function Quotations() {
                 </Button>
               </div>
 
-              <TabsList className="grid w-full grid-cols-1 max-w-md bg-muted/50 p-1 rounded-lg">
-                <TabsTrigger 
-                  value="quotations" 
-                  className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
-                >
-                  <FileText className="w-4 h-4" />
-                  รายการใบเสนอราคา
-                </TabsTrigger>
-              </TabsList>
 
               <TabsContent value="quotations" className="space-y-6">
                 {/* Search and Filter Section */}
