@@ -47,13 +47,14 @@ interface QuotationPreviewProps {
   className?: string;
 }
 const defaultCompanyInfo: CompanyInfo = {
-  name: "ENT GROUP CO., LTD.",
-  address: "70/5 Metro Beach Town Chaeng Watthana 2 Village, Moo 4\nKhlong Thanon Praditsathan, Pak Kret, Nonthaburi 11120",
+  name: "บริษัท อีเอ็น ทีกรุ๊ป จำกัด (สำนักงานใหญ่)",
+  address: "เลขที่ 70/5 หมู่บ้านเมทโทร บิซทาวน์แจ้งวัฒนะ 2 หมูที่ 4 ตำบลคลองพระอุดม อำเภอปกเกร็ด จังหวัดนนทบุรี 11120",
   taxId: "0135558013167",
   phone: "02-045-6104",
   mobile: "095-7391053, 082-2497922",
   fax: "02-045-6105",
-  website: "www.entgroup.co.th"
+  website: "www.entgroup.co.th",
+  email: "sales@entgroup.co.th"
 };
 export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
   quotationData,
@@ -91,13 +92,19 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
               {companyInfo.address}
             </div>
             <div className="text-gray-600">
-              TAX ID: {companyInfo.taxId}
+              เลขประจำตัวผู้เสียภาษี {companyInfo.taxId}
             </div>
             <div className="text-gray-600">
-              TEL: {companyInfo.phone} | MOBILE: {companyInfo.mobile}
+              โทร. {companyInfo.phone}
+            </div>
+            <div className="text-gray-600">
+              เบอร์มือถือ {companyInfo.mobile}
             </div>
             {companyInfo.fax && <div className="text-gray-600">
-                FAX: {companyInfo.fax} | {companyInfo.website}
+                โทรสาร {companyInfo.fax}
+              </div>}
+            {companyInfo.website && <div className="text-gray-600">
+                {companyInfo.website} / {companyInfo.email}
               </div>}
           </div>
         </div>
