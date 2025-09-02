@@ -1039,7 +1039,7 @@ export default function QuotationForm() {
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className={cn("w-full justify-between text-right font-normal", !quotation.valid_until && "text-muted-foreground")}>
-                          {quotation.valid_until ? format(new Date(quotation.valid_until), "dd/MM/yyyy") : <span>เลือกวันที่</span>}
+                          {quotation.valid_until ? format(new Date(quotation.valid_until), "dd/MM/yyyy") : <span>B</span>}
                           <CalendarIcon className="h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -1179,7 +1179,7 @@ export default function QuotationForm() {
                             </Select>
                           </div>
                         </TableCell>
-                        <TableCell className="w-24 font-medium text-right align-top">
+                        <TableCell className="w-24 font-medium text-right">
                           {item.line_total.toLocaleString('th-TH', {
                         minimumFractionDigits: 2
                       })}
