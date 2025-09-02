@@ -199,7 +199,8 @@ export default function QuotationImport() {
       if (!row.customer_name) {
         errors.push({ row: index + 2, field: 'customer_name', message: 'กรุณากรอกชื่อลูกค้า' });
       }
-      if (!row.total_amount || parseFloat(row.total_amount) <= 0) {
+      const totalAmount = parseFloat(row.total_amount);
+      if (!row.total_amount || isNaN(totalAmount) || totalAmount <= 0) {
         errors.push({ row: index + 2, field: 'total_amount', message: 'ยอดรวมต้องมากกว่า 0', value: row.total_amount });
       }
     });
@@ -287,7 +288,7 @@ export default function QuotationImport() {
           hasValidationError = true;
         }
 
-        if (quotationData.total_amount <= 0) {
+        if (isNaN(quotationData.total_amount) || quotationData.total_amount <= 0) {
           validationErrors.push({
             row: i + 2,
             field: 'total_amount',
