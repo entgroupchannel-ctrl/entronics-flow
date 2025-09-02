@@ -345,7 +345,7 @@ export default function QuotationForm() {
             product_name: product.name,
             product_sku: product.sku,
             unit_price: product.price,
-            description: `${product.brand ? product.brand + ' - ' : ''}${product.name}${product.sku ? '\nSKU: ' + product.sku : ''}${product.category ? '\nหมวดหมู่: ' + product.category : ''}${product.price ? '\nราคา: ' + product.price.toLocaleString('th-TH') + ' บาท' : ''}`
+            description: `ชื่อสินค้า: ${product.name}${product.brand ? '\nแบรนด์: ' + product.brand : ''}${product.sku ? '\nรหัสสินค้า (SKU): ' + product.sku : ''}${product.category ? '\nหมวดหมู่: ' + product.category : ''}${product.price ? '\nราคาต่อหน่วย: ' + product.price.toLocaleString('th-TH') + ' บาท' : ''}${product.brand || product.category ? '\n\nรายละเอียดเพิ่มเติม: ' : ''}`
           };
           const subtotal = updatedItem.quantity * updatedItem.unit_price;
           let discountAmount = updatedItem.discount_amount;
@@ -1148,7 +1148,7 @@ export default function QuotationForm() {
                             
 
                             <div>
-                              <Textarea placeholder="รายละเอียดเพิ่มเติม" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} className="text-sm text-left min-h-[80px] resize-y w-full mt-1" rows={3} />
+                              <Textarea placeholder="รายละเอียดสินค้าจะแสดงที่นี่เมื่อเลือกสินค้า..." value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} className="text-sm text-left min-h-[120px] resize-y w-full mt-1" rows={6} />
                             </div>
                           </div>
                         </TableCell>
