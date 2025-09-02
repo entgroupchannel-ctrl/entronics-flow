@@ -602,19 +602,19 @@ export default function PaymentRecords() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                                className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-green-100 hover:border-emerald-300 hover:shadow-md transition-all duration-200 font-medium"
                                 onClick={() => handleVerifyPayment(payment.id, 'verified')}
                               >
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                บันทึก
+                                <CheckCircle className="w-4 h-4 mr-1.5" />
+                                สร้างใบเสร็จ
                               </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                                className="bg-gradient-to-r from-rose-50 to-red-50 border-rose-200 text-rose-700 hover:from-rose-100 hover:to-red-100 hover:border-rose-300 hover:shadow-md transition-all duration-200 font-medium"
                                 onClick={() => handleVerifyPayment(payment.id, 'rejected')}
                               >
-                                <XCircle className="w-4 h-4 mr-1" />
+                                <XCircle className="w-4 h-4 mr-1.5" />
                                 ปฏิเสธ
                               </Button>
                             </>
@@ -625,19 +625,19 @@ export default function PaymentRecords() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                                className="bg-gradient-to-r from-sky-50 to-blue-50 border-sky-200 text-sky-700 hover:from-sky-100 hover:to-blue-100 hover:border-sky-300 hover:shadow-md transition-all duration-200 font-medium"
                                 onClick={() => handleCreateReceipt(payment)}
                               >
-                                <Receipt className="w-4 h-4 mr-1" />
+                                <Receipt className="w-4 h-4 mr-1.5" />
                                 สร้างใบเสร็จ
                               </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                                className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 hover:shadow-md transition-all duration-200 font-medium"
                                 onClick={() => handleResetPayment(payment.id)}
                               >
-                                <RotateCcw className="w-4 h-4 mr-1" />
+                                <RotateCcw className="w-4 h-4 mr-1.5" />
                                 รีเซ็ต
                               </Button>
                             </>
@@ -647,10 +647,10 @@ export default function PaymentRecords() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                              className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 hover:shadow-md transition-all duration-200 font-medium"
                               onClick={() => handleResetPayment(payment.id)}
                             >
-                              <RotateCcw className="w-4 h-4 mr-1" />
+                              <RotateCcw className="w-4 h-4 mr-1.5" />
                               รีเซ็ต
                             </Button>
                           )}
@@ -658,10 +658,10 @@ export default function PaymentRecords() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                            className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
                             onClick={() => handleDeletePayment(payment.id)}
                           >
-                            <Trash2 className="w-4 h-4 mr-1" />
+                            <Trash2 className="w-4 h-4 mr-1.5" />
                             ลบ
                           </Button>
                         </div>
