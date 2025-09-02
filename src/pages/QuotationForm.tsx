@@ -127,6 +127,8 @@ export default function QuotationForm() {
   const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
   const [customerSearchValue, setCustomerSearchValue] = useState("");
   const [productFilter, setProductFilter] = useState("");
+  const [globalProductSearchOpen, setGlobalProductSearchOpen] = useState(false);
+  const [globalProductSearchValue, setGlobalProductSearchValue] = useState("");
   const [govDocAgreement, setGovDocAgreement] = useState(false);
   const [companyNotes, setCompanyNotes] = useState("");
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
@@ -378,6 +380,27 @@ export default function QuotationForm() {
         customer_line_id: customer.line_id || ''
       }));
     }
+  };
+
+  const addItemFromSearch = (product: Product) => {
+    const newItem: QuotationItem = {
+      id: Date.now().toString(),
+      product_id: product.id,
+      product_name: product.name,
+      product_sku: product.sku,
+      description: `ชื่อสินค้า: ${product.name}${product.brand ? '\nแบรนด์: ' + product.brand : ''}${product.sku ? '\nรหัสสินค้า (SKU): ' + product.sku : ''}${product.category ? '\nหมวดหมู่: ' + product.category : ''}${product.price ? '\nราคาต่อหน่วย: ' + product.price.toLocaleString('th-TH') + ' บาท' : ''}${product.brand || product.category ? '\n\nรายละเอียดเพิ่มเติม: ' : ''}`,
+      quantity: 1,
+      unit_price: product.price,
+      discount_amount: 0,
+      discount_type: 'amount',
+      line_total: product.price,
+      is_software: false
+    };
+    setItems(prev => [...prev, newItem]);
+    toast({
+      title: "เพิ่มสินค้าสำเร็จ",
+      description: `เพิ่ม ${product.name} ลงในรายการแล้ว`,
+    });
   };
   const saveQuotation = async () => {
     try {
@@ -1095,15 +1118,95 @@ export default function QuotationForm() {
               </div>
             </div>
 
+            {/* Product Search and Add */}
+            <div className="border border-gray-200 rounded-lg mb-4">
+              <div className="p-4 bg-gray-50/50 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800">ค้นหาและเพิ่มสินค้า</h3>
+              </div>
+              <div className="p-4">
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Popover open={globalProductSearchOpen} onOpenChange={setGlobalProductSearchOpen}>
+                      <PopoverTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          role="combobox" 
+                          aria-expanded={globalProductSearchOpen} 
+                          className="w-full justify-between"
+                        >
+                          <div className="flex items-center">
+                            <Search className="w-4 h-4 mr-2" />
+                            {globalProductSearchValue || "ค้นหาสินค้าเพื่อเพิ่มลงรายการ..."}
+                          </div>
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[600px] p-0 bg-background border shadow-lg z-[1000]" align="start">
+                        <Command className="bg-background">
+                          <CommandInput 
+                            placeholder="พิมพ์ชื่อสินค้า, SKU, หรือแบรนด์..." 
+                            value={globalProductSearchValue} 
+                            onValueChange={setGlobalProductSearchValue}
+                            className="bg-background h-12 text-base px-4" 
+                          />
+                          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+                            ไม่พบสินค้าที่ค้นหา
+                          </CommandEmpty>
+                          <CommandGroup className="bg-background">
+                            <CommandList className="max-h-64 overflow-y-auto bg-background">
+                              {products.filter(product => {
+                                const searchLower = globalProductSearchValue.toLowerCase();
+                                return product.name.toLowerCase().includes(searchLower) || 
+                                       product.sku.toLowerCase().includes(searchLower) ||
+                                       (product.brand && product.brand.toLowerCase().includes(searchLower));
+                              }).map(product => (
+                                <CommandItem 
+                                  key={product.id} 
+                                  value={product.name} 
+                                  onSelect={() => {
+                                    addItemFromSearch(product);
+                                    setGlobalProductSearchValue('');
+                                    setGlobalProductSearchOpen(false);
+                                  }}
+                                  className="hover:bg-accent cursor-pointer p-3"
+                                >
+                                  <div className="w-full">
+                                    <div className="font-medium">{product.name}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                      SKU: {product.sku} | ราคา: ฿{product.price.toLocaleString('th-TH')}
+                                    </div>
+                                    {product.brand && (
+                                      <div className="text-sm text-muted-foreground">แบรนด์: {product.brand}</div>
+                                    )}
+                                    {product.category && (
+                                      <div className="text-sm text-muted-foreground">หมวดหมู่: {product.category}</div>
+                                    )}
+                                  </div>
+                                </CommandItem>
+                              ))}
+                            </CommandList>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <Button onClick={addItem} variant="outline" size="default">
+                    <Plus className="w-4 h-4 mr-2" />
+                    เพิ่มรายการใหม่
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             {/* Items Table */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">รายการสินค้า</h3>
+                <h3 className="text-lg font-semibold">รายการสินค้าในใบเสนอราคา</h3>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2 min-w-[400px] max-w-[500px]">
                     <Search className="w-4 h-4 text-muted-foreground" />
                     <Input 
-                      placeholder="ค้นหาสินค้า ชื่อ, SKU, แบรนด์..." 
+                      placeholder="กรองสินค้าในดรอปดาวน์..." 
                       value={productFilter} 
                       onChange={e => setProductFilter(e.target.value)} 
                       className="text-sm bg-background border-2 focus:border-primary" 
@@ -1120,15 +1223,11 @@ export default function QuotationForm() {
                         product.name.toLowerCase().includes(productFilter.toLowerCase()) || 
                         product.sku.toLowerCase().includes(productFilter.toLowerCase()) || 
                         (product.brand && product.brand.toLowerCase().includes(productFilter.toLowerCase()))
-                      ).length} รายการ จากการค้นหา</>
+                      ).length} รายการ จากการกรอง</>
                     ) : (
                       <>ทั้งหมด {products.length} รายการ</>
                     )}
                   </div>
-                  <Button onClick={addItem} size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    เพิ่มรายการ
-                  </Button>
                 </div>
               </div>
 
