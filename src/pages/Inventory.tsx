@@ -19,6 +19,7 @@ import {
   Upload,
   Download,
   Edit,
+  Edit2,
   Trash2,
   Eye,
   AlertTriangle
@@ -860,131 +861,215 @@ const Inventory = () => {
                 </Card>
               )}
 
-              {/* Edit Product Dialog */}
-              {canManageInventory() && (
-                <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-                  <DialogContent className="sm:max-w-[600px]">
-                    <DialogHeader>
-                      <DialogTitle>แก้ไขสินค้า</DialogTitle>
-                      <DialogDescription>
-                        แก้ไขข้อมูลสินค้าในระบบ
-                      </DialogDescription>
-                    </DialogHeader>
-                     {editingProduct && (
-                       <div className="space-y-6">
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                           <div className="space-y-4">
-                             <div>
-                               <Label htmlFor="edit-sku">SKU *</Label>
-                               <Input
-                                 id="edit-sku"
-                                 value={editingProduct.sku}
-                                 onChange={(e) => setEditingProduct({...editingProduct, sku: e.target.value})}
-                                 placeholder="ADV-PPC-3150"
-                               />
-                             </div>
-                             
-                             <div>
-                               <Label htmlFor="edit-name">ชื่อสินค้า *</Label>
-                               <Input
-                                 id="edit-name"
-                                 value={editingProduct.name}
-                                 onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
-                                 placeholder="Advantech PPC-3150 15 inch Panel PC"
-                               />
-                             </div>
-
-                             <div>
-                               <Label htmlFor="edit-category">หมวดหมู่</Label>
-                               <Select value={editingProduct.category || ""} onValueChange={(value) => setEditingProduct({...editingProduct, category: value})}>
-                                 <SelectTrigger>
-                                   <SelectValue placeholder="เลือกหมวดหมู่" />
-                                 </SelectTrigger>
-                                 <SelectContent>
-                                   {categories.map(category => (
-                                     <SelectItem key={category} value={category}>{category}</SelectItem>
-                                   ))}
-                                 </SelectContent>
-                               </Select>
-                             </div>
-
-                             <div>
-                               <Label htmlFor="edit-brand">ยี่ห้อ</Label>
-                               <Select value={editingProduct.brand || ""} onValueChange={(value) => setEditingProduct({...editingProduct, brand: value})}>
-                                 <SelectTrigger>
-                                   <SelectValue placeholder="เลือกยี่ห้อ" />
-                                 </SelectTrigger>
-                                 <SelectContent>
-                                   {brands.map(brand => (
-                                     <SelectItem key={brand} value={brand}>{brand}</SelectItem>
-                                   ))}
-                                 </SelectContent>
-                               </Select>
-                             </div>
-                           </div>
-
-                           <div className="space-y-4">
-                             <div>
-                               <Label htmlFor="edit-price">ราคาขาย (บาท)</Label>
-                               <Input
-                                 id="edit-price"
-                                 type="number"
-                                 value={editingProduct.price}
-                                 onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})}
-                                 placeholder="45000"
-                               />
-                             </div>
-
-                             <div>
-                               <Label htmlFor="edit-stock">จำนวนสต๊อค</Label>
-                               <Input
-                                 id="edit-stock"
-                                 type="number"
-                                 value={editingProduct.stock}
-                                 onChange={(e) => setEditingProduct({...editingProduct, stock: Number(e.target.value)})}
-                                 placeholder="12"
-                               />
-                             </div>
-                           </div>
-                         </div>
-
-                         <div className="space-y-2">
-                           <Label htmlFor="edit-description">รายละเอียดสินค้า</Label>
-                           <Textarea
-                             id="edit-description"
-                             value={editingProduct.description || ""}
-                             onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})}
-                             placeholder="รายละเอียดเพิ่มเติมของสินค้า..."
-                             rows={3}
-                            />
-                          </div>
-
-                          {/* Checkbox สำหรับระบุซอฟต์แวร์ในฟอร์มแก้ไข */}
+              {/* Product Details Dialog */}
+              <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>รายละเอียดสินค้า</DialogTitle>
+                  </DialogHeader>
+                  {editingProduct && (
+                    <div className="space-y-6">
+                      {/* Top section with status and basic info */}
+                      <div className="bg-muted/30 p-4 rounded-lg">
+                        <div className="flex items-start justify-between">
                           <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id="edit-is_software"
-                                checked={editingProduct.is_software || false}
-                                onCheckedChange={(checked) => setEditingProduct({...editingProduct, is_software: checked as boolean})}
-                              />
-                              <Label htmlFor="edit-is_software" className="text-sm font-medium">
-                                สินค้าซอฟต์แวร์ (หัก ณ ที่จ่าย 3%)
-                              </Label>
+                            <div className="flex items-center gap-2">
+                              {getStatusBadge(editingProduct.status)}
+                              {editingProduct.status === "Out of Stock" && (
+                                <Badge variant="destructive">หมดสต็อก</Badge>
+                              )}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              SKU: {editingProduct.sku}
                             </div>
                           </div>
-                       </div>
-                    )}
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-                        ยกเลิก
-                      </Button>
+                          
+                          <div className="text-right">
+                            <div className="text-sm text-muted-foreground">จำนวนสต็อกปัจจุบัน</div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl font-bold">{editingProduct.stock}</span>
+                              <span className="text-sm text-muted-foreground">ชิ้น</span>
+                              {editingProduct.stock <= 5 && (
+                                <AlertTriangle className="h-5 w-5 text-warning" />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Product info grid */}
+                      <div className="grid grid-cols-3 gap-6">
+                        <div>
+                          <Label className="text-sm text-muted-foreground">ยี่ห้อ:</Label>
+                          <div className="font-medium mt-1">
+                            {canManageInventory() ? (
+                              <Select value={editingProduct.brand || ""} onValueChange={(value) => setEditingProduct({...editingProduct, brand: value})}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="-" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {brands.map(brand => (
+                                    <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              editingProduct.brand || "-"
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label className="text-sm text-muted-foreground">ราคาขาย:</Label>
+                          <div className="font-medium mt-1">
+                            {canManageInventory() ? (
+                              <Input
+                                type="number"
+                                value={editingProduct.price}
+                                onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})}
+                              />
+                            ) : (
+                              `฿${editingProduct.price.toLocaleString()}`
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label className="text-sm text-muted-foreground">สภาพ:</Label>
+                          <div className="mt-1">
+                            {getConditionBadge(editingProduct.item_condition || "new")}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => openStockUpdate(editingProduct)}
+                          className="flex-1"
+                        >
+                          <Package className="h-4 w-4 mr-2" />
+                          อัพเดทสต็อก
+                        </Button>
+                        
+                        {canManageInventory() && (
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteProduct(editingProduct.id, editingProduct.name)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Product description */}
+                      {editingProduct.description && (
+                        <div>
+                          <Label className="text-sm font-medium">รายละเอียดสินค้า</Label>
+                          <div className="mt-2 p-3 bg-muted/50 rounded-md text-sm whitespace-pre-wrap">
+                            {editingProduct.description}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Editable fields for admins */}
+                      {canManageInventory() && (
+                        <div className="border-t pt-6 space-y-4">
+                          <h4 className="font-medium">แก้ไขข้อมูล</h4>
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="edit-sku">SKU *</Label>
+                              <Input
+                                id="edit-sku"
+                                value={editingProduct.sku}
+                                onChange={(e) => setEditingProduct({...editingProduct, sku: e.target.value})}
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="edit-name">ชื่อสินค้า *</Label>
+                              <Input
+                                id="edit-name"
+                                value={editingProduct.name}
+                                onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="edit-category">หมวดหมู่</Label>
+                              <Select value={editingProduct.category || ""} onValueChange={(value) => setEditingProduct({...editingProduct, category: value})}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="เลือกหมวดหมู่" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {categories.map(category => (
+                                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div>
+                              <Label htmlFor="edit-stock">จำนวนสต๊อค</Label>
+                              <Input
+                                id="edit-stock"
+                                type="number"
+                                value={editingProduct.stock}
+                                onChange={(e) => setEditingProduct({...editingProduct, stock: Number(e.target.value)})}
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="edit-description">รายละเอียดสินค้า</Label>
+                            <Textarea
+                              id="edit-description"
+                              value={editingProduct.description || ""}
+                              onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})}
+                              placeholder="รายละเอียดเพิ่มเติมของสินค้า..."
+                              rows={3}
+                             />
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="edit-is_software"
+                              checked={editingProduct.is_software || false}
+                              onCheckedChange={(checked) => setEditingProduct({...editingProduct, is_software: checked as boolean})}
+                            />
+                            <Label htmlFor="edit-is_software" className="text-sm font-medium">
+                              สินค้าซอฟต์แวร์ (หัก ณ ที่จ่าย 3%)
+                            </Label>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                      ปิด
+                    </Button>
+                    {canManageInventory() && (
                       <Button onClick={handleEditProduct}>
                         บันทึกการเปลี่ยนแปลง
                       </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
+                    )}
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
 
                {/* Products Grid */}
                <div className="space-y-4">
