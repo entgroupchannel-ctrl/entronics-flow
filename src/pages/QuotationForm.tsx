@@ -106,7 +106,20 @@ export default function QuotationForm() {
     };
   });
   
-  const [items, setItems] = useState<QuotationItem[]>([]);
+  const [items, setItems] = useState<QuotationItem[]>(() => {
+    // Initialize with one empty item for better user experience
+    return [{
+      id: Date.now().toString(),
+      product_name: '',
+      description: '',
+      quantity: 1,
+      unit_price: 0,
+      discount_amount: 0,
+      discount_type: 'amount',
+      line_total: 0,
+      is_software: false
+    }];
+  });
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [includeVat, setIncludeVat] = useState(true);
   const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
