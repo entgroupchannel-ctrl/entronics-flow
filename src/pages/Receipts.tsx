@@ -258,10 +258,21 @@ export default function Receipts() {
                 <h1 className="text-2xl font-bold text-foreground">ใบเสร็จรับเงิน</h1>
               </div>
               
-              <Button onClick={() => navigate('/receipts/new')} className="bg-primary hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
-                สร้างใบเสร็จรับเงิน
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button 
+                  onClick={() => navigate('/payment-records')} 
+                  variant="outline"
+                  className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  การชำระเงิน
+                </Button>
+                
+                <Button onClick={() => navigate('/receipts/new')} className="bg-primary hover:bg-primary/90">
+                  <Plus className="w-4 h-4 mr-2" />
+                  สร้างใบเสร็จรับเงิน
+                </Button>
+              </div>
             </div>
 
             {/* Stats Cards */}
