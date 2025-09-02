@@ -85,11 +85,23 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
     }
   };
   const handleExportPDF = async () => {
-    await exportToPDF({
-      filename: generateQuotationFilename(quotationData.quotation_number),
-      quotationData,
-      companyInfo
-    });
+    try {
+      console.log('Quotation data:', quotationData);
+      console.log('Company info:', companyInfo);
+      
+      if (!quotationData || !quotationData.items || quotationData.items.length === 0) {
+        console.error('Invalid quotation data');
+        return;
+      }
+
+      await exportToPDF({
+        filename: generateQuotationFilename(quotationData.quotation_number),
+        quotationData,
+        companyInfo
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+    }
   };
 
   const handlePrint = async () => {
