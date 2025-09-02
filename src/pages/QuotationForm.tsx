@@ -1165,7 +1165,7 @@ export default function QuotationForm() {
                           <Input type="number" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} min="1" className="text-center" />
                         </TableCell>
                         <TableCell className="w-40 align-top">
-                          <Input type="number" value={item.unit_price} onChange={e => updateItem(item.id, 'unit_price', Number(e.target.value))} min="0" step="0.01" className="text-right" placeholder="0.00" />
+                          <Input type="number" value={item.unit_price} onChange={e => updateItem(item.id, 'unit_price', Number(e.target.value))} min="0" step="0.01" className="text-right w-32" placeholder="0.00" />
                         </TableCell>
                         <TableCell className="w-36 align-top">
                           <div className="flex gap-1">
