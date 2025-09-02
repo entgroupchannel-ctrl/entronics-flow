@@ -394,6 +394,23 @@ export default function PaymentRecords() {
 
   const handleDeletePayment = async (paymentId: string) => {
     try {
+      // First check if there are receipts referencing this payment
+      const { data: receipts, error: checkError } = await supabase
+        .from('receipts')
+        .select('id')
+        .eq('payment_record_id', paymentId);
+
+      if (checkError) throw checkError;
+
+      if (receipts && receipts.length > 0) {
+        toast({
+          title: "ไม่สามารถลบได้",
+          description: "ไม่สามารถลบรายการชำระเงินนี้ได้เนื่องจากมีใบเสร็จที่เชื่อมโยงอยู่",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('payment_records')
         .delete()
@@ -406,13 +423,23 @@ export default function PaymentRecords() {
         description: "ลบรายการชำระเงินเรียบร้อยแล้ว",
       });
       loadPaymentRecords();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting payment:', error);
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถลบรายการได้",
-        variant: "destructive",
-      });
+      
+      // Handle foreign key constraint errors specifically
+      if (error.code === '23503') {
+        toast({
+          title: "ไม่สามารถลบได้",
+          description: "ไม่สามารถลบรายการชำระเงินนี้ได้เนื่องจากมีข้อมูลที่เชื่อมโยงอยู่ (เช่น ใบเสร็จ)",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถลบรายการได้",
+          variant: "destructive",
+        });
+      }
     }
   };
 
