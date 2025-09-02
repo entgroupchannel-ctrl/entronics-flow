@@ -639,14 +639,14 @@ export default function PaymentRecords() {
 
           {/* Add Payment Form Modal */}
           {showAddForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-                <h2 className="text-2xl font-bold mb-6">บันทึกการชำระเงิน</h2>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg p-4 w-full max-w-5xl max-h-[95vh] overflow-y-auto">
+                <h2 className="text-xl font-bold mb-4">บันทึกการชำระเงิน</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Left Column - Form Fields */}
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     <div>
-                      <Label htmlFor="tax_invoice_id" className="text-base font-semibold">ใบกำกับภาษี</Label>
+                      <Label htmlFor="tax_invoice_id" className="text-sm font-semibold">ใบกำกับภาษี</Label>
                       <Select
                         value={formData.tax_invoice_id}
                         onValueChange={(value) => {
@@ -659,12 +659,12 @@ export default function PaymentRecords() {
                           }
                         }}
                       >
-                        <SelectTrigger className="text-base h-12">
+                        <SelectTrigger className="text-sm h-10 bg-white">
                           <SelectValue placeholder="เลือกใบกำกับภาษี" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white border shadow-lg z-[100]">
                           {taxInvoices.map((invoice) => (
-                            <SelectItem key={invoice.id} value={invoice.id} className="text-base py-3">
+                            <SelectItem key={invoice.id} value={invoice.id} className="text-sm py-2 bg-white hover:bg-gray-100">
                               {invoice.tax_invoice_number} - {invoice.customer_name} (฿{invoice.total_amount.toLocaleString()})
                             </SelectItem>
                           ))}
@@ -672,39 +672,39 @@ export default function PaymentRecords() {
                       </Select>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="payment_date" className="text-base font-semibold">วันที่ชำระ</Label>
+                        <Label htmlFor="payment_date" className="text-sm font-semibold">วันที่ชำระ</Label>
                         <Input
                           id="payment_date"
                           type="datetime-local"
                           value={formData.payment_date || new Date().toISOString().slice(0, 16)}
                           onChange={(e) => setFormData(prev => ({ ...prev, payment_date: e.target.value }))}
-                          className="text-base h-12"
+                          className="text-sm h-10"
                         />
                       </div>
                       
                       <div>
-                        <Label htmlFor="payment_method" className="text-base font-semibold">วิธีการชำระ</Label>
+                        <Label htmlFor="payment_method" className="text-sm font-semibold">วิธีการชำระ</Label>
                         <Select
                           value={formData.payment_method}
                           onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
                         >
-                          <SelectTrigger className="text-base h-12">
+                          <SelectTrigger className="text-sm h-10 bg-white">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="โอนเงิน" className="text-base py-3">โอนเงิน</SelectItem>
-                            <SelectItem value="เงินสด" className="text-base py-3">เงินสด</SelectItem>
-                            <SelectItem value="เช็ค" className="text-base py-3">เช็ค</SelectItem>
-                            <SelectItem value="บัตรเครดิต" className="text-base py-3">บัตรเครดิต</SelectItem>
+                          <SelectContent className="bg-white border shadow-lg z-[100]">
+                            <SelectItem value="โอนเงิน" className="text-sm py-2 bg-white hover:bg-gray-100">โอนเงิน</SelectItem>
+                            <SelectItem value="เงินสด" className="text-sm py-2 bg-white hover:bg-gray-100">เงินสด</SelectItem>
+                            <SelectItem value="เช็ค" className="text-sm py-2 bg-white hover:bg-gray-100">เช็ค</SelectItem>
+                            <SelectItem value="บัตรเครดิต" className="text-sm py-2 bg-white hover:bg-gray-100">บัตรเครดิต</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
                     
                     <div>
-                      <Label htmlFor="amount_received" className="text-base font-semibold">
+                      <Label htmlFor="amount_received" className="text-sm font-semibold">
                         จำนวนเงินที่รับ <span className="text-red-500">*</span>
                       </Label>
                       <Input
@@ -714,87 +714,87 @@ export default function PaymentRecords() {
                         value={formData.amount_received}
                         onChange={(e) => setFormData(prev => ({ ...prev, amount_received: parseFloat(e.target.value) || 0 }))}
                         required
-                        className={`text-lg font-bold h-14 ${formData.amount_received <= 0 ? "border-red-300 focus:border-red-500" : ""}`}
+                        className={`text-base font-bold h-12 ${formData.amount_received <= 0 ? "border-red-300 focus:border-red-500" : ""}`}
                         placeholder="0.00"
                       />
                       {formData.amount_received <= 0 && (
-                        <p className="text-red-500 text-sm mt-1 font-medium">กรุณากรอกจำนวนเงินที่รับ</p>
+                        <p className="text-red-500 text-xs mt-1 font-medium">กรุณากรอกจำนวนเงินที่รับ</p>
                       )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="payment_reference" className="text-base font-semibold">หมายเลขอ้างอิง</Label>
+                        <Label htmlFor="payment_reference" className="text-sm font-semibold">หมายเลขอ้างอิง</Label>
                         <Input
                           id="payment_reference"
                           value={formData.payment_reference}
                           onChange={(e) => setFormData(prev => ({ ...prev, payment_reference: e.target.value }))}
                           placeholder="หมายเลขการโอน หรืออ้างอิง"
-                          className="text-base h-12"
+                          className="text-sm h-10"
                         />
                       </div>
                       
                       <div>
-                        <Label htmlFor="bank_name" className="text-base font-semibold">ธนาคาร</Label>
+                        <Label htmlFor="bank_name" className="text-sm font-semibold">ธนาคาร</Label>
                         <Input
                           id="bank_name"
                           value={formData.bank_name}
                           onChange={(e) => setFormData(prev => ({ ...prev, bank_name: e.target.value }))}
                           placeholder="ชื่อธนาคาร"
-                          className="text-base h-12"
+                          className="text-sm h-10"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="depositor_name" className="text-base font-semibold">ชื่อผู้โอน</Label>
+                      <Label htmlFor="depositor_name" className="text-sm font-semibold">ชื่อผู้โอน</Label>
                       <Input
                         id="depositor_name"
                         value={formData.depositor_name}
                         onChange={(e) => setFormData(prev => ({ ...prev, depositor_name: e.target.value }))}
                         placeholder="ชื่อผู้ทำรายการ"
-                        className="text-base h-12"
+                        className="text-sm h-10"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="payment_notes" className="text-base font-semibold">หมายเหตุ</Label>
+                      <Label htmlFor="payment_notes" className="text-sm font-semibold">หมายเหตุ</Label>
                       <Textarea
                         id="payment_notes"
                         value={formData.payment_notes}
                         onChange={(e) => setFormData(prev => ({ ...prev, payment_notes: e.target.value }))}
                         placeholder="หมายเหตุเพิ่มเติม"
-                        rows={3}
-                        className="text-base"
+                        rows={2}
+                        className="text-sm"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="payment_evidence" className="text-base font-semibold">หลักฐานการชำระเงิน</Label>
+                      <Label htmlFor="payment_evidence" className="text-sm font-semibold">หลักฐานการชำระเงิน</Label>
                       <Input
                         id="payment_evidence"
                         type="file"
                         accept="image/*,.pdf"
                         onChange={handleFileChange}
-                        className="mt-1 text-base h-12"
+                        className="mt-1 text-sm h-10"
                       />
-                      <p className="text-sm text-muted-foreground mt-1 font-medium">
+                      <p className="text-xs text-muted-foreground mt-1">
                         อัปโหลดสลิปหรือหลักฐานการชำระเงิน (JPG, PNG, PDF สูงสุด 5MB)
                       </p>
                     </div>
                   </div>
 
                   {/* Right Column - Preview and Summary */}
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h3 className="text-lg font-bold mb-3">ตัวอย่างหลักฐาน</h3>
+                  <div className="space-y-3">
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <h3 className="text-base font-bold mb-2">ตัวอย่างหลักฐาน</h3>
                       {previewUrl ? (
                         <div className="space-y-2">
                           <div className="border rounded-lg overflow-hidden bg-white">
                             <img 
                               src={previewUrl} 
                               alt="Preview" 
-                              className="w-full h-64 object-contain"
+                              className="w-full h-48 object-contain"
                             />
                           </div>
                           <Button
@@ -807,31 +807,31 @@ export default function PaymentRecords() {
                               const fileInput = document.getElementById('payment_evidence') as HTMLInputElement;
                               if (fileInput) fileInput.value = '';
                             }}
-                            className="w-full text-base font-medium"
+                            className="w-full text-sm"
                           >
                             ลบไฟล์
                           </Button>
                         </div>
                       ) : (
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
-                          <div className="text-3xl mb-2">📄</div>
-                          <p className="font-medium">ยังไม่ได้เลือกไฟล์</p>
-                          <p className="text-sm">อัปโหลดสลิปหรือหลักฐานการชำระเงิน</p>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500">
+                          <div className="text-2xl mb-1">📄</div>
+                          <p className="text-sm font-medium">ยังไม่ได้เลือกไฟล์</p>
+                          <p className="text-xs">อัปโหลดสลิปหรือหลักฐาน</p>
                         </div>
                       )}
                     </div>
 
                     {/* Summary Info */}
                     {selectedTaxInvoice && (
-                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <h3 className="text-lg font-bold mb-3 text-blue-800">ข้อมูลใบกำกับภาษี</h3>
-                        <div className="space-y-2 text-base">
+                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <h3 className="text-base font-bold mb-2 text-blue-800">ข้อมูลใบกำกับภาษี</h3>
+                        <div className="space-y-1 text-sm">
                           <div><strong>เลขที่:</strong> <span className="font-mono">{selectedTaxInvoice.tax_invoice_number}</span></div>
                           <div><strong>ลูกค้า:</strong> {selectedTaxInvoice.customer_name}</div>
-                          <div><strong>ยอดรวม:</strong> <span className="text-lg font-bold text-blue-600">฿{selectedTaxInvoice.total_amount.toLocaleString()}</span></div>
+                          <div><strong>ยอดรวม:</strong> <span className="text-base font-bold text-blue-600">฿{selectedTaxInvoice.total_amount.toLocaleString()}</span></div>
                           <div>
                             <strong>สถานะ:</strong> 
-                            <Badge variant={selectedTaxInvoice.status === 'paid' ? 'default' : 'secondary'} className="ml-2 text-sm">
+                            <Badge variant={selectedTaxInvoice.status === 'paid' ? 'default' : 'secondary'} className="ml-2 text-xs">
                               {selectedTaxInvoice.status === 'paid' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'}
                             </Badge>
                           </div>
@@ -840,19 +840,19 @@ export default function PaymentRecords() {
                     )}
 
                     {formData.amount_received > 0 && selectedTaxInvoice && (
-                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                        <h3 className="text-lg font-bold mb-3 text-green-800">สรุปการชำระเงิน</h3>
-                        <div className="space-y-2 text-base">
+                      <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                        <h3 className="text-base font-bold mb-2 text-green-800">สรุปการชำระเงิน</h3>
+                        <div className="space-y-1 text-sm">
                           <div className="flex justify-between">
-                            <span className="font-medium">ยอดที่ต้องชำระ:</span>
+                            <span>ยอดที่ต้องชำระ:</span>
                             <span className="font-bold">฿{selectedTaxInvoice.total_amount.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="font-medium">ยอดที่รับ:</span>
-                            <span className="font-bold text-green-600 text-lg">฿{formData.amount_received.toLocaleString()}</span>
+                            <span>ยอดที่รับ:</span>
+                            <span className="font-bold text-green-600">฿{formData.amount_received.toLocaleString()}</span>
                           </div>
                           <hr className="border-green-200" />
-                          <div className="flex justify-between font-bold text-lg">
+                          <div className="flex justify-between font-bold">
                             <span>ส่วนต่าง:</span>
                             <span className={formData.amount_received - selectedTaxInvoice.total_amount >= 0 ? "text-green-600" : "text-red-600"}>
                               ฿{(formData.amount_received - selectedTaxInvoice.total_amount).toLocaleString()}
@@ -864,7 +864,7 @@ export default function PaymentRecords() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-6 border-t mt-6">
+                <div className="flex justify-end gap-2 pt-4 border-t mt-4">
                   <Button 
                     variant="outline" 
                     onClick={() => {
@@ -873,14 +873,14 @@ export default function PaymentRecords() {
                       setPreviewUrl('');
                       setSelectedTaxInvoice(null);
                     }}
-                    className="text-base font-medium px-6 py-3"
+                    className="text-sm px-4 py-2"
                   >
                     ยกเลิก
                   </Button>
                   <Button 
                     onClick={handleAddPayment}
                     disabled={formData.amount_received <= 0 || !formData.tax_invoice_id}
-                    className="text-base font-bold px-6 py-3"
+                    className="text-sm font-bold px-4 py-2"
                   >
                     บันทึก
                   </Button>
