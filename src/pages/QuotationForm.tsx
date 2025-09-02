@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, Printer, Share, Download, MoreHorizontal, Check, ChevronsUpDown, ChevronUp, ChevronDown, Search, Upload } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, Trash2, Save, X, FileText, CalendarIcon, Edit, Printer, Share, Download, MoreHorizontal, Check, ChevronsUpDown, ChevronUp, ChevronDown, Search, Upload, Eye, Settings } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { addDays, format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import entGroupLogo from "@/assets/ent-group-logo.png";
+import QuotationPreview from "@/components/quotations/QuotationPreview";
+import { useQuotationPDF, generateQuotationFilename } from "@/components/quotations/QuotationPDF";
+import CompanySettings from "@/components/settings/CompanySettings";
 interface Customer {
   id: string;
   name: string;
@@ -72,12 +76,13 @@ interface Quotation {
 }
 export default function QuotationForm() {
   const navigate = useNavigate();
-  const {
-    id
-  } = useParams();
-  const {
-    user
-  } = useAuth();
+  const { id } = useParams();
+  const { user } = useAuth();
+  const { exportToPDF: exportQuotationToPDF, printQuotation: printQuotationPDF } = useQuotationPDF();
+  
+  // State for preview and company settings
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [companySettingsOpen, setCompanySettingsOpen] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [quotation, setQuotation] = useState<Quotation>(() => {
@@ -855,6 +860,9 @@ export default function QuotationForm() {
           <div className="flex items-center space-x-2">
             {/* เมนูส่งออกและพิมพ์ */}
             <div className="flex items-center space-x-1 border-r pr-2">
+              <Button variant="ghost" size="sm" onClick={() => setPreviewOpen(true)} title="ดูตัวอย่าง">
+                <Eye className="w-4 h-4" />
+              </Button>
               <Button variant="ghost" size="sm" onClick={shareQuotation} title="แชร์">
                 <Share className="w-4 h-4" />
               </Button>
@@ -871,6 +879,10 @@ export default function QuotationForm() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => setPreviewOpen(true)}>
+                    <Eye className="w-4 h-4 mr-2" />
+                    ดูตัวอย่าง
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={exportToPDF}>
                     <Download className="w-4 h-4 mr-2" />
                     ส่งออก PDF
@@ -882,6 +894,10 @@ export default function QuotationForm() {
                   <DropdownMenuItem onClick={shareQuotation}>
                     <Share className="w-4 h-4 mr-2" />
                     แชร์เอกสาร
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setCompanySettingsOpen(true)}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    ตั้งค่าบริษัท
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1357,5 +1373,62 @@ export default function QuotationForm() {
           </CardContent>
         </Card>
       </div>
-    </div>;
+
+      {/* Preview Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>ตัวอย่างใบเสนอราคา</DialogTitle>
+            <DialogDescription>
+              ตรวจสอบความถูกต้องของข้อมูลก่อนบันทึกหรือส่งออก
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="flex justify-end space-x-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => printQuotationPDF('quotation-preview')}
+              >
+                <Printer className="w-4 h-4 mr-2" />
+                พิมพ์
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={() => exportQuotationToPDF({ 
+                  filename: generateQuotationFilename(quotation.quotation_number)
+                })}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                ส่งออก PDF
+              </Button>
+            </div>
+            
+            <QuotationPreview 
+              quotationData={{
+                ...quotation,
+                items: items
+              }}
+              printMode={false}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Company Settings Dialog */}
+      <Dialog open={companySettingsOpen} onOpenChange={setCompanySettingsOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>ตั้งค่าข้อมูลบริษัท</DialogTitle>
+            <DialogDescription>
+              จัดการข้อมูลบริษัทที่จะแสดงในใบเสนอราคา
+            </DialogDescription>
+          </DialogHeader>
+          
+          <CompanySettings />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }
