@@ -1190,7 +1190,7 @@ export default function QuotationForm() {
                                   <span className="text-sm">%</span>
                                 </SelectItem>
                                 <SelectItem value="amount" className="hover:bg-accent">
-                                  <span className="text-sm">บาท</span>
+                                  <span className="text-sm">฿</span>
                                 </SelectItem>
                               </SelectContent>
                             </Select>
