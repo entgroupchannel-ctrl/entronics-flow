@@ -230,8 +230,8 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
               level > 0 && "ml-4 w-[calc(100%-1rem)]",
               level > 1 && "ml-8 w-[calc(100%-2rem)]",
               active 
-                ? "bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-accent" 
-                : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 hover:border hover:border-sidebar-accent/50"
+                ? "bg-sidebar-primary text-sidebar-primary-foreground border border-sidebar-primary" 
+                : "text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent hover:border hover:border-sidebar-accent"
             )}
             onClick={() => handleMenuClick(item)}
           >
@@ -263,8 +263,8 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
             className={cn(
               "w-12 h-12 mx-auto",
               active 
-                ? "bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-accent" 
-                : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 hover:border hover:border-sidebar-accent/50"
+                ? "bg-sidebar-primary text-sidebar-primary-foreground border border-sidebar-primary" 
+                : "text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent hover:border hover:border-sidebar-accent"
             )}
             onClick={() => handleMenuClick(item)}
           >
@@ -316,7 +316,7 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
               </div>
               <div>
                 <h1 className="text-lg font-bold text-sidebar-foreground">ENT GROUP</h1>
-                <p className="text-xs text-sidebar-foreground/80">Industrial PC ERP</p>
+                <p className="text-xs text-sidebar-foreground/70">Industrial PC ERP</p>
               </div>
             </div>
           )}
@@ -354,7 +354,7 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
                 </div>
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-sm font-medium text-sidebar-foreground truncate">Admin User</p>
-                  <p className="text-xs text-sidebar-foreground/80 truncate">admin@entgroup.com</p>
+                  <p className="text-xs text-sidebar-foreground/70 truncate">admin@entgroup.com</p>
                 </div>
               </div>
             </button>
