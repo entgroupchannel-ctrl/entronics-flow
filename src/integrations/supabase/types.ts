@@ -95,6 +95,62 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_contacts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          department: string | null
+          email: string | null
+          id: string
+          is_primary: boolean
+          line_id: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          position: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          department?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean
+          line_id?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          department?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean
+          line_id?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_contacts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null
@@ -1215,6 +1271,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           customer_address: string | null
+          customer_branch: string | null
           customer_email: string | null
           customer_id: string | null
           customer_name: string
@@ -1253,6 +1310,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_address?: string | null
+          customer_branch?: string | null
           customer_email?: string | null
           customer_id?: string | null
           customer_name: string
@@ -1291,6 +1349,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_address?: string | null
+          customer_branch?: string | null
           customer_email?: string | null
           customer_id?: string | null
           customer_name?: string
