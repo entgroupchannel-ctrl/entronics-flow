@@ -547,10 +547,11 @@ export default function PaymentRecords() {
                       <TableHead>ใบกำกับภาษี</TableHead>
                       <TableHead>ลูกค้า</TableHead>
                       <TableHead>วิธีการชำระ</TableHead>
-                      <TableHead>จำนวนเงิน</TableHead>
-                      <TableHead>สถานะ</TableHead>
-                      <TableHead>วันที่ชำระ</TableHead>
-                      <TableHead>การดำเนินการ</TableHead>
+                       <TableHead>จำนวนเงิน</TableHead>
+                       <TableHead>สถานะ</TableHead>
+                       <TableHead>วันที่ชำระ</TableHead>
+                       <TableHead>การดำเนินการ</TableHead>
+                       <TableHead className="text-right">จัดการ</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -567,59 +568,59 @@ export default function PaymentRecords() {
                         </TableCell>
                         <TableCell>{payment.payment_method}</TableCell>
                         <TableCell>฿{payment.amount_received.toLocaleString()}</TableCell>
-                         <TableCell>
-                           <div className="flex items-center gap-2">
-                             {getStatusBadge(payment.verification_status)}
-                             <DropdownMenu>
-                               <DropdownMenuTrigger asChild>
-                                 <Button variant="ghost" size="sm">
-                                   <MoreHorizontal className="w-4 h-4" />
-                                 </Button>
-                               </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48">
-                                  <DropdownMenuItem onClick={() => setSelectedPayment(payment)}>
-                                    <Edit className="w-4 h-4 mr-2" />
-                                    แก้ไข
-                                  </DropdownMenuItem>
-                                  
-                                  <DropdownMenuItem onClick={() => window.print()}>
-                                    <Printer className="w-4 h-4 mr-2" />
-                                    พิมพ์
-                                  </DropdownMenuItem>
-                                  
-                                  <DropdownMenuItem onClick={() => {}}>
-                                    <Download className="w-4 h-4 mr-2" />
-                                    ดาวน์โหลด
-                                  </DropdownMenuItem>
-                                  
-                                  <DropdownMenuItem onClick={() => {}}>
-                                    <Share2 className="w-4 h-4 mr-2" />
-                                    แชร์
-                                  </DropdownMenuItem>
-                                  
-                                  <DropdownMenuItem 
-                                    onClick={() => handleDeletePayment(payment.id)}
-                                    className="text-red-600 focus:text-red-600"
-                                  >
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    ลบ
-                                  </DropdownMenuItem>
-                               </DropdownMenuContent>
-                             </DropdownMenu>
-                           </div>
-                         </TableCell>
+                          <TableCell>
+                              {getStatusBadge(payment.verification_status)}
+                          </TableCell>
                          <TableCell>
                            {new Date(payment.payment_date).toLocaleDateString('th-TH')}
-                         </TableCell>
-                         <TableCell>
-                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => setSelectedPayment(payment)}
-                           >
-                             <Eye className="w-4 h-4" />
-                           </Button>
-                         </TableCell>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedPayment(payment)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem onClick={() => setSelectedPayment(payment)}>
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  แก้ไข
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuItem onClick={() => window.print()}>
+                                  <Printer className="w-4 h-4 mr-2" />
+                                  พิมพ์
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuItem onClick={() => {}}>
+                                  <Download className="w-4 h-4 mr-2" />
+                                  ดาวน์โหลด
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuItem onClick={() => {}}>
+                                  <Share2 className="w-4 h-4 mr-2" />
+                                  แชร์
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeletePayment(payment.id)}
+                                  className="text-red-600 focus:text-red-600"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  ลบ
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
