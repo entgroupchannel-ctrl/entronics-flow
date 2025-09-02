@@ -522,9 +522,8 @@ export default function QuotationForm() {
       return;
     }
     try {
-      const {
-        jsPDF
-      } = await import('jspdf');
+      const { jsPDF } = await import('jspdf');
+      (await import('jspdf-autotable')).default;
 
       // Create PDF with proper A4 settings
       const doc = new jsPDF({
@@ -533,51 +532,51 @@ export default function QuotationForm() {
         format: 'a4'
       });
 
-      // A4 dimensions: 210mm x 297mm
+      // A4 dimensions: 210mm x 297mm  
       const pageWidth = 210;
       const pageHeight = 297;
-      const margin = 20;
-      const contentWidth = pageWidth - margin * 2;
+      const margin = 15;
+      const contentWidth = pageWidth - (margin * 2);
 
-      // Set default font
-      doc.setFont('helvetica');
-      doc.setFontSize(10);
-
-      // Header Section
       let yPos = margin;
 
-      // Logo space (reserved)
-      doc.setFillColor(248, 249, 250);
-      doc.roundedRect(margin, yPos, 50, 25, 2, 2, 'F');
-      doc.setFontSize(8);
+      // Header with company logo area
+      doc.setFillColor(245, 245, 245);
+      doc.rect(margin, yPos, contentWidth, 40, 'F');
+      
+      // Logo placeholder
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(margin + 5, yPos + 5, 35, 30, 'FD');
       doc.setTextColor(150, 150, 150);
-      doc.text('LOGO', margin + 25, yPos + 15, {
-        align: 'center'
-      });
-
-      // Company Header
-      doc.setTextColor(220, 53, 69);
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text('QUOTATION', pageWidth - margin, yPos + 10, {
-        align: 'right'
-      });
-      doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
-      doc.text('ใบเสนอราคา', pageWidth - margin, yPos + 18, {
-        align: 'right'
-      });
-      yPos += 35;
-
-      // Decorative line
-      doc.setDrawColor(220, 53, 69);
-      doc.setLineWidth(0.8);
-      doc.line(margin, yPos, pageWidth - margin, yPos);
-      yPos += 10;
-
-      // Company Information Section
+      doc.setFontSize(10);
+      doc.text('LOGO', margin + 22.5, yPos + 22, { align: 'center' });
+      
+      // Company information  
       doc.setTextColor(0, 0, 0);
-      doc.setFontSize(11);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ENT GROUP CO., LTD.', margin + 45, yPos + 10);
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text('70/5 Metro Beach Town Chaeng Watthana 2 Village, Moo 4', margin + 45, yPos + 16);
+      doc.text('Khlong Thanon Praditsathan, Pak Kret, Nonthaburi 11120', margin + 45, yPos + 20);
+      doc.text('TAX ID: 0135558013167', margin + 45, yPos + 24);
+      doc.text('TEL: 02-045-6104 | MOBILE: 095-7391053, 082-2497922', margin + 45, yPos + 28);
+      doc.text('FAX: 02-045-6105 | www.entgroup.co.th', margin + 45, yPos + 32);
+      
+      yPos += 50;
+      
+      // Document title
+      doc.setFillColor(220, 53, 69);
+      doc.rect(margin, yPos, contentWidth, 12, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('QUOTATION / ใบเสนอราคา', pageWidth / 2, yPos + 8, { align: 'center' });
+      
+      yPos += 20;
       doc.setFont('helvetica', 'bold');
       doc.text('ENT GROUP CO., LTD.', margin, yPos);
       doc.setFont('helvetica', 'normal');
