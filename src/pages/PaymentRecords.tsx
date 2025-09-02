@@ -13,6 +13,8 @@ import { Plus, Eye, CheckCircle, XCircle, Upload, Receipt, RotateCcw, Trash2, Mo
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { format } from "date-fns";
+import { th } from "date-fns/locale";
 
 interface PaymentRecord {
   id: string;
@@ -1126,103 +1128,143 @@ export default function PaymentRecords() {
 
           {/* Details Panel */}
           {showDetailsPanel && selectedPayment && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <h2 className="text-xl font-semibold mb-4">รายละเอียดการชำระเงิน</h2>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>หมายเลขการชำระ</Label>
-                      <div className="font-mono text-blue-600">{selectedPayment.payment_number}</div>
-                    </div>
-                    <div>
-                      <Label>ใบกำกับภาษี</Label>
-                      <div className="font-mono">{selectedPayment.tax_invoices?.tax_invoice_number}</div>
-                    </div>
-                    <div>
-                      <Label>ลูกค้า</Label>
-                      <div>{selectedPayment.tax_invoices?.customer_name}</div>
-                    </div>
-                    <div>
-                      <Label>จำนวนเงิน</Label>
-                      <div className="font-bold text-green-600">฿{selectedPayment.amount_received.toLocaleString()}</div>
-                    </div>
-                    <div>
-                      <Label>วิธีการชำระ</Label>
-                      <div>{selectedPayment.payment_method}</div>
-                    </div>
-                    <div>
-                       <Label>วันที่ชำระ</Label>
-                       <div>{new Date(selectedPayment.payment_date).toLocaleString('th-TH')}</div>
-                    </div>
-                  </div>
-                  
-                  {selectedPayment.payment_reference && (
-                    <div>
-                      <Label>หมายเลขอ้างอิง</Label>
-                      <div>{selectedPayment.payment_reference}</div>
-                    </div>
-                  )}
-                  
-                  {selectedPayment.bank_name && (
-                    <div>
-                      <Label>ธนาคาร</Label>
-                      <div>{selectedPayment.bank_name}</div>
-                    </div>
-                  )}
-                  
-                  {selectedPayment.depositor_name && (
-                    <div>
-                      <Label>ผู้โอน</Label>
-                      <div>{selectedPayment.depositor_name}</div>
-                    </div>
-                  )}
-                  
-                  {selectedPayment.payment_notes && (
-                    <div>
-                      <Label>หมายเหตุ</Label>
-                      <div>{selectedPayment.payment_notes}</div>
-                    </div>
-                  )}
-                  
-                  {selectedPayment.payment_evidence_url && (
-                    <div>
-                      <Label>หลักฐานการโอนเงิน</Label>
-                      <div className="mt-2 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-700">สลิปการโอนเงิน</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(selectedPayment.payment_evidence_url, '_blank')}
-                            className="text-xs"
-                          >
-                            เปิดในหน้าต่างใหม่
-                          </Button>
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-background rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl border">
+                <div className="sticky top-0 bg-background border-b p-6 flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-foreground">รายละเอียดการชำระเงิน</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowDetailsPanel(false)}
+                    className="h-8 w-8 p-0"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                
+                <div className="p-6 space-y-8">
+                  {/* Header Section */}
+                  <div className="bg-gradient-to-r from-primary/5 to-primary/10 p-6 rounded-lg border border-primary/20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">หมายเลขการชำระ</Label>
+                        <div className="text-2xl font-bold text-primary mt-1">
+                          {selectedPayment.payment_number}
                         </div>
-                        <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
-                          <img
-                            src={selectedPayment.payment_evidence_url}
-                            alt="หลักฐานการโอนเงิน"
-                            className="w-full h-auto max-h-96 object-contain"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                              const fallback = document.createElement('div');
-                              fallback.className = 'flex items-center justify-center h-32 bg-gray-100 text-gray-500';
-                              fallback.innerHTML = '<div class="text-center"><div class="text-sm">ไม่สามารถแสดงรูปภาพได้</div><div class="text-xs">คลิก "เปิดในหน้าต่างใหม่" เพื่อดู</div></div>';
-                              (e.target as HTMLElement).parentNode?.appendChild(fallback);
-                            }}
-                          />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">ใบกำกับภาษี</Label>
+                        <div className="text-2xl font-bold text-foreground mt-1">
+                          {selectedPayment.tax_invoices?.tax_invoice_number}
                         </div>
                       </div>
                     </div>
-                  )}
-                  
-                  <div className="flex justify-end pt-4">
-                    <Button onClick={() => setShowDetailsPanel(false)}>
-                      ปิด
-                    </Button>
                   </div>
+
+                  {/* Customer and Amount Section */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-card p-6 rounded-lg border shadow-sm">
+                      <Label className="text-sm font-medium text-muted-foreground">ลูกค้า</Label>
+                      <div className="text-xl font-semibold text-foreground mt-2">
+                        {selectedPayment.tax_invoices?.customer_name}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-card p-6 rounded-lg border shadow-sm">
+                      <Label className="text-sm font-medium text-muted-foreground">จำนวนเงิน</Label>
+                      <div className="text-3xl font-bold text-green-600 mt-2">
+                        ฿{selectedPayment.amount_received.toLocaleString()}
+                        <span className="text-sm font-normal text-muted-foreground ml-2">เงินที่รับแล้ว</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Details Section */}
+                  <div className="bg-card p-6 rounded-lg border shadow-sm">
+                    <h4 className="text-lg font-semibold text-foreground mb-4">รายละเอียดการชำระ</h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">วิธีการชำระ</Label>
+                        <div className="text-lg font-medium text-foreground mt-1">{selectedPayment.payment_method}</div>
+                      </div>
+                      
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">วันที่ชำระ</Label>
+                        <div className="text-lg font-medium text-foreground mt-1">
+                          {format(new Date(selectedPayment.payment_date), 'dd/MM/yyyy HH:mm:ss', { locale: th })}
+                        </div>
+                      </div>
+                    </div>
+
+                    {selectedPayment.payment_reference && (
+                      <div className="mt-4">
+                        <Label className="text-sm font-medium text-muted-foreground">หมายเลขอ้างอิง</Label>
+                        <div className="text-lg font-medium text-foreground mt-1">{selectedPayment.payment_reference}</div>
+                      </div>
+                    )}
+
+                    {(selectedPayment.bank_name || selectedPayment.depositor_name) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                        {selectedPayment.bank_name && (
+                          <div>
+                            <Label className="text-sm font-medium text-muted-foreground">ธนาคาร</Label>
+                            <div className="text-lg font-medium text-foreground mt-1">{selectedPayment.bank_name}</div>
+                          </div>
+                        )}
+                        
+                        {selectedPayment.depositor_name && (
+                          <div>
+                            <Label className="text-sm font-medium text-muted-foreground">ผู้โอน</Label>
+                            <div className="text-lg font-medium text-foreground mt-1">{selectedPayment.depositor_name}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedPayment.payment_notes && (
+                      <div className="mt-4">
+                        <Label className="text-sm font-medium text-muted-foreground">หมายเหตุ</Label>
+                        <div className="mt-2 p-4 bg-muted/50 rounded-lg border text-foreground">
+                          {selectedPayment.payment_notes}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Payment Evidence Section */}
+                  {selectedPayment.payment_evidence_url && (
+                    <div className="bg-card p-6 rounded-lg border shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold text-foreground">สลิปการโอนเงิน</h4>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(selectedPayment.payment_evidence_url, '_blank')}
+                          className="flex items-center gap-2"
+                        >
+                          <Eye className="h-4 w-4" />
+                          ดูรายละเอียด
+                        </Button>
+                      </div>
+                      
+                      <div className="border border-border rounded-lg overflow-hidden bg-background">
+                        <img
+                          src={selectedPayment.payment_evidence_url}
+                          alt="หลักฐานการโอนเงิน"
+                          className="w-full h-auto max-h-96 object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            const fallback = document.createElement('div');
+                            fallback.className = 'flex items-center justify-center h-32 bg-muted text-muted-foreground';
+                            fallback.innerHTML = '<div class="text-center"><div class="text-sm">ไม่สามารถแสดงรูปภาพได้</div><div class="text-xs mt-1">คลิก "ดูรายละเอียด" เพื่อเปิดในหน้าต่างใหม่</div></div>';
+                            (e.target as HTMLElement).parentNode?.appendChild(fallback);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
