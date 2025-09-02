@@ -33,6 +33,12 @@ interface PaymentRecord {
     customer_name: string;
     total_amount: number;
   };
+  receipts?: Array<{
+    id: string;
+    receipt_number: string;
+    receipt_date: string;
+    total_amount: number;
+  }>;
 }
 
 export default function PaymentRecords() {
@@ -85,6 +91,12 @@ export default function PaymentRecords() {
           tax_invoices (
             tax_invoice_number,
             customer_name,
+            total_amount
+          ),
+          receipts (
+            id,
+            receipt_number,
+            receipt_date,
             total_amount
           )
         `)
@@ -588,6 +600,12 @@ export default function PaymentRecords() {
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                       วันที่ชำระ: {new Date(payment.payment_date).toLocaleDateString('th-TH')}
                     </Badge>
+                    {/* Receipt Link */}
+                    {payment.receipts && payment.receipts.length > 0 && (
+                      <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                        🧾 เชื่อมโยงใบเสร็จ: {payment.receipts[0].receipt_number}
+                      </Badge>
+                    )}
                     <div className="ml-auto">
                       {payment.verification_status === 'verified' && (
                         <Badge className="bg-green-100 text-green-800 border border-green-200">
@@ -610,7 +628,8 @@ export default function PaymentRecords() {
                   {/* Action Buttons */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <div className="flex items-center gap-2">
-                      {payment.verification_status === 'verified' && (
+                      {/* Show different buttons based on status and receipt existence */}
+                      {payment.verification_status === 'verified' && (!payment.receipts || payment.receipts.length === 0) && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -621,6 +640,18 @@ export default function PaymentRecords() {
                           สร้างใบเสร็จ
                         </Button>
                       )}
+                      
+                      {payment.verification_status === 'verified' && payment.receipts && payment.receipts.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            ✅ สร้างใบเสร็จแล้ว: {payment.receipts[0].receipt_number}
+                          </Badge>
+                          <span className="text-xs text-gray-500">
+                            ({new Date(payment.receipts[0].receipt_date).toLocaleDateString('th-TH')})
+                          </span>
+                        </div>
+                      )}
+                      
                       {payment.verification_status === 'pending' && (
                         <Button
                           variant="outline"
@@ -628,22 +659,42 @@ export default function PaymentRecords() {
                           onClick={() => handleVerifyPayment(payment.id, 'verified')}
                           className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
                         >
-                          <Receipt className="w-4 h-4 mr-1" />
-                          สร้างใบเสร็จ
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          ยืนยันและสร้างใบเสร็จ
                         </Button>
                       )}
-                      <Button
-                        variant="outline" 
-                        size="sm"
-                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                      >
-                        รีเซ็ต
-                      </Button>
+                      
+                      {payment.verification_status === 'pending' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleVerifyPayment(payment.id, 'rejected')}
+                          className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300"
+                        >
+                          <XCircle className="w-4 h-4 mr-1" />
+                          ปฏิเสธ
+                        </Button>
+                      )}
+                      
+                      {payment.verification_status !== 'pending' && (
+                        <Button
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleResetPayment(payment.id)}
+                          className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                        >
+                          <RotateCcw className="w-4 h-4 mr-1" />
+                          รีเซ็ต
+                        </Button>
+                      )}
+                      
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleDeletePayment(payment.id)}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={payment.receipts && payment.receipts.length > 0}
+                        title={payment.receipts && payment.receipts.length > 0 ? "ไม่สามารถลบได้เนื่องจากมีใบเสร็จที่เชื่อมโยงอยู่" : "ลบรายการชำระเงิน"}
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
                         ลบ
