@@ -501,7 +501,7 @@ export default function PaymentRecords() {
                     {/* Tax Invoice */}
                     <div>
                       <div className="text-sm text-muted-foreground mb-1">ใบกำกับภาษี</div>
-                      <div className="text-lg font-semibold">
+                      <div className="text-lg font-semibold font-mono">
                         {payment.tax_invoices?.tax_invoice_number}
                       </div>
                       <div className="text-sm text-gray-600 mt-1">
@@ -594,7 +594,7 @@ export default function PaymentRecords() {
                         size="sm"
                         className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
                       >
-                        ที่อื่น
+                        รีเซ็ต
                       </Button>
                       <Button
                         variant="outline"
