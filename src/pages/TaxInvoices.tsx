@@ -590,7 +590,7 @@ export default function TaxInvoices() {
                               <Receipt className="w-4 h-4 mr-2" />
                               สร้างใบเสร็จรับเงิน
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleVerifyPayment(taxInvoice.id)}>
+                            <DropdownMenuItem onClick={() => navigate(`/payment-records?invoice=${taxInvoice.id}`)}>
                               <CheckCircle className="w-4 h-4 mr-2" />
                               ยืนยันรับเงิน
                             </DropdownMenuItem>

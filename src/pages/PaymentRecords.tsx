@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,6 +43,7 @@ export default function PaymentRecords() {
   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
   const [taxInvoices, setTaxInvoices] = useState<any[]>([]);
   const [selectedTaxInvoice, setSelectedTaxInvoice] = useState<any>(null);
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -58,16 +60,16 @@ export default function PaymentRecords() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Get tax invoice ID from URL parameters
-  const urlParams = new URLSearchParams(window.location.search);
-  const preSelectedTaxInvoiceId = urlParams.get('tax_invoice_id');
+  const preSelectedTaxInvoiceId = searchParams.get('invoice');
 
   useEffect(() => {
     loadPaymentRecords();
     loadTaxInvoices();
     
-    // If there's a pre-selected tax invoice, set it in form data
+    // If there's a pre-selected tax invoice, set it in form data and open add form
     if (preSelectedTaxInvoiceId) {
       setFormData(prev => ({ ...prev, tax_invoice_id: preSelectedTaxInvoiceId }));
+      setShowAddForm(true);
     }
   }, [preSelectedTaxInvoiceId]);
 
@@ -483,7 +485,9 @@ export default function PaymentRecords() {
 
           {/* Payment Records Cards */}
           <div className="space-y-4">
-            {paymentRecords.map((payment) => (
+            {paymentRecords
+              .filter(payment => preSelectedTaxInvoiceId ? payment.tax_invoice_id === preSelectedTaxInvoiceId : true)
+              .map((payment) => (
               <Card key={payment.id} className="p-0">
                 <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start mb-4">
@@ -611,7 +615,9 @@ export default function PaymentRecords() {
               </Card>
             ))}
             
-            {paymentRecords.length === 0 && (
+            {paymentRecords
+              .filter(payment => preSelectedTaxInvoiceId ? payment.tax_invoice_id === preSelectedTaxInvoiceId : true)
+              .length === 0 && (
               <Card>
                 <CardContent className="p-8">
                   <div className="text-center text-muted-foreground">
