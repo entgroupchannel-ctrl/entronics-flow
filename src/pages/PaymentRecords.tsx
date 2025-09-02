@@ -53,6 +53,9 @@ export default function PaymentRecords() {
     payment_notes: "",
   });
 
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
   // Get tax invoice ID from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   const preSelectedTaxInvoiceId = urlParams.get('tax_invoice_id');
@@ -119,6 +122,61 @@ export default function PaymentRecords() {
     }
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "ไฟล์ไม่ถูกต้อง",
+          description: "กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, GIF) หรือ PDF",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "ไฟล์ใหญ่เกินไป",
+          description: "กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setUploadedFile(file);
+      
+      // Create preview URL for images
+      if (file.type.startsWith('image/')) {
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+      } else {
+        setPreviewUrl(null);
+      }
+    }
+  };
+
+  const uploadFileToStorage = async (file: File) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `payment-evidence/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('payment-evidence')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      return filePath;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
+  };
+
   const handleAddPayment = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -131,10 +189,18 @@ export default function PaymentRecords() {
         return;
       }
 
+      let paymentEvidenceUrl = null;
+      
+      // Upload file if selected
+      if (uploadedFile) {
+        paymentEvidenceUrl = await uploadFileToStorage(uploadedFile);
+      }
+
       const { error } = await supabase
         .from('payment_records')
         .insert({
           ...formData,
+          payment_evidence_url: paymentEvidenceUrl,
           created_by: user.id,
         } as any);
 
@@ -155,6 +221,8 @@ export default function PaymentRecords() {
         amount_received: 0,
         payment_notes: "",
       });
+      setUploadedFile(null);
+      setPreviewUrl(null);
       loadPaymentRecords();
     } catch (error) {
       console.error('Error adding payment:', error);
@@ -526,7 +594,7 @@ export default function PaymentRecords() {
                         value={formData.payment_method}
                         onValueChange={(value) => setFormData({ ...formData, payment_method: value })}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-slate-50 border-slate-300">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -547,6 +615,7 @@ export default function PaymentRecords() {
                         value={formData.amount_received}
                         onChange={(e) => setFormData({ ...formData, amount_received: parseFloat(e.target.value) || 0 })}
                         required
+                        className="bg-slate-50 border-slate-300"
                       />
                     </div>
 
@@ -556,6 +625,7 @@ export default function PaymentRecords() {
                         id="payment_reference"
                         value={formData.payment_reference}
                         onChange={(e) => setFormData({ ...formData, payment_reference: e.target.value })}
+                        className="bg-slate-50 border-slate-300"
                       />
                     </div>
 
@@ -565,6 +635,7 @@ export default function PaymentRecords() {
                         id="bank_name"
                         value={formData.bank_name}
                         onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                        className="bg-slate-50 border-slate-300"
                       />
                     </div>
 
@@ -574,7 +645,54 @@ export default function PaymentRecords() {
                         id="depositor_name"
                         value={formData.depositor_name}
                         onChange={(e) => setFormData({ ...formData, depositor_name: e.target.value })}
+                        className="bg-slate-50 border-slate-300"
                       />
+                    </div>
+
+                    {/* File upload section */}
+                    <div className="md:col-span-3">
+                      <Label htmlFor="payment_evidence">หลักฐานการชำระเงิน</Label>
+                      <div className="mt-2">
+                        <Input
+                          id="payment_evidence"
+                          type="file"
+                          accept="image/*,application/pdf"
+                          onChange={handleFileChange}
+                          className="bg-slate-50 border-slate-300"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          รองรับไฟล์รูปภาพ (JPG, PNG, GIF) และ PDF ขนาดไม่เกิน 5MB
+                        </p>
+                      </div>
+                      
+                      {/* Preview section */}
+                      {previewUrl && (
+                        <div className="mt-4">
+                          <Label>ตัวอย่างหลักฐาน</Label>
+                          <div className="mt-2 border border-slate-300 rounded-lg p-4 bg-slate-50">
+                            <img 
+                              src={previewUrl} 
+                              alt="Payment evidence preview" 
+                              className="max-w-full h-auto max-h-64 object-contain rounded-lg"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {uploadedFile && !previewUrl && (
+                        <div className="mt-4">
+                          <Label>ไฟล์ที่เลือก</Label>
+                          <div className="mt-2 p-3 bg-slate-50 border border-slate-300 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Upload className="w-4 h-4 text-slate-600" />
+                              <span className="text-sm font-medium">{uploadedFile.name}</span>
+                              <span className="text-xs text-slate-500">
+                                ({(uploadedFile.size / 1024 / 1024).toFixed(2)} MB)
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="md:col-span-3">
@@ -584,6 +702,7 @@ export default function PaymentRecords() {
                         value={formData.payment_notes}
                         onChange={(e) => setFormData({ ...formData, payment_notes: e.target.value })}
                         rows={2}
+                        className="bg-slate-50 border-slate-300"
                       />
                     </div>
                   </div>
