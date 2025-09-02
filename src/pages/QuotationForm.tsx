@@ -1179,7 +1179,7 @@ export default function QuotationForm() {
                             </Select>
                           </div>
                         </TableCell>
-                        <TableCell className="w-24 font-medium text-right">
+                        <TableCell className="w-24 font-medium text-right align-top">
                           {item.line_total.toLocaleString('th-TH', {
                         minimumFractionDigits: 2
                       })}
