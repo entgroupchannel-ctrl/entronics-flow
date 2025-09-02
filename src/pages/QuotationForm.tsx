@@ -1064,7 +1064,7 @@ export default function QuotationForm() {
                       <SelectTrigger className="border-gray-300">
                         <SelectValue placeholder="เลือกสถานะ" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" sideOffset={4}>
                         <SelectItem value="draft">ร่าง</SelectItem>
                         <SelectItem value="pending">รอการอนุมัติ</SelectItem>
                         <SelectItem value="approved">อนุมัติแล้ว</SelectItem>
@@ -1126,11 +1126,15 @@ export default function QuotationForm() {
                         </TableCell>
                         <TableCell className="w-[40%]">
                           <div className="space-y-2">
-                            <Select onValueChange={value => selectProduct(item.id, value)}>
+                            <Select key={`product-${item.id}`} onValueChange={value => selectProduct(item.id, value)}>
                               <SelectTrigger className="text-sm text-left">
                                 <SelectValue placeholder="เลือกสินค้า" />
                               </SelectTrigger>
-                              <SelectContent className="bg-background border border-border shadow-lg z-50">
+                              <SelectContent 
+                                className="bg-background border border-border shadow-lg z-50"
+                                position="popper"
+                                sideOffset={4}
+                              >
                                 {filteredProducts.map(product => <SelectItem key={product.id} value={product.id} className="text-sm text-left hover:bg-accent">
                                     <div className="text-left">
                                       <div className="font-medium">{product.name}</div>
@@ -1164,11 +1168,19 @@ export default function QuotationForm() {
                         <TableCell className="w-36 align-top">
                           <div className="flex gap-1">
                             <Input type="number" value={item.discount_amount} onChange={e => updateItem(item.id, 'discount_amount', Number(e.target.value))} min="0" step="0.01" className="text-right flex-1 min-w-[80px]" placeholder="0" />
-                            <Select value={item.discount_type} onValueChange={(value: 'amount' | 'percentage') => updateItem(item.id, 'discount_type', value)}>
+                            <Select 
+                              key={`discount-${item.id}`} 
+                              value={item.discount_type} 
+                              onValueChange={(value: 'amount' | 'percentage') => updateItem(item.id, 'discount_type', value)}
+                            >
                               <SelectTrigger className="w-16 bg-background border border-border">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-background border border-border shadow-lg z-50">
+                              <SelectContent 
+                                className="bg-background border border-border shadow-lg z-50"
+                                position="popper"
+                                sideOffset={4}
+                              >
                                 <SelectItem value="percentage" className="hover:bg-accent">
                                   <span className="text-sm">%</span>
                                 </SelectItem>
