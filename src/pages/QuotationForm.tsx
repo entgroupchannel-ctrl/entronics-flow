@@ -1082,10 +1082,28 @@ export default function QuotationForm() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">รายการสินค้า</h3>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2 min-w-[300px]">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 min-w-[400px] max-w-[500px]">
                     <Search className="w-4 h-4 text-muted-foreground" />
-                    <Input placeholder="ค้นหาสินค้า..." value={productFilter} onChange={e => setProductFilter(e.target.value)} className="text-sm" />
+                    <Input 
+                      placeholder="ค้นหาสินค้า ชื่อ, SKU, แบรนด์..." 
+                      value={productFilter} 
+                      onChange={e => setProductFilter(e.target.value)} 
+                      className="text-sm bg-background border-2 focus:border-primary" 
+                    />
+                    {productFilter && (
+                      <Button variant="ghost" size="sm" onClick={() => setProductFilter('')} className="px-2">
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {productFilter ? `พบ ${products.filter(product => 
+                      productFilter === "" || 
+                      product.name.toLowerCase().includes(productFilter.toLowerCase()) || 
+                      product.sku.toLowerCase().includes(productFilter.toLowerCase()) || 
+                      (product.brand && product.brand.toLowerCase().includes(productFilter.toLowerCase()))
+                    ).length} รายการ` : `ทั้งหมด ${products.length} รายการ`}
                   </div>
                   <Button onClick={addItem} size="sm">
                     <Plus className="w-4 h-4 mr-2" />
