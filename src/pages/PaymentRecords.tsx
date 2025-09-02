@@ -579,137 +579,159 @@ export default function PaymentRecords() {
                         </div>
                       </div>
 
-                      {/* Second Row - Actions & Status */}
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                        {/* Status Actions - All buttons in a horizontal row */}
-                        <div className="flex gap-2">
-                          {payment.verification_status === 'pending' && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-green-100 hover:border-emerald-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleVerifyPayment(payment.id, 'verified')}
-                              >
-                                <CheckCircle className="w-4 h-4 mr-1.5" />
-                                สร้างใบเสร็จ
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-rose-50 to-red-50 border-rose-200 text-rose-700 hover:from-rose-100 hover:to-red-100 hover:border-rose-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleVerifyPayment(payment.id, 'rejected')}
-                              >
-                                <XCircle className="w-4 h-4 mr-1.5" />
-                                ปฏิเสธ
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleDeletePayment(payment.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-1.5" />
-                                ลบ
-                              </Button>
-                            </>
-                          )}
+                      {/* Second Row - Payment Info & Actions */}
+                      <div className="space-y-3 pt-3 border-t border-slate-100">
+                        {/* Payment Info Box */}
+                        <div className={`grid grid-cols-2 gap-4 p-3 rounded-lg border ${
+                          payment.verification_status === 'verified' 
+                            ? 'bg-emerald-50 border-emerald-200' 
+                            : payment.verification_status === 'rejected'
+                            ? 'bg-rose-50 border-rose-200'
+                            : 'bg-slate-50 border-slate-200'
+                        }`}>
+                          <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground font-medium">วิธีชำระ</div>
+                            <div className="text-sm font-medium">{payment.payment_method}</div>
+                          </div>
                           
-                          {payment.verification_status === 'verified' && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-sky-50 to-blue-50 border-sky-200 text-sky-700 hover:from-sky-100 hover:to-blue-100 hover:border-sky-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleCreateReceipt(payment)}
-                              >
-                                <Receipt className="w-4 h-4 mr-1.5" />
-                                สร้างใบเสร็จ
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleResetPayment(payment.id)}
-                              >
-                                <RotateCcw className="w-4 h-4 mr-1.5" />
-                                รีเซ็ต
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleDeletePayment(payment.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-1.5" />
-                                ลบ
-                              </Button>
-                            </>
-                          )}
-                          
-                          {payment.verification_status === 'rejected' && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleResetPayment(payment.id)}
-                              >
-                                <RotateCcw className="w-4 h-4 mr-1.5" />
-                                รีเซ็ต
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleDeletePayment(payment.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-1.5" />
-                                ลบ
-                              </Button>
-                            </>
-                          )}
+                          <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground font-medium">วันที่ชำระ</div>
+                            <div className="text-sm font-medium">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</div>
+                          </div>
                         </div>
 
-                        {/* Status Badge & Menu */}
-                        <div className="flex items-center gap-2">
-                          {getStatusBadge(payment.verification_status)}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => setSelectedPayment(payment)}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                แก้ไข
-                              </DropdownMenuItem>
-                              
-                              <DropdownMenuItem onClick={() => window.print()}>
-                                <Printer className="w-4 h-4 mr-2" />
-                                พิมพ์
-                              </DropdownMenuItem>
-                              
-                              <DropdownMenuItem onClick={() => {}}>
-                                <Download className="w-4 h-4 mr-2" />
-                                ดาวน์โหลด
-                              </DropdownMenuItem>
-                              
-                              <DropdownMenuItem onClick={() => {}}>
-                                <Share2 className="w-4 h-4 mr-2" />
-                                แชร์
-                              </DropdownMenuItem>
-                              
-                              <DropdownMenuItem 
-                                onClick={() => handleDeletePayment(payment.id)}
-                                className="text-red-600 focus:text-red-600"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                ลบ
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                        {/* Actions Row */}
+                        <div className="flex items-center justify-between">
+                          {/* Status Actions - All buttons in a horizontal row */}
+                          <div className="flex gap-2">
+                            {payment.verification_status === 'pending' && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-green-100 hover:border-emerald-300 hover:shadow-md transition-all duration-200 font-medium"
+                                  onClick={() => handleVerifyPayment(payment.id, 'verified')}
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-1.5" />
+                                  สร้างใบเสร็จ
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-gradient-to-r from-rose-50 to-red-50 border-rose-200 text-rose-700 hover:from-rose-100 hover:to-red-100 hover:border-rose-300 hover:shadow-md transition-all duration-200 font-medium"
+                                  onClick={() => handleVerifyPayment(payment.id, 'rejected')}
+                                >
+                                  <XCircle className="w-4 h-4 mr-1.5" />
+                                  ปฏิเสธ
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
+                                  onClick={() => handleDeletePayment(payment.id)}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-1.5" />
+                                  ลบ
+                                </Button>
+                              </>
+                            )}
+                            
+                            {payment.verification_status === 'verified' && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-gradient-to-r from-sky-50 to-blue-50 border-sky-200 text-sky-700 hover:from-sky-100 hover:to-blue-100 hover:border-sky-300 hover:shadow-md transition-all duration-200 font-medium"
+                                  onClick={() => handleCreateReceipt(payment)}
+                                >
+                                  <Receipt className="w-4 h-4 mr-1.5" />
+                                  สร้างใบเสร็จ
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 hover:shadow-md transition-all duration-200 font-medium"
+                                  onClick={() => handleResetPayment(payment.id)}
+                                >
+                                  <RotateCcw className="w-4 h-4 mr-1.5" />
+                                  รีเซ็ต
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
+                                  onClick={() => handleDeletePayment(payment.id)}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-1.5" />
+                                  ลบ
+                                </Button>
+                              </>
+                            )}
+                            
+                            {payment.verification_status === 'rejected' && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 hover:shadow-md transition-all duration-200 font-medium"
+                                  onClick={() => handleResetPayment(payment.id)}
+                                >
+                                  <RotateCcw className="w-4 h-4 mr-1.5" />
+                                  รีเซ็ต
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
+                                  onClick={() => handleDeletePayment(payment.id)}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-1.5" />
+                                  ลบ
+                                </Button>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Status Badge & Menu */}
+                          <div className="flex items-center gap-2">
+                            {getStatusBadge(payment.verification_status)}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem onClick={() => setSelectedPayment(payment)}>
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  แก้ไข
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuItem onClick={() => window.print()}>
+                                  <Printer className="w-4 h-4 mr-2" />
+                                  พิมพ์
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuItem onClick={() => {}}>
+                                  <Download className="w-4 h-4 mr-2" />
+                                  ดาวน์โหลด
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuItem onClick={() => {}}>
+                                  <Share2 className="w-4 h-4 mr-2" />
+                                  แชร์
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeletePayment(payment.id)}
+                                  className="text-red-600 focus:text-red-600"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  ลบ
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
