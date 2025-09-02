@@ -1150,10 +1150,6 @@ export default function QuotationForm() {
                               </SelectContent>
                             </Select>
                             
-                            {item.product_name && <div className="bg-muted/30 p-2 rounded text-xs">
-                                <div className="font-medium text-primary">{item.product_name}</div>
-                                {item.product_sku && <div className="text-muted-foreground">SKU: {item.product_sku}</div>}
-                              </div>}
 
                             <div>
                               <Label className="text-xs text-muted-foreground">รายละเอียดสินค้า:</Label>
