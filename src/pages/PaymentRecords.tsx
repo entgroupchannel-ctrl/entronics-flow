@@ -534,169 +534,188 @@ export default function PaymentRecords() {
             </Card>
           </div>
 
-          {/* Payment Records Table */}
+          {/* Payment Records */}
           <Card>
             <CardHeader>
               <CardTitle>รายการชำระเงิน</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>หมายเลขการชำระ</TableHead>
-                      <TableHead>ใบกำกับภาษี</TableHead>
-                      <TableHead>ลูกค้า</TableHead>
-                      <TableHead>วิธีการชำระ</TableHead>
-                       <TableHead>จำนวนเงิน</TableHead>
-                       <TableHead>สถานะ</TableHead>
-                       <TableHead>วันที่ชำระ</TableHead>
-                       <TableHead>การดำเนินการ</TableHead>
-                       <TableHead className="text-right">จัดการ</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paymentRecords.map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell className="font-medium">
-                          {payment.payment_number}
-                        </TableCell>
-                        <TableCell>
-                          {payment.tax_invoices?.tax_invoice_number}
-                        </TableCell>
-                        <TableCell>
-                          {payment.tax_invoices?.customer_name}
-                        </TableCell>
-                        <TableCell>{payment.payment_method}</TableCell>
-                        <TableCell>฿{payment.amount_received.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {payment.verification_status === 'pending' && (
-                                <>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
-                                    onClick={() => handleVerifyPayment(payment.id, 'verified')}
-                                  >
-                                    <CheckCircle className="w-4 h-4 mr-1" />
-                                    บันทึกการชำระเงิน
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
-                                    onClick={() => handleVerifyPayment(payment.id, 'rejected')}
-                                  >
-                                    <XCircle className="w-4 h-4 mr-1" />
-                                    ปฏิเสธ
-                                  </Button>
-                                </>
-                              )}
-                              
-                              {payment.verification_status === 'verified' && (
-                                <>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-                                    onClick={() => handleCreateReceipt(payment)}
-                                  >
-                                    <Receipt className="w-4 h-4 mr-1" />
-                                    สร้างใบเสร็จรับเงิน
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
-                                    onClick={() => handleResetPayment(payment.id)}
-                                  >
-                                    <RotateCcw className="w-4 h-4 mr-1" />
-                                    รีเซ็ต
-                                  </Button>
-                                </>
-                              )}
-                              
-                              {payment.verification_status === 'rejected' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
-                                  onClick={() => handleResetPayment(payment.id)}
-                                >
-                                  <RotateCcw className="w-4 h-4 mr-1" />
-                                  รีเซ็ต
-                                </Button>
-                              )}
-                              
+              <div className="space-y-4">
+                {paymentRecords.map((payment) => (
+                  <Card key={payment.id} className="border border-slate-200 hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      {/* First Row - Main Information */}
+                      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center mb-3">
+                        <div className="space-y-1">
+                          <div className="text-xs text-muted-foreground">หมายเลขการชำระ</div>
+                          <div className="font-semibold text-blue-600">{payment.payment_number}</div>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <div className="text-xs text-muted-foreground">ใบกำกับภาษี</div>
+                          <div className="font-medium">{payment.tax_invoices?.tax_invoice_number}</div>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <div className="text-xs text-muted-foreground">ลูกค้า</div>
+                          <div className="font-medium">{payment.tax_invoices?.customer_name}</div>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <div className="text-xs text-muted-foreground">จำนวนเงิน</div>
+                          <div className="font-bold text-green-600 text-lg">฿{payment.amount_received.toLocaleString()}</div>
+                        </div>
+                        
+                        <div className="flex justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedPayment(payment);
+                              setShowDetailsPanel(true);
+                            }}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            ดูรายละเอียด
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Second Row - Additional Information & Actions */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center pt-3 border-t border-slate-100">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground">วิธีการชำระ</div>
+                            <div className="text-sm">{payment.payment_method}</div>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground">วันที่ชำระ</div>
+                            <div className="text-sm">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</div>
+                          </div>
+                        </div>
+
+                        {/* Status Actions */}
+                        <div className="flex flex-wrap gap-2">
+                          {payment.verification_status === 'pending' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                                onClick={() => handleVerifyPayment(payment.id, 'verified')}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                บันทึก
+                              </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
                                 className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
-                                onClick={() => handleDeletePayment(payment.id)}
+                                onClick={() => handleVerifyPayment(payment.id, 'rejected')}
                               >
-                                <Trash2 className="w-4 h-4 mr-1" />
-                                ลบ
+                                <XCircle className="w-4 h-4 mr-1" />
+                                ปฏิเสธ
                               </Button>
-                            </div>
-                          </TableCell>
-                         <TableCell>
-                           {new Date(payment.payment_date).toLocaleDateString('th-TH')}
-                          </TableCell>
-                          <TableCell>
-                             <Button
-                               variant="ghost"
-                               size="sm"
-                               onClick={() => {
-                                 setSelectedPayment(payment);
-                                 setShowDetailsPanel(true);
-                               }}
-                             >
-                               <Eye className="w-4 h-4" />
-                             </Button>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem onClick={() => setSelectedPayment(payment)}>
-                                  <Edit className="w-4 h-4 mr-2" />
-                                  แก้ไข
-                                </DropdownMenuItem>
-                                
-                                <DropdownMenuItem onClick={() => window.print()}>
-                                  <Printer className="w-4 h-4 mr-2" />
-                                  พิมพ์
-                                </DropdownMenuItem>
-                                
-                                <DropdownMenuItem onClick={() => {}}>
-                                  <Download className="w-4 h-4 mr-2" />
-                                  ดาวน์โหลด
-                                </DropdownMenuItem>
-                                
-                                <DropdownMenuItem onClick={() => {}}>
-                                  <Share2 className="w-4 h-4 mr-2" />
-                                  แชร์
-                                </DropdownMenuItem>
-                                
-                                <DropdownMenuItem 
-                                  onClick={() => handleDeletePayment(payment.id)}
-                                  className="text-red-600 focus:text-red-600"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  ลบ
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                            </>
+                          )}
+                          
+                          {payment.verification_status === 'verified' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                                onClick={() => handleCreateReceipt(payment)}
+                              >
+                                <Receipt className="w-4 h-4 mr-1" />
+                                สร้างใบเสร็จ
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                                onClick={() => handleResetPayment(payment.id)}
+                              >
+                                <RotateCcw className="w-4 h-4 mr-1" />
+                                รีเซ็ต
+                              </Button>
+                            </>
+                          )}
+                          
+                          {payment.verification_status === 'rejected' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                              onClick={() => handleResetPayment(payment.id)}
+                            >
+                              <RotateCcw className="w-4 h-4 mr-1" />
+                              รีเซ็ต
+                            </Button>
+                          )}
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                            onClick={() => handleDeletePayment(payment.id)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            ลบ
+                          </Button>
+                        </div>
+
+                        {/* Status Badge & Menu */}
+                        <div className="flex items-center justify-end gap-2">
+                          {getStatusBadge(payment.verification_status)}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem onClick={() => setSelectedPayment(payment)}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                แก้ไข
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuItem onClick={() => window.print()}>
+                                <Printer className="w-4 h-4 mr-2" />
+                                พิมพ์
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuItem onClick={() => {}}>
+                                <Download className="w-4 h-4 mr-2" />
+                                ดาวน์โหลด
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuItem onClick={() => {}}>
+                                <Share2 className="w-4 h-4 mr-2" />
+                                แชร์
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuItem 
+                                onClick={() => handleDeletePayment(payment.id)}
+                                className="text-red-600 focus:text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                ลบ
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                {paymentRecords.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    ไม่พบรายการชำระเงิน
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
