@@ -501,7 +501,7 @@ export default function PaymentRecords() {
                     {/* Tax Invoice */}
                     <div>
                       <div className="text-sm text-muted-foreground mb-1">ใบกำกับภาษี</div>
-                      <div className="text-lg font-semibold font-mono">
+                      <div className="text-lg font-semibold">
                         {payment.tax_invoices?.tax_invoice_number}
                       </div>
                       <div className="text-sm text-gray-600 mt-1">
