@@ -48,6 +48,12 @@ export default function PaymentRecords() {
   const [selectedPayment, setSelectedPayment] = useState<PaymentRecord | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'reset' | 'reject';
+    payment: PaymentRecord;
+    onConfirm: () => void;
+  } | null>(null);
   const [taxInvoices, setTaxInvoices] = useState<any[]>([]);
   const [selectedTaxInvoice, setSelectedTaxInvoice] = useState<any>(null);
   const [searchParams] = useSearchParams();
@@ -309,88 +315,91 @@ export default function PaymentRecords() {
   };
 
   const handleVerifyPayment = async (paymentId: string, status: 'verified' | 'rejected') => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-      const paymentRecord = paymentRecords.find(p => p.id === paymentId);
-      if (!paymentRecord) return;
+    const paymentRecord = paymentRecords.find(p => p.id === paymentId);
+    if (!paymentRecord) return;
 
-      // Check if rejecting a payment with existing receipts
-      if (status === 'rejected' && paymentRecord.receipts && paymentRecord.receipts.length > 0) {
-        const confirmed = window.confirm(
-          `การปฏิเสธจะยกเลิกใบเสร็จ ${paymentRecord.receipts[0].receipt_number} ที่เชื่อมโยงอยู่\n\nต้องการดำเนินการต่อหรือไม่?`
-        );
-        
-        if (!confirmed) return;
+    const executeVerification = async () => {
+      try {
+        // Check if rejecting a payment with existing receipts
+        if (status === 'rejected' && paymentRecord.receipts && paymentRecord.receipts.length > 0) {
+          // Cancel linked receipts
+          for (const receipt of paymentRecord.receipts) {
+            const { error: receiptError } = await supabase
+              .from('receipts')
+              .update({
+                payment_status: 'cancelled',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', receipt.id);
 
-        // Cancel linked receipts
-        for (const receipt of paymentRecord.receipts) {
-          const { error: receiptError } = await supabase
-            .from('receipts')
-            .update({
-              payment_status: 'cancelled',
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', receipt.id);
-
-          if (receiptError) {
-            console.error('Error cancelling receipt:', receiptError);
-            toast({
-              title: "เกิดข้อผิดพลาด",
-              description: `ไม่สามารถยกเลิกใบเสร็จ ${receipt.receipt_number} ได้`,
-              variant: "destructive",
-            });
-            return;
+            if (receiptError) {
+              console.error('Error cancelling receipt:', receiptError);
+              toast({
+                title: "เกิดข้อผิดพลาด",
+                description: `ไม่สามารถยกเลิกใบเสร็จ ${receipt.receipt_number} ได้`,
+                variant: "destructive",
+              });
+              return;
+            }
           }
         }
-      }
 
-      const { error } = await supabase
-        .from('payment_records')
-        .update({
-          verification_status: status,
-          verified_by: user.id,
-          verified_at: new Date().toISOString(),
-        })
-        .eq('id', paymentId);
+        const { error } = await supabase
+          .from('payment_records')
+          .update({
+            verification_status: status,
+            verified_by: user.id,
+            verified_at: new Date().toISOString(),
+          })
+          .eq('id', paymentId);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (status === 'verified') {
-        try {
-          const receipt = await createReceiptFromPayment(paymentRecord);
+        if (status === 'verified') {
+          try {
+            const receipt = await createReceiptFromPayment(paymentRecord);
+            toast({
+              title: "สำเร็จ",
+              description: `ยืนยันการชำระเงินและสร้างใบเสร็จ ${receipt.receipt_number} เรียบร้อยแล้ว`,
+            });
+          } catch (receiptError) {
+            console.error('Error creating receipt:', receiptError);
+            toast({
+              title: "ยืนยันการชำระเงินสำเร็จ",
+              description: "แต่เกิดข้อผิดพลาดในการสร้างใบเสร็จ กรุณาสร้างใบเสร็จด้วยตนเอง",
+              variant: "destructive",
+            });
+          }
+        } else {
+          const message = paymentRecord.receipts && paymentRecord.receipts.length > 0
+            ? `ปฏิเสธการชำระเงินและยกเลิกใบเสร็จ ${paymentRecord.receipts[0].receipt_number} เรียบร้อยแล้ว`
+            : "ปฏิเสธการชำระเงินเรียบร้อยแล้ว";
+
           toast({
             title: "สำเร็จ",
-            description: `ยืนยันการชำระเงินและสร้างใบเสร็จ ${receipt.receipt_number} เรียบร้อยแล้ว`,
-          });
-        } catch (receiptError) {
-          console.error('Error creating receipt:', receiptError);
-          toast({
-            title: "ยืนยันการชำระเงินสำเร็จ",
-            description: "แต่เกิดข้อผิดพลาดในการสร้างใบเสร็จ กรุณาสร้างใบเสร็จด้วยตนเอง",
-            variant: "destructive",
+            description: message,
           });
         }
-      } else {
-        const message = paymentRecord.receipts && paymentRecord.receipts.length > 0
-          ? `ปฏิเสธการชำระเงินและยกเลิกใบเสร็จ ${paymentRecord.receipts[0].receipt_number} เรียบร้อยแล้ว`
-          : "ปฏิเสธการชำระเงินเรียบร้อยแล้ว";
 
+        loadPaymentRecords();
+      } catch (error) {
+        console.error('Error verifying payment:', error);
         toast({
-          title: "สำเร็จ",
-          description: message,
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถยืนยันการชำระเงินได้",
+          variant: "destructive",
         });
       }
+    };
 
-      loadPaymentRecords();
-    } catch (error) {
-      console.error('Error verifying payment:', error);
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถยืนยันการชำระเงินได้",
-        variant: "destructive",
-      });
+    // Check if rejecting a payment with existing receipts and show confirmation
+    if (status === 'rejected' && paymentRecord.receipts && paymentRecord.receipts.length > 0) {
+      showConfirmation('reject', paymentRecord, executeVerification);
+    } else {
+      executeVerification();
     }
   };
 
@@ -412,68 +421,84 @@ export default function PaymentRecords() {
     }
   };
 
+  const showConfirmation = (type: 'reset' | 'reject', payment: PaymentRecord, onConfirm: () => void) => {
+    setConfirmAction({ type, payment, onConfirm });
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmAction = () => {
+    if (confirmAction) {
+      confirmAction.onConfirm();
+      setShowConfirmDialog(false);
+      setConfirmAction(null);
+    }
+  };
+
   const handleResetPayment = async (paymentId: string) => {
-    try {
-      const paymentRecord = paymentRecords.find(p => p.id === paymentId);
-      if (!paymentRecord) return;
+    const paymentRecord = paymentRecords.find(p => p.id === paymentId);
+    if (!paymentRecord) return;
 
-      // Check if there are linked receipts
-      if (paymentRecord.receipts && paymentRecord.receipts.length > 0) {
-        const confirmed = window.confirm(
-          `การรีเซ็ตจะยกเลิกใบเสร็จ ${paymentRecord.receipts[0].receipt_number} ที่เชื่อมโยงอยู่\n\nต้องการดำเนินการต่อหรือไม่?`
-        );
-        
-        if (!confirmed) return;
+    const executeReset = async () => {
+      try {
+        // Check if there are linked receipts
+        if (paymentRecord.receipts && paymentRecord.receipts.length > 0) {
+          // Cancel linked receipts
+          for (const receipt of paymentRecord.receipts) {
+            const { error: receiptError } = await supabase
+              .from('receipts')
+              .update({
+                payment_status: 'cancelled',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', receipt.id);
 
-        // Cancel linked receipts
-        for (const receipt of paymentRecord.receipts) {
-          const { error: receiptError } = await supabase
-            .from('receipts')
-            .update({
-              payment_status: 'cancelled',
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', receipt.id);
-
-          if (receiptError) {
-            console.error('Error cancelling receipt:', receiptError);
-            toast({
-              title: "เกิดข้อผิดพลาด",
-              description: `ไม่สามารถยกเลิกใบเสร็จ ${receipt.receipt_number} ได้`,
-              variant: "destructive",
-            });
-            return;
+            if (receiptError) {
+              console.error('Error cancelling receipt:', receiptError);
+              toast({
+                title: "เกิดข้อผิดพลาด",
+                description: `ไม่สามารถยกเลิกใบเสร็จ ${receipt.receipt_number} ได้`,
+                variant: "destructive",
+              });
+              return;
+            }
           }
         }
+
+        const { error } = await supabase
+          .from('payment_records')
+          .update({
+            verification_status: 'pending',
+            verified_by: null,
+            verified_at: null,
+          })
+          .eq('id', paymentId);
+
+        if (error) throw error;
+
+        const message = paymentRecord.receipts && paymentRecord.receipts.length > 0
+          ? `รีเซ็ตสถานะการชำระเงินและยกเลิกใบเสร็จ ${paymentRecord.receipts[0].receipt_number} เรียบร้อยแล้ว`
+          : "รีเซ็ตสถานะการชำระเงินเรียบร้อยแล้ว";
+
+        toast({
+          title: "สำเร็จ",
+          description: message,
+        });
+        loadPaymentRecords();
+      } catch (error) {
+        console.error('Error resetting payment:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถรีเซ็ตสถานะได้",
+          variant: "destructive",
+        });
       }
+    };
 
-      const { error } = await supabase
-        .from('payment_records')
-        .update({
-          verification_status: 'pending',
-          verified_by: null,
-          verified_at: null,
-        })
-        .eq('id', paymentId);
-
-      if (error) throw error;
-
-      const message = paymentRecord.receipts && paymentRecord.receipts.length > 0
-        ? `รีเซ็ตสถานะการชำระเงินและยกเลิกใบเสร็จ ${paymentRecord.receipts[0].receipt_number} เรียบร้อยแล้ว`
-        : "รีเซ็ตสถานะการชำระเงินเรียบร้อยแล้ว";
-
-      toast({
-        title: "สำเร็จ",
-        description: message,
-      });
-      loadPaymentRecords();
-    } catch (error) {
-      console.error('Error resetting payment:', error);
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถรีเซ็ตสถานะได้",
-        variant: "destructive",
-      });
+    // Check if there are linked receipts and show confirmation
+    if (paymentRecord.receipts && paymentRecord.receipts.length > 0) {
+      showConfirmation('reset', paymentRecord, executeReset);
+    } else {
+      executeReset();
     }
   };
 
@@ -1160,6 +1185,71 @@ export default function PaymentRecords() {
               </div>
             </div>
           )}
+
+          {/* Beautiful Confirmation Dialog */}
+          <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+            <AlertDialogContent className="max-w-md">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2 text-lg">
+                  {confirmAction?.type === 'reset' ? (
+                    <>
+                      <RotateCcw className="w-5 h-5 text-orange-500" />
+                      ยืนยันการรีเซ็ต
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-5 h-5 text-red-500" />
+                      ยืนยันการปฏิเสธ
+                    </>
+                  )}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-base space-y-3">
+                  {confirmAction?.type === 'reset' ? (
+                    <div className="space-y-2">
+                      <p>การรีเซ็ตจะยกเลิกใบเสร็จที่เชื่อมโยงอยู่:</p>
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                        <div className="text-orange-800 font-medium">
+                          📋 {confirmAction.payment.receipts?.[0]?.receipt_number}
+                        </div>
+                        <div className="text-orange-600 text-sm">
+                          วันที่: {confirmAction.payment.receipts?.[0]?.receipt_date && new Date(confirmAction.payment.receipts[0].receipt_date).toLocaleDateString('th-TH')}
+                        </div>
+                      </div>
+                      <p className="text-gray-600">ต้องการดำเนินการต่อหรือไม่?</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p>การปฏิเสธจะยกเลิกใบเสร็จที่เชื่อมโยงอยู่:</p>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <div className="text-red-800 font-medium">
+                          📋 {confirmAction?.payment.receipts?.[0]?.receipt_number}
+                        </div>
+                        <div className="text-red-600 text-sm">
+                          วันที่: {confirmAction?.payment.receipts?.[0]?.receipt_date && new Date(confirmAction.payment.receipts[0].receipt_date).toLocaleDateString('th-TH')}
+                        </div>
+                      </div>
+                      <p className="text-gray-600">ต้องการดำเนินการต่อหรือไม่?</p>
+                    </div>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="gap-2">
+                <AlertDialogCancel className="bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300">
+                  ยกเลิก
+                </AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleConfirmAction}
+                  className={
+                    confirmAction?.type === 'reset' 
+                      ? "bg-orange-500 hover:bg-orange-600 text-white"
+                      : "bg-red-500 hover:bg-red-600 text-white"
+                  }
+                >
+                  {confirmAction?.type === 'reset' ? 'ยืนยันรีเซ็ต' : 'ยืนยันปฏิเสธ'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>
