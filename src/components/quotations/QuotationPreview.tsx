@@ -108,7 +108,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
       </div>
 
       {/* Quotation Header */}
-      <div className="bg-red-500 text-white text-center py-3 mb-6">
+      <div className="bg-blue-500 text-white text-center py-3 mb-6">
         <h2 className="text-xl font-bold tracking-wider">ใบเสนอราคา / Q U O T A T I O N</h2>
       </div>
 
