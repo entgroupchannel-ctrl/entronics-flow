@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
@@ -472,8 +472,7 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
             <DropdownMenuItem
               onClick={() => {
                 console.log('Clicked อนุมัติ');
-                setCurrentAction('approve');
-                setIsDialogOpen(true);
+                handleAction('approve');
               }}
               className="flex items-center gap-2 cursor-pointer hover:bg-accent"
             >
@@ -485,6 +484,7 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
               onClick={() => {
                 console.log('Clicked ไม่อนุมัติ');
                 setCurrentAction('reject');
+                setNotes('');
                 setIsDialogOpen(true);
               }}
               className="flex items-center gap-2 cursor-pointer hover:bg-accent"
@@ -549,6 +549,9 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>จัดการใบเสนอราคา {quotation.quotation_number}</DialogTitle>
+              <DialogDescription>
+                กรุณาเลือกประเภทกระบวนการและใส่หมายเหตุหากจำเป็น
+              </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4">
