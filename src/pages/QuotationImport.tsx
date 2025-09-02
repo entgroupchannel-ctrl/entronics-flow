@@ -208,15 +208,6 @@ export default function QuotationImport() {
   };
 
   const importData = async () => {
-    if (errors.length > 0) {
-      toast({
-        title: "ไม่สามารถนำเข้าข้อมูลได้",
-        description: "กรุณาแก้ไขข้อผิดพลาดก่อนนำเข้าข้อมูล",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!parsedData) return;
 
     setStep('importing');
@@ -283,7 +274,9 @@ export default function QuotationImport() {
         quotationData.status = quotationData.status || 'draft';
         quotationData.workflow_status = 'wait_for_approve';
 
-        // Validate required fields
+        // Skip rows with validation errors but continue importing valid ones
+        let hasValidationError = false;
+        
         if (!quotationData.customer_name.trim()) {
           validationErrors.push({
             row: i + 2,
@@ -291,7 +284,7 @@ export default function QuotationImport() {
             value: quotationData.customer_name,
             message: 'ชื่อลูกค้าไม่สามารถเป็นค่าว่างได้'
           });
-          continue;
+          hasValidationError = true;
         }
 
         if (quotationData.total_amount <= 0) {
@@ -301,6 +294,12 @@ export default function QuotationImport() {
             value: quotationData.total_amount,
             message: 'ยอดรวมต้องมากกว่า 0'
           });
+          hasValidationError = true;
+        }
+
+        // Skip this row if it has validation errors
+        if (hasValidationError) {
+          setProgress(((i + 1) / parsedData.data.length) * 100);
           continue;
         }
 
@@ -341,9 +340,18 @@ export default function QuotationImport() {
       setErrors(validationErrors);
       setStep('complete');
 
+      const successMessage = successfulImports.length > 0 
+        ? `นำเข้าสำเร็จ ${successfulImports.length} รายการ`
+        : 'ไม่มีรายการที่สามารถนำเข้าได้';
+      
+      const errorMessage = validationErrors.length > 0 
+        ? `, ข้ามรายการที่มีปัญหา ${validationErrors.length} รายการ`
+        : '';
+
       toast({
         title: "Import เสร็จสิ้น",
-        description: `สำเร็จ: ${successfulImports.length} รายการ, ล้มเหลว: ${validationErrors.length} รายการ`,
+        description: successMessage + errorMessage,
+        variant: successfulImports.length > 0 ? "default" : "destructive",
       });
 
     } catch (error: any) {
