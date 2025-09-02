@@ -809,22 +809,27 @@ export default function TaxInvoices() {
 
         {/* Payment Evidence Dialog */}
         <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                จำเป็นต้องแนบหลักฐานการชำระเงิน
-              </DialogTitle>
+              <DialogTitle>ยืนยันรับเงิน</DialogTitle>
               <DialogDescription>
-                ต้องแนบหลักฐานการชำระเงินก่อนสร้างใบเสร็จรับเงิน
-                <br />
-                <span className="font-medium">
-                  ใบกำกับภาษี: {selectedTaxInvoiceForPayment?.tax_invoice_number}
-                </span>
+                กรุณาแนบหลักฐานการชำระเงิน
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
+              {/* แสดงข้อมูลใบกำกับภาษีที่เลือก */}
+              {selectedTaxInvoiceForPayment && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2">ข้อมูลใบกำกับภาษี</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>เลขที่: <span className="font-medium">{selectedTaxInvoiceForPayment.tax_invoice_number}</span></div>
+                    <div>ลูกค้า: <span className="font-medium">{selectedTaxInvoiceForPayment.customer_name}</span></div>
+                    <div>จำนวนเงิน: <span className="font-medium">฿{selectedTaxInvoiceForPayment.total_amount?.toLocaleString()}</span></div>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="payment_method">วิธีการชำระเงิน</Label>
                 <Select
