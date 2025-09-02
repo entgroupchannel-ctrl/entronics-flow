@@ -567,64 +567,70 @@ export default function PaymentRecords() {
                         </TableCell>
                         <TableCell>{payment.payment_method}</TableCell>
                         <TableCell>฿{payment.amount_received.toLocaleString()}</TableCell>
-                        <TableCell>{getStatusBadge(payment.verification_status)}</TableCell>
-                        <TableCell>
-                          {new Date(payment.payment_date).toLocaleDateString('th-TH')}
-                        </TableCell>
                          <TableCell>
-                           <DropdownMenu>
-                             <DropdownMenuTrigger asChild>
-                               <Button variant="ghost" size="sm">
-                                 <MoreHorizontal className="w-4 h-4" />
-                               </Button>
-                             </DropdownMenuTrigger>
-                             <DropdownMenuContent align="end" className="w-48">
-                               <DropdownMenuItem onClick={() => setSelectedPayment(payment)}>
-                                 <Eye className="w-4 h-4 mr-2" />
-                                 ดูรายละเอียด
-                               </DropdownMenuItem>
-                               
-                               {payment.verification_status === 'pending' && (
-                                 <DropdownMenuItem onClick={() => handleVerifyPayment(payment.id, 'verified')}>
-                                   <Save className="w-4 h-4 mr-2 text-green-600" />
-                                   <span className="text-green-600">บันทึกการชำระเงิน</span>
+                           <div className="flex items-center gap-2">
+                             {getStatusBadge(payment.verification_status)}
+                             <DropdownMenu>
+                               <DropdownMenuTrigger asChild>
+                                 <Button variant="ghost" size="sm">
+                                   <MoreHorizontal className="w-4 h-4" />
+                                 </Button>
+                               </DropdownMenuTrigger>
+                               <DropdownMenuContent align="end" className="w-48">
+                                 {payment.verification_status === 'pending' && (
+                                   <DropdownMenuItem onClick={() => handleVerifyPayment(payment.id, 'verified')}>
+                                     <Save className="w-4 h-4 mr-2 text-green-600" />
+                                     <span className="text-green-600">บันทึกการชำระเงิน</span>
+                                   </DropdownMenuItem>
+                                 )}
+                                 
+                                 <DropdownMenuItem 
+                                   onClick={() => handleCreateReceipt(payment)}
+                                   disabled={payment.verification_status !== 'verified'}
+                                   className={payment.verification_status !== 'verified' ? 'text-gray-400 cursor-not-allowed' : ''}
+                                 >
+                                   <Receipt className={`w-4 h-4 mr-2 ${payment.verification_status !== 'verified' ? 'text-gray-400' : 'text-blue-600'}`} />
+                                   <span className={payment.verification_status !== 'verified' ? 'text-gray-400' : 'text-blue-600'}>
+                                     สร้างใบเสร็จรับเงิน
+                                   </span>
                                  </DropdownMenuItem>
-                               )}
-                               
-                               <DropdownMenuItem 
-                                 onClick={() => handleCreateReceipt(payment)}
-                                 disabled={payment.verification_status !== 'verified'}
-                                 className={payment.verification_status !== 'verified' ? 'text-gray-400 cursor-not-allowed' : ''}
-                               >
-                                 <Receipt className={`w-4 h-4 mr-2 ${payment.verification_status !== 'verified' ? 'text-gray-400' : 'text-blue-600'}`} />
-                                 <span className={payment.verification_status !== 'verified' ? 'text-gray-400' : 'text-blue-600'}>
-                                   สร้างใบเสร็จรับเงิน
-                                 </span>
-                               </DropdownMenuItem>
-                               
-                               {payment.verification_status !== 'pending' && (
-                                 <DropdownMenuItem onClick={() => handleResetPayment(payment.id)}>
-                                   <RotateCcw className="w-4 h-4 mr-2 text-orange-600" />
-                                   <span className="text-orange-600">รีเซ็ต</span>
+                                 
+                                 {payment.verification_status !== 'pending' && (
+                                   <DropdownMenuItem onClick={() => handleResetPayment(payment.id)}>
+                                     <RotateCcw className="w-4 h-4 mr-2 text-orange-600" />
+                                     <span className="text-orange-600">รีเซ็ต</span>
+                                   </DropdownMenuItem>
+                                 )}
+                                 
+                                 <DropdownMenuItem 
+                                   onClick={() => handleDeletePayment(payment.id)}
+                                   className="text-red-600 focus:text-red-600"
+                                 >
+                                   <Trash2 className="w-4 h-4 mr-2" />
+                                   ลบ
                                  </DropdownMenuItem>
-                               )}
-                               
-                               <DropdownMenuItem 
-                                 onClick={() => handleDeletePayment(payment.id)}
-                                 className="text-red-600 focus:text-red-600"
-                               >
-                                 <Trash2 className="w-4 h-4 mr-2" />
-                                 ลบ
-                               </DropdownMenuItem>
-                               
-                               {payment.verification_status === 'pending' && (
-                                 <DropdownMenuItem onClick={() => handleVerifyPayment(payment.id, 'rejected')}>
-                                   <XCircle className="w-4 h-4 mr-2 text-red-600" />
-                                   <span className="text-red-600">ปฏิเสธ</span>
-                                 </DropdownMenuItem>
-                               )}
-                             </DropdownMenuContent>
-                           </DropdownMenu>
+                                 
+                                 {payment.verification_status === 'pending' && (
+                                   <DropdownMenuItem onClick={() => handleVerifyPayment(payment.id, 'rejected')}>
+                                     <XCircle className="w-4 h-4 mr-2 text-red-600" />
+                                     <span className="text-red-600">ปฏิเสธ</span>
+                                   </DropdownMenuItem>
+                                 )}
+                               </DropdownMenuContent>
+                             </DropdownMenu>
+                           </div>
+                         </TableCell>
+                         <TableCell>
+                           {new Date(payment.payment_date).toLocaleDateString('th-TH')}
+                         </TableCell>
+                         <TableCell>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => setSelectedPayment(payment)}
+                           >
+                             <Eye className="w-4 h-4" />
+                           </Button>
                          </TableCell>
                       </TableRow>
                     ))}
