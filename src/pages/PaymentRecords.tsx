@@ -28,6 +28,7 @@ interface PaymentRecord {
   verified_by?: string;
   verified_at?: string;
   payment_notes?: string;
+  payment_evidence_url?: string;
   tax_invoices?: {
     tax_invoice_number: string;
     customer_name: string;
@@ -1181,6 +1182,39 @@ export default function PaymentRecords() {
                     <div>
                       <Label>หมายเหตุ</Label>
                       <div>{selectedPayment.payment_notes}</div>
+                    </div>
+                  )}
+                  
+                  {selectedPayment.payment_evidence_url && (
+                    <div>
+                      <Label>หลักฐานการโอนเงิน</Label>
+                      <div className="mt-2 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700">สลิปการโอนเงิน</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(selectedPayment.payment_evidence_url, '_blank')}
+                            className="text-xs"
+                          >
+                            เปิดในหน้าต่างใหม่
+                          </Button>
+                        </div>
+                        <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
+                          <img
+                            src={selectedPayment.payment_evidence_url}
+                            alt="หลักฐานการโอนเงิน"
+                            className="w-full h-auto max-h-96 object-contain"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              const fallback = document.createElement('div');
+                              fallback.className = 'flex items-center justify-center h-32 bg-gray-100 text-gray-500';
+                              fallback.innerHTML = '<div class="text-center"><div class="text-sm">ไม่สามารถแสดงรูปภาพได้</div><div class="text-xs">คลิก "เปิดในหน้าต่างใหม่" เพื่อดู</div></div>';
+                              (e.target as HTMLElement).parentNode?.appendChild(fallback);
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
                   
