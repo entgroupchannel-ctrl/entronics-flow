@@ -47,8 +47,8 @@ interface QuotationPreviewProps {
   className?: string;
 }
 const defaultCompanyInfo: CompanyInfo = {
-  name: "บริษัท อีเอ็น ทีกรุ๊ป จำกัด (สำนักงานใหญ่)",
-  address: "เลขที่ 70/5 หมู่บ้านเมทโทร บิซทาวน์แจ้งวัฒนะ 2 หมูที่ 4\nตำบลคลองพระอุดม อำเภอปกเกร็ด จังหวัดนนทบุรี 11120",
+  name: "ENT GROUP CO., LTD.",
+  address: "70/5 Metro Beach Town Chaeng Watthana 2 Village, Moo 4\nKhlong Thanon Praditsathan, Pak Kret, Nonthaburi 11120",
   taxId: "0135558013167",
   phone: "02-045-6104",
   mobile: "095-7391053, 082-2497922",
@@ -91,37 +91,31 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
               {companyInfo.address}
             </div>
             <div className="text-gray-600">
-              เลขประจำตัวผู้เสียภาษี {companyInfo.taxId}
+              TAX ID: {companyInfo.taxId}
             </div>
             <div className="text-gray-600">
-              โทร. {companyInfo.phone}
-            </div>
-            <div className="text-gray-600">
-              เบอร์มือถือ {companyInfo.mobile}
+              TEL: {companyInfo.phone} | MOBILE: {companyInfo.mobile}
             </div>
             {companyInfo.fax && <div className="text-gray-600">
-                โทรสาร {companyInfo.fax}
+                FAX: {companyInfo.fax} | {companyInfo.website}
               </div>}
-            <div className="text-gray-600">
-              {companyInfo.website}
-            </div>
           </div>
         </div>
       </div>
 
       {/* Quotation Header */}
-      <div className="bg-blue-500 text-white text-center py-3 mb-6">
+      <div className="bg-red-500 text-white text-center py-3 mb-6">
         <h2 className="text-xl font-bold tracking-wider">ใบเสนอราคา / Q U O T A T I O N</h2>
       </div>
 
       {/* Customer and Quotation Info */}
-      <div className="border-2 border-gray-400 rounded p-4 mb-6">
+      <div className="border-2 border-red-500 rounded p-4 mb-6">
         <div className="grid grid-cols-2 gap-8">
           {/* Customer Info */}
           <div className="space-y-2">
-            <div className="text-gray-600 font-bold">ข้อมูลลูกค้า / Customer Information:</div>
+            <div className="text-red-500 font-bold">ข้อมูลลูกค้า / C U S T O M E R :</div>
             <div className="text-sm space-y-1">
-              <div>{quotationData.customer_name}</div>
+              
               {quotationData.customer_address && <div className="whitespace-pre-line">{quotationData.customer_address}</div>}
               {quotationData.customer_phone && <div>TEL: {quotationData.customer_phone}</div>}
               {quotationData.customer_email && <div>EMAIL: {quotationData.customer_email}</div>}
@@ -130,7 +124,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
 
           {/* Quotation Info */}
           <div className="space-y-2 text-right">
-            <div className="text-gray-600 font-bold">REF: {quotationData.quotation_number || 'QT2025XXXXXX'}</div>
+            <div className="text-red-500 font-bold">REF: {quotationData.quotation_number || 'QT2025XXXXXX'}</div>
             <div className="text-sm space-y-1">
               <div>เลขที่: {quotationData.quotation_number}</div>
               <div>วันที่: {formatDate(quotationData.quotation_date)}</div>
