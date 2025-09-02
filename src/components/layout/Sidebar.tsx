@@ -74,18 +74,18 @@ const menuItems = [
         iconColor: "text-green-600",
         submenu: [
           {
-            title: "การชำระเงิน",
-            icon: CreditCard,
-            href: "/payment-records",
-            view: "payment-records",
-            iconColor: "text-blue-500"
-          },
-          {
             title: "ใบส่งสินค้า/ใบกำกับภาษี",
             icon: FileText,
             href: "/tax-invoices",
             view: "tax-invoices",
             iconColor: "text-green-600"
+          },
+          {
+            title: "การชำระเงิน",
+            icon: CreditCard,
+            href: "/payment-records",
+            view: "payment-records",
+            iconColor: "text-blue-500"
           }
         ]
       },
