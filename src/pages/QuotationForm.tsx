@@ -1263,7 +1263,7 @@ export default function QuotationForm() {
                   <div className="flex items-center space-x-2">
                     <Checkbox id="gov-doc-agreement" checked={govDocAgreement} onCheckedChange={checked => setGovDocAgreement(checked as boolean)} />
                     <Label htmlFor="gov-doc-agreement" className="text-sm font-medium">
-                      ลงนามเอกสารภาครัฐมีผลในความผิด
+                      ลายเซ็นอิเล็กทรอนิกส์และตรายาง
                     </Label>
                   </div>
                   
