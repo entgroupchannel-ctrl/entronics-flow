@@ -684,11 +684,11 @@ const Inventory = () => {
             </p>
           </div>
 
-          <Tabs defaultValue="products" className="space-y-6">
+          <Tabs defaultValue="reports" className="space-y-6">
             <TabsList>
+              <TabsTrigger value="reports">รายงานคลัง</TabsTrigger>
               <TabsTrigger value="products">รายการสินค้า</TabsTrigger>
               <TabsTrigger value="import">นำเข้าสินค้า</TabsTrigger>
-              <TabsTrigger value="reports">รายงานคลัง</TabsTrigger>
             </TabsList>
 
             <TabsContent value="products" className="space-y-6">
