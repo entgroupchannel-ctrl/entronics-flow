@@ -145,7 +145,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
 
           {/* Quotation Info */}
           <div className="space-y-2 text-right">
-            <div className="text-red-500 font-bold">@% 5H@- QT2025099326</div>
+            <div className="text-red-500 font-bold">REF: {quotationData.quotation_number || 'QT2025XXXXXX'}</div>
             <div className="text-sm space-y-1">
               <div>เลขที่: {quotationData.quotation_number}</div>
               <div>วันที่: {formatDate(quotationData.quotation_date)}</div>
