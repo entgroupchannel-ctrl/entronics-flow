@@ -193,15 +193,26 @@ export default function QuotationImport() {
     const errors: ValidationError[] = [];
 
     data.forEach((row, index) => {
-      if (!row.quotation_number) {
+      if (!row.quotation_number || row.quotation_number.toString().trim() === '') {
         errors.push({ row: index + 2, field: 'quotation_number', message: 'กรุณากรอกเลขที่เอกสาร' });
       }
-      if (!row.customer_name) {
+      if (!row.customer_name || row.customer_name.toString().trim() === '') {
         errors.push({ row: index + 2, field: 'customer_name', message: 'กรุณากรอกชื่อลูกค้า' });
       }
-      const totalAmount = parseFloat(row.total_amount);
-      if (!row.total_amount || isNaN(totalAmount) || totalAmount <= 0) {
-        errors.push({ row: index + 2, field: 'total_amount', message: 'ยอดรวมต้องมากกว่า 0', value: row.total_amount });
+      
+      // ตรวจสอบ total_amount อย่างละเอียด
+      let totalAmount = 0;
+      if (row.total_amount !== null && row.total_amount !== undefined && row.total_amount !== '') {
+        totalAmount = parseFloat(row.total_amount.toString().replace(/[^0-9.-]/g, ''));
+      }
+      
+      if (isNaN(totalAmount) || totalAmount <= 0) {
+        errors.push({ 
+          row: index + 2, 
+          field: 'total_amount', 
+          message: 'ยอดรวมต้องมากกว่า 0', 
+          value: row.total_amount 
+        });
       }
     });
 
