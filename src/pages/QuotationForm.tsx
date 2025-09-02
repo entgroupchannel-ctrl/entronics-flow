@@ -1434,127 +1434,86 @@ export default function QuotationForm() {
             <div className="mt-8 border-t pt-6">
               <div className="grid grid-cols-2 gap-8">
                 {/* Left Column - Notes and Agreement */}
-                <div className="space-y-4">
+                <div className="border border-gray-200 rounded-lg p-6 bg-gray-50/50 space-y-4">
                   <div className="flex items-center space-x-2">
                     <Checkbox 
                       id="gov-doc-agreement" 
                       checked={govDocAgreement}
                       onCheckedChange={(checked) => setGovDocAgreement(checked as boolean)}
                     />
-                    <Label htmlFor="gov-doc-agreement" className="text-sm">
+                    <Label htmlFor="gov-doc-agreement" className="text-sm font-medium">
                       ลงนามเอกสารภาครัฐมีผลในความผิด
                     </Label>
                   </div>
                   
                   <div>
-                    <Label className="text-sm font-medium">หมายเหตุ:</Label>
+                    <Label className="text-sm font-medium mb-2 block">หมายเหตุ:</Label>
                     <Textarea
                       placeholder="หมายเหตุเพิ่มเติม..."
                       value={quotation.notes || ''}
                       onChange={(e) => setQuotation(prev => ({ ...prev, notes: e.target.value }))}
-                      className="mt-1 text-sm"
-                      rows={3}
+                      className="text-sm border-gray-300 bg-white"
+                      rows={4}
                     />
                   </div>
                   
                   <div>
-                    <Label className="text-sm font-medium">ใบความในบริษัท:</Label>
+                    <Label className="text-sm font-medium mb-2 block">ใบความในบริษัท:</Label>
                     <Textarea
-                      placeholder="เรื่องในบริษัทและข้อตกลงของบริษัท..."
+                      placeholder="เรื่องใบและข้อตกลงของบริษัท..."
                       value={companyNotes}
                       onChange={(e) => setCompanyNotes(e.target.value)}
-                      className="mt-1 text-sm"
-                      rows={3}
+                      className="text-sm border-gray-300 bg-white"
+                      rows={4}
                     />
                   </div>
                 </div>
 
                 {/* Right Column - Signature Upload */}
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <h4 className="text-lg font-semibold mb-4">ลายเซ็นผู้เสนอราคา</h4>
-                    
-                    {/* Signature Upload */}
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-600 mb-2">
-                        คลิกเพื่ออัพโหลดไฟล์ หรือลากไฟล์มาวางที่นี่
-                      </p>
-                      <p className="text-xs text-gray-500 mb-3">
-                        รองรับไฟล์ JPG, PNG (ขนาดไม่เกิน 5MB)
-                      </p>
-                      <input
-                        type="file"
-                        accept=".jpg,.jpeg,.png"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            if (file.size > 5 * 1024 * 1024) {
-                              toast({
-                                title: "ไฟล์ใหญ่เกินไป",
-                                description: "กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 5MB",
-                                variant: "destructive",
-                              });
-                              return;
-                            }
-                            setSignatureFile(file);
+                <div className="border border-gray-200 rounded-lg p-6 bg-gray-50/50">
+                  <h4 className="text-lg font-semibold mb-4 text-center">ลายเซ็นผู้เสนอราคา</h4>
+                  
+                  {/* Signature Upload */}
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors bg-white">
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-sm text-gray-600 mb-2 font-medium">
+                      คลิกเพื่ออัพโหลดไฟล์ หรือลากไฟล์มาวางที่นี่
+                    </p>
+                    <p className="text-xs text-gray-500 mb-4">
+                      รองรับไฟล์ JPG, PNG (ขนาดไม่เกิน 5MB)
+                    </p>
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 5 * 1024 * 1024) {
+                            toast({
+                              title: "ไฟล์ใหญ่เกินไป",
+                              description: "กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 5MB",
+                              variant: "destructive",
+                            });
+                            return;
                           }
-                        }}
-                        className="hidden"
-                        id="signature-upload"
-                      />
-                      <Label htmlFor="signature-upload" className="cursor-pointer">
-                        <Button variant="outline" size="sm" type="button" asChild>
-                          <span>เลือกไฟล์</span>
-                        </Button>
-                      </Label>
-                      {signatureFile && (
-                        <p className="text-sm text-green-600 mt-2">
-                          ไฟล์ที่เลือก: {signatureFile.name}
+                          setSignatureFile(file);
+                        }
+                      }}
+                      className="hidden"
+                      id="signature-upload"
+                    />
+                    <Label htmlFor="signature-upload" className="cursor-pointer">
+                      <Button variant="outline" size="sm" type="button" asChild>
+                        <span>เลือกไฟล์</span>
+                      </Button>
+                    </Label>
+                    {signatureFile && (
+                      <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded">
+                        <p className="text-sm text-green-700 font-medium">
+                          ✓ ไฟล์ที่เลือก: {signatureFile.name}
                         </p>
-                      )}
-                    </div>
-
-                    {/* Company Stamp Upload */}
-                    <div className="mt-4">
-                      <h5 className="text-sm font-medium mb-2">ตรายางบริษัท</h5>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
-                        <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                        <p className="text-xs text-gray-600 mb-2">
-                          อัพโหลดตรายางบริษัท
-                        </p>
-                        <input
-                          type="file"
-                          accept=".jpg,.jpeg,.png"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              if (file.size > 5 * 1024 * 1024) {
-                                toast({
-                                  title: "ไฟล์ใหญ่เกินไป",
-                                  description: "กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 5MB",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-                              setStampFile(file);
-                            }
-                          }}
-                          className="hidden"
-                          id="stamp-upload"
-                        />
-                        <Label htmlFor="stamp-upload" className="cursor-pointer">
-                          <Button variant="outline" size="sm" type="button" asChild>
-                            <span>เลือกไฟล์</span>
-                          </Button>
-                        </Label>
-                        {stampFile && (
-                          <p className="text-xs text-green-600 mt-2">
-                            ไฟล์ที่เลือก: {stampFile.name}
-                          </p>
-                        )}
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
