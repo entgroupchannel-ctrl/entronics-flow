@@ -38,6 +38,7 @@ interface PaymentRecord {
     receipt_number: string;
     receipt_date: string;
     total_amount: number;
+    payment_status: string;
   }>;
 }
 
@@ -97,7 +98,8 @@ export default function PaymentRecords() {
             id,
             receipt_number,
             receipt_date,
-            total_amount
+            total_amount,
+            payment_status
           )
         `)
         .order('created_at', { ascending: false });
@@ -314,6 +316,36 @@ export default function PaymentRecords() {
       const paymentRecord = paymentRecords.find(p => p.id === paymentId);
       if (!paymentRecord) return;
 
+      // Check if rejecting a payment with existing receipts
+      if (status === 'rejected' && paymentRecord.receipts && paymentRecord.receipts.length > 0) {
+        const confirmed = window.confirm(
+          `การปฏิเสธจะยกเลิกใบเสร็จ ${paymentRecord.receipts[0].receipt_number} ที่เชื่อมโยงอยู่\n\nต้องการดำเนินการต่อหรือไม่?`
+        );
+        
+        if (!confirmed) return;
+
+        // Cancel linked receipts
+        for (const receipt of paymentRecord.receipts) {
+          const { error: receiptError } = await supabase
+            .from('receipts')
+            .update({
+              payment_status: 'cancelled',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', receipt.id);
+
+          if (receiptError) {
+            console.error('Error cancelling receipt:', receiptError);
+            toast({
+              title: "เกิดข้อผิดพลาด",
+              description: `ไม่สามารถยกเลิกใบเสร็จ ${receipt.receipt_number} ได้`,
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+      }
+
       const { error } = await supabase
         .from('payment_records')
         .update({
@@ -341,9 +373,13 @@ export default function PaymentRecords() {
           });
         }
       } else {
+        const message = paymentRecord.receipts && paymentRecord.receipts.length > 0
+          ? `ปฏิเสธการชำระเงินและยกเลิกใบเสร็จ ${paymentRecord.receipts[0].receipt_number} เรียบร้อยแล้ว`
+          : "ปฏิเสธการชำระเงินเรียบร้อยแล้ว";
+
         toast({
           title: "สำเร็จ",
-          description: "ปฏิเสธการชำระเงินเรียบร้อยแล้ว",
+          description: message,
         });
       }
 
@@ -378,6 +414,39 @@ export default function PaymentRecords() {
 
   const handleResetPayment = async (paymentId: string) => {
     try {
+      const paymentRecord = paymentRecords.find(p => p.id === paymentId);
+      if (!paymentRecord) return;
+
+      // Check if there are linked receipts
+      if (paymentRecord.receipts && paymentRecord.receipts.length > 0) {
+        const confirmed = window.confirm(
+          `การรีเซ็ตจะยกเลิกใบเสร็จ ${paymentRecord.receipts[0].receipt_number} ที่เชื่อมโยงอยู่\n\nต้องการดำเนินการต่อหรือไม่?`
+        );
+        
+        if (!confirmed) return;
+
+        // Cancel linked receipts
+        for (const receipt of paymentRecord.receipts) {
+          const { error: receiptError } = await supabase
+            .from('receipts')
+            .update({
+              payment_status: 'cancelled',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', receipt.id);
+
+          if (receiptError) {
+            console.error('Error cancelling receipt:', receiptError);
+            toast({
+              title: "เกิดข้อผิดพลาด",
+              description: `ไม่สามารถยกเลิกใบเสร็จ ${receipt.receipt_number} ได้`,
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+      }
+
       const { error } = await supabase
         .from('payment_records')
         .update({
@@ -389,9 +458,13 @@ export default function PaymentRecords() {
 
       if (error) throw error;
 
+      const message = paymentRecord.receipts && paymentRecord.receipts.length > 0
+        ? `รีเซ็ตสถานะการชำระเงินและยกเลิกใบเสร็จ ${paymentRecord.receipts[0].receipt_number} เรียบร้อยแล้ว`
+        : "รีเซ็ตสถานะการชำระเงินเรียบร้อยแล้ว";
+
       toast({
         title: "สำเร็จ",
-        description: "รีเซ็ตสถานะการชำระเงินเรียบร้อยแล้ว",
+        description: message,
       });
       loadPaymentRecords();
     } catch (error) {
@@ -602,8 +675,16 @@ export default function PaymentRecords() {
                     </Badge>
                     {/* Receipt Link */}
                     {payment.receipts && payment.receipts.length > 0 && (
-                      <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                        🧾 เชื่อมโยงใบเสร็จ: {payment.receipts[0].receipt_number}
+                      <Badge 
+                        variant="outline" 
+                        className={
+                          payment.receipts[0].payment_status === 'cancelled'
+                            ? "bg-red-50 text-red-700 border-red-200"
+                            : "bg-purple-50 text-purple-700 border-purple-200"
+                        }
+                      >
+                        {payment.receipts[0].payment_status === 'cancelled' ? '❌' : '🧾'} 
+                        {payment.receipts[0].payment_status === 'cancelled' ? 'ใบเสร็จยกเลิก' : 'เชื่อมโยงใบเสร็จ'}: {payment.receipts[0].receipt_number}
                       </Badge>
                     )}
                     <div className="ml-auto">
@@ -629,7 +710,7 @@ export default function PaymentRecords() {
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <div className="flex items-center gap-2">
                       {/* Show different buttons based on status and receipt existence */}
-                      {payment.verification_status === 'verified' && (!payment.receipts || payment.receipts.length === 0) && (
+                      {payment.verification_status === 'verified' && (!payment.receipts || payment.receipts.length === 0 || payment.receipts[0].payment_status === 'cancelled') && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -637,11 +718,13 @@ export default function PaymentRecords() {
                           className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300"
                         >
                           <Receipt className="w-4 h-4 mr-1" />
-                          สร้างใบเสร็จ
+                          {payment.receipts && payment.receipts.length > 0 && payment.receipts[0].payment_status === 'cancelled' 
+                            ? 'สร้างใบเสร็จใหม่' 
+                            : 'สร้างใบเสร็จ'}
                         </Button>
                       )}
                       
-                      {payment.verification_status === 'verified' && payment.receipts && payment.receipts.length > 0 && (
+                      {payment.verification_status === 'verified' && payment.receipts && payment.receipts.length > 0 && payment.receipts[0].payment_status !== 'cancelled' && (
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                             ✅ สร้างใบเสร็จแล้ว: {payment.receipts[0].receipt_number}
@@ -693,8 +776,12 @@ export default function PaymentRecords() {
                         size="sm"
                         onClick={() => handleDeletePayment(payment.id)}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        disabled={payment.receipts && payment.receipts.length > 0}
-                        title={payment.receipts && payment.receipts.length > 0 ? "ไม่สามารถลบได้เนื่องจากมีใบเสร็จที่เชื่อมโยงอยู่" : "ลบรายการชำระเงิน"}
+                        disabled={payment.receipts && payment.receipts.length > 0 && payment.receipts[0].payment_status !== 'cancelled'}
+                        title={
+                          payment.receipts && payment.receipts.length > 0 && payment.receipts[0].payment_status !== 'cancelled'
+                            ? "ไม่สามารถลบได้เนื่องจากมีใบเสร็จที่เชื่อมโยงอยู่" 
+                            : "ลบรายการชำระเงิน"
+                        }
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
                         ลบ
