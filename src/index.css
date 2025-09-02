@@ -6,7 +6,7 @@
 @layer base {
   :root {
     /* Core Brand Colors */
-    --background: 217 90% 98%;
+    --background: 210 50% 85%;
     --foreground: 217 30% 20%;
     --primary: 217 65% 65%;
     --primary-dark: 217 70% 55%;
@@ -57,9 +57,9 @@
     --transition-colors: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 
     /* Shadcn Integration */
-    --card: 217 80% 99%;
+    --card: 210 60% 92%;
     --card-foreground: 217 30% 20%;
-    --popover: 217 80% 99%;
+    --popover: 210 60% 92%;
     --popover-foreground: 217 30% 20%;
     --primary-foreground: 0 0% 100%;
     --secondary: 217 40% 94%;
@@ -67,7 +67,7 @@
     --accent: 217 40% 92%;
     --accent-foreground: 217 30% 20%;
     --destructive-foreground: 0 0% 100%;
-    --input: 217 80% 99%;
+    --input: 210 60% 92%;
     --ring: 217 65% 65%;
 
     --radius: 0.5rem;
