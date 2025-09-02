@@ -119,7 +119,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
         <div className="grid grid-cols-2 gap-8">
           {/* Customer Info */}
           <div className="space-y-2">
-            <div className="text-red-500 font-bold">ข้อมูลลูกค้า / Customer Information:</div>
+            <div className="text-gray-600 font-bold">ข้อมูลลูกค้า / Customer Information:</div>
             <div className="text-sm space-y-1">
               <div>{quotationData.customer_name}</div>
               {quotationData.customer_address && <div className="whitespace-pre-line">{quotationData.customer_address}</div>}
