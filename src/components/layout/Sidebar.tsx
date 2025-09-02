@@ -345,7 +345,7 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
           <div className="border-t border-sidebar-border p-4 bg-sidebar">
             <button 
               onClick={onLogoClick}
-              className="w-full hover:bg-sidebar-accent rounded-lg p-2 transition-colors bg-sidebar"
+              className="w-full hover:bg-sidebar-accent rounded-lg p-2 transition-colors"
               title="ข้อมูลบริษัท"
             >
               <div className="flex items-center space-x-3">
