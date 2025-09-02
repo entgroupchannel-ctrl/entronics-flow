@@ -5,11 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, Eye, CheckCircle, XCircle, Upload, Receipt, RotateCcw, Trash2, MoreHorizontal, Save, Edit, Printer, Download, Share2 } from "lucide-react";
+import { Plus, Eye, CheckCircle, XCircle, Upload, Receipt, RotateCcw, Trash2, MoreHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -109,7 +108,6 @@ export default function PaymentRecords() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      console.log('Tax invoices loaded:', data);
       setTaxInvoices(data || []);
       
       if (preSelectedTaxInvoiceId && data) {
@@ -275,31 +273,6 @@ export default function PaymentRecords() {
 
       if (receiptError) throw receiptError;
 
-      const { data: taxInvoiceItems, error: itemsError } = await supabase
-        .from('tax_invoice_items')
-        .select('*')
-        .eq('tax_invoice_id', paymentRecord.tax_invoice_id);
-
-      if (itemsError) throw itemsError;
-
-      if (taxInvoiceItems && taxInvoiceItems.length > 0) {
-        const receiptItems = taxInvoiceItems.map((item, index) => ({
-          receipt_id: receipt.id,
-          sequence_number: index + 1,
-          document_number: taxInvoice.tax_invoice_number,
-          document_date: taxInvoice.tax_invoice_date,
-          due_date: taxInvoice.tax_invoice_date,
-          subtotal_before_tax: item.line_total,
-          payment_amount: item.line_total,
-        }));
-
-        const { error: receiptItemsError } = await supabase
-          .from('receipt_items')
-          .insert(receiptItems);
-
-        if (receiptItemsError) throw receiptItemsError;
-      }
-
       return receipt;
     } catch (error) {
       console.error('Error creating receipt:', error);
@@ -429,17 +402,6 @@ export default function PaymentRecords() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'verified':
-        return <Badge className="bg-green-100 text-green-800">ยืนยันแล้ว</Badge>;
-      case 'rejected':
-        return <Badge className="bg-red-100 text-red-800">ปฏิเสธ</Badge>;
-      default:
-        return <Badge className="bg-yellow-100 text-yellow-800">รอตรวจสอบ</Badge>;
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex h-screen">
@@ -458,7 +420,7 @@ export default function PaymentRecords() {
         <div className="container mx-auto p-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">การชำระเงิน</h1>
+              <h1 className="text-3xl font-bold">รายการชำระเงิน</h1>
               <p className="text-muted-foreground">
                 จัดการและตรวจสอบการชำระเงินจากลูกค้า
               </p>
@@ -495,320 +457,236 @@ export default function PaymentRecords() {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ยอดรวมวันนี้</CardTitle>
+                <CardTitle className="text-sm font-medium">ปฏิเสธ</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  ฿{paymentRecords
-                    .filter(p => p.verification_status === 'verified' && 
-                      new Date(p.payment_date).toDateString() === new Date().toDateString())
-                    .reduce((sum, p) => sum + p.amount_received, 0).toLocaleString()}
+                  {paymentRecords.filter(p => p.verification_status === 'rejected').length}
                 </div>
-                <p className="text-xs text-muted-foreground">เงินที่รับวันนี้</p>
+                <p className="text-xs text-muted-foreground">รายการที่ปฏิเสธ</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ยอดรวมเดือน</CardTitle>
+                <CardTitle className="text-sm font-medium">รวมเงิน</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-green-600">
                   ฿{paymentRecords
-                    .filter(p => p.verification_status === 'verified' && 
-                      new Date(p.payment_date).getMonth() === new Date().getMonth())
+                    .filter(p => p.verification_status === 'verified')
                     .reduce((sum, p) => sum + p.amount_received, 0).toLocaleString()}
                 </div>
-                <p className="text-xs text-muted-foreground">เงินที่รับเดือนนี้</p>
+                <p className="text-xs text-muted-foreground">เงินที่รับแล้ว</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Payment Records */}
-          <Card>
-            <CardHeader>
-              <CardTitle>รายการชำระเงิน</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {paymentRecords.map((payment) => (
-                  <Card key={payment.id} className="border border-slate-200 hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      {/* First Row - Main Information */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center mb-3">
-                        <div className="space-y-1">
-                          <div className="text-xs text-muted-foreground">หมายเลขการชำระ</div>
-                          <div className="font-semibold text-blue-600">{payment.payment_number}</div>
-                          <div className="text-sm font-medium text-slate-700">{payment.tax_invoices?.customer_name}</div>
-                        </div>
-                        
-                        <div className="space-y-1">
-                          <div className="text-xs text-muted-foreground">ใบกำกับภาษี</div>
-                          <div className="font-medium">{payment.tax_invoices?.tax_invoice_number}</div>
-                          <div className="text-xs text-slate-500">{payment.payment_method}</div>
-                        </div>
-                        
-                        <div className="flex items-center gap-4">
-                          <div className="space-y-1">
-                            <div className="text-xs text-muted-foreground">จำนวนเงิน</div>
-                            <div className="font-bold text-green-600 text-lg">฿{payment.amount_received.toLocaleString()}</div>
-                            <div className="text-xs text-slate-500">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</div>
-                          </div>
-                          
-                          {/* Payment Info Box */}
-                          <div className={`flex gap-4 px-3 py-2 rounded-lg border ${
-                            payment.verification_status === 'verified' 
-                              ? 'bg-emerald-50 border-emerald-200' 
-                              : payment.verification_status === 'rejected'
-                              ? 'bg-rose-50 border-rose-200'
-                              : 'bg-slate-50 border-slate-200'
-                          }`}>
-                            <div className="text-sm">
-                              <span className="text-muted-foreground">วิธีชำระ: </span>
-                              <span className="font-medium">{payment.payment_method}</span>
-                            </div>
-                            <div className="text-sm">
-                              <span className="text-muted-foreground">วันที่ชำระ: </span>
-                              <span className="font-medium">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex justify-end">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedPayment(payment);
-                              setShowDetailsPanel(true);
-                            }}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            ดูรายละเอียด
-                          </Button>
-                        </div>
+          {/* Payment Records Cards */}
+          <div className="space-y-4">
+            {paymentRecords.map((payment) => (
+              <Card key={payment.id} className="p-0">
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start mb-4">
+                    {/* Payment Number & Customer */}
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-1">หมายเลขการชำระ</div>
+                      <div className="text-lg font-semibold text-blue-600 font-mono">
+                        {payment.payment_number}
                       </div>
-
-                      {/* Second Row - Actions & Payment Info */}
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                        {/* Status Actions - All buttons in a horizontal row */}
-                        <div className="flex items-center gap-2">
-                          {payment.verification_status === 'pending' && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-green-100 hover:border-emerald-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleVerifyPayment(payment.id, 'verified')}
-                              >
-                                <CheckCircle className="w-4 h-4 mr-1.5" />
-                                สร้างใบเสร็จ
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-rose-50 to-red-50 border-rose-200 text-rose-700 hover:from-rose-100 hover:to-red-100 hover:border-rose-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleVerifyPayment(payment.id, 'rejected')}
-                              >
-                                <XCircle className="w-4 h-4 mr-1.5" />
-                                ปฏิเสธ
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleDeletePayment(payment.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-1.5" />
-                                ลบ
-                              </Button>
-                            </>
-                          )}
-                            
-                          {payment.verification_status === 'verified' && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-sky-50 to-blue-50 border-sky-200 text-sky-700 hover:from-sky-100 hover:to-blue-100 hover:border-sky-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleCreateReceipt(payment)}
-                              >
-                                <Receipt className="w-4 h-4 mr-1.5" />
-                                สร้างใบเสร็จ
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleResetPayment(payment.id)}
-                              >
-                                <RotateCcw className="w-4 h-4 mr-1.5" />
-                                รีเซ็ต
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleDeletePayment(payment.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-1.5" />
-                                ลบ
-                              </Button>
-                              
-                              {/* Payment Info after Delete button */}
-                              <div className={`ml-4 flex gap-4 px-3 py-2 rounded-lg border ${
-                                payment.verification_status === 'verified' 
-                                  ? 'bg-emerald-50 border-emerald-200' 
-                                  : payment.verification_status === 'rejected'
-                                  ? 'bg-rose-50 border-rose-200'
-                                  : 'bg-slate-50 border-slate-200'
-                              }`}>
-                                <div className="text-sm">
-                                  <span className="text-muted-foreground">วิธีชำระ: </span>
-                                  <span className="font-medium">{payment.payment_method}</span>
-                                </div>
-                                <div className="text-sm">
-                                  <span className="text-muted-foreground">วันที่ชำระ: </span>
-                                  <span className="font-medium">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</span>
-                                </div>
-                              </div>
-                            </>
-                          )}
-                            
-                          {payment.verification_status === 'rejected' && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleResetPayment(payment.id)}
-                              >
-                                <RotateCcw className="w-4 h-4 mr-1.5" />
-                                รีเซ็ต
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 text-slate-600 hover:from-slate-100 hover:to-gray-100 hover:border-slate-300 hover:shadow-md transition-all duration-200 font-medium"
-                                onClick={() => handleDeletePayment(payment.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-1.5" />
-                                ลบ
-                              </Button>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Status Badge & Menu */}
-                        <div className="flex items-center gap-2">
-                          {getStatusBadge(payment.verification_status)}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => setSelectedPayment(payment)}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                แก้ไข
-                              </DropdownMenuItem>
-                              
-                              <DropdownMenuItem onClick={() => window.print()}>
-                                <Printer className="w-4 h-4 mr-2" />
-                                พิมพ์
-                              </DropdownMenuItem>
-                              
-                              <DropdownMenuItem onClick={() => {}}>
-                                <Download className="w-4 h-4 mr-2" />
-                                ดาวน์โหลด
-                              </DropdownMenuItem>
-                              
-                              <DropdownMenuItem onClick={() => {}}>
-                                <Share2 className="w-4 h-4 mr-2" />
-                                แชร์
-                              </DropdownMenuItem>
-                              
-                              <DropdownMenuItem 
-                                onClick={() => handleDeletePayment(payment.id)}
-                                className="text-red-600 focus:text-red-600"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                ลบ
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {payment.tax_invoices?.customer_name}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                
-                {paymentRecords.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    ไม่พบรายการชำระเงิน
+                    </div>
+
+                    {/* Tax Invoice */}
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-1">ใบกำกับภาษี</div>
+                      <div className="text-lg font-semibold font-mono">
+                        {payment.tax_invoices?.tax_invoice_number}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {payment.payment_method}
+                      </div>
+                    </div>
+
+                    {/* Amount */}
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-1">จำนวนเงิน</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        ฿{payment.amount_received.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {new Date(payment.payment_date).toLocaleDateString('th-TH')}
+                      </div>
+                    </div>
+
+                    {/* View Details Button */}
+                    <div className="flex justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPayment(payment);
+                          setShowDetailsPanel(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        ดูรายละเอียด
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Add Payment Form Dialog */}
+                  {/* Payment Info Badges */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      วิธีชำระ: {payment.payment_method}
+                    </Badge>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      วันที่ชำระ: {new Date(payment.payment_date).toLocaleDateString('th-TH')}
+                    </Badge>
+                    <div className="ml-auto">
+                      {payment.verification_status === 'verified' && (
+                        <Badge className="bg-green-100 text-green-800 border border-green-200">
+                          ยืนยันแล้ว
+                        </Badge>
+                      )}
+                      {payment.verification_status === 'pending' && (
+                        <Badge className="bg-yellow-100 text-yellow-800 border border-yellow-200">
+                          รอตรวจสอบ
+                        </Badge>
+                      )}
+                      {payment.verification_status === 'rejected' && (
+                        <Badge className="bg-red-100 text-red-800 border border-red-200">
+                          ปฏิเสธ
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-2">
+                      {payment.verification_status === 'verified' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCreateReceipt(payment)}
+                          className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300"
+                        >
+                          <Receipt className="w-4 h-4 mr-1" />
+                          สร้างใบเสร็จ
+                        </Button>
+                      )}
+                      {payment.verification_status === 'pending' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleVerifyPayment(payment.id, 'verified')}
+                          className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
+                        >
+                          <Receipt className="w-4 h-4 mr-1" />
+                          สร้างใบเสร็จ
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline" 
+                        size="sm"
+                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                      >
+                        ที่อื่น
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeletePayment(payment.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        ลบ
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            
+            {paymentRecords.length === 0 && (
+              <Card>
+                <CardContent className="p-8">
+                  <div className="text-center text-muted-foreground">
+                    ไม่มีรายการชำระเงิน
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Add Payment Form Modal */}
           {showAddForm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                <CardHeader>
-                  <CardTitle>บันทึกการชำระเงิน</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Display selected tax invoice information instead of dropdown */}
-                    {selectedTaxInvoice ? (
-                      <div className="md:col-span-3">
-                        <Label>ข้อมูลใบกำกับภาษี</Label>
-                        <div className="bg-muted p-4 rounded-lg">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                            <div>
-                              <span className="font-medium">เลขที่:</span> 
-                              <span className="text-blue-600 font-bold text-lg ml-2">{selectedTaxInvoice.tax_invoice_number}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium">ลูกค้า:</span> {selectedTaxInvoice.customer_name}
-                            </div>
-                            <div>
-                              <span className="font-medium">จำนวนเงิน:</span> ฿{selectedTaxInvoice.total_amount?.toLocaleString()}
-                            </div>
+              <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <h2 className="text-xl font-semibold mb-4">บันทึกการชำระเงิน</h2>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="tax_invoice_id">ใบกำกับภาษี</Label>
+                    <Select
+                      value={formData.tax_invoice_id}
+                      onValueChange={(value) => {
+                        setFormData(prev => ({ ...prev, tax_invoice_id: value }));
+                        const selected = taxInvoices.find(inv => inv.id === value);
+                        setSelectedTaxInvoice(selected);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="เลือกใบกำกับภาษี" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {taxInvoices.map((invoice) => (
+                          <SelectItem key={invoice.id} value={invoice.id}>
+                            {invoice.tax_invoice_number} - {invoice.customer_name} (฿{invoice.total_amount.toLocaleString()})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedTaxInvoice && (
+                    <Card>
+                      <CardContent className="p-4">
+                        <h3 className="font-medium mb-2">ข้อมูลใบกำกับภาษี</h3>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">เลขที่: </span>
+                            {selectedTaxInvoice.tax_invoice_number}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">ลูกค้า: </span>
+                            {selectedTaxInvoice.customer_name}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">จำนวนเงิน: </span>
+                            ฿{selectedTaxInvoice.total_amount.toLocaleString()}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">สถานะ: </span>
+                            <Badge variant={selectedTaxInvoice.status === 'paid' ? 'default' : 'secondary'}>
+                              {selectedTaxInvoice.status === 'paid' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'}
+                            </Badge>
                           </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <Label htmlFor="tax_invoice_id">ใบกำกับภาษี</Label>
-                        <Select
-                          value={formData.tax_invoice_id}
-                          onValueChange={(value) => setFormData({ ...formData, tax_invoice_id: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="เลือกใบกำกับภาษี" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {taxInvoices.map((invoice) => (
-                              <SelectItem key={invoice.id} value={invoice.id}>
-                                {invoice.tax_invoice_number} - {invoice.customer_name} 
-                                (฿{invoice.total_amount.toLocaleString()})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
+                      </CardContent>
+                    </Card>
+                  )}
 
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="payment_method">วิธีการชำระเงิน</Label>
+                      <Label htmlFor="payment_method">วิธีการชำระ</Label>
                       <Select
                         value={formData.payment_method}
-                        onValueChange={(value) => setFormData({ ...formData, payment_method: value })}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
                       >
-                        <SelectTrigger className="bg-slate-50 border-slate-300">
+                        <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -819,7 +697,7 @@ export default function PaymentRecords() {
                         </SelectContent>
                       </Select>
                     </div>
-
+                    
                     <div>
                       <Label htmlFor="amount_received">จำนวนเงินที่รับ</Label>
                       <Input
@@ -827,274 +705,159 @@ export default function PaymentRecords() {
                         type="number"
                         step="0.01"
                         value={formData.amount_received}
-                        onChange={(e) => setFormData({ ...formData, amount_received: parseFloat(e.target.value) || 0 })}
-                        required
-                        className="bg-slate-50 border-slate-300"
+                        onChange={(e) => setFormData(prev => ({ ...prev, amount_received: parseFloat(e.target.value) || 0 }))}
                       />
                     </div>
+                  </div>
 
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="payment_reference">เลขที่อ้างอิง/Ref</Label>
+                      <Label htmlFor="payment_reference">หมายเลขอ้างอิง</Label>
                       <Input
                         id="payment_reference"
                         value={formData.payment_reference}
-                        onChange={(e) => setFormData({ ...formData, payment_reference: e.target.value })}
-                        className="bg-slate-50 border-slate-300"
+                        onChange={(e) => setFormData(prev => ({ ...prev, payment_reference: e.target.value }))}
+                        placeholder="หมายเลขการโอน หรืออ้างอิง"
                       />
                     </div>
-
+                    
                     <div>
                       <Label htmlFor="bank_name">ธนาคาร</Label>
                       <Input
                         id="bank_name"
                         value={formData.bank_name}
-                        onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
-                        className="bg-slate-50 border-slate-300"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="depositor_name">ชื่อผู้โอน</Label>
-                      <Input
-                        id="depositor_name"
-                        value={formData.depositor_name}
-                        onChange={(e) => setFormData({ ...formData, depositor_name: e.target.value })}
-                        className="bg-slate-50 border-slate-300"
-                      />
-                    </div>
-
-                    {/* File upload section */}
-                    <div className="md:col-span-3">
-                      <Label htmlFor="payment_evidence">หลักฐานการชำระเงิน</Label>
-                      <div className="mt-2">
-                        <Input
-                          id="payment_evidence"
-                          type="file"
-                          accept="image/*,application/pdf"
-                          onChange={handleFileChange}
-                          className="bg-slate-50 border-slate-300"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          รองรับไฟล์รูปภาพ (JPG, PNG, GIF) และ PDF ขนาดไม่เกิน 5MB
-                        </p>
-                      </div>
-                      
-                      {/* Preview section */}
-                      {previewUrl && (
-                        <div className="mt-4">
-                          <Label>ตัวอย่างหลักฐาน</Label>
-                          <div className="mt-2 border border-slate-300 rounded-lg p-4 bg-slate-50">
-                            <img 
-                              src={previewUrl} 
-                              alt="Payment evidence preview" 
-                              className="max-w-full h-auto max-h-64 object-contain rounded-lg"
-                            />
-                          </div>
-                        </div>
-                      )}
-                      
-                      {uploadedFile && !previewUrl && (
-                        <div className="mt-4">
-                          <Label>ไฟล์ที่เลือก</Label>
-                          <div className="mt-2 p-3 bg-slate-50 border border-slate-300 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <Upload className="w-4 h-4 text-slate-600" />
-                              <span className="text-sm font-medium">{uploadedFile.name}</span>
-                              <span className="text-xs text-slate-500">
-                                ({(uploadedFile.size / 1024 / 1024).toFixed(2)} MB)
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="md:col-span-3">
-                      <Label htmlFor="payment_notes">หมายเหตุ</Label>
-                      <Textarea
-                        id="payment_notes"
-                        value={formData.payment_notes}
-                        onChange={(e) => setFormData({ ...formData, payment_notes: e.target.value })}
-                        rows={2}
-                        className="bg-slate-50 border-slate-300"
+                        onChange={(e) => setFormData(prev => ({ ...prev, bank_name: e.target.value }))}
+                        placeholder="ชื่อธนาคาร"
                       />
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-6">
-                    <Button onClick={() => setShowAddForm(false)} variant="outline" className="flex-1">
+                  <div>
+                    <Label htmlFor="depositor_name">ชื่อผู้โอน</Label>
+                    <Input
+                      id="depositor_name"
+                      value={formData.depositor_name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, depositor_name: e.target.value }))}
+                      placeholder="ชื่อผู้ทำรายการ"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="payment_notes">หมายเหตุ</Label>
+                    <Textarea
+                      id="payment_notes"
+                      value={formData.payment_notes}
+                      onChange={(e) => setFormData(prev => ({ ...prev, payment_notes: e.target.value }))}
+                      placeholder="หมายเหตุเพิ่มเติม"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="payment_evidence">หลักฐานการชำระเงิน</Label>
+                    <Input
+                      id="payment_evidence"
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={handleFileChange}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      อัปโหลดสลิปหรือหลักฐานการชำระเงิน (JPG, PNG, PDF สูงสุด 5MB)
+                    </p>
+                  </div>
+
+                  {previewUrl && (
+                    <div>
+                      <Label>ตัวอย่างไฟล์</Label>
+                      <img src={previewUrl} alt="Preview" className="max-w-full h-40 object-contain border rounded mt-1" />
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button variant="outline" onClick={() => setShowAddForm(false)}>
                       ยกเลิก
                     </Button>
-                    <Button onClick={handleAddPayment} className="flex-1">
+                    <Button onClick={handleAddPayment}>
                       บันทึก
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Details Panel */}
+          {showDetailsPanel && selectedPayment && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <h2 className="text-xl font-semibold mb-4">รายละเอียดการชำระเงิน</h2>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>หมายเลขการชำระ</Label>
+                      <div className="font-mono text-blue-600">{selectedPayment.payment_number}</div>
+                    </div>
+                    <div>
+                      <Label>ใบกำกับภาษี</Label>
+                      <div className="font-mono">{selectedPayment.tax_invoices?.tax_invoice_number}</div>
+                    </div>
+                    <div>
+                      <Label>ลูกค้า</Label>
+                      <div>{selectedPayment.tax_invoices?.customer_name}</div>
+                    </div>
+                    <div>
+                      <Label>จำนวนเงิน</Label>
+                      <div className="font-bold text-green-600">฿{selectedPayment.amount_received.toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <Label>วิธีการชำระ</Label>
+                      <div>{selectedPayment.payment_method}</div>
+                    </div>
+                    <div>
+                      <Label>วันที่ชำระ</Label>
+                      <div>{new Date(selectedPayment.payment_date).toLocaleDateString('th-TH')}</div>
+                    </div>
+                  </div>
+                  
+                  {selectedPayment.payment_reference && (
+                    <div>
+                      <Label>หมายเลขอ้างอิง</Label>
+                      <div>{selectedPayment.payment_reference}</div>
+                    </div>
+                  )}
+                  
+                  {selectedPayment.bank_name && (
+                    <div>
+                      <Label>ธนาคาร</Label>
+                      <div>{selectedPayment.bank_name}</div>
+                    </div>
+                  )}
+                  
+                  {selectedPayment.depositor_name && (
+                    <div>
+                      <Label>ผู้โอน</Label>
+                      <div>{selectedPayment.depositor_name}</div>
+                    </div>
+                  )}
+                  
+                  {selectedPayment.payment_notes && (
+                    <div>
+                      <Label>หมายเหตุ</Label>
+                      <div>{selectedPayment.payment_notes}</div>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-end pt-4">
+                    <Button onClick={() => setShowDetailsPanel(false)}>
+                      ปิด
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
-
-      {/* Payment Details Panel */}
-      {showDetailsPanel && selectedPayment && (
-        <>
-          {/* Overlay */}
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-30 z-40"
-            onClick={() => setShowDetailsPanel(false)}
-          />
-          
-          {/* Details Panel */}
-          <div 
-            className={`fixed top-0 right-0 h-full w-96 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
-              showDetailsPanel ? 'translate-x-0' : 'translate-x-full'
-            }`}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">รายละเอียดการชำระเงิน</h2>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setShowDetailsPanel(false)}
-                >
-                  ×
-                </Button>
-              </div>
-
-              <div className="space-y-6">
-                {/* Header Info */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-blue-800 mb-1">
-                      {selectedPayment.payment_number}
-                    </div>
-                    <div className="text-sm text-blue-600">
-                      หมายเลขการชำระเงิน
-                    </div>
-                  </div>
-                </div>
-
-                {/* Status */}
-                <div className="flex justify-center">
-                  {getStatusBadge(selectedPayment.verification_status)}
-                </div>
-
-                {/* Customer & Invoice Info */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">ข้อมูลใบกำกับภาษี</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <Label className="text-xs text-muted-foreground">เลขที่ใบกำกับภาษี</Label>
-                      <div className="font-semibold text-blue-600">
-                        {selectedPayment.tax_invoices?.tax_invoice_number}
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">ลูกค้า</Label>
-                      <div className="font-medium">{selectedPayment.tax_invoices?.customer_name}</div>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">ยอดรวมใบกำกับภาษี</Label>
-                      <div className="font-medium">฿{selectedPayment.tax_invoices?.total_amount?.toLocaleString()}</div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Payment Details */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">รายละเอียดการชำระ</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">วิธีการชำระ</Label>
-                        <div className="font-medium">{selectedPayment.payment_method}</div>
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">จำนวนที่ชำระ</Label>
-                        <div className="font-bold text-green-600 text-lg">
-                          ฿{selectedPayment.amount_received.toLocaleString()}
-                        </div>
-                      </div>
-                    </div>
-
-                    {selectedPayment.payment_reference && (
-                      <div>
-                        <Label className="text-xs text-muted-foreground">เลขที่อ้างอิง</Label>
-                        <div className="font-medium">{selectedPayment.payment_reference}</div>
-                      </div>
-                    )}
-
-                    {selectedPayment.bank_name && (
-                      <div>
-                        <Label className="text-xs text-muted-foreground">ธนาคาร</Label>
-                        <div className="font-medium">{selectedPayment.bank_name}</div>
-                      </div>
-                    )}
-
-                    {selectedPayment.depositor_name && (
-                      <div>
-                        <Label className="text-xs text-muted-foreground">ชื่อผู้โอน</Label>
-                        <div className="font-medium">{selectedPayment.depositor_name}</div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Additional Info */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">ข้อมูลเพิ่มเติม</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <Label className="text-xs text-muted-foreground">วันที่บันทึก</Label>
-                      <div className="font-medium">
-                        {new Date(selectedPayment.payment_date).toLocaleString('th-TH', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </div>
-                    </div>
-
-                    {selectedPayment.verified_at && (
-                      <div>
-                        <Label className="text-xs text-muted-foreground">วันที่ตรวจสอบ</Label>
-                        <div className="font-medium">
-                          {new Date(selectedPayment.verified_at).toLocaleString('th-TH', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedPayment.payment_notes && (
-                      <div>
-                        <Label className="text-xs text-muted-foreground">หมายเหตุ</Label>
-                        <div className="font-medium bg-gray-50 p-3 rounded text-sm">
-                          {selectedPayment.payment_notes}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 }
