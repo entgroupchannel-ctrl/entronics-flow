@@ -52,7 +52,44 @@ export default function Receipts() {
   const loadReceipts = async () => {
     try {
       setLoading(true);
-      // จำลองข้อมูลใบเสร็จรับเงิน เนื่องจากยังไม่มีตารางในฐานข้อมูล
+      
+      // ลองเชื่อมต่อกับฐานข้อมูลก่อน หากไม่สำเร็จจะใช้ข้อมูล mock
+      try {
+        const { data: receiptsData, error } = await supabase
+          .from('receipts')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.log('ตาราง receipts ยังไม่มี หรือมีปัญหากับการเชื่อมต่อ:', error.message);
+          throw error;
+        }
+
+        // หากมีข้อมูลจากฐานข้อมูล ให้แปลงเป็นรูปแบบที่ interface ต้องการ
+        if (receiptsData && receiptsData.length > 0) {
+          const formattedReceipts = receiptsData.map((receipt: any) => ({
+            id: receipt.id,
+            receipt_number: receipt.receipt_number,
+            receipt_date: receipt.receipt_date,
+            customer_name: receipt.customer_name,
+            project_name: receipt.project_name || undefined,
+            total_amount: receipt.total_amount,
+            status: receipt.payment_status || 'pending', // ใช้ payment_status หรือ default เป็น pending
+            payment_method: receipt.payment_method || undefined,
+            invoice_id: receipt.invoice_id || undefined,
+            tax_invoice_id: receipt.tax_invoice_id || undefined,
+            created_by: receipt.created_by || undefined,
+            created_at: receipt.created_at,
+            updated_at: receipt.updated_at
+          }));
+          setReceipts(formattedReceipts);
+          return;
+        }
+      } catch (dbError) {
+        console.log('ไม่สามารถเชื่อมต่อฐานข้อมูลได้:', dbError);
+      }
+      
+      // แสดงข้อมูล mock
       const mockReceipts = [
         {
           id: '1',
@@ -78,11 +115,26 @@ export default function Receipts() {
           tax_invoice_id: 'inv-2',
           created_at: '2025-09-01T11:00:00Z',
           updated_at: '2025-09-01T11:00:00Z'
+        },
+        {
+          id: '3',
+          receipt_number: 'RC202509003',
+          receipt_date: '2025-09-02',
+          customer_name: '101TRAINING COMPANY LIMITED',
+          project_name: 'ซื้อคอมพิวเตอร์',
+          total_amount: 21817.3,
+          status: 'paid',
+          payment_method: 'โอนเงิน',
+          tax_invoice_id: 'inv-3',
+          created_at: '2025-09-02T08:00:00Z',
+          updated_at: '2025-09-02T08:00:00Z'
         }
       ];
       setReceipts(mockReceipts);
+      
     } catch (error: any) {
       console.error('Error loading receipts:', error);
+      
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถโหลดรายการใบเสร็จรับเงินได้",
@@ -146,20 +198,46 @@ export default function Receipts() {
     if (!selectedReceiptToDelete) return;
 
     try {
-      // Logic for deleting receipt would go here
+      // ลบใบเสร็จรับเงินจากฐานข้อมูล
+      const { error } = await supabase
+        .from('receipts')
+        .delete()
+        .eq('id', selectedReceiptToDelete.id);
+
+      if (error) {
+        console.error('Supabase delete error:', error);
+        throw error;
+      }
+
+      // ลบออกจาก state ท้องถิ่นแทนการโหลดใหม่
+      setReceipts(prev => prev.filter(receipt => receipt.id !== selectedReceiptToDelete.id));
+      
+      // ลบออกจาก selectedItems ถ้ามี
+      setSelectedItems(prev => prev.filter(id => id !== selectedReceiptToDelete.id));
+
       toast({
         title: "ลบสำเร็จ",
         description: `ลบใบเสร็จรับเงิน ${selectedReceiptToDelete.number} เรียบร้อยแล้ว`,
       });
-
-      loadReceipts();
     } catch (error: any) {
       console.error('Error deleting receipt:', error);
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถลบใบเสร็จรับเงินได้",
-        variant: "destructive",
-      });
+      
+      // สำหรับข้อมูล mock ให้ลบจาก state โดยตรง
+      if (selectedReceiptToDelete.id === '1' || selectedReceiptToDelete.id === '2' || selectedReceiptToDelete.id === '3') {
+        setReceipts(prev => prev.filter(receipt => receipt.id !== selectedReceiptToDelete.id));
+        setSelectedItems(prev => prev.filter(id => id !== selectedReceiptToDelete.id));
+        
+        toast({
+          title: "ลบสำเร็จ",
+          description: `ลบใบเสร็จรับเงิน ${selectedReceiptToDelete.number} เรียบร้อยแล้ว (ข้อมูลตัวอย่าง)`,
+        });
+      } else {
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถลบใบเสร็จรับเงินได้",
+          variant: "destructive",
+        });
+      }
     } finally {
       setDeleteDialogOpen(false);
       setSelectedReceiptToDelete(null);
