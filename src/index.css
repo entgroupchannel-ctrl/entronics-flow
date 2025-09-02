@@ -6,7 +6,7 @@
 @layer base {
   :root {
     /* Core Brand Colors */
-    --background: 210 50% 85%;
+    --background: 210 50% 90%;
     --foreground: 217 30% 20%;
     --primary: 217 65% 65%;
     --primary-dark: 217 70% 55%;
@@ -27,9 +27,9 @@
     --slate-light: 215 15% 65%;
     
     /* Professional Grays */
-    --muted: 217 40% 94%;
+    --muted: 217 40% 96%;
     --muted-foreground: 217 25% 45%;
-    --border: 217 30% 85%;
+    --border: 217 30% 88%;
     
     /* Status Colors */
     --success: 142 76% 36%;
@@ -57,29 +57,29 @@
     --transition-colors: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 
     /* Shadcn Integration */
-    --card: 210 60% 92%;
+    --card: 210 60% 96%;
     --card-foreground: 217 30% 20%;
-    --popover: 210 60% 92%;
+    --popover: 210 60% 96%;
     --popover-foreground: 217 30% 20%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 217 40% 94%;
+    --secondary: 217 40% 96%;
     --secondary-foreground: 217 30% 20%;
-    --accent: 217 40% 92%;
+    --accent: 217 40% 94%;
     --accent-foreground: 217 30% 20%;
     --destructive-foreground: 0 0% 100%;
-    --input: 210 60% 92%;
+    --input: 210 60% 96%;
     --ring: 217 65% 65%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 217 65% 75%;
+    --sidebar-background: 217 65% 78%;
     --sidebar-foreground: 217 30% 20%;
     --sidebar-primary: 217 70% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 40% 85%;
+    --sidebar-accent: 217 40% 88%;
     --sidebar-accent-foreground: 217 30% 25%;
-    --sidebar-border: 217 40% 65%;
-    --sidebar-ring: 217 60% 80%;
+    --sidebar-border: 217 40% 68%;
+    --sidebar-ring: 217 60% 83%;
   }
 
   .dark {
