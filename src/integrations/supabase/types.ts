@@ -2320,6 +2320,10 @@ export type Database = {
         Args: { tax_invoice_id_param: string }
         Returns: boolean
       }
+      can_manage_customers: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       can_manage_inventory: {
         Args: { _user_id: string }
         Returns: boolean
