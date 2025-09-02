@@ -197,33 +197,12 @@ export default function Receipts() {
   const handleDeleteConfirm = async () => {
     if (!selectedReceiptToDelete) return;
 
+    // Check if this is mock data first
+    const isMockData = selectedReceiptToDelete.id === '1' || selectedReceiptToDelete.id === '2' || selectedReceiptToDelete.id === '3';
+    
     try {
-      // ลบใบเสร็จรับเงินจากฐานข้อมูล
-      const { error } = await supabase
-        .from('receipts')
-        .delete()
-        .eq('id', selectedReceiptToDelete.id);
-
-      if (error) {
-        console.error('Supabase delete error:', error);
-        throw error;
-      }
-
-      // ลบออกจาก state ท้องถิ่นแทนการโหลดใหม่
-      setReceipts(prev => prev.filter(receipt => receipt.id !== selectedReceiptToDelete.id));
-      
-      // ลบออกจาก selectedItems ถ้ามี
-      setSelectedItems(prev => prev.filter(id => id !== selectedReceiptToDelete.id));
-
-      toast({
-        title: "ลบสำเร็จ",
-        description: `ลบใบเสร็จรับเงิน ${selectedReceiptToDelete.number} เรียบร้อยแล้ว`,
-      });
-    } catch (error: any) {
-      console.error('Error deleting receipt:', error);
-      
-      // สำหรับข้อมูล mock ให้ลบจาก state โดยตรง
-      if (selectedReceiptToDelete.id === '1' || selectedReceiptToDelete.id === '2' || selectedReceiptToDelete.id === '3') {
+      if (isMockData) {
+        // Handle mock data deletion
         setReceipts(prev => prev.filter(receipt => receipt.id !== selectedReceiptToDelete.id));
         setSelectedItems(prev => prev.filter(id => id !== selectedReceiptToDelete.id));
         
@@ -232,12 +211,33 @@ export default function Receipts() {
           description: `ลบใบเสร็จรับเงิน ${selectedReceiptToDelete.number} เรียบร้อยแล้ว (ข้อมูลตัวอย่าง)`,
         });
       } else {
+        // Handle real database deletion
+        const { error } = await supabase
+          .from('receipts')
+          .delete()
+          .eq('id', selectedReceiptToDelete.id);
+
+        if (error) {
+          console.error('Supabase delete error:', error);
+          throw error;
+        }
+
+        // ลบออกจาก state ท้องถิ่นแทนการโหลดใหม่
+        setReceipts(prev => prev.filter(receipt => receipt.id !== selectedReceiptToDelete.id));
+        setSelectedItems(prev => prev.filter(id => id !== selectedReceiptToDelete.id));
+
         toast({
-          title: "เกิดข้อผิดพลาด",
-          description: "ไม่สามารถลบใบเสร็จรับเงินได้",
-          variant: "destructive",
+          title: "ลบสำเร็จ",
+          description: `ลบใบเสร็จรับเงิน ${selectedReceiptToDelete.number} เรียบร้อยแล้ว`,
         });
       }
+    } catch (error: any) {
+      console.error('Error deleting receipt:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบใบเสร็จรับเงินได้",
+        variant: "destructive",
+      });
     } finally {
       setDeleteDialogOpen(false);
       setSelectedReceiptToDelete(null);

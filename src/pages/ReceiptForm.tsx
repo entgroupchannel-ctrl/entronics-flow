@@ -169,11 +169,7 @@ export default function ReceiptForm() {
       // Fetch complete tax invoice data with items
       const { data: taxInvoice, error } = await supabase
         .from('tax_invoices')
-        .select(`
-          *,
-          tax_invoice_items (*),
-          customers (*)
-        `)
+        .select('*')
         .eq('id', taxInvoiceId)
         .single();
 
