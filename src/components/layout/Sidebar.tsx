@@ -311,8 +311,8 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
           
           {!collapsed && (
             <div className="flex items-center space-x-2 ml-2">
-              <div className="h-8 w-8 rounded bg-gradient-primary flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-white" />
+              <div className="h-8 w-8 rounded bg-sidebar-primary flex items-center justify-center">
+                <Building2 className="h-5 w-5 text-sidebar-primary-foreground" />
               </div>
               <div>
                 <h1 className="text-lg font-bold text-sidebar-foreground">ENT GROUP</h1>
@@ -326,10 +326,10 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
             <div className="flex items-center justify-center flex-1">
               <button 
                 onClick={onLogoClick}
-                className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+                className="h-10 w-10 rounded-full bg-sidebar-primary flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
                 title="ข้อมูลบริษัท"
               >
-                <span className="text-xl font-bold text-red-500">E</span>
+                <span className="text-xl font-bold text-sidebar-primary-foreground">E</span>
               </button>
             </div>
           )}
@@ -349,8 +349,8 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
               title="ข้อมูลบริษัท"
             >
               <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
-                  <Users className="h-4 w-4 text-white" />
+                <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center">
+                  <Users className="h-4 w-4 text-sidebar-primary-foreground" />
                 </div>
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-sm font-medium text-sidebar-foreground truncate">Admin User</p>
@@ -368,10 +368,10 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
               <TooltipTrigger asChild>
                 <button 
                   onClick={onLogoClick}
-                  className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center mx-auto cursor-pointer hover:scale-105 transition-transform"
+                  className="h-10 w-10 rounded-full bg-sidebar-primary flex items-center justify-center mx-auto cursor-pointer hover:scale-105 transition-transform"
                   title="ข้อมูลบริษัท"
                 >
-                  <Users className="h-5 w-5 text-white" />
+                  <Users className="h-5 w-5 text-sidebar-primary-foreground" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right" className="ml-2 bg-sidebar-primary text-sidebar-primary-foreground">
