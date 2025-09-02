@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Receipt, X, RotateCcw, Upload, AlertTriangle } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Receipt, X, RotateCcw, Upload, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,8 @@ interface TaxInvoice {
   due_date?: string;
   invoice_id?: string;
   tax_invoice_items?: any[];
+  payments_verified?: boolean;
+  can_issue_receipt?: boolean;
   invoice?: {
     id: string;
     invoice_number: string;
@@ -290,6 +292,11 @@ export default function TaxInvoices() {
         variant: "destructive",
       });
     }
+  };
+
+  // Handle payment verification
+  const handleVerifyPayment = async (taxInvoiceId: string) => {
+    navigate(`/payment-records?tax_invoice_id=${taxInvoiceId}`);
   };
 
   // Handle payment evidence upload
@@ -575,9 +582,17 @@ export default function TaxInvoices() {
                             align="center" 
                             className="bg-background border shadow-lg z-[100]"
                           >
-                            <DropdownMenuItem onClick={() => handleCreateReceipt(taxInvoice)}>
+                            <DropdownMenuItem 
+                              onClick={() => handleCreateReceipt(taxInvoice)}
+                              disabled={!(taxInvoice.payments_verified && taxInvoice.can_issue_receipt)}
+                              className={!(taxInvoice.payments_verified && taxInvoice.can_issue_receipt) ? "text-muted-foreground" : ""}
+                            >
                               <Receipt className="w-4 h-4 mr-2" />
                               สร้างใบเสร็จรับเงิน
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleVerifyPayment(taxInvoice.id)}>
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              ยืนยันรับเงิน
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => {
                               console.log('Cancel', taxInvoice.id);
