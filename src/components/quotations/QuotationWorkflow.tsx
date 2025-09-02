@@ -452,8 +452,14 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
     <div className="flex items-center gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" disabled={loading}>
-            รออนุมัติ
+          <Button 
+            variant="outline" 
+            size="sm" 
+            disabled={loading}
+            className={`${statusInfo.color} border-current`}
+          >
+            {statusInfo.icon}
+            <span className="ml-1">{statusInfo.label}</span>
             <ChevronDown className="w-4 h-4 ml-1" />
           </Button>
         </DropdownMenuTrigger>
