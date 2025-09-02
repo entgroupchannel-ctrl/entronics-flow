@@ -90,11 +90,11 @@ export default function PaymentRecords() {
     try {
       const { data, error } = await supabase
         .from('tax_invoices')
-        .select('id, tax_invoice_number, customer_name, total_amount')
-        .eq('status', 'sent')
+        .select('id, tax_invoice_number, customer_name, total_amount, status')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('Tax invoices loaded:', data); // Debug log
       setTaxInvoices(data || []);
     } catch (error) {
       console.error('Error loading tax invoices:', error);
