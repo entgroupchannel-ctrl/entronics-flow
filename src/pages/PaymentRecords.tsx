@@ -643,8 +643,20 @@ export default function PaymentRecords() {
           {/* Add Payment Form Modal */}
           {showAddForm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
-              <div className="bg-white rounded-lg p-3 w-full max-w-4xl max-h-[98vh] overflow-y-auto">
-                <h2 className="text-lg font-bold mb-3">บันทึกการชำระเงิน</h2>
+              <div className="bg-white rounded-lg p-3 w-full max-w-4xl max-h-[98vh] overflow-y-auto relative">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-bold">บันทึกการชำระเงิน</h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAddForm(false)}
+                    className="p-1 h-8 w-8 rounded-full hover:bg-gray-100"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </Button>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {/* Left Column - Form Fields */}
                   <div className="space-y-3">
