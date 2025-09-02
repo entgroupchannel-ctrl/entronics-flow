@@ -1123,8 +1123,8 @@ export default function QuotationForm() {
                               <Button variant="ghost" size="sm" onClick={() => moveItem(item.id, 'up')} disabled={index === 0} className="h-6 w-6 p-0 hover:bg-accent">
                                 <ChevronUp className="w-3 h-3" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => moveItem(item.id, 'down')} disabled={index === items.length - 1} className="h-6 w-6 p-0 hover:bg-accent">
-                                <ChevronDown className="w-3 h-3" />
+                              <Button variant="ghost" size="sm" onClick={() => moveItem(item.id, 'down')} disabled={index === items.length - 1} className="h-6 w-6 p-0 hover:bg-accent bg-slate-100 hover:bg-slate-200">
+                                <ChevronDown className="w-3 h-3 text-slate-600" />
                               </Button>
                             </div>
                           </div>
