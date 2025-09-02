@@ -835,7 +835,8 @@ export default function QuotationForm() {
       });
     }
   };
-  return <div className="min-h-screen bg-background p-4">
+  return (
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto space-y-4">
         {/* Breadcrumb */}
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
