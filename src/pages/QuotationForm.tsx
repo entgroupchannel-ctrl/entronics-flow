@@ -593,48 +593,45 @@ export default function QuotationForm() {
       yPos += 4;
       doc.text('FAX: 02-045-6105  |  www.entgroup.co.th', margin, yPos);
 
-      // Document Information (Right side)
-      const rightColX = pageWidth - 70;
-      let rightY = yPos - 20;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      const docInfo = [['เลขที่:', quotation.quotation_number || ''], ['วันที่:', new Date(quotation.quotation_date).toLocaleDateString('th-TH')], ['ครบกำหนด:', quotation.valid_until ? new Date(quotation.valid_until).toLocaleDateString('th-TH') : '-'], ['ผู้ขาย:', 'คุณปริศ โพธิแสง (บอย)'], ['ตำแหน่ง:', 'Sales Executive']];
-      docInfo.forEach(([label, value]) => {
-        doc.setFont('helvetica', 'normal');
-        doc.text(label, rightColX, rightY);
-        doc.text(value, rightColX + 20, rightY);
-        rightY += 4;
-      });
-      yPos += 25;
-
-      // Customer Section with subtle background
-      doc.setFillColor(248, 249, 250);
-      doc.roundedRect(margin, yPos, contentWidth, 25, 2, 2, 'F');
+      // Document Details Section
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(220, 53, 69);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(margin, yPos, contentWidth, 30, 2, 2, 'FD');
+      
+      // Left side - Customer info
       doc.setTextColor(220, 53, 69);
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.text('ลูกค้า / CUSTOMER', margin + 5, yPos + 7);
+      doc.text('ลูกค้า / CUSTOMER:', margin + 5, yPos + 8);
+      
       doc.setTextColor(0, 0, 0);
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.text(quotation.customer_name || '', margin + 5, yPos + 13);
+      doc.setFontSize(9);
+      doc.text(quotation.customer_name || '', margin + 5, yPos + 14);
+      
       if (quotation.customer_address) {
         const addressLines = doc.splitTextToSize(quotation.customer_address, 80);
         doc.text(addressLines, margin + 5, yPos + 18);
       }
-
-      // Contact info on the right
-      if (quotation.customer_phone || quotation.customer_email) {
-        let contactY = yPos + 7;
-        if (quotation.customer_phone) {
-          doc.text('โทร: ' + quotation.customer_phone, rightColX, contactY);
-          contactY += 4;
-        }
-        if (quotation.customer_email) {
-          doc.text('อีเมล: ' + quotation.customer_email, rightColX, contactY);
-        }
-      }
-      yPos += 35;
+      
+      // Right side - Document info
+      const rightX = pageWidth - 70;
+      doc.setTextColor(220, 53, 69);
+      doc.setFont('helvetica', 'bold');
+      doc.text('เลขที่เอกสาร:', rightX, yPos + 8);
+      doc.text('วันที่:', rightX, yPos + 14);
+      doc.text('ครบกำหนด:', rightX, yPos + 20);
+      doc.text('ผู้ขาย:', rightX, yPos + 26);
+      
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('helvetica', 'normal');
+      doc.text(quotation.quotation_number || '', rightX + 25, yPos + 8);
+      doc.text(new Date(quotation.quotation_date).toLocaleDateString('th-TH'), rightX + 25, yPos + 14);
+      doc.text(quotation.valid_until ? new Date(quotation.valid_until).toLocaleDateString('th-TH') : '-', rightX + 25, yPos + 20);
+      doc.text('คุณปริศ โพธิแสง (บอย)', rightX + 25, yPos + 26);
+      
+      yPos += 40;
 
       // Items table with modern design
       doc.setTextColor(255, 255, 255);
