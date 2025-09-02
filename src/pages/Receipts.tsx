@@ -20,12 +20,26 @@ interface ReceiptInterface {
   receipt_number: string;
   receipt_date: string;
   customer_name: string;
+  customer_address?: string;
+  customer_phone?: string;
+  customer_email?: string;
   project_name?: string;
   total_amount: number;
   status: string;
   payment_method?: string;
+  payment_reference?: string;
+  bank_name?: string;
+  bank_account?: string;
   invoice_id?: string;
   tax_invoice_id?: string;
+  subtotal?: number;
+  discount_amount?: number;
+  discount_percentage?: number;
+  vat_amount?: number;
+  withholding_tax_amount?: number;
+  amount_paid?: number;
+  amount_change?: number;
+  notes?: string;
   created_by?: string;
   created_at: string;
   updated_at: string;
@@ -44,6 +58,26 @@ export default function Receipts() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedReceiptToDelete, setSelectedReceiptToDelete] = useState<{id: string, number: string} | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedReceiptToEdit, setSelectedReceiptToEdit] = useState<ReceiptInterface | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    customer_name: '',
+    customer_address: '',
+    customer_phone: '',
+    customer_email: '',
+    payment_method: 'โอนเงิน',
+    payment_reference: '',
+    bank_name: '',
+    bank_account: '',
+    subtotal: 0,
+    discount_amount: 0,
+    discount_percentage: 0,
+    vat_amount: 0,
+    withholding_tax_amount: 0,
+    amount_paid: 0,
+    amount_change: 0,
+    notes: ''
+  });
 
   useEffect(() => {
     loadReceipts();
@@ -248,6 +282,148 @@ export default function Receipts() {
     } finally {
       setDeleteDialogOpen(false);
       setSelectedReceiptToDelete(null);
+    }
+  };
+
+  const openEditDialog = async (receipt: ReceiptInterface) => {
+    setDropdownOpen(null);
+    try {
+      // ดึงข้อมูลใบเสร็จแบบเต็ม
+      const { data: fullReceipt, error } = await supabase
+        .from('receipts')
+        .select('*')
+        .eq('id', receipt.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching receipt:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถดึงข้อมูลใบเสร็จได้",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (fullReceipt) {
+        setSelectedReceiptToEdit({
+          ...fullReceipt,
+          status: fullReceipt.payment_status || 'pending'
+        });
+        setEditFormData({
+          customer_name: fullReceipt.customer_name || '',
+          customer_address: fullReceipt.customer_address || '',
+          customer_phone: fullReceipt.customer_phone || '',
+          customer_email: fullReceipt.customer_email || '',
+          payment_method: fullReceipt.payment_method || 'โอนเงิน',
+          payment_reference: fullReceipt.payment_reference || '',
+          bank_name: fullReceipt.bank_name || '',
+          bank_account: fullReceipt.bank_account || '',
+          subtotal: fullReceipt.subtotal || 0,
+          discount_amount: fullReceipt.discount_amount || 0,
+          discount_percentage: fullReceipt.discount_percentage || 0,
+          vat_amount: fullReceipt.vat_amount || 0,
+          withholding_tax_amount: fullReceipt.withholding_tax_amount || 0,
+          amount_paid: fullReceipt.amount_paid || 0,
+          amount_change: fullReceipt.amount_change || 0,
+          notes: fullReceipt.notes || ''
+        });
+        setEditDialogOpen(true);
+      }
+    } catch (error) {
+      console.error('Error in openEditDialog:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถเปิดหน้าแก้ไขได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditConfirm = async () => {
+    if (!selectedReceiptToEdit) return;
+
+    try {
+      // คำนวณยอดรวมใหม่
+      const calculatedTotal = editFormData.subtotal + editFormData.vat_amount - editFormData.discount_amount - editFormData.withholding_tax_amount;
+      const calculatedChange = editFormData.amount_paid - calculatedTotal;
+
+      const { error } = await supabase
+        .from('receipts')
+        .update({
+          customer_name: editFormData.customer_name,
+          customer_address: editFormData.customer_address,
+          customer_phone: editFormData.customer_phone,
+          customer_email: editFormData.customer_email,
+          payment_method: editFormData.payment_method,
+          payment_reference: editFormData.payment_reference,
+          bank_name: editFormData.bank_name,
+          bank_account: editFormData.bank_account,
+          subtotal: editFormData.subtotal,
+          discount_amount: editFormData.discount_amount,
+          discount_percentage: editFormData.discount_percentage,
+          vat_amount: editFormData.vat_amount,
+          withholding_tax_amount: editFormData.withholding_tax_amount,
+          total_amount: calculatedTotal,
+          amount_paid: editFormData.amount_paid,
+          amount_change: calculatedChange,
+          notes: editFormData.notes,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedReceiptToEdit.id);
+
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+
+      // อัพเดต state ท้องถิ่น
+      setReceipts(prev => prev.map(receipt => 
+        receipt.id === selectedReceiptToEdit.id 
+          ? { 
+              ...receipt, 
+              customer_name: editFormData.customer_name,
+              payment_method: editFormData.payment_method,
+              total_amount: calculatedTotal,
+              updated_at: new Date().toISOString()
+            }
+          : receipt
+      ));
+
+      toast({
+        title: "แก้ไขสำเร็จ",
+        description: `แก้ไขใบเสร็จรับเงิน ${selectedReceiptToEdit.receipt_number} เรียบร้อยแล้ว`,
+      });
+
+      setEditDialogOpen(false);
+      setSelectedReceiptToEdit(null);
+      // รีเซ็ตฟอร์ม
+      setEditFormData({
+        customer_name: '',
+        customer_address: '',
+        customer_phone: '',
+        customer_email: '',
+        payment_method: 'โอนเงิน',
+        payment_reference: '',
+        bank_name: '',
+        bank_account: '',
+        subtotal: 0,
+        discount_amount: 0,
+        discount_percentage: 0,
+        vat_amount: 0,
+        withholding_tax_amount: 0,
+        amount_paid: 0,
+        amount_change: 0,
+        notes: ''
+      });
+
+    } catch (error: any) {
+      console.error('Error updating receipt:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถแก้ไขใบเสร็จรับเงินได้",
+        variant: "destructive",
+      });
     }
   };
 
@@ -472,8 +648,7 @@ export default function Receipts() {
                                 onCloseAutoFocus={(e) => e.preventDefault()}
                               >
                                 <DropdownMenuItem onClick={() => {
-                                  setDropdownOpen(null);
-                                  navigate(`/receipts/${receipt.id}/edit`);
+                                  openEditDialog(receipt);
                                 }}>
                                   <Edit className="w-4 h-4 mr-2" />
                                   แก้ไข
@@ -575,6 +750,215 @@ export default function Receipts() {
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
               ลบ
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit Receipt Dialog */}
+      <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <AlertDialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold">
+              แก้ไขใบเสร็จรับเงิน {selectedReceiptToEdit?.receipt_number}
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+            {/* ข้อมูลลูกค้า */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-primary">ข้อมูลลูกค้า</h3>
+              
+              <div>
+                <label className="text-sm font-medium">ชื่อลูกค้า *</label>
+                <Input
+                  value={editFormData.customer_name}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, customer_name: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">ที่อยู่</label>
+                <textarea
+                  value={editFormData.customer_address}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, customer_address: e.target.value }))}
+                  className="w-full mt-1 p-2 border border-gray-300 rounded-md min-h-[80px]"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium">เบอร์โทร</label>
+                  <Input
+                    value={editFormData.customer_phone}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, customer_phone: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">อีเมล</label>
+                  <Input
+                    type="email"
+                    value={editFormData.customer_email}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, customer_email: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ข้อมูลการชำระเงิน */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-primary">ข้อมูลการชำระเงิน</h3>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium">วิธีการชำระ</label>
+                  <Select 
+                    value={editFormData.payment_method}
+                    onValueChange={(value) => setEditFormData(prev => ({ ...prev, payment_method: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="เงินสด">เงินสด</SelectItem>
+                      <SelectItem value="โอนเงิน">โอนเงิน</SelectItem>
+                      <SelectItem value="เช็ค">เช็ค</SelectItem>
+                      <SelectItem value="บัตรเครดิต">บัตรเครดิต</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">หมายเลขอ้างอิง</label>
+                  <Input
+                    value={editFormData.payment_reference}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, payment_reference: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium">ธนาคาร</label>
+                  <Input
+                    value={editFormData.bank_name}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, bank_name: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">เลขที่บัญชี</label>
+                  <Input
+                    value={editFormData.bank_account}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, bank_account: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ข้อมูลการเงิน */}
+            <div className="space-y-4 md:col-span-2">
+              <h3 className="text-lg font-semibold text-primary">ข้อมูลการเงิน</h3>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-sm font-medium">ยอดรวมย่อย</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editFormData.subtotal}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, subtotal: parseFloat(e.target.value) || 0 }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">ส่วนลด</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editFormData.discount_amount}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, discount_amount: parseFloat(e.target.value) || 0 }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">VAT 7%</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editFormData.vat_amount}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, vat_amount: parseFloat(e.target.value) || 0 }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">หัก ณ ที่จ่าย</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editFormData.withholding_tax_amount}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, withholding_tax_amount: parseFloat(e.target.value) || 0 }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-sm font-medium">ยอดรวมสุทธิ</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editFormData.subtotal + editFormData.vat_amount - editFormData.discount_amount - editFormData.withholding_tax_amount}
+                    readOnly
+                    className="mt-1 bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">จำนวนเงินที่รับ</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editFormData.amount_paid}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, amount_paid: parseFloat(e.target.value) || 0 }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">เงินทอน</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editFormData.amount_paid - (editFormData.subtotal + editFormData.vat_amount - editFormData.discount_amount - editFormData.withholding_tax_amount)}
+                    readOnly
+                    className="mt-1 bg-gray-100"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">หมายเหตุ</label>
+                <textarea
+                  value={editFormData.notes}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  className="w-full mt-1 p-2 border border-gray-300 rounded-md min-h-[80px]"
+                  placeholder="หมายเหตุเพิ่มเติม..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleEditConfirm}
+              className="bg-primary hover:bg-primary/90"
+            >
+              บันทึกการแก้ไข
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
