@@ -582,18 +582,19 @@ export default function TaxInvoices() {
                             align="center" 
                             className="bg-background border shadow-lg z-[100]"
                           >
-                            <DropdownMenuItem 
-                              onClick={() => handleCreateReceipt(taxInvoice)}
-                              disabled={!(taxInvoice.payments_verified && taxInvoice.can_issue_receipt)}
-                              className={!(taxInvoice.payments_verified && taxInvoice.can_issue_receipt) ? "text-muted-foreground" : ""}
-                            >
-                              <Receipt className="w-4 h-4 mr-2" />
-                              สร้างใบเสร็จรับเงิน
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => navigate(`/payment-records?invoice=${taxInvoice.id}`)}>
-                              <CheckCircle className="w-4 h-4 mr-2" />
-                              ยืนยันรับเงิน
-                            </DropdownMenuItem>
+                            {taxInvoice.payments_verified && taxInvoice.can_issue_receipt ? (
+                              <DropdownMenuItem 
+                                onClick={() => handleCreateReceipt(taxInvoice)}
+                              >
+                                <Receipt className="w-4 h-4 mr-2" />
+                                สร้างใบเสร็จรับเงิน
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem onClick={() => navigate(`/payment-records?invoice=${taxInvoice.id}`)}>
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                ยืนยันรับเงิน
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => {
                               console.log('Cancel', taxInvoice.id);
                             }}>
