@@ -639,12 +639,12 @@ export default function PaymentRecords() {
 
           {/* Add Payment Form Modal */}
           {showAddForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-lg p-4 w-full max-w-5xl max-h-[95vh] overflow-y-auto">
-                <h2 className="text-xl font-bold mb-4">บันทึกการชำระเงิน</h2>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
+              <div className="bg-white rounded-lg p-3 w-full max-w-4xl max-h-[98vh] overflow-y-auto">
+                <h2 className="text-lg font-bold mb-3">บันทึกการชำระเงิน</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {/* Left Column - Form Fields */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div>
                       <Label htmlFor="tax_invoice_id" className="text-sm font-semibold">ใบกำกับภาษี</Label>
                       <Select
@@ -785,16 +785,16 @@ export default function PaymentRecords() {
                   </div>
 
                   {/* Right Column - Preview and Summary */}
-                  <div className="space-y-3">
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <h3 className="text-base font-bold mb-2">ตัวอย่างหลักฐาน</h3>
+                  <div className="space-y-2">
+                    <div className="bg-gray-50 p-2 rounded-lg">
+                      <h3 className="text-sm font-bold mb-2">ตัวอย่างหลักฐาน</h3>
                       {previewUrl ? (
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           <div className="border rounded-lg overflow-hidden bg-white">
                             <img 
                               src={previewUrl} 
                               alt="Preview" 
-                              className="w-full h-48 object-contain"
+                              className="w-full h-32 object-contain"
                             />
                           </div>
                           <Button
@@ -807,15 +807,15 @@ export default function PaymentRecords() {
                               const fileInput = document.getElementById('payment_evidence') as HTMLInputElement;
                               if (fileInput) fileInput.value = '';
                             }}
-                            className="w-full text-sm"
+                            className="w-full text-xs h-7"
                           >
                             ลบไฟล์
                           </Button>
                         </div>
                       ) : (
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500">
-                          <div className="text-2xl mb-1">📄</div>
-                          <p className="text-sm font-medium">ยังไม่ได้เลือกไฟล์</p>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center text-gray-500">
+                          <div className="text-lg mb-1">📄</div>
+                          <p className="text-xs font-medium">ยังไม่ได้เลือกไฟล์</p>
                           <p className="text-xs">อัปโหลดสลิปหรือหลักฐาน</p>
                         </div>
                       )}
@@ -823,15 +823,15 @@ export default function PaymentRecords() {
 
                     {/* Summary Info */}
                     {selectedTaxInvoice && (
-                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                        <h3 className="text-base font-bold mb-2 text-blue-800">ข้อมูลใบกำกับภาษี</h3>
-                        <div className="space-y-1 text-sm">
+                      <div className="bg-blue-50 p-2 rounded-lg border border-blue-200">
+                        <h3 className="text-sm font-bold mb-1 text-blue-800">ข้อมูลใบกำกับภาษี</h3>
+                        <div className="space-y-1 text-xs">
                           <div><strong>เลขที่:</strong> <span className="font-mono">{selectedTaxInvoice.tax_invoice_number}</span></div>
                           <div><strong>ลูกค้า:</strong> {selectedTaxInvoice.customer_name}</div>
-                          <div><strong>ยอดรวม:</strong> <span className="text-base font-bold text-blue-600">฿{selectedTaxInvoice.total_amount.toLocaleString()}</span></div>
+                          <div><strong>ยอดรวม:</strong> <span className="text-sm font-bold text-blue-600">฿{selectedTaxInvoice.total_amount.toLocaleString()}</span></div>
                           <div>
                             <strong>สถานะ:</strong> 
-                            <Badge variant={selectedTaxInvoice.status === 'paid' ? 'default' : 'secondary'} className="ml-2 text-xs">
+                            <Badge variant={selectedTaxInvoice.status === 'paid' ? 'default' : 'secondary'} className="ml-1 text-xs">
                               {selectedTaxInvoice.status === 'paid' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'}
                             </Badge>
                           </div>
@@ -840,9 +840,9 @@ export default function PaymentRecords() {
                     )}
 
                     {formData.amount_received > 0 && selectedTaxInvoice && (
-                      <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-                        <h3 className="text-base font-bold mb-2 text-green-800">สรุปการชำระเงิน</h3>
-                        <div className="space-y-1 text-sm">
+                      <div className="bg-green-50 p-2 rounded-lg border border-green-200">
+                        <h3 className="text-sm font-bold mb-1 text-green-800">สรุปการชำระเงิน</h3>
+                        <div className="space-y-1 text-xs">
                           <div className="flex justify-between">
                             <span>ยอดที่ต้องชำระ:</span>
                             <span className="font-bold">฿{selectedTaxInvoice.total_amount.toLocaleString()}</span>
@@ -864,7 +864,7 @@ export default function PaymentRecords() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t mt-4">
+                <div className="flex justify-end gap-2 pt-3 border-t mt-3">
                   <Button 
                     variant="outline" 
                     onClick={() => {
