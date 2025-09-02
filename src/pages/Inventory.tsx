@@ -1015,30 +1015,39 @@ const Inventory = () => {
                                </div>
                              </div>
                              
-                             <div className="flex-1 space-y-3">
-                               <div>
-                                 <div className="font-semibold text-lg">{product.name}</div>
-                                 <div className="text-sm text-muted-foreground">SKU: {product.sku}</div>
-                               </div>
-                               
-                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                 <div>
-                                   <span className="text-muted-foreground">หมวดหมู่:</span>
-                                   <div className="font-medium">{product.category || "-"}</div>
-                                 </div>
-                                 <div>
-                                   <span className="text-muted-foreground">ยี่ห้อ:</span>
-                                   <div className="font-medium">{product.brand || "-"}</div>
-                                 </div>
-                                 <div>
-                                   <span className="text-muted-foreground">ราคาขาย:</span>
-                                   <div className="font-medium">฿{product.price.toLocaleString()}</div>
-                                 </div>
-                                 <div>
-                                   <span className="text-muted-foreground">สภาพ:</span>
-                                   <div>{getConditionBadge(product.item_condition || "new")}</div>
-                                 </div>
-                               </div>
+                              <div className="flex-1 space-y-3">
+                                <div>
+                                  <div className="text-sm text-muted-foreground">SKU: {product.sku}</div>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                  <div>
+                                    <span className="text-muted-foreground">ยี่ห้อ:</span>
+                                    <div className="font-medium">{product.brand || "-"}</div>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">ราคาขาย:</span>
+                                    <div className="font-medium">฿{product.price.toLocaleString()}</div>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">สภาพ:</span>
+                                    <div>{getConditionBadge(product.item_condition || "new")}</div>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingProduct(product);
+                                      setShowEditDialog(true);
+                                    }}
+                                  >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    ดูรายละเอียด
+                                  </Button>
+                                </div>
                                
                                {product.description && (
                                  <div className="text-sm text-muted-foreground">
