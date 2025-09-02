@@ -113,7 +113,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
       </div>
 
       {/* Customer and Quotation Info */}
-      <div className="border-2 border-red-500 rounded p-4 mb-6">
+      <div className="border-2 border-gray-500 rounded p-4 mb-6">
         <div className="grid grid-cols-2 gap-8">
           {/* Customer Info */}
           <div className="space-y-2">
