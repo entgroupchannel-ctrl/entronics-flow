@@ -39,32 +39,26 @@ export default function QuotationImport() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Field mappings สำหรับระบบ
+  // Field mappings สำหรับระบบ - ตรงกับรูปแบบข้อมูลของคุณ
   const systemFields = {
     'quotation_number': 'เลขที่เอกสาร',
-    'quotation_date': 'วัน/เดือน/ปี',
+    'quotation_date': 'วัน/เดือน/ปี', 
     'customer_name': 'ชื่อลูกค้า',
     'project_name': 'ชื่อโปรเจ็ค',
     'customer_tax_id': 'เลขผู้เสียภาษี',
     'customer_branch': 'สำนักงานใหญ่/สาขา',
     'subtotal': 'มูลค่า',
-    'vat_amount': 'ภาษีมูลค่าเพิ่ม',
+    'vat_amount': 'ภาษีมูลค่าเพิ่ม', 
     'total_amount': 'ยอดรวมสุทธิ',
     'reference_document': 'เอกสารอ้างอิงในระบบ',
     'reference_number': 'เลขที่อ้างอิง',
-    'status': 'สถานะ',
-    'customer_phone': 'เบอร์โทรศัพท์',
-    'customer_email': 'อีเมล',
-    'customer_address': 'ที่อยู่',
-    'valid_until': 'วันที่หมดอายุ',
-    'notes': 'หมายเหตุ',
-    'terms_conditions': 'เงื่อนไข'
+    'status': 'สถานะ'
   };
 
   const downloadTemplate = () => {
     const templateData = [
       Object.values(systemFields),
-      ['QT202501001', '01/01/2025', 'บริษัท ตัวอย่าง จำกัด', 'โปรเจ็ค A', '0123456789012', 'สำนักงานใหญ่', '100000', '7000', '107000', '', '', 'draft', '02-123-4567', 'example@company.com', '123 ถนนสุขุมวิท กรุงเทพฯ', '15/01/2025', 'หมายเหตุ', 'เงื่อนไข 30 วัน']
+      ['QT202501001', '01/01/2025', 'บริษัท ตัวอย่าง จำกัด', 'โปรเจ็ค A', '0123456789012', 'สำนักงานใหญ่', '100000', '7000', '107000', '', '', 'draft']
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(templateData);
