@@ -57,7 +57,14 @@ export default function Receipts() {
       try {
         const { data: receiptsData, error } = await supabase
           .from('receipts')
-          .select('*')
+          .select(`
+            *,
+            payment_records (
+              id,
+              payment_number,
+              verification_status
+            )
+          `)
           .order('created_at', { ascending: false });
 
         if (error) {
@@ -152,7 +159,7 @@ export default function Receipts() {
       case 'pending':
         return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">รอชำระ</Badge>;
       case 'cancelled':
-        return <Badge variant="destructive">ยกเลิก</Badge>;
+        return <Badge variant="destructive" className="bg-red-100 text-red-800">❌ ยกเลิก</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -437,41 +444,8 @@ export default function Receipts() {
                           <TableCell className="font-medium">
                             ฿{receipt.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                           </TableCell>
-                           <TableCell onClick={(e) => e.stopPropagation()}>
-                             <DropdownMenu>
-                               <DropdownMenuTrigger asChild>
-                                 <Button 
-                                   variant="outline" 
-                                   size="sm" 
-                                   className="bg-background border hover:bg-accent"
-                                 >
-                                   สถานะ
-                                 </Button>
-                               </DropdownMenuTrigger>
-                               <DropdownMenuContent 
-                                 align="center" 
-                                 className="bg-background border shadow-lg z-[100]"
-                               >
-                                 <DropdownMenuItem onClick={() => {
-                                   console.log('Set pending status', receipt.id);
-                                 }}>
-                                   <Clock className="w-4 h-4 mr-2" />
-                                   รอดำเนินการ
-                                 </DropdownMenuItem>
-                                 <DropdownMenuItem onClick={() => {
-                                   console.log('Set collected status', receipt.id);
-                                 }}>
-                                   <CheckCircle className="w-4 h-4 mr-2" />
-                                   เก็บเงินแล้ว
-                                 </DropdownMenuItem>
-                                 <DropdownMenuItem onClick={() => {
-                                   console.log('Set cancelled status', receipt.id);
-                                 }}>
-                                   <X className="w-4 h-4 mr-2" />
-                                   ยกเลิก
-                                 </DropdownMenuItem>
-                               </DropdownMenuContent>
-                             </DropdownMenu>
+                           <TableCell>
+                             {getStatusBadge(receipt.status)}
                            </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <DropdownMenu 
