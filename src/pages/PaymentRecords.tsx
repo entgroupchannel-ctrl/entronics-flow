@@ -39,6 +39,7 @@ interface PaymentRecord {
     receipt_date: string;
     total_amount: number;
     payment_status: string;
+    cancelled_at?: string;
   }>;
 }
 
@@ -670,9 +671,9 @@ export default function PaymentRecords() {
                       <div className="text-2xl font-bold text-green-600">
                         ฿{payment.amount_received.toLocaleString()}
                       </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        {new Date(payment.payment_date).toLocaleDateString('th-TH')}
-                      </div>
+                       <div className="text-sm text-gray-600 mt-1">
+                         {new Date(payment.payment_date).toLocaleString('th-TH')}
+                       </div>
                     </div>
 
                     {/* View Details Button */}
@@ -710,8 +711,13 @@ export default function PaymentRecords() {
                             : "bg-purple-50 text-purple-700 border-purple-200"
                         }
                       >
-                        {payment.receipts[0].payment_status === 'cancelled' ? '❌' : '🧾'} 
-                        {payment.receipts[0].payment_status === 'cancelled' ? 'ใบเสร็จยกเลิก' : 'เชื่อมโยงใบเสร็จ'}: {payment.receipts[0].receipt_number}
+                         {payment.receipts[0].payment_status === 'cancelled' ? '❌' : '🧾'} 
+                         {payment.receipts[0].payment_status === 'cancelled' ? 'ใบเสร็จยกเลิก' : 'เชื่อมโยงใบเสร็จ'}: {payment.receipts[0].receipt_number}
+                         {payment.receipts[0].payment_status === 'cancelled' && payment.receipts[0].cancelled_at && (
+                           <span className="text-xs ml-1">
+                             (ยกเลิกเมื่อ: {new Date(payment.receipts[0].cancelled_at).toLocaleString('th-TH')})
+                           </span>
+                         )}
                       </Badge>
                     )}
                     <div className="ml-auto">
@@ -756,9 +762,9 @@ export default function PaymentRecords() {
                           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                             ✅ สร้างใบเสร็จแล้ว: {payment.receipts[0].receipt_number}
                           </Badge>
-                          <span className="text-xs text-gray-500">
-                            ({new Date(payment.receipts[0].receipt_date).toLocaleDateString('th-TH')})
-                          </span>
+                           <span className="text-xs text-gray-500">
+                             (ออกใบเสร็จเมื่อ: {new Date(payment.receipts[0].receipt_date).toLocaleString('th-TH')})
+                           </span>
                         </div>
                       )}
                       
@@ -1145,8 +1151,8 @@ export default function PaymentRecords() {
                       <div>{selectedPayment.payment_method}</div>
                     </div>
                     <div>
-                      <Label>วันที่ชำระ</Label>
-                      <div>{new Date(selectedPayment.payment_date).toLocaleDateString('th-TH')}</div>
+                       <Label>วันที่ชำระ</Label>
+                       <div>{new Date(selectedPayment.payment_date).toLocaleString('th-TH')}</div>
                     </div>
                   </div>
                   
