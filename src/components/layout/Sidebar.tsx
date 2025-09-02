@@ -342,10 +342,10 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
 
         {/* User Info */}
         {!collapsed && (
-          <div className="border-t border-sidebar-border p-4">
+          <div className="border-t border-sidebar-border p-4 bg-sidebar">
             <button 
               onClick={onLogoClick}
-              className="w-full hover:bg-sidebar-accent/50 rounded-lg p-2 transition-colors"
+              className="w-full hover:bg-sidebar-accent rounded-lg p-2 transition-colors"
               title="ข้อมูลบริษัท"
             >
               <div className="flex items-center space-x-3">
@@ -363,7 +363,7 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
 
         {/* Collapsed user avatar */}
         {collapsed && (
-          <div className="border-t border-sidebar-border p-2">
+          <div className="border-t border-sidebar-border p-2 bg-sidebar">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button 
