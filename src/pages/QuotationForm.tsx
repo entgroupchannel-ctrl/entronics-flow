@@ -1157,10 +1157,7 @@ export default function QuotationForm() {
 
                             <div>
                               <Label className="text-xs text-muted-foreground">รายละเอียดสินค้า:</Label>
-                              <Textarea placeholder="รายละเอียดเพิ่มเติม" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} className="text-sm text-right min-h-[80px] resize-y w-full mt-1" style={{
-                            textAlign: 'right',
-                            direction: 'rtl'
-                          }} rows={3} />
+                              <Textarea placeholder="รายละเอียดเพิ่มเติม" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} className="text-sm text-left min-h-[80px] resize-y w-full mt-1" rows={3} />
                             </div>
                           </div>
                         </TableCell>
