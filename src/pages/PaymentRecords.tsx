@@ -547,10 +547,30 @@ export default function PaymentRecords() {
                           <div className="text-xs text-slate-500">{payment.payment_method}</div>
                         </div>
                         
-                        <div className="space-y-1">
-                          <div className="text-xs text-muted-foreground">จำนวนเงิน</div>
-                          <div className="font-bold text-green-600 text-lg">฿{payment.amount_received.toLocaleString()}</div>
-                          <div className="text-xs text-slate-500">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</div>
+                        <div className="flex items-center gap-4">
+                          <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground">จำนวนเงิน</div>
+                            <div className="font-bold text-green-600 text-lg">฿{payment.amount_received.toLocaleString()}</div>
+                            <div className="text-xs text-slate-500">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</div>
+                          </div>
+                          
+                          {/* Payment Info Box */}
+                          <div className={`flex gap-4 px-3 py-2 rounded-lg border ${
+                            payment.verification_status === 'verified' 
+                              ? 'bg-emerald-50 border-emerald-200' 
+                              : payment.verification_status === 'rejected'
+                              ? 'bg-rose-50 border-rose-200'
+                              : 'bg-slate-50 border-slate-200'
+                          }`}>
+                            <div className="text-sm">
+                              <span className="text-muted-foreground">วิธีชำระ: </span>
+                              <span className="font-medium">{payment.payment_method}</span>
+                            </div>
+                            <div className="text-sm">
+                              <span className="text-muted-foreground">วันที่ชำระ: </span>
+                              <span className="font-medium">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</span>
+                            </div>
+                          </div>
                         </div>
                         
                         <div className="flex justify-end">
@@ -601,18 +621,6 @@ export default function PaymentRecords() {
                                 <Trash2 className="w-4 h-4 mr-1.5" />
                                 ลบ
                               </Button>
-                              
-                              {/* Payment Info after Delete button */}
-                              <div className="ml-4 flex gap-4 px-3 py-2 rounded-lg border bg-slate-50 border-slate-200">
-                                <div className="text-sm">
-                                  <span className="text-muted-foreground">วิธีชำระ: </span>
-                                  <span className="font-medium">{payment.payment_method}</span>
-                                </div>
-                                <div className="text-sm">
-                                  <span className="text-muted-foreground">วันที่ชำระ: </span>
-                                  <span className="font-medium">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</span>
-                                </div>
-                              </div>
                             </>
                           )}
                             
@@ -686,24 +694,6 @@ export default function PaymentRecords() {
                                 <Trash2 className="w-4 h-4 mr-1.5" />
                                 ลบ
                               </Button>
-                              
-                              {/* Payment Info after Delete button */}
-                              <div className={`ml-4 flex gap-4 px-3 py-2 rounded-lg border ${
-                                payment.verification_status === 'verified' 
-                                  ? 'bg-emerald-50 border-emerald-200' 
-                                  : payment.verification_status === 'rejected'
-                                  ? 'bg-rose-50 border-rose-200'
-                                  : 'bg-slate-50 border-slate-200'
-                              }`}>
-                                <div className="text-sm">
-                                  <span className="text-muted-foreground">วิธีชำระ: </span>
-                                  <span className="font-medium">{payment.payment_method}</span>
-                                </div>
-                                <div className="text-sm">
-                                  <span className="text-muted-foreground">วันที่ชำระ: </span>
-                                  <span className="font-medium">{new Date(payment.payment_date).toLocaleDateString('th-TH')}</span>
-                                </div>
-                              </div>
                             </>
                           )}
                         </div>
