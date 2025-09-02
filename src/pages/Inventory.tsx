@@ -307,6 +307,10 @@ const Inventory = () => {
     }
   };
 
+  const [updateStockProduct, setUpdateStockProduct] = useState<Product | null>(null);
+  const [newStockValue, setNewStockValue] = useState<number>(0);
+  const [showStockUpdateDialog, setShowStockUpdateDialog] = useState(false);
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -342,6 +346,60 @@ const Inventory = () => {
       default:
         return <Badge variant="outline">{condition}</Badge>;
     }
+  };
+
+  const handleUpdateStock = async () => {
+    if (!updateStockProduct) return;
+
+    try {
+      // Determine new status based on stock
+      let status = "In Stock";
+      if (newStockValue === 0) {
+        status = "Out of Stock";
+      } else if (newStockValue <= 5) {
+        status = "Low Stock";
+      }
+
+      const { error } = await supabase
+        .from('products')
+        .update({
+          stock: newStockValue,
+          status: status
+        })
+        .eq('id', updateStockProduct.id);
+
+      if (error) {
+        console.error('Error updating stock:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถอัพเดทสต๊อกได้",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await loadProducts();
+      setUpdateStockProduct(null);
+      setShowStockUpdateDialog(false);
+      
+      toast({
+        title: "อัพเดทสต๊อกสำเร็จ",
+        description: `อัพเดทสต๊อกสินค้า ${updateStockProduct.name} เรียบร้อยแล้ว`
+      });
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถอัพเดทสต๊อกได้",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const openStockUpdate = (product: Product) => {
+    setUpdateStockProduct(product);
+    setNewStockValue(product.stock);
+    setShowStockUpdateDialog(true);
   };
 
   const downloadTemplate = () => {
@@ -928,129 +986,203 @@ const Inventory = () => {
                 </Dialog>
               )}
 
-              {/* Products Table */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5" />
-                    รายการสินค้า ({filteredProducts.length} รายการ)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="text-muted-foreground">กำลังโหลดข้อมูล...</div>
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                         <TableRow>
-                           <TableHead>SKU</TableHead>
-                           <TableHead>ชื่อสินค้า</TableHead>
-                           <TableHead>หมวดหมู่</TableHead>
-                           <TableHead>สภาพ</TableHead>
-                           <TableHead>ยี่ห้อ</TableHead>
-                           <TableHead className="text-right">ราคาขาย</TableHead>
-                           <TableHead className="text-right">สต๊อค</TableHead>
-                           <TableHead>สถานะ</TableHead>
-                           {canManageInventory() && <TableHead className="text-center">จัดการ</TableHead>}
-                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                         {filteredProducts.length === 0 ? (
-                           <TableRow>
-                              <TableCell colSpan={canManageInventory() ? 9 : 8} className="text-center py-8 text-muted-foreground">
-                                {searchTerm || selectedCategory !== "all" || selectedCondition !== "all" ? "ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา" : "ยังไม่มีสินค้าในระบบ"}
-                              </TableCell>
-                           </TableRow>
-                        ) : (
-                          filteredProducts.map((product) => (
-                            <TableRow key={product.id}>
-                               <TableCell className="font-medium">{product.sku}</TableCell>
-                                <TableCell>
-                                  <div className="font-medium">{product.name}</div>
-                                  {product.description && (
-                                    <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                      {product.description}
-                                    </div>
-                                  )}
-                                  {product.repair_notes && (
-                                    <div className="text-xs text-blue-600 mt-1">
-                                      บันทึกการซ่อม: {product.repair_notes}
-                                    </div>
-                                  )}
-                                </TableCell>
-                               <TableCell>{product.category || "-"}</TableCell>
-                               <TableCell>
-                                 {getConditionBadge(product.item_condition || "new")}
-                                 {product.repaired_date && (
-                                   <div className="text-xs text-muted-foreground mt-1">
-                                     ซ่อมเมื่อ: {new Date(product.repaired_date).toLocaleDateString('th-TH')}
-                                   </div>
-                                 )}
-                               </TableCell>
-                               <TableCell>{product.brand || "-"}</TableCell>
-                              <TableCell className="text-right">฿{product.price.toLocaleString()}</TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                  <span>{product.stock}</span>
-                                  {product.stock <= 5 && (
-                                    <AlertTriangle className="h-4 w-4 text-warning" />
-                                  )}
-                                </div>
-                              </TableCell>
-                               <TableCell>
-                                 {getStatusBadge(product.status)}
-                               </TableCell>
-                               {canManageInventory() && (
-                                 <TableCell>
-                                   <div className="flex items-center justify-center gap-2">
-                                     <Button 
-                                       variant="ghost" 
-                                       size="icon"
-                                       onClick={() => {
-                                         setEditingProduct(product);
-                                         setShowEditDialog(true);
-                                       }}
-                                     >
-                                       <Edit className="h-4 w-4" />
-                                     </Button>
-                                     <AlertDialog>
-                                       <AlertDialogTrigger asChild>
-                                         <Button variant="ghost" size="icon">
-                                           <Trash2 className="h-4 w-4" />
-                                         </Button>
-                                       </AlertDialogTrigger>
-                                       <AlertDialogContent>
-                                         <AlertDialogHeader>
-                                           <AlertDialogTitle>ยืนยันการลบสินค้า</AlertDialogTitle>
-                                           <AlertDialogDescription>
-                                             คุณแน่ใจหรือไม่ที่จะลบสินค้า "{product.name}" นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้
-                                           </AlertDialogDescription>
-                                         </AlertDialogHeader>
-                                         <AlertDialogFooter>
-                                           <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-                                           <AlertDialogAction
-                                             onClick={() => handleDeleteProduct(product.id, product.name)}
-                                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                           >
-                                             ลบสินค้า
-                                           </AlertDialogAction>
-                                         </AlertDialogFooter>
-                                       </AlertDialogContent>
-                                     </AlertDialog>
-                                   </div>
-                                 </TableCell>
+               {/* Products Grid */}
+               <div className="space-y-4">
+                 {loading ? (
+                   <div className="flex items-center justify-center py-8">
+                     <div className="text-muted-foreground">กำลังโหลดข้อมูล...</div>
+                   </div>
+                 ) : filteredProducts.length === 0 ? (
+                   <Card>
+                     <CardContent className="text-center py-8 text-muted-foreground">
+                       {searchTerm || selectedCategory !== "all" || selectedCondition !== "all" ? "ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา" : "ยังไม่มีสินค้าในระบบ"}
+                     </CardContent>
+                   </Card>
+                 ) : (
+                   filteredProducts.map((product) => (
+                     <Card key={product.id} className="border border-border">
+                       <CardContent className="p-6">
+                         <div className="flex items-start justify-between">
+                           {/* Left side - Status and product info */}
+                           <div className="flex gap-4 flex-1">
+                             <div className="flex flex-col items-center gap-2 min-w-[120px]">
+                               <div className="text-sm font-medium text-muted-foreground">สถานะสินค้า</div>
+                               {getStatusBadge(product.status)}
+                               <div className="text-xs text-muted-foreground text-center">
+                                 {product.status === "In Stock" && "พร้อมขาย"}
+                                 {product.status === "Low Stock" && "สต๊อกต่ำ"}
+                                 {product.status === "Out of Stock" && "หมดสต๊อก"}
+                               </div>
+                             </div>
+                             
+                             <div className="flex-1 space-y-3">
+                               <div>
+                                 <div className="font-semibold text-lg">{product.name}</div>
+                                 <div className="text-sm text-muted-foreground">SKU: {product.sku}</div>
+                               </div>
+                               
+                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                 <div>
+                                   <span className="text-muted-foreground">หมวดหมู่:</span>
+                                   <div className="font-medium">{product.category || "-"}</div>
+                                 </div>
+                                 <div>
+                                   <span className="text-muted-foreground">ยี่ห้อ:</span>
+                                   <div className="font-medium">{product.brand || "-"}</div>
+                                 </div>
+                                 <div>
+                                   <span className="text-muted-foreground">ราคาขาย:</span>
+                                   <div className="font-medium">฿{product.price.toLocaleString()}</div>
+                                 </div>
+                                 <div>
+                                   <span className="text-muted-foreground">สภาพ:</span>
+                                   <div>{getConditionBadge(product.item_condition || "new")}</div>
+                                 </div>
+                               </div>
+                               
+                               {product.description && (
+                                 <div className="text-sm text-muted-foreground">
+                                   {product.description}
+                                 </div>
                                )}
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+                               
+                               {product.repair_notes && (
+                                 <div className="text-xs p-2 bg-blue-50 rounded border-l-4 border-blue-200">
+                                   <strong>บันทึกการซ่อม:</strong> {product.repair_notes}
+                                   {product.repaired_date && (
+                                     <div className="mt-1">
+                                       ซ่อมเมื่อ: {new Date(product.repaired_date).toLocaleDateString('th-TH')}
+                                     </div>
+                                   )}
+                                 </div>
+                               )}
+                             </div>
+                           </div>
+                           
+                           {/* Right side - Stock update */}
+                           <div className="flex flex-col items-end gap-4 min-w-[200px]">
+                             <div className="text-center">
+                               <div className="text-sm font-medium text-muted-foreground">จำนวนสต๊อกปัจจุบัน</div>
+                               <div className="flex items-center justify-center gap-2 mt-1">
+                                 <span className="text-2xl font-bold">{product.stock}</span>
+                                 <span className="text-sm text-muted-foreground">ชิ้น</span>
+                                 {product.stock <= 5 && (
+                                   <AlertTriangle className="h-5 w-5 text-warning" />
+                                 )}
+                               </div>
+                             </div>
+                             
+                             <div className="flex gap-2">
+                               {canManageInventory() && (
+                                 <>
+                                   <Button 
+                                     variant="outline" 
+                                     size="sm"
+                                     onClick={() => openStockUpdate(product)}
+                                   >
+                                     <Package className="h-4 w-4 mr-2" />
+                                     อัพเดทสต๊อก
+                                   </Button>
+                                   
+                                   <Button 
+                                     variant="ghost" 
+                                     size="sm"
+                                     onClick={() => {
+                                       setEditingProduct(product);
+                                       setShowEditDialog(true);
+                                     }}
+                                   >
+                                     <Edit className="h-4 w-4" />
+                                   </Button>
+                                   
+                                   <AlertDialog>
+                                     <AlertDialogTrigger asChild>
+                                       <Button variant="ghost" size="sm">
+                                         <Trash2 className="h-4 w-4" />
+                                       </Button>
+                                     </AlertDialogTrigger>
+                                     <AlertDialogContent>
+                                       <AlertDialogHeader>
+                                         <AlertDialogTitle>ยืนยันการลบสินค้า</AlertDialogTitle>
+                                         <AlertDialogDescription>
+                                           คุณแน่ใจหรือไม่ที่จะลบสินค้า "{product.name}" นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                         </AlertDialogDescription>
+                                       </AlertDialogHeader>
+                                       <AlertDialogFooter>
+                                         <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                                         <AlertDialogAction
+                                           onClick={() => handleDeleteProduct(product.id, product.name)}
+                                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                         >
+                                           ลบสินค้า
+                                         </AlertDialogAction>
+                                       </AlertDialogFooter>
+                                     </AlertDialogContent>
+                                   </AlertDialog>
+                                 </>
+                               )}
+                             </div>
+                           </div>
+                         </div>
+                       </CardContent>
+                     </Card>
+                   ))
+                 )}
+               </div>
+               
+               {/* Stock Update Dialog */}
+               {canManageInventory() && (
+                 <Dialog open={showStockUpdateDialog} onOpenChange={setShowStockUpdateDialog}>
+                   <DialogContent className="sm:max-w-[400px]">
+                     <DialogHeader>
+                       <DialogTitle>อัพเดทสต๊อกสินค้า</DialogTitle>
+                       <DialogDescription>
+                         ปรับปรุงจำนวนสต๊อกสินค้า "{updateStockProduct?.name}"
+                       </DialogDescription>
+                     </DialogHeader>
+                     {updateStockProduct && (
+                       <div className="space-y-4">
+                         <div className="grid grid-cols-2 gap-4 text-sm">
+                           <div>
+                             <span className="text-muted-foreground">SKU:</span>
+                             <div className="font-medium">{updateStockProduct.sku}</div>
+                           </div>
+                           <div>
+                             <span className="text-muted-foreground">สต๊อกปัจจุบัน:</span>
+                             <div className="font-medium">{updateStockProduct.stock} ชิ้น</div>
+                           </div>
+                         </div>
+                         
+                         <div className="space-y-2">
+                           <Label htmlFor="new-stock">จำนวนสต๊อกใหม่</Label>
+                           <Input
+                             id="new-stock"
+                             type="number"
+                             min="0"
+                             value={newStockValue}
+                             onChange={(e) => setNewStockValue(Number(e.target.value))}
+                             placeholder="0"
+                           />
+                           <div className="text-xs text-muted-foreground">
+                             {newStockValue === 0 && "สถานะ: หมดสต๊อก"}
+                             {newStockValue > 0 && newStockValue <= 5 && "สถานะ: สต๊อกต่ำ"}
+                             {newStockValue > 5 && "สถานะ: มีสต๊อก"}
+                           </div>
+                         </div>
+                       </div>
+                     )}
+                     <DialogFooter>
+                       <Button variant="outline" onClick={() => setShowStockUpdateDialog(false)}>
+                         ยกเลิก
+                       </Button>
+                       <Button onClick={handleUpdateStock}>
+                         อัพเดทสต๊อก
+                       </Button>
+                     </DialogFooter>
+                   </DialogContent>
+                 </Dialog>
+               )}
+             </TabsContent>
 
             <TabsContent value="import" className="space-y-6">
               {showAddForm && (
