@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files, Receipt, ExternalLink } from 'lucide-react';
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Copy, Files, Receipt, ExternalLink, Upload } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -354,10 +354,16 @@ export default function Quotations() {
                   </div>
                 </div>
                 
-                <Button onClick={createNewQuotation} className="bg-primary hover:bg-primary/90">
-                  <Plus className="w-4 h-4 mr-2" />
-                  สร้างใบเสนอราคา
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Button onClick={() => navigate('/quotations/import')} variant="outline" className="flex items-center gap-2">
+                    <Upload className="w-4 h-4" />
+                    นำเข้าข้อมูล
+                  </Button>
+                  <Button onClick={createNewQuotation} className="bg-primary hover:bg-primary/90">
+                    <Plus className="w-4 h-4 mr-2" />
+                    สร้างใบเสนอราคา
+                  </Button>
+                </div>
               </div>
 
 

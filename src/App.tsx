@@ -11,6 +11,7 @@ import Inventory from "./pages/Inventory";
 import Customers from "./pages/Customers";
 import Quotations from "./pages/Quotations";
 import QuotationForm from "./pages/QuotationForm";
+import QuotationImport from "./pages/QuotationImport";
 import Invoices from "./pages/Invoices";
 import InvoiceForm from "./pages/InvoiceForm";
 import TaxInvoices from "./pages/TaxInvoices";
@@ -66,6 +67,11 @@ const App = () => (
             <Route path="/quotations/:id/edit" element={
               <ProtectedRoute>
                 <QuotationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/quotations/import" element={
+              <ProtectedRoute>
+                <QuotationImport />
               </ProtectedRoute>
             } />
             <Route path="/invoices" element={
