@@ -43,11 +43,11 @@ export const useQuotationPDF = () => {
   const addQuotationHeader = (pdf: jsPDF, pageNumber: number, totalPages: number, quotationData: any, companyInfo: any) => {
     // Company header
     pdf.setFontSize(16);
-    pdf.setFont('Arial', 'bold');
+    pdf.setFont('helvetica', 'bold');
     pdf.text(companyInfo?.name || 'บริษัท อี เอ็น ที กรุ๊ป จำกัด (สำนักงานใหญ่)', 20, 20);
     
     pdf.setFontSize(9);
-    pdf.setFont('Arial', 'normal');
+    pdf.setFont('helvetica', 'normal');
     const companyAddress = companyInfo?.address || 'เลขที่ 70/5 หมู่บ้านเมทโทร บิซทาวน์แจ้งวัฒนะ 2 หมูที่ 4 ตำบลคลองพราอุดม อำเภอปากเกร็ด จังหวัดนนทบุรี 11120';
     const addressLines = pdf.splitTextToSize(companyAddress, 160);
     let yPos = 28;
@@ -69,7 +69,7 @@ export const useQuotationPDF = () => {
     pdf.rect(20, yPos + 10, 170, 8, 'F');
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(14);
-    pdf.setFont('Arial', 'bold');
+    pdf.setFont('helvetica', 'bold');
     pdf.text('ใบเสนอราคา / Q U O T A T I O N', 105, yPos + 16, { align: 'center' });
 
     // Reset text color
@@ -83,9 +83,9 @@ export const useQuotationPDF = () => {
     
     // Customer info
     pdf.setFontSize(10);
-    pdf.setFont('Arial', 'bold');
+    pdf.setFont('helvetica', 'bold');
     pdf.text('ข้อมูลลูกค้า / C U S T O M E R :', 25, boxY + 6);
-    pdf.setFont('Arial', 'normal');
+    pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(9);
     pdf.text(quotationData.customer_name || '', 25, boxY + 12);
     
@@ -99,10 +99,10 @@ export const useQuotationPDF = () => {
     }
 
     // Quotation info (right side)
-    pdf.setFont('Arial', 'bold');
+    pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(10);
     pdf.text(`REF: ${quotationData.quotation_number || 'QT2025XXXXXX'}`, 190, boxY + 6, { align: 'right' });
-    pdf.setFont('Arial', 'normal');
+    pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(9);
     pdf.text(`เลขที่: ${quotationData.quotation_number || ''}`, 190, boxY + 12, { align: 'right' });
     pdf.text(`วันที่: ${formatDate(quotationData.quotation_date)}`, 190, boxY + 16, { align: 'right' });
@@ -168,7 +168,7 @@ export const useQuotationPDF = () => {
         pdf.rect(20, contentStartY, 170, 8, 'F');
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(9);
-        pdf.setFont('Arial', 'bold');
+        pdf.setFont('helvetica', 'bold');
         
         // Column headers
         pdf.text('ลำดับ', 25, contentStartY + 5, { align: 'center' });
@@ -179,7 +179,7 @@ export const useQuotationPDF = () => {
         pdf.text('จำนวนเงิน', 185, contentStartY + 5, { align: 'right' });
 
         pdf.setTextColor(0, 0, 0);
-        pdf.setFont('Arial', 'normal');
+        pdf.setFont('helvetica', 'normal');
 
         // Add items for this page
         let yPos = contentStartY + 12;
@@ -198,18 +198,18 @@ export const useQuotationPDF = () => {
           pdf.text(globalIndex.toString(), 25, yPos + 3, { align: 'center' });
           
           // Item details
-          pdf.setFont('Arial', 'bold');
+          pdf.setFont('helvetica', 'bold');
           const itemNameLines = pdf.splitTextToSize(item.product_name, 55);
           pdf.text(itemNameLines[0] || '', 30, yPos + 3);
           
           if (item.product_sku) {
-            pdf.setFont('Arial', 'normal');
+            pdf.setFont('helvetica', 'normal');
             pdf.setFontSize(7);
             pdf.text(`SKU: ${item.product_sku}`, 30, yPos + 7);
           }
           
           if (item.description) {
-            pdf.setFont('Arial', 'normal');
+            pdf.setFont('helvetica', 'normal');
             pdf.setFontSize(7);
             const descLines = pdf.splitTextToSize(item.description, 55);
             let descY = yPos + (item.product_sku ? 11 : 7);
@@ -219,7 +219,7 @@ export const useQuotationPDF = () => {
             });
           }
           
-          pdf.setFont('Arial', 'normal');
+          pdf.setFont('helvetica', 'normal');
           pdf.setFontSize(8);
           
           // Quantity
@@ -259,7 +259,7 @@ export const useQuotationPDF = () => {
           pdf.text('ภาษีมูลค่าเพิ่ม 7%:', 135, yPos + (quotationData.discount_amount > 0 ? 18 : 12));
           pdf.text(formatCurrency(quotationData.vat_amount), 185, yPos + (quotationData.discount_amount > 0 ? 18 : 12), { align: 'right' });
           
-          pdf.setFont('Arial', 'bold');
+          pdf.setFont('helvetica', 'bold');
           const totalY = yPos + (quotationData.discount_amount > 0 ? 24 : 18);
           pdf.line(130, totalY - 2, 190, totalY - 2);
           pdf.text('ยอดรวมทั้งสิ้น:', 135, totalY + 2);
