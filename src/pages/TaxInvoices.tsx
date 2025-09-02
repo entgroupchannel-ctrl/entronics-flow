@@ -34,6 +34,12 @@ interface TaxInvoice {
     id: string;
     invoice_number: string;
   };
+  payment_records?: Array<{
+    id: string;
+    verification_status: string;
+    amount_received: number;
+    payment_number: string;
+  }>;
 }
 
 export default function TaxInvoices() {
@@ -76,7 +82,13 @@ export default function TaxInvoices() {
         .select(`
           *,
           tax_invoice_items (*),
-          invoices(id, invoice_number)
+          invoices(id, invoice_number),
+          payment_records(
+            id,
+            verification_status,
+            amount_received,
+            payment_number
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -265,6 +277,42 @@ export default function TaxInvoices() {
       console.error('Error checking payment status:', error);
       return 0;
     }
+  };
+
+  // Check if tax invoice has verified payments
+  const getPaymentStatus = (taxInvoice: TaxInvoice) => {
+    if (!taxInvoice.payment_records || taxInvoice.payment_records.length === 0) {
+      return { hasVerifiedPayments: false, totalVerified: 0, verifiedPayments: [] };
+    }
+    
+    const verifiedPayments = taxInvoice.payment_records.filter(p => p.verification_status === 'verified');
+    const totalVerified = verifiedPayments.reduce((sum, p) => sum + p.amount_received, 0);
+    const hasVerifiedPayments = totalVerified >= taxInvoice.total_amount;
+    
+    return { hasVerifiedPayments, totalVerified, verifiedPayments };
+  };
+
+  // Get payment status badge
+  const getPaymentStatusBadge = (taxInvoice: TaxInvoice) => {
+    const { hasVerifiedPayments, verifiedPayments } = getPaymentStatus(taxInvoice);
+    
+    if (hasVerifiedPayments && verifiedPayments.length > 0) {
+      return (
+        <div className="space-y-1">
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            ✅ ยืนยันชำระเงิน
+          </Badge>
+          <button
+            onClick={() => navigate(`/payment-records?invoice=${taxInvoice.id}`)}
+            className="block text-xs text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            ดูการชำระเงิน ({verifiedPayments.length} รายการ)
+          </button>
+        </div>
+      );
+    }
+    
+    return getStatusBadge(taxInvoice.status);
   };
 
   // Handle receipt creation with payment verification
@@ -567,49 +615,9 @@ export default function TaxInvoices() {
                       <TableCell className="text-right font-medium">
                         ฿{taxInvoice.total_amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                       </TableCell>
-                      <TableCell className="text-center">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="bg-background border hover:bg-accent"
-                            >
-                              สถานะ
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent 
-                            align="center" 
-                            className="bg-background border shadow-lg z-[100]"
-                          >
-                            {taxInvoice.payments_verified && taxInvoice.can_issue_receipt ? (
-                              <DropdownMenuItem 
-                                onClick={() => handleCreateReceipt(taxInvoice)}
-                              >
-                                <Receipt className="w-4 h-4 mr-2" />
-                                สร้างใบเสร็จรับเงิน
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem onClick={() => navigate(`/payment-records?invoice=${taxInvoice.id}`)}>
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                ยืนยันรับเงิน
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem onClick={() => {
-                              console.log('Cancel', taxInvoice.id);
-                            }}>
-                              <X className="w-4 h-4 mr-2" />
-                              ยกเลิก
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                              console.log('Reset', taxInvoice.id);
-                            }}>
-                              <RotateCcw className="w-4 h-4 mr-2" />
-                              รีเซ็ต
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                       </TableCell>
+                       <TableCell className="text-center">
+                         {getPaymentStatusBadge(taxInvoice)}
+                        </TableCell>
                        <TableCell>
                          <DropdownMenu 
                            open={dropdownOpen === taxInvoice.id} 
