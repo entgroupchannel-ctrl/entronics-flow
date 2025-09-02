@@ -1227,13 +1227,13 @@ export default function QuotationForm() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-primary hover:bg-primary">
-                    <TableHead className="w-16 text-primary-foreground font-semibold text-center">ลำดับ</TableHead>
-                    <TableHead className="w-[40%] text-primary-foreground font-semibold">รายการสินค้า</TableHead>
-                    <TableHead className="w-28 text-primary-foreground font-semibold text-center align-top">จำนวน</TableHead>
-                    <TableHead className="w-40 text-primary-foreground font-semibold text-center align-top">ราคาต่อหน่วย</TableHead>
-                    <TableHead className="w-36 text-primary-foreground font-semibold text-center align-top">ส่วนลด</TableHead>
-                    <TableHead className="w-24 text-primary-foreground font-semibold text-center">รวม</TableHead>
-                    <TableHead className="w-20 text-primary-foreground"></TableHead>
+                    <TableHead className="w-16 text-primary-foreground font-semibold text-center align-middle">ลำดับ</TableHead>
+                    <TableHead className="w-[40%] text-primary-foreground font-semibold align-middle">รายการสินค้า</TableHead>
+                    <TableHead className="w-28 text-primary-foreground font-semibold text-center align-middle">จำนวน</TableHead>
+                    <TableHead className="w-40 text-primary-foreground font-semibold text-center align-middle">ราคาต่อหน่วย</TableHead>
+                    <TableHead className="w-36 text-primary-foreground font-semibold text-center align-middle">ส่วนลด</TableHead>
+                    <TableHead className="w-24 text-primary-foreground font-semibold text-center align-middle">รวม</TableHead>
+                    <TableHead className="w-20 text-primary-foreground align-middle"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
