@@ -1285,7 +1285,7 @@ export default function QuotationForm() {
                                   <SelectItem key={product.id} value={product.id} className="text-sm text-left hover:bg-accent">
                                     <div className="text-left">
                                       <div className="font-medium">{product.name}</div>
-                                      <div className="text-xs text-muted-foreground">SKU: {product.sku}</div>
+                                      <div className="text-xs text-muted-foreground">SKU: {product.sku} | ราคา: {product.price.toLocaleString('th-TH')} บาท</div>
                                       {product.brand && (
                                         <div className="text-xs text-muted-foreground">แบรนด์: {product.brand}</div>
                                       )}
@@ -1294,14 +1294,27 @@ export default function QuotationForm() {
                                 ))}
                               </SelectContent>
                             </Select>
-                            <Textarea
-                              placeholder="รายละเอียดเพิ่มเติม"
-                              value={item.description}
-                              onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                              className="text-sm text-right min-h-[100px] resize-y w-full"
-                              style={{ textAlign: 'right', direction: 'rtl' }}
-                              rows={4}
-                            />
+                            
+                            {item.product_name && (
+                              <div className="bg-muted/30 p-2 rounded text-xs">
+                                <div className="font-medium text-primary">{item.product_name}</div>
+                                {item.product_sku && (
+                                  <div className="text-muted-foreground">SKU: {item.product_sku}</div>
+                                )}
+                              </div>
+                            )}
+
+                            <div>
+                              <Label className="text-xs text-muted-foreground">รายละเอียดสินค้า:</Label>
+                              <Textarea
+                                placeholder="รายละเอียดเพิ่มเติม"
+                                value={item.description}
+                                onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                                className="text-sm text-right min-h-[80px] resize-y w-full mt-1"
+                                style={{ textAlign: 'right', direction: 'rtl' }}
+                                rows={3}
+                              />
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="w-28 align-top">
@@ -1343,8 +1356,12 @@ export default function QuotationForm() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent className="bg-background border border-border shadow-lg z-50">
-                                <SelectItem value="amount" className="hover:bg-accent">บาท</SelectItem>
-                                <SelectItem value="percentage" className="hover:bg-accent">%</SelectItem>
+                                <SelectItem value="percentage" className="hover:bg-accent">
+                                  <span className="text-sm">%</span>
+                                </SelectItem>
+                                <SelectItem value="amount" className="hover:bg-accent">
+                                  <span className="text-sm">บาท</span>
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
