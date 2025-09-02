@@ -49,6 +49,7 @@ export default function PaymentRecords() {
   const [formData, setFormData] = useState({
     tax_invoice_id: "",
     payment_method: "โอนเงิน",
+    payment_date: new Date().toISOString().slice(0, 16),
     payment_reference: "",
     bank_name: "",
     depositor_name: "",
@@ -56,8 +57,8 @@ export default function PaymentRecords() {
     payment_notes: "",
   });
 
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
 
   // Get tax invoice ID from URL parameters
   const preSelectedTaxInvoiceId = searchParams.get('invoice');
@@ -145,13 +146,13 @@ export default function PaymentRecords() {
         return;
       }
 
-      setUploadedFile(file);
+      setSelectedFile(file);
       
       if (file.type.startsWith('image/')) {
         const url = URL.createObjectURL(file);
         setPreviewUrl(url);
       } else {
-        setPreviewUrl(null);
+        setPreviewUrl('');
       }
     }
   };
@@ -189,8 +190,8 @@ export default function PaymentRecords() {
 
       let paymentEvidenceUrl = null;
       
-      if (uploadedFile) {
-        paymentEvidenceUrl = await uploadFileToStorage(uploadedFile);
+      if (selectedFile) {
+        paymentEvidenceUrl = await uploadFileToStorage(selectedFile);
       }
 
       const { error } = await supabase
@@ -212,14 +213,15 @@ export default function PaymentRecords() {
       setFormData({
         tax_invoice_id: "",
         payment_method: "โอนเงิน",
+        payment_date: new Date().toISOString().slice(0, 16),
         payment_reference: "",
         bank_name: "",
         depositor_name: "",
         amount_received: 0,
         payment_notes: "",
       });
-      setUploadedFile(null);
-      setPreviewUrl(null);
+      setSelectedFile(null);
+      setPreviewUrl('');
       loadPaymentRecords();
     } catch (error) {
       console.error('Error adding payment:', error);
@@ -631,162 +633,233 @@ export default function PaymentRecords() {
           {/* Add Payment Form Modal */}
           {showAddForm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
                 <h2 className="text-xl font-semibold mb-4">บันทึกการชำระเงิน</h2>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="tax_invoice_id">ใบกำกับภาษี</Label>
-                    <Select
-                      value={formData.tax_invoice_id}
-                      onValueChange={(value) => {
-                        setFormData(prev => ({ ...prev, tax_invoice_id: value }));
-                        const selected = taxInvoices.find(inv => inv.id === value);
-                        setSelectedTaxInvoice(selected);
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="เลือกใบกำกับภาษี" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {taxInvoices.map((invoice) => (
-                          <SelectItem key={invoice.id} value={invoice.id}>
-                            {invoice.tax_invoice_number} - {invoice.customer_name} (฿{invoice.total_amount.toLocaleString()})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {selectedTaxInvoice && (
-                    <Card>
-                      <CardContent className="p-4">
-                        <h3 className="font-medium mb-2">ข้อมูลใบกำกับภาษี</h3>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-muted-foreground">เลขที่: </span>
-                            {selectedTaxInvoice.tax_invoice_number}
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">ลูกค้า: </span>
-                            {selectedTaxInvoice.customer_name}
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">จำนวนเงิน: </span>
-                            ฿{selectedTaxInvoice.total_amount.toLocaleString()}
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">สถานะ: </span>
-                            <Badge variant={selectedTaxInvoice.status === 'paid' ? 'default' : 'secondary'}>
-                              {selectedTaxInvoice.status === 'paid' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'}
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column - Form Fields */}
+                  <div className="space-y-4">
                     <div>
-                      <Label htmlFor="payment_method">วิธีการชำระ</Label>
+                      <Label htmlFor="tax_invoice_id">ใบกำกับภาษี</Label>
                       <Select
-                        value={formData.payment_method}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
+                        value={formData.tax_invoice_id}
+                        onValueChange={(value) => {
+                          setFormData(prev => ({ ...prev, tax_invoice_id: value }));
+                          const selected = taxInvoices.find(inv => inv.id === value);
+                          setSelectedTaxInvoice(selected);
+                        }}
                       >
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="เลือกใบกำกับภาษี" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="โอนเงิน">โอนเงิน</SelectItem>
-                          <SelectItem value="เงินสด">เงินสด</SelectItem>
-                          <SelectItem value="เช็ค">เช็ค</SelectItem>
-                          <SelectItem value="บัตรเครดิต">บัตรเครดิต</SelectItem>
+                          {taxInvoices.map((invoice) => (
+                            <SelectItem key={invoice.id} value={invoice.id}>
+                              {invoice.tax_invoice_number} - {invoice.customer_name} (฿{invoice.total_amount.toLocaleString()})
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="payment_date">วันที่ชำระ</Label>
+                        <Input
+                          id="payment_date"
+                          type="datetime-local"
+                          value={formData.payment_date || new Date().toISOString().slice(0, 16)}
+                          onChange={(e) => setFormData(prev => ({ ...prev, payment_date: e.target.value }))}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="payment_method">วิธีการชำระ</Label>
+                        <Select
+                          value={formData.payment_method}
+                          onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="โอนเงิน">โอนเงิน</SelectItem>
+                            <SelectItem value="เงินสด">เงินสด</SelectItem>
+                            <SelectItem value="เช็ค">เช็ค</SelectItem>
+                            <SelectItem value="บัตรเครดิต">บัตรเครดิต</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                     
                     <div>
-                      <Label htmlFor="amount_received">จำนวนเงินที่รับ</Label>
+                      <Label htmlFor="amount_received">จำนวนเงินที่รับ <span className="text-red-500">*</span></Label>
                       <Input
                         id="amount_received"
                         type="number"
                         step="0.01"
                         value={formData.amount_received}
                         onChange={(e) => setFormData(prev => ({ ...prev, amount_received: parseFloat(e.target.value) || 0 }))}
+                        required
+                        className={formData.amount_received <= 0 ? "border-red-300 focus:border-red-500" : ""}
                       />
+                      {formData.amount_received <= 0 && (
+                        <p className="text-red-500 text-xs mt-1">กรุณากรอกจำนวนเงินที่รับ</p>
+                      )}
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="payment_reference">หมายเลขอ้างอิง</Label>
+                        <Input
+                          id="payment_reference"
+                          value={formData.payment_reference}
+                          onChange={(e) => setFormData(prev => ({ ...prev, payment_reference: e.target.value }))}
+                          placeholder="หมายเลขการโอน หรืออ้างอิง"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="bank_name">ธนาคาร</Label>
+                        <Input
+                          id="bank_name"
+                          value={formData.bank_name}
+                          onChange={(e) => setFormData(prev => ({ ...prev, bank_name: e.target.value }))}
+                          placeholder="ชื่อธนาคาร"
+                        />
+                      </div>
+                    </div>
+
                     <div>
-                      <Label htmlFor="payment_reference">หมายเลขอ้างอิง</Label>
+                      <Label htmlFor="depositor_name">ชื่อผู้โอน</Label>
                       <Input
-                        id="payment_reference"
-                        value={formData.payment_reference}
-                        onChange={(e) => setFormData(prev => ({ ...prev, payment_reference: e.target.value }))}
-                        placeholder="หมายเลขการโอน หรืออ้างอิง"
+                        id="depositor_name"
+                        value={formData.depositor_name}
+                        onChange={(e) => setFormData(prev => ({ ...prev, depositor_name: e.target.value }))}
+                        placeholder="ชื่อผู้ทำรายการ"
                       />
                     </div>
-                    
+
                     <div>
-                      <Label htmlFor="bank_name">ธนาคาร</Label>
+                      <Label htmlFor="payment_notes">หมายเหตุ</Label>
+                      <Textarea
+                        id="payment_notes"
+                        value={formData.payment_notes}
+                        onChange={(e) => setFormData(prev => ({ ...prev, payment_notes: e.target.value }))}
+                        placeholder="หมายเหตุเพิ่มเติม"
+                        rows={3}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="payment_evidence">หลักฐานการชำระเงิน</Label>
                       <Input
-                        id="bank_name"
-                        value={formData.bank_name}
-                        onChange={(e) => setFormData(prev => ({ ...prev, bank_name: e.target.value }))}
-                        placeholder="ชื่อธนาคาร"
+                        id="payment_evidence"
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={handleFileChange}
+                        className="mt-1"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        อัปโหลดสลิปหรือหลักฐานการชำระเงิน (JPG, PNG, PDF สูงสุด 5MB)
+                      </p>
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="depositor_name">ชื่อผู้โอน</Label>
-                    <Input
-                      id="depositor_name"
-                      value={formData.depositor_name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, depositor_name: e.target.value }))}
-                      placeholder="ชื่อผู้ทำรายการ"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="payment_notes">หมายเหตุ</Label>
-                    <Textarea
-                      id="payment_notes"
-                      value={formData.payment_notes}
-                      onChange={(e) => setFormData(prev => ({ ...prev, payment_notes: e.target.value }))}
-                      placeholder="หมายเหตุเพิ่มเติม"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="payment_evidence">หลักฐานการชำระเงิน</Label>
-                    <Input
-                      id="payment_evidence"
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={handleFileChange}
-                      className="mt-1"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      อัปโหลดสลิปหรือหลักฐานการชำระเงิน (JPG, PNG, PDF สูงสุด 5MB)
-                    </p>
-                  </div>
-
-                  {previewUrl && (
-                    <div>
-                      <Label>ตัวอย่างไฟล์</Label>
-                      <img src={previewUrl} alt="Preview" className="max-w-full h-40 object-contain border rounded mt-1" />
+                  {/* Right Column - Preview and Summary */}
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-3">ตัวอย่างหลักฐาน</h3>
+                      {previewUrl ? (
+                        <div className="space-y-2">
+                          <div className="border rounded-lg overflow-hidden bg-white">
+                            <img 
+                              src={previewUrl} 
+                              alt="Preview" 
+                              className="w-full h-64 object-contain"
+                            />
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedFile(null);
+                              setPreviewUrl('');
+                              // Clear file input
+                              const fileInput = document.getElementById('payment_evidence') as HTMLInputElement;
+                              if (fileInput) fileInput.value = '';
+                            }}
+                            className="w-full"
+                          >
+                            ลบไฟล์
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
+                          <div className="text-2xl mb-2">📄</div>
+                          <p>ยังไม่ได้เลือกไฟล์</p>
+                          <p className="text-sm">อัปโหลดสลิปหรือหลักฐานการชำระเงิน</p>
+                        </div>
+                      )}
                     </div>
-                  )}
 
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setShowAddForm(false)}>
-                      ยกเลิก
-                    </Button>
-                    <Button onClick={handleAddPayment}>
-                      บันทึก
-                    </Button>
+                    {/* Summary Info */}
+                    {selectedTaxInvoice && (
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <h3 className="text-lg font-semibold mb-3 text-blue-800">ข้อมูลใบกำกับภาษี</h3>
+                        <div className="space-y-2 text-sm">
+                          <div><strong>เลขที่:</strong> {selectedTaxInvoice.tax_invoice_number}</div>
+                          <div><strong>ลูกค้า:</strong> {selectedTaxInvoice.customer_name}</div>
+                          <div><strong>ยอดรวม:</strong> ฿{selectedTaxInvoice.total_amount.toLocaleString()}</div>
+                          <div>
+                            <strong>สถานะ:</strong> 
+                            <Badge variant={selectedTaxInvoice.status === 'paid' ? 'default' : 'secondary'} className="ml-2">
+                              {selectedTaxInvoice.status === 'paid' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {formData.amount_received > 0 && selectedTaxInvoice && (
+                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h3 className="text-lg font-semibold mb-3 text-green-800">สรุปการชำระเงิน</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>ยอดที่ต้องชำระ:</span>
+                            <span>฿{selectedTaxInvoice.total_amount.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>ยอดที่รับ:</span>
+                            <span className="font-bold">฿{formData.amount_received.toLocaleString()}</span>
+                          </div>
+                          <hr className="border-green-200" />
+                          <div className="flex justify-between font-bold">
+                            <span>ส่วนต่าง:</span>
+                            <span className={formData.amount_received - selectedTaxInvoice.total_amount >= 0 ? "text-green-600" : "text-red-600"}>
+                              ฿{(formData.amount_received - selectedTaxInvoice.total_amount).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-6 border-t mt-6">
+                  <Button variant="outline" onClick={() => {
+                    setShowAddForm(false);
+                    setSelectedFile(null);
+                    setPreviewUrl('');
+                    setSelectedTaxInvoice(null);
+                  }}>
+                    ยกเลิก
+                  </Button>
+                  <Button 
+                    onClick={handleAddPayment}
+                    disabled={formData.amount_received <= 0 || !formData.tax_invoice_id}
+                  >
+                    บันทึก
+                  </Button>
                 </div>
               </div>
             </div>
