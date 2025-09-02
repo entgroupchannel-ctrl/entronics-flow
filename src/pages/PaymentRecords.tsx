@@ -569,7 +569,75 @@ export default function PaymentRecords() {
                         <TableCell>{payment.payment_method}</TableCell>
                         <TableCell>฿{payment.amount_received.toLocaleString()}</TableCell>
                           <TableCell>
-                              {getStatusBadge(payment.verification_status)}
+                            <div className="flex items-center gap-2">
+                              {payment.verification_status === 'pending' && (
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                                    onClick={() => handleVerifyPayment(payment.id, 'verified')}
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    บันทึกการชำระเงิน
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                                    onClick={() => handleVerifyPayment(payment.id, 'rejected')}
+                                  >
+                                    <XCircle className="w-4 h-4 mr-1" />
+                                    ปฏิเสธ
+                                  </Button>
+                                </>
+                              )}
+                              
+                              {payment.verification_status === 'verified' && (
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                                    onClick={() => handleCreateReceipt(payment)}
+                                  >
+                                    <Receipt className="w-4 h-4 mr-1" />
+                                    สร้างใบเสร็จรับเงิน
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                                    onClick={() => handleResetPayment(payment.id)}
+                                  >
+                                    <RotateCcw className="w-4 h-4 mr-1" />
+                                    รีเซ็ต
+                                  </Button>
+                                </>
+                              )}
+                              
+                              {payment.verification_status === 'rejected' && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                                  onClick={() => handleResetPayment(payment.id)}
+                                >
+                                  <RotateCcw className="w-4 h-4 mr-1" />
+                                  รีเซ็ต
+                                </Button>
+                              )}
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                                onClick={() => handleDeletePayment(payment.id)}
+                              >
+                                <Trash2 className="w-4 h-4 mr-1" />
+                                ลบ
+                              </Button>
+                            </div>
                           </TableCell>
                          <TableCell>
                            {new Date(payment.payment_date).toLocaleDateString('th-TH')}
