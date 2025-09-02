@@ -555,7 +555,8 @@ export default function PaymentRecords() {
                         <div className="bg-muted p-4 rounded-lg">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                             <div>
-                              <span className="font-medium">เลขที่:</span> {selectedTaxInvoice.tax_invoice_number}
+                              <span className="font-medium">เลขที่:</span> 
+                              <span className="text-blue-600 font-bold text-lg ml-2">{selectedTaxInvoice.tax_invoice_number}</span>
                             </div>
                             <div>
                               <span className="font-medium">ลูกค้า:</span> {selectedTaxInvoice.customer_name}
