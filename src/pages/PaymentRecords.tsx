@@ -59,6 +59,7 @@ export default function PaymentRecords() {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [customBankName, setCustomBankName] = useState<string>('');
 
   // Get tax invoice ID from URL parameters
   const preSelectedTaxInvoiceId = searchParams.get('invoice');
@@ -205,6 +206,7 @@ export default function PaymentRecords() {
         .from('payment_records')
         .insert({
           ...formData,
+          bank_name: formData.bank_name === 'อื่นๆ' ? customBankName : formData.bank_name,
           payment_evidence_url: paymentEvidenceUrl,
           created_by: user.id,
         } as any);
@@ -229,6 +231,7 @@ export default function PaymentRecords() {
       });
       setSelectedFile(null);
       setPreviewUrl('');
+      setCustomBankName('');
       loadPaymentRecords();
     } catch (error) {
       console.error('Error adding payment:', error);
@@ -736,13 +739,35 @@ export default function PaymentRecords() {
                       
                       <div>
                         <Label htmlFor="bank_name" className="text-sm font-semibold">ธนาคาร</Label>
-                        <Input
-                          id="bank_name"
+                        <Select
                           value={formData.bank_name}
-                          onChange={(e) => setFormData(prev => ({ ...prev, bank_name: e.target.value }))}
-                          placeholder="ชื่อธนาคาร"
-                          className="text-sm h-10 bg-gray-50 border-gray-200 hover:bg-gray-100"
-                        />
+                          onValueChange={(value) => {
+                            setFormData(prev => ({ ...prev, bank_name: value }));
+                            if (value !== 'อื่นๆ') {
+                              setCustomBankName('');
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="text-sm h-10 bg-gray-50 border-gray-200 hover:bg-gray-100">
+                            <SelectValue placeholder="เลือกธนาคาร" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border shadow-lg z-[100]">
+                            <SelectItem value="กสิกรไทย" className="text-sm py-2 bg-white hover:bg-gray-100">ธ.กสิกรไทย</SelectItem>
+                            <SelectItem value="กรุงเทพ" className="text-sm py-2 bg-white hover:bg-gray-100">ธ.กรุงเทพ</SelectItem>
+                            <SelectItem value="ไทยพาณิชย์" className="text-sm py-2 bg-white hover:bg-gray-100">ธ.ไทยพาณิชย์</SelectItem>
+                            <SelectItem value="กรุงไทย" className="text-sm py-2 bg-white hover:bg-gray-100">ธ.กรุงไทย</SelectItem>
+                            <SelectItem value="กรุงศรีอยุธยา" className="text-sm py-2 bg-white hover:bg-gray-100">ธ.กรุงศรีอยุธยา</SelectItem>
+                            <SelectItem value="อื่นๆ" className="text-sm py-2 bg-white hover:bg-gray-100">อื่นๆ (ระบุ)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {formData.bank_name === 'อื่นๆ' && (
+                          <Input
+                            value={customBankName}
+                            onChange={(e) => setCustomBankName(e.target.value)}
+                            placeholder="กรุณาระบุชื่อธนาคาร"
+                            className="text-sm h-10 bg-gray-50 border-gray-200 hover:bg-gray-100 mt-2"
+                          />
+                        )}
                       </div>
                     </div>
 
@@ -872,6 +897,7 @@ export default function PaymentRecords() {
                       setSelectedFile(null);
                       setPreviewUrl('');
                       setSelectedTaxInvoice(null);
+                      setCustomBankName('');
                     }}
                     className="text-sm px-4 py-2"
                   >
