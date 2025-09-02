@@ -659,7 +659,7 @@ export default function PaymentRecords() {
                           }
                         }}
                       >
-                        <SelectTrigger className="text-sm h-10 bg-white">
+                        <SelectTrigger className="text-sm h-10 bg-gray-50 border-gray-200 hover:bg-gray-100">
                           <SelectValue placeholder="เลือกใบกำกับภาษี" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border shadow-lg z-[100]">
@@ -680,7 +680,7 @@ export default function PaymentRecords() {
                           type="datetime-local"
                           value={formData.payment_date || new Date().toISOString().slice(0, 16)}
                           onChange={(e) => setFormData(prev => ({ ...prev, payment_date: e.target.value }))}
-                          className="text-sm h-10"
+                          className="text-sm h-10 bg-gray-50 border-gray-200 hover:bg-gray-100"
                         />
                       </div>
                       
@@ -690,7 +690,7 @@ export default function PaymentRecords() {
                           value={formData.payment_method}
                           onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
                         >
-                          <SelectTrigger className="text-sm h-10 bg-white">
+                          <SelectTrigger className="text-sm h-10 bg-gray-50 border-gray-200 hover:bg-gray-100">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="bg-white border shadow-lg z-[100]">
@@ -714,7 +714,7 @@ export default function PaymentRecords() {
                         value={formData.amount_received}
                         onChange={(e) => setFormData(prev => ({ ...prev, amount_received: parseFloat(e.target.value) || 0 }))}
                         required
-                        className={`text-base font-bold h-12 ${formData.amount_received <= 0 ? "border-red-300 focus:border-red-500" : ""}`}
+                        className={`text-base font-bold h-12 bg-gray-50 border-gray-200 hover:bg-gray-100 ${formData.amount_received <= 0 ? "border-red-300 focus:border-red-500" : ""}`}
                         placeholder="0.00"
                       />
                       {formData.amount_received <= 0 && (
@@ -730,7 +730,7 @@ export default function PaymentRecords() {
                           value={formData.payment_reference}
                           onChange={(e) => setFormData(prev => ({ ...prev, payment_reference: e.target.value }))}
                           placeholder="หมายเลขการโอน หรืออ้างอิง"
-                          className="text-sm h-10"
+                          className="text-sm h-10 bg-gray-50 border-gray-200 hover:bg-gray-100"
                         />
                       </div>
                       
@@ -741,7 +741,7 @@ export default function PaymentRecords() {
                           value={formData.bank_name}
                           onChange={(e) => setFormData(prev => ({ ...prev, bank_name: e.target.value }))}
                           placeholder="ชื่อธนาคาร"
-                          className="text-sm h-10"
+                          className="text-sm h-10 bg-gray-50 border-gray-200 hover:bg-gray-100"
                         />
                       </div>
                     </div>
@@ -753,7 +753,7 @@ export default function PaymentRecords() {
                         value={formData.depositor_name}
                         onChange={(e) => setFormData(prev => ({ ...prev, depositor_name: e.target.value }))}
                         placeholder="ชื่อผู้ทำรายการ"
-                        className="text-sm h-10"
+                        className="text-sm h-10 bg-gray-50 border-gray-200 hover:bg-gray-100"
                       />
                     </div>
 
@@ -765,7 +765,7 @@ export default function PaymentRecords() {
                         onChange={(e) => setFormData(prev => ({ ...prev, payment_notes: e.target.value }))}
                         placeholder="หมายเหตุเพิ่มเติม"
                         rows={2}
-                        className="text-sm"
+                        className="text-sm bg-gray-50 border-gray-200 hover:bg-gray-100"
                       />
                     </div>
 
@@ -776,7 +776,7 @@ export default function PaymentRecords() {
                         type="file"
                         accept="image/*,.pdf"
                         onChange={handleFileChange}
-                        className="mt-1 text-sm h-10"
+                        className="mt-1 text-sm h-10 bg-gray-50 border-gray-200 hover:bg-gray-100"
                       />
                       <p className="text-xs text-muted-foreground mt-1">
                         อัปโหลดสลิปหรือหลักฐานการชำระเงิน (JPG, PNG, PDF สูงสุด 5MB)
