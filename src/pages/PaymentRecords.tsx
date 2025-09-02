@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Eye, CheckCircle, XCircle, Upload } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Plus, Eye, CheckCircle, XCircle, Upload, Receipt, RotateCcw, Trash2, MoreHorizontal, Save, Edit } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -368,6 +369,76 @@ export default function PaymentRecords() {
     }
   };
 
+  const handleCreateReceipt = async (paymentRecord: PaymentRecord) => {
+    try {
+      const receipt = await createReceiptFromPayment(paymentRecord);
+      toast({
+        title: "สำเร็จ",
+        description: `สร้างใบเสร็จ ${receipt.receipt_number} เรียบร้อยแล้ว`,
+      });
+      loadPaymentRecords();
+    } catch (error) {
+      console.error('Error creating receipt:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถสร้างใบเสร็จได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleResetPayment = async (paymentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('payment_records')
+        .update({
+          verification_status: 'pending',
+          verified_by: null,
+          verified_at: null,
+        })
+        .eq('id', paymentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "สำเร็จ",
+        description: "รีเซ็ตสถานะการชำระเงินเรียบร้อยแล้ว",
+      });
+      loadPaymentRecords();
+    } catch (error) {
+      console.error('Error resetting payment:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถรีเซ็ตสถานะได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeletePayment = async (paymentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('payment_records')
+        .delete()
+        .eq('id', paymentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "สำเร็จ",
+        description: "ลบรายการชำระเงินเรียบร้อยแล้ว",
+      });
+      loadPaymentRecords();
+    } catch (error) {
+      console.error('Error deleting payment:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบรายการได้",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'verified':
@@ -500,37 +571,61 @@ export default function PaymentRecords() {
                         <TableCell>
                           {new Date(payment.payment_date).toLocaleDateString('th-TH')}
                         </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedPayment(payment)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            {payment.verification_status === 'pending' && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleVerifyPayment(payment.id, 'verified')}
-                                  className="text-green-600 hover:text-green-800"
-                                >
-                                  <CheckCircle className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleVerifyPayment(payment.id, 'rejected')}
-                                  className="text-red-600 hover:text-red-800"
-                                >
-                                  <XCircle className="w-4 h-4" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </TableCell>
+                         <TableCell>
+                           <DropdownMenu>
+                             <DropdownMenuTrigger asChild>
+                               <Button variant="ghost" size="sm">
+                                 <MoreHorizontal className="w-4 h-4" />
+                               </Button>
+                             </DropdownMenuTrigger>
+                             <DropdownMenuContent align="end" className="w-48">
+                               <DropdownMenuItem onClick={() => setSelectedPayment(payment)}>
+                                 <Eye className="w-4 h-4 mr-2" />
+                                 ดูรายละเอียด
+                               </DropdownMenuItem>
+                               
+                               {payment.verification_status === 'pending' && (
+                                 <DropdownMenuItem onClick={() => handleVerifyPayment(payment.id, 'verified')}>
+                                   <Save className="w-4 h-4 mr-2 text-green-600" />
+                                   <span className="text-green-600">บันทึกการชำระเงิน</span>
+                                 </DropdownMenuItem>
+                               )}
+                               
+                               <DropdownMenuItem 
+                                 onClick={() => handleCreateReceipt(payment)}
+                                 disabled={payment.verification_status !== 'verified'}
+                                 className={payment.verification_status !== 'verified' ? 'text-gray-400 cursor-not-allowed' : ''}
+                               >
+                                 <Receipt className={`w-4 h-4 mr-2 ${payment.verification_status !== 'verified' ? 'text-gray-400' : 'text-blue-600'}`} />
+                                 <span className={payment.verification_status !== 'verified' ? 'text-gray-400' : 'text-blue-600'}>
+                                   สร้างใบเสร็จรับเงิน
+                                 </span>
+                               </DropdownMenuItem>
+                               
+                               {payment.verification_status !== 'pending' && (
+                                 <DropdownMenuItem onClick={() => handleResetPayment(payment.id)}>
+                                   <RotateCcw className="w-4 h-4 mr-2 text-orange-600" />
+                                   <span className="text-orange-600">รีเซ็ต</span>
+                                 </DropdownMenuItem>
+                               )}
+                               
+                               <DropdownMenuItem 
+                                 onClick={() => handleDeletePayment(payment.id)}
+                                 className="text-red-600 focus:text-red-600"
+                               >
+                                 <Trash2 className="w-4 h-4 mr-2" />
+                                 ลบ
+                               </DropdownMenuItem>
+                               
+                               {payment.verification_status === 'pending' && (
+                                 <DropdownMenuItem onClick={() => handleVerifyPayment(payment.id, 'rejected')}>
+                                   <XCircle className="w-4 h-4 mr-2 text-red-600" />
+                                   <span className="text-red-600">ปฏิเสธ</span>
+                                 </DropdownMenuItem>
+                               )}
+                             </DropdownMenuContent>
+                           </DropdownMenu>
+                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
