@@ -47,7 +47,7 @@ interface QuotationPreviewProps {
   className?: string;
 }
 const defaultCompanyInfo: CompanyInfo = {
-  name: "บริษัท อีเอ็น ทีกรุ๊ป จำกัด (สำนักงานใหญ่)",
+  name: "บริษัท อี เอ็น ที กรุ๊ป จำกัด (สำนักงานใหญ่)",
   address: "เลขที่ 70/5 หมู่บ้านเมทโทร บิซทาวน์แจ้งวัฒนะ 2 หมูที่ 4 ตำบลคลองพระอุดม อำเภอปกเกร็ด จังหวัดนนทบุรี 11120",
   taxId: "0135558013167",
   phone: "02-045-6104",
