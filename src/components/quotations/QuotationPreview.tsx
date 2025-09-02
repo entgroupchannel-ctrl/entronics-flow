@@ -210,7 +210,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
       <div className="grid grid-cols-2 gap-8 mt-8">
         <div className="text-center">
           <div className="mb-16"></div>
-          <div className="border-t border-gray-400 pt-2">
+          <div className="pt-2">
             <div>ลงชื่อ ................................</div>
             <div className="text-sm mt-1">ผู้เสนอราคา/พนักงานขาย</div>
           </div>
