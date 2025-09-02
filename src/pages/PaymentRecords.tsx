@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, Eye, CheckCircle, XCircle, Upload, Receipt, RotateCcw, Trash2, MoreHorizontal, Save, Edit } from "lucide-react";
+import { Plus, Eye, CheckCircle, XCircle, Upload, Receipt, RotateCcw, Trash2, MoreHorizontal, Save, Edit, Printer, Download, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -576,46 +576,34 @@ export default function PaymentRecords() {
                                    <MoreHorizontal className="w-4 h-4" />
                                  </Button>
                                </DropdownMenuTrigger>
-                               <DropdownMenuContent align="end" className="w-48">
-                                 {payment.verification_status === 'pending' && (
-                                   <DropdownMenuItem onClick={() => handleVerifyPayment(payment.id, 'verified')}>
-                                     <Save className="w-4 h-4 mr-2 text-green-600" />
-                                     <span className="text-green-600">บันทึกการชำระเงิน</span>
-                                   </DropdownMenuItem>
-                                 )}
-                                 
-                                 <DropdownMenuItem 
-                                   onClick={() => handleCreateReceipt(payment)}
-                                   disabled={payment.verification_status !== 'verified'}
-                                   className={payment.verification_status !== 'verified' ? 'text-gray-400 cursor-not-allowed' : ''}
-                                 >
-                                   <Receipt className={`w-4 h-4 mr-2 ${payment.verification_status !== 'verified' ? 'text-gray-400' : 'text-blue-600'}`} />
-                                   <span className={payment.verification_status !== 'verified' ? 'text-gray-400' : 'text-blue-600'}>
-                                     สร้างใบเสร็จรับเงิน
-                                   </span>
-                                 </DropdownMenuItem>
-                                 
-                                 {payment.verification_status !== 'pending' && (
-                                   <DropdownMenuItem onClick={() => handleResetPayment(payment.id)}>
-                                     <RotateCcw className="w-4 h-4 mr-2 text-orange-600" />
-                                     <span className="text-orange-600">รีเซ็ต</span>
-                                   </DropdownMenuItem>
-                                 )}
-                                 
-                                 <DropdownMenuItem 
-                                   onClick={() => handleDeletePayment(payment.id)}
-                                   className="text-red-600 focus:text-red-600"
-                                 >
-                                   <Trash2 className="w-4 h-4 mr-2" />
-                                   ลบ
-                                 </DropdownMenuItem>
-                                 
-                                 {payment.verification_status === 'pending' && (
-                                   <DropdownMenuItem onClick={() => handleVerifyPayment(payment.id, 'rejected')}>
-                                     <XCircle className="w-4 h-4 mr-2 text-red-600" />
-                                     <span className="text-red-600">ปฏิเสธ</span>
-                                   </DropdownMenuItem>
-                                 )}
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuItem onClick={() => setSelectedPayment(payment)}>
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    แก้ไข
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuItem onClick={() => window.print()}>
+                                    <Printer className="w-4 h-4 mr-2" />
+                                    พิมพ์
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuItem onClick={() => {}}>
+                                    <Download className="w-4 h-4 mr-2" />
+                                    ดาวน์โหลด
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuItem onClick={() => {}}>
+                                    <Share2 className="w-4 h-4 mr-2" />
+                                    แชร์
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDeletePayment(payment.id)}
+                                    className="text-red-600 focus:text-red-600"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    ลบ
+                                  </DropdownMenuItem>
                                </DropdownMenuContent>
                              </DropdownMenu>
                            </div>
