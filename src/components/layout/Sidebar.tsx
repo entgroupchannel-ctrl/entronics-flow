@@ -336,7 +336,7 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-2">
+        <nav className="flex-1 space-y-1 p-2 bg-sidebar">
           {menuItems.map((item) => renderMenuItem(item))}
         </nav>
 
