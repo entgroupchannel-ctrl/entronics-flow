@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Receipt, X, RotateCcw } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, Search, FileText, Edit, Share2, Printer, Download, MoreHorizontal, History, Trash2, Receipt, X, RotateCcw, Upload, AlertTriangle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +48,19 @@ export default function TaxInvoices() {
   const [selectedTaxInvoiceToDelete, setSelectedTaxInvoiceToDelete] = useState<{id: string, number: string} | null>(null);
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  
+  // Payment verification states
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [selectedTaxInvoiceForPayment, setSelectedTaxInvoiceForPayment] = useState<TaxInvoice | null>(null);
+  const [paymentForm, setPaymentForm] = useState({
+    payment_method: 'โอนเงิน',
+    amount_received: 0,
+    payment_reference: '',
+    bank_name: '',
+    depositor_name: '',
+    payment_notes: '',
+    payment_evidence_file: null as File | null
+  });
 
   useEffect(() => {
     loadTaxInvoices();
@@ -227,6 +243,126 @@ export default function TaxInvoices() {
     } finally {
       setDeleteDialogOpen(false);
       setSelectedTaxInvoiceToDelete(null);
+    }
+  };
+
+  // Check if tax invoice has verified payments
+  const checkPaymentStatus = async (taxInvoiceId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('payment_records')
+        .select('amount_received')
+        .eq('tax_invoice_id', taxInvoiceId)
+        .eq('verification_status', 'verified');
+
+      if (error) throw error;
+
+      const totalVerifiedPayments = data?.reduce((sum, payment) => sum + payment.amount_received, 0) || 0;
+      return totalVerifiedPayments;
+    } catch (error) {
+      console.error('Error checking payment status:', error);
+      return 0;
+    }
+  };
+
+  // Handle receipt creation with payment verification
+  const handleCreateReceipt = async (taxInvoice: TaxInvoice) => {
+    try {
+      const verifiedAmount = await checkPaymentStatus(taxInvoice.id);
+      
+      if (verifiedAmount < taxInvoice.total_amount) {
+        // Show payment dialog if no sufficient verified payments
+        setSelectedTaxInvoiceForPayment(taxInvoice);
+        setPaymentForm(prev => ({
+          ...prev,
+          amount_received: taxInvoice.total_amount - verifiedAmount
+        }));
+        setPaymentDialogOpen(true);
+      } else {
+        // Proceed to receipt creation
+        navigate(`/receipts/new?tax_invoice_id=${taxInvoice.id}`);
+      }
+    } catch (error) {
+      console.error('Error handling receipt creation:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถตรวจสอบสถานะการชำระเงินได้",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle payment evidence upload
+  const handlePaymentSubmit = async () => {
+    if (!selectedTaxInvoiceForPayment || !paymentForm.payment_evidence_file) {
+      toast({
+        title: "ข้อมูลไม่ครบถ้วน",
+        description: "กรุณาแนบหลักฐานการชำระเงิน",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Upload payment evidence file
+      const fileName = `${user.id}/${Date.now()}_${paymentForm.payment_evidence_file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('payment-evidence')
+        .upload(fileName, paymentForm.payment_evidence_file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL for the uploaded file
+      const { data: { publicUrl } } = supabase.storage
+        .from('payment-evidence')
+        .getPublicUrl(fileName);
+
+      // Create payment record
+      const { error: paymentError } = await supabase
+        .from('payment_records')
+        .insert({
+          tax_invoice_id: selectedTaxInvoiceForPayment.id,
+          payment_method: paymentForm.payment_method,
+          amount_received: paymentForm.amount_received,
+          payment_reference: paymentForm.payment_reference,
+          bank_name: paymentForm.bank_name,
+          depositor_name: paymentForm.depositor_name,
+          payment_notes: paymentForm.payment_notes,
+          payment_evidence_url: publicUrl,
+          created_by: user.id,
+          verification_status: 'pending'
+        } as any);
+
+      if (paymentError) throw paymentError;
+
+      toast({
+        title: "บันทึกสำเร็จ",
+        description: "บันทึกหลักฐานการชำระเงินเรียบร้อยแล้ว รอการยืนยันจากผู้ดูแลระบบ",
+      });
+
+      // Reset form and close dialog
+      setPaymentDialogOpen(false);
+      setSelectedTaxInvoiceForPayment(null);
+      setPaymentForm({
+        payment_method: 'โอนเงิน',
+        amount_received: 0,
+        payment_reference: '',
+        bank_name: '',
+        depositor_name: '',
+        payment_notes: '',
+        payment_evidence_file: null
+      });
+
+    } catch (error: any) {
+      console.error('Error submitting payment:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกหลักฐานการชำระเงินได้",
+        variant: "destructive",
+      });
     }
   };
 
@@ -439,9 +575,7 @@ export default function TaxInvoices() {
                             align="center" 
                             className="bg-background border shadow-lg z-[100]"
                           >
-                            <DropdownMenuItem onClick={() => {
-                              navigate(`/receipts/new?tax_invoice_id=${taxInvoice.id}`);
-                            }}>
+                            <DropdownMenuItem onClick={() => handleCreateReceipt(taxInvoice)}>
                               <Receipt className="w-4 h-4 mr-2" />
                               สร้างใบเสร็จรับเงิน
                             </DropdownMenuItem>
@@ -657,6 +791,142 @@ export default function TaxInvoices() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Payment Evidence Dialog */}
+        <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                จำเป็นต้องแนบหลักฐานการชำระเงิน
+              </DialogTitle>
+              <DialogDescription>
+                ต้องแนบหลักฐานการชำระเงินก่อนสร้างใบเสร็จรับเงิน
+                <br />
+                <span className="font-medium">
+                  ใบกำกับภาษี: {selectedTaxInvoiceForPayment?.tax_invoice_number}
+                </span>
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="payment_method">วิธีการชำระเงิน</Label>
+                <Select
+                  value={paymentForm.payment_method}
+                  onValueChange={(value) => setPaymentForm(prev => ({ ...prev, payment_method: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="โอนเงิน">โอนเงิน</SelectItem>
+                    <SelectItem value="เงินสด">เงินสด</SelectItem>
+                    <SelectItem value="เช็ค">เช็ค</SelectItem>
+                    <SelectItem value="บัตรเครดิต">บัตรเครดิต</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="amount_received">จำนวนเงินที่รับ</Label>
+                <Input
+                  id="amount_received"
+                  type="number"
+                  step="0.01"
+                  value={paymentForm.amount_received}
+                  onChange={(e) => setPaymentForm(prev => ({ 
+                    ...prev, 
+                    amount_received: parseFloat(e.target.value) || 0 
+                  }))}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="payment_reference">เลขที่อ้างอิง/Ref</Label>
+                <Input
+                  id="payment_reference"
+                  value={paymentForm.payment_reference}
+                  onChange={(e) => setPaymentForm(prev => ({ 
+                    ...prev, 
+                    payment_reference: e.target.value 
+                  }))}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="bank_name">ธนาคาร</Label>
+                <Input
+                  id="bank_name"
+                  value={paymentForm.bank_name}
+                  onChange={(e) => setPaymentForm(prev => ({ 
+                    ...prev, 
+                    bank_name: e.target.value 
+                  }))}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="depositor_name">ชื่อผู้โอน</Label>
+                <Input
+                  id="depositor_name"
+                  value={paymentForm.depositor_name}
+                  onChange={(e) => setPaymentForm(prev => ({ 
+                    ...prev, 
+                    depositor_name: e.target.value 
+                  }))}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="payment_evidence">หลักฐานการชำระเงิน (สลิป/ใบเสร็จ) *</Label>
+                <Input
+                  id="payment_evidence"
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setPaymentForm(prev => ({ ...prev, payment_evidence_file: file }));
+                  }}
+                  required
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  รองรับไฟล์: JPG, PNG, PDF (ขนาดไม่เกิน 10MB)
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="payment_notes">หมายเหตุ</Label>
+                <Textarea
+                  id="payment_notes"
+                  value={paymentForm.payment_notes}
+                  onChange={(e) => setPaymentForm(prev => ({ 
+                    ...prev, 
+                    payment_notes: e.target.value 
+                  }))}
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setPaymentDialogOpen(false)}
+              >
+                ยกเลิก
+              </Button>
+              <Button
+                onClick={handlePaymentSubmit}
+                disabled={!paymentForm.payment_evidence_file}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                บันทึกหลักฐาน
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
