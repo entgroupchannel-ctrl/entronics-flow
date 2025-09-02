@@ -48,7 +48,7 @@ interface QuotationPreviewProps {
 }
 const defaultCompanyInfo: CompanyInfo = {
   name: "บริษัท อีเอ็น ทีกรุ๊ป จำกัด (สำนักงานใหญ่)",
-  address: "เลขที่ 70/5 หมู่บ้านเมทโทร บิซทาวน์แจ้งวัฒนะ 2 หมูที่ 4 ตำบลคลองพระอุดม อำเภอปากเกร็ด จังหวัดนนทบุรี 11120",
+  address: "เลขที่ 70/5 หมู่บ้านเมทโทร บิซทาวน์แจ้งวัฒนะ 2 หมูที่ 4 ตำบลคลองพระอุดม อำเภอปกเกร็ด จังหวัดนนทบุรี 11120",
   taxId: "0135558013167",
   phone: "02-045-6104",
   mobile: "095-7391053, 082-2497922",
@@ -95,17 +95,14 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
               เลขประจำตัวผู้เสียภาษี {companyInfo.taxId}
             </div>
             <div className="text-gray-600">
-              โทร. {companyInfo.phone}
+              โทร. {companyInfo.phone} โทรสาร {companyInfo.fax}
             </div>
             <div className="text-gray-600">
               เบอร์มือถือ {companyInfo.mobile}
             </div>
-            {companyInfo.fax && <div className="text-gray-600">
-                โทรสาร {companyInfo.fax}
-              </div>}
-            {companyInfo.website && <div className="text-gray-600">
-                {companyInfo.website} / {companyInfo.email}
-              </div>}
+            <div className="text-gray-600">
+              {companyInfo.website} / {companyInfo.email}
+            </div>
           </div>
         </div>
       </div>
