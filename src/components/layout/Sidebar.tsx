@@ -71,7 +71,16 @@ const menuItems = [
         icon: FileText,
         href: "/tax-invoices",
         view: "tax-invoices",
-        iconColor: "text-green-600"
+        iconColor: "text-green-600",
+        submenu: [
+          {
+            title: "การชำระเงิน",
+            icon: CreditCard,
+            href: "/payment-records",
+            view: "payment-records",
+            iconColor: "text-blue-500"
+          }
+        ]
       },
       {
         title: "ใบเสร็จรับเงิน",
@@ -152,7 +161,8 @@ const menuItems = [
 export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false); // เปิดไซด์บาร์เป็นค่าเริ่มต้น
   const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({
-    'sales-documents': true // เปิดเมนูเอกสารการขายไว้เป็น default
+    'sales-documents': true, // เปิดเมนูเอกสารการขายไว้เป็น default
+    'tax-invoices': true // เปิดเมนูใบส่งสินค้า/ใบกำกับภาษีไว้เป็น default
   });
   const location = useLocation();
   const navigate = useNavigate();
