@@ -456,99 +456,101 @@ export default function PaymentRecords() {
           {/* Add Payment Form Dialog */}
           {showAddForm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 <CardHeader>
                   <CardTitle>บันทึกการชำระเงิน</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="tax_invoice_id">ใบกำกับภาษี</Label>
-                    <Select
-                      value={formData.tax_invoice_id}
-                      onValueChange={(value) => setFormData({ ...formData, tax_invoice_id: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="เลือกใบกำกับภาษี" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {taxInvoices.map((invoice) => (
-                          <SelectItem key={invoice.id} value={invoice.id}>
-                            {invoice.tax_invoice_number} - {invoice.customer_name} 
-                            (฿{invoice.total_amount.toLocaleString()})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="tax_invoice_id">ใบกำกับภาษี</Label>
+                      <Select
+                        value={formData.tax_invoice_id}
+                        onValueChange={(value) => setFormData({ ...formData, tax_invoice_id: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="เลือกใบกำกับภาษี" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {taxInvoices.map((invoice) => (
+                            <SelectItem key={invoice.id} value={invoice.id}>
+                              {invoice.tax_invoice_number} - {invoice.customer_name} 
+                              (฿{invoice.total_amount.toLocaleString()})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="payment_method">วิธีการชำระเงิน</Label>
+                      <Select
+                        value={formData.payment_method}
+                        onValueChange={(value) => setFormData({ ...formData, payment_method: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="โอนเงิน">โอนเงิน</SelectItem>
+                          <SelectItem value="เงินสด">เงินสด</SelectItem>
+                          <SelectItem value="เช็ค">เช็ค</SelectItem>
+                          <SelectItem value="บัตรเครดิต">บัตรเครดิต</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="amount_received">จำนวนเงินที่รับ</Label>
+                      <Input
+                        id="amount_received"
+                        type="number"
+                        step="0.01"
+                        value={formData.amount_received}
+                        onChange={(e) => setFormData({ ...formData, amount_received: parseFloat(e.target.value) || 0 })}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="payment_reference">เลขที่อ้างอิง/Ref</Label>
+                      <Input
+                        id="payment_reference"
+                        value={formData.payment_reference}
+                        onChange={(e) => setFormData({ ...formData, payment_reference: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="bank_name">ธนาคาร</Label>
+                      <Input
+                        id="bank_name"
+                        value={formData.bank_name}
+                        onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="depositor_name">ชื่อผู้โอน</Label>
+                      <Input
+                        id="depositor_name"
+                        value={formData.depositor_name}
+                        onChange={(e) => setFormData({ ...formData, depositor_name: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="md:col-span-3">
+                      <Label htmlFor="payment_notes">หมายเหตุ</Label>
+                      <Textarea
+                        id="payment_notes"
+                        value={formData.payment_notes}
+                        onChange={(e) => setFormData({ ...formData, payment_notes: e.target.value })}
+                        rows={2}
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="payment_method">วิธีการชำระเงิน</Label>
-                    <Select
-                      value={formData.payment_method}
-                      onValueChange={(value) => setFormData({ ...formData, payment_method: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="โอนเงิน">โอนเงิน</SelectItem>
-                        <SelectItem value="เงินสด">เงินสด</SelectItem>
-                        <SelectItem value="เช็ค">เช็ค</SelectItem>
-                        <SelectItem value="บัตรเครดิต">บัตรเครดิต</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="amount_received">จำนวนเงินที่รับ</Label>
-                    <Input
-                      id="amount_received"
-                      type="number"
-                      step="0.01"
-                      value={formData.amount_received}
-                      onChange={(e) => setFormData({ ...formData, amount_received: parseFloat(e.target.value) || 0 })}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="payment_reference">เลขที่อ้างอิง/Ref</Label>
-                    <Input
-                      id="payment_reference"
-                      value={formData.payment_reference}
-                      onChange={(e) => setFormData({ ...formData, payment_reference: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="bank_name">ธนาคาร</Label>
-                    <Input
-                      id="bank_name"
-                      value={formData.bank_name}
-                      onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="depositor_name">ชื่อผู้โอน</Label>
-                    <Input
-                      id="depositor_name"
-                      value={formData.depositor_name}
-                      onChange={(e) => setFormData({ ...formData, depositor_name: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="payment_notes">หมายเหตุ</Label>
-                    <Textarea
-                      id="payment_notes"
-                      value={formData.payment_notes}
-                      onChange={(e) => setFormData({ ...formData, payment_notes: e.target.value })}
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="flex gap-2 pt-4">
+                  <div className="flex gap-2 pt-6">
                     <Button onClick={() => setShowAddForm(false)} variant="outline" className="flex-1">
                       ยกเลิก
                     </Button>
