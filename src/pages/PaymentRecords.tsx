@@ -40,6 +40,7 @@ export default function PaymentRecords() {
   const [loading, setLoading] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState<PaymentRecord | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showDetailsPanel, setShowDetailsPanel] = useState(false);
   const [taxInvoices, setTaxInvoices] = useState<any[]>([]);
   const [selectedTaxInvoice, setSelectedTaxInvoice] = useState<any>(null);
   const { toast } = useToast();
@@ -462,7 +463,7 @@ export default function PaymentRecords() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background relative">
       <Sidebar />
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-6">
@@ -643,13 +644,16 @@ export default function PaymentRecords() {
                            {new Date(payment.payment_date).toLocaleDateString('th-TH')}
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedPayment(payment)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => {
+                                 setSelectedPayment(payment);
+                                 setShowDetailsPanel(true);
+                               }}
+                             >
+                               <Eye className="w-4 h-4" />
+                             </Button>
                           </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
@@ -878,102 +882,168 @@ export default function PaymentRecords() {
               </Card>
             </div>
           )}
-
-          {/* Payment Details Dialog */}
-          {selectedPayment && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
-                <CardHeader>
-                  <CardTitle>รายละเอียดการชำระเงิน</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>หมายเลขการชำระ</Label>
-                      <div className="font-medium">{selectedPayment.payment_number}</div>
-                    </div>
-                    <div>
-                      <Label>สถานะ</Label>
-                      <div>{getStatusBadge(selectedPayment.verification_status)}</div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>ใบกำกับภาษี</Label>
-                    <div className="font-medium">{selectedPayment.tax_invoices?.tax_invoice_number}</div>
-                  </div>
-
-                  <div>
-                    <Label>ลูกค้า</Label>
-                    <div className="font-medium">{selectedPayment.tax_invoices?.customer_name}</div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>วิธีการชำระ</Label>
-                      <div className="font-medium">{selectedPayment.payment_method}</div>
-                    </div>
-                    <div>
-                      <Label>จำนวนเงิน</Label>
-                      <div className="font-medium">฿{selectedPayment.amount_received.toLocaleString()}</div>
-                    </div>
-                  </div>
-
-                  {selectedPayment.payment_reference && (
-                    <div>
-                      <Label>เลขที่อ้างอิง</Label>
-                      <div className="font-medium">{selectedPayment.payment_reference}</div>
-                    </div>
-                  )}
-
-                  {selectedPayment.bank_name && (
-                    <div>
-                      <Label>ธนาคาร</Label>
-                      <div className="font-medium">{selectedPayment.bank_name}</div>
-                    </div>
-                  )}
-
-                  {selectedPayment.depositor_name && (
-                    <div>
-                      <Label>ชื่อผู้โอน</Label>
-                      <div className="font-medium">{selectedPayment.depositor_name}</div>
-                    </div>
-                  )}
-
-                  {selectedPayment.payment_notes && (
-                    <div>
-                      <Label>หมายเหตุ</Label>
-                      <div className="font-medium">{selectedPayment.payment_notes}</div>
-                    </div>
-                  )}
-
-                  <div>
-                    <Label>วันที่บันทึก</Label>
-                    <div className="font-medium">
-                      {new Date(selectedPayment.payment_date).toLocaleString('th-TH')}
-                    </div>
-                  </div>
-
-                  {selectedPayment.verified_at && (
-                    <div>
-                      <Label>วันที่ตรวจสอบ</Label>
-                      <div className="font-medium">
-                        {new Date(selectedPayment.verified_at).toLocaleString('th-TH')}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="pt-4">
-                    <Button onClick={() => setSelectedPayment(null)} className="w-full">
-                      ปิด
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Payment Details Panel */}
+      {showDetailsPanel && selectedPayment && (
+        <>
+          {/* Overlay */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-30 z-40"
+            onClick={() => setShowDetailsPanel(false)}
+          />
+          
+          {/* Details Panel */}
+          <div 
+            className={`fixed top-0 right-0 h-full w-96 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+              showDetailsPanel ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">รายละเอียดการชำระเงิน</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowDetailsPanel(false)}
+                >
+                  ×
+                </Button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Header Info */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-blue-800 mb-1">
+                      {selectedPayment.payment_number}
+                    </div>
+                    <div className="text-sm text-blue-600">
+                      หมายเลขการชำระเงิน
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="flex justify-center">
+                  {getStatusBadge(selectedPayment.verification_status)}
+                </div>
+
+                {/* Customer & Invoice Info */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">ข้อมูลใบกำกับภาษี</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">เลขที่ใบกำกับภาษี</Label>
+                      <div className="font-semibold text-blue-600">
+                        {selectedPayment.tax_invoices?.tax_invoice_number}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">ลูกค้า</Label>
+                      <div className="font-medium">{selectedPayment.tax_invoices?.customer_name}</div>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">ยอดรวมใบกำกับภาษี</Label>
+                      <div className="font-medium">฿{selectedPayment.tax_invoices?.total_amount?.toLocaleString()}</div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Payment Details */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">รายละเอียดการชำระ</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">วิธีการชำระ</Label>
+                        <div className="font-medium">{selectedPayment.payment_method}</div>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">จำนวนที่ชำระ</Label>
+                        <div className="font-bold text-green-600 text-lg">
+                          ฿{selectedPayment.amount_received.toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+
+                    {selectedPayment.payment_reference && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">เลขที่อ้างอิง</Label>
+                        <div className="font-medium">{selectedPayment.payment_reference}</div>
+                      </div>
+                    )}
+
+                    {selectedPayment.bank_name && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">ธนาคาร</Label>
+                        <div className="font-medium">{selectedPayment.bank_name}</div>
+                      </div>
+                    )}
+
+                    {selectedPayment.depositor_name && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">ชื่อผู้โอน</Label>
+                        <div className="font-medium">{selectedPayment.depositor_name}</div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Additional Info */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">ข้อมูลเพิ่มเติม</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">วันที่บันทึก</Label>
+                      <div className="font-medium">
+                        {new Date(selectedPayment.payment_date).toLocaleString('th-TH', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+
+                    {selectedPayment.verified_at && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">วันที่ตรวจสอบ</Label>
+                        <div className="font-medium">
+                          {new Date(selectedPayment.verified_at).toLocaleString('th-TH', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedPayment.payment_notes && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">หมายเหตุ</Label>
+                        <div className="font-medium bg-gray-50 p-3 rounded text-sm">
+                          {selectedPayment.payment_notes}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
