@@ -42,50 +42,43 @@ const menuItems = [
     title: "แดชบอร์ด / Dashboard",
     icon: LayoutDashboard,
     href: "/",
-    view: "dashboard",
-    iconColor: "text-blue-500"
+    view: "dashboard"
   },
   {
     title: "เอกสารการขาย / Sale Docs",
     icon: FileText,
     href: "/quotations",
     view: "sales-documents",
-    iconColor: "text-green-500",
     submenu: [
       {
         title: "ใบเสนอราคา",
         icon: FileText,
         href: "/quotations",
-        view: "quotations",
-        iconColor: "text-green-500"
+        view: "quotations"
       },
       {
         title: "ใบวางบิล/ใบแจ้งหนี้",
         icon: FileText,
         href: "/invoices",
-        view: "invoices",
-        iconColor: "text-blue-500"
+        view: "invoices"
       },
       {
         title: "การชำระเงิน/ใบกำกับภาษี",
         icon: FileText,
         href: "/tax-invoices",
         view: "tax-invoices",
-        iconColor: "text-green-600",
         submenu: [
           {
             title: "ใบส่งสินค้า/ใบกำกับภาษี",
             icon: FileText,
             href: "/tax-invoices",
-            view: "tax-invoices",
-            iconColor: "text-green-600"
+            view: "tax-invoices"
           },
           {
             title: "การชำระเงิน",
             icon: CreditCard,
             href: "/payment-records",
-            view: "payment-records",
-            iconColor: "text-blue-500"
+            view: "payment-records"
           }
         ]
       },
@@ -93,8 +86,7 @@ const menuItems = [
         title: "ใบเสร็จรับเงิน",
         icon: Receipt,
         href: "/receipts",
-        view: "receipts",
-        iconColor: "text-purple-600"
+        view: "receipts"
       }
     ]
   },
@@ -102,43 +94,37 @@ const menuItems = [
     title: "แจ้งซ่อม / Service Ticket",
     icon: Wrench,
     href: "/service-dashboard",
-    view: "service",
-    iconColor: "text-orange-500"
+    view: "service"
   },
   {
     title: "ระบบจัดส่งสินค้า / Delivery",
     icon: Truck,
     href: "/delivery",
-    view: "delivery",
-    iconColor: "text-blue-600"
+    view: "delivery"
   },
   {
     title: "รายชื่อลูกค้า / Customers",
     icon: Users,
     href: "/customers",
-    view: "customers",
-    iconColor: "text-purple-500"
+    view: "customers"
   },
   {
     title: "คลังสินค้า / Inventory",
     icon: Package,
     href: "/inventory",
-    view: "inventory",
-    iconColor: "text-cyan-500"
+    view: "inventory"
   },
   {
     title: "การเงิน / Financial",
     icon: DollarSign,
     href: "/financial",
     view: "financial",
-    iconColor: "text-yellow-500",
     submenu: [
       {
         title: "รายการรับเงิน",
         icon: CreditCard,
         href: "/payment-records",
-        view: "payment-records",
-        iconColor: "text-green-500"
+        view: "payment-records"
       }
     ]
   },
@@ -146,22 +132,19 @@ const menuItems = [
     title: "วิเคราะห์ข้อมูล / Analytics",
     icon: BarChart3,
     href: "/analytics",
-    view: "analytics",
-    iconColor: "text-indigo-500"
+    view: "analytics"
   },
   {
     title: "รายงาน / Reports",
     icon: FileText,
     href: "/reports",
-    view: "reports",
-    iconColor: "text-teal-500"
+    view: "reports"
   },
   {
     title: "ตั้งค่า / Settings",
     icon: Settings,
     href: "/settings",
-    view: "settings",
-    iconColor: "text-gray-500"
+    view: "settings"
   }
 ];
 
@@ -235,7 +218,7 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
             )}
             onClick={() => handleMenuClick(item)}
           >
-            <Icon className={cn("mr-3 h-4 w-4", item.iconColor)} />
+            <Icon className="mr-3 h-4 w-4" />
             <span className="text-sm flex-1 text-left">{item.title}</span>
             {hasSubmenu && (
               isExpanded ? 
@@ -268,7 +251,7 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
             )}
             onClick={() => handleMenuClick(item)}
           >
-            <Icon className={cn("h-5 w-5", item.iconColor)} />
+            <Icon className="h-5 w-5" />
           </Button>
         </TooltipTrigger>
         <TooltipContent side="right" className="ml-2 bg-sidebar-primary text-sidebar-primary-foreground">
