@@ -40,6 +40,7 @@ export default function PaymentRecords() {
   const [selectedPayment, setSelectedPayment] = useState<PaymentRecord | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [taxInvoices, setTaxInvoices] = useState<any[]>([]);
+  const [selectedTaxInvoice, setSelectedTaxInvoice] = useState<any>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -52,10 +53,19 @@ export default function PaymentRecords() {
     payment_notes: "",
   });
 
+  // Get tax invoice ID from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const preSelectedTaxInvoiceId = urlParams.get('tax_invoice_id');
+
   useEffect(() => {
     loadPaymentRecords();
     loadTaxInvoices();
-  }, []);
+    
+    // If there's a pre-selected tax invoice, set it in form data
+    if (preSelectedTaxInvoiceId) {
+      setFormData(prev => ({ ...prev, tax_invoice_id: preSelectedTaxInvoiceId }));
+    }
+  }, [preSelectedTaxInvoiceId]);
 
   const loadPaymentRecords = async () => {
     try {
@@ -96,6 +106,14 @@ export default function PaymentRecords() {
       if (error) throw error;
       console.log('Tax invoices loaded:', data); // Debug log
       setTaxInvoices(data || []);
+      
+      // If there's a pre-selected tax invoice, find and set the selected invoice
+      if (preSelectedTaxInvoiceId && data) {
+        const selectedInvoice = data.find(inv => inv.id === preSelectedTaxInvoiceId);
+        if (selectedInvoice) {
+          setSelectedTaxInvoice(selectedInvoice);
+        }
+      }
     } catch (error) {
       console.error('Error loading tax invoices:', error);
     }
@@ -462,25 +480,45 @@ export default function PaymentRecords() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="tax_invoice_id">ใบกำกับภาษี</Label>
-                      <Select
-                        value={formData.tax_invoice_id}
-                        onValueChange={(value) => setFormData({ ...formData, tax_invoice_id: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="เลือกใบกำกับภาษี" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {taxInvoices.map((invoice) => (
-                            <SelectItem key={invoice.id} value={invoice.id}>
-                              {invoice.tax_invoice_number} - {invoice.customer_name} 
-                              (฿{invoice.total_amount.toLocaleString()})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {/* Display selected tax invoice information instead of dropdown */}
+                    {selectedTaxInvoice ? (
+                      <div className="md:col-span-3">
+                        <Label>ข้อมูลใบกำกับภาษี</Label>
+                        <div className="bg-muted p-4 rounded-lg">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                            <div>
+                              <span className="font-medium">เลขที่:</span> {selectedTaxInvoice.tax_invoice_number}
+                            </div>
+                            <div>
+                              <span className="font-medium">ลูกค้า:</span> {selectedTaxInvoice.customer_name}
+                            </div>
+                            <div>
+                              <span className="font-medium">จำนวนเงิน:</span> ฿{selectedTaxInvoice.total_amount?.toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <Label htmlFor="tax_invoice_id">ใบกำกับภาษี</Label>
+                        <Select
+                          value={formData.tax_invoice_id}
+                          onValueChange={(value) => setFormData({ ...formData, tax_invoice_id: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="เลือกใบกำกับภาษี" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {taxInvoices.map((invoice) => (
+                              <SelectItem key={invoice.id} value={invoice.id}>
+                                {invoice.tax_invoice_number} - {invoice.customer_name} 
+                                (฿{invoice.total_amount.toLocaleString()})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
                     <div>
                       <Label htmlFor="payment_method">วิธีการชำระเงิน</Label>
