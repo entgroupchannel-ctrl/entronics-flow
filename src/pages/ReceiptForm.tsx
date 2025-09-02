@@ -191,6 +191,7 @@ export default function ReceiptForm() {
         setFormData(prev => ({
           ...prev,
           tax_invoice_id: taxInvoice.id,
+          customer_id: taxInvoice.customer_id,
           customer_name: taxInvoice.customer_name || "",
           customer_address: taxInvoice.customer_address || "",
           customer_phone: taxInvoice.customer_phone || "",
