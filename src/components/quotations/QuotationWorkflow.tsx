@@ -456,11 +456,11 @@ const QuotationWorkflow: React.FC<QuotationWorkflowProps> = ({ quotation, onStat
             variant="outline" 
             size="sm" 
             disabled={loading}
-            className={`${statusInfo.color} border-current`}
+            className={`${statusInfo.color} border-current h-8 px-2 text-xs min-w-[120px] max-w-[160px]`}
           >
             {statusInfo.icon}
-            <span className="ml-1">{statusInfo.label}</span>
-            <ChevronDown className="w-4 h-4 ml-1" />
+            <span className="ml-1 truncate">{statusInfo.label}</span>
+            <ChevronDown className="w-3 h-3 ml-1 flex-shrink-0" />
           </Button>
         </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64 bg-background border shadow-lg z-50">
