@@ -94,9 +94,23 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
         return;
       }
 
+      // ใช้ข้อมูลเดียวกันกับที่แสดงใน preview
+      const actualQuotationData = {
+        ...quotationData,
+        items: quotationData.items.map(item => ({
+          ...item,
+          // ตรวจสอบให้แน่ใจว่าข้อมูลตรงกับที่แสดงใน preview
+          line_total: item.quantity * item.unit_price - (item.discount_amount || 0)
+        })),
+        // คำนวณยอดรวมใหม่เพื่อให้ตรงกับ preview
+        total_amount: quotationData.items.reduce((sum, item) => 
+          sum + (item.quantity * item.unit_price - (item.discount_amount || 0)), 0
+        )
+      };
+
       await exportToPDF({
         filename: generateQuotationFilename(quotationData.quotation_number),
-        quotationData,
+        quotationData: actualQuotationData,
         companyInfo
       });
     } catch (error) {
