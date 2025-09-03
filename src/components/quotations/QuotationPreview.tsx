@@ -127,10 +127,6 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
       {/* Export Buttons */}
       {showExportButtons && !printMode && (
         <div className="flex gap-4 mb-6 no-print">
-          <Button onClick={handleExportPDF} className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            ส่งออก PDF
-          </Button>
           <Button onClick={handlePrint} variant="outline" className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
             พิมพ์
