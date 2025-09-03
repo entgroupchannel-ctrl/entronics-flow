@@ -125,14 +125,6 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
   return (
     <div className={`${printMode ? '' : 'space-y-4'}`}>
       {/* Export Buttons */}
-      {showExportButtons && !printMode && (
-        <div className="flex gap-4 mb-6 no-print">
-          <Button onClick={handlePrint} variant="outline" className="flex items-center gap-2">
-            <Printer className="h-4 w-4" />
-            พิมพ์
-          </Button>
-        </div>
-      )}
 
       <div className={`bg-white ${printMode ? 'p-8' : 'p-6'} ${className}`} id="quotation-preview">
       {/* Header */}
