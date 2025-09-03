@@ -1235,9 +1235,7 @@ export default function QuotationForm() {
               </Button>
               <Button 
                 size="sm" 
-                onClick={() => exportQuotationToPDF({ 
-                  filename: generateQuotationFilename(quotation.quotation_number)
-                })}
+                onClick={exportToPDF}
               >
                 <Download className="w-4 h-4 mr-2" />
                 ส่งออก PDF
