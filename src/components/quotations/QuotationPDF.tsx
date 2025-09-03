@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 import { useToast } from '@/hooks/use-toast';
 
 interface PDFExportOptions {
@@ -135,6 +136,49 @@ export const useQuotationPDF = () => {
         title: "กำลังสร้าง PDF",
         description: "กรุณารอสักครู่...",
       });
+
+      // หาไฟล์ที่มี id "quotation-preview" สำหรับแปลงเป็น PDF
+      const element = document.getElementById('quotation-preview');
+      if (!element) {
+        console.warn('ไม่พบ preview element, ใช้การสร้าง PDF แบบเดิม');
+        // ใช้การสร้าง PDF แบบเดิมต่อไป
+      } else {
+        // ใช้ html2canvas เพื่อแปลง element เป็น PDF
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          height: element.scrollHeight,
+          width: element.scrollWidth
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgWidth = 210;
+        const pageHeight = 295;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        pdf.save(filename);
+        
+        toast({
+          title: "สร้าง PDF สำเร็จ",
+          description: "ดาวน์โหลดไฟล์แล้ว",
+        });
+        return;
+      }
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageHeight = 297;
