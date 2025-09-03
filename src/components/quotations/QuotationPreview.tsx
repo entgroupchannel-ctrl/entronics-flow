@@ -131,7 +131,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
       <div className="flex items-start justify-between mb-8">
         {/* Company Logo and Info */}
         <div className="flex items-start justify-between w-full">
-          <div className="w-24 h-24 bg-white border border-gray-200 flex items-center justify-center">
+          <div className="w-24 h-24 bg-white border border-gray-200 flex items-center justify-center ml-8">
             <img src="/lovable-uploads/eb7e09fe-1705-4cc7-8c88-1adea20831c2.png" alt="ENT Group Logo" className="w-full h-full object-contain p-2" />
           </div>
           <div className="space-y-1 text-sm ml-auto mr-8">
