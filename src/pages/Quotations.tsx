@@ -526,7 +526,9 @@ export default function Quotations() {
                                   <div className="font-medium">{quotation.customer_name}</div>
                                   <div className="text-sm text-muted-foreground">
                                     {quotation.quotation_items && quotation.quotation_items.length > 0 
-                                      ? quotation.quotation_items[0].description || quotation.quotation_items[0].product_name
+                                      ? (quotation.quotation_items[0].description || quotation.quotation_items[0].product_name || '').length > 50
+                                        ? (quotation.quotation_items[0].description || quotation.quotation_items[0].product_name || '').substring(0, 50) + '...'
+                                        : quotation.quotation_items[0].description || quotation.quotation_items[0].product_name
                                       : 'ไม่มีรายการสินค้า'
                                     }
                                   </div>
