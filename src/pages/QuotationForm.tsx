@@ -531,7 +531,7 @@ export default function QuotationForm() {
       // Error handling is already done in saveQuotation
     }
   };
-  const exportToPDF = async () => {
+  const handleExportToPDF = async () => {
     // ตรวจสอบข้อมูลก่อน export
     if (!quotation.quotation_number) {
       toast({
@@ -632,7 +632,7 @@ export default function QuotationForm() {
               <Button variant="ghost" size="sm" onClick={printQuotation} title="พิมพ์">
                 <Printer className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={exportToPDF} title="ดาวน์โหลด PDF">
+              <Button variant="ghost" size="sm" onClick={handleExportToPDF} title="ดาวน์โหลด PDF">
                 <Download className="w-4 h-4" />
               </Button>
               <DropdownMenu>
@@ -646,7 +646,7 @@ export default function QuotationForm() {
                     <Eye className="w-4 h-4 mr-2" />
                     ดูตัวอย่าง
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={exportToPDF}>
+                  <DropdownMenuItem onClick={handleExportToPDF}>
                     <Download className="w-4 h-4 mr-2" />
                     ส่งออก PDF
                   </DropdownMenuItem>
@@ -1235,7 +1235,7 @@ export default function QuotationForm() {
               </Button>
               <Button 
                 size="sm" 
-                onClick={exportToPDF}
+                onClick={handleExportToPDF}
               >
                 <Download className="w-4 h-4 mr-2" />
                 ส่งออก PDF
