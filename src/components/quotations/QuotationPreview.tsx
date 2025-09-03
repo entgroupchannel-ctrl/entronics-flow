@@ -201,7 +201,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
 
       <div className="border border-gray-300 mb-6">
         {quotationData.items.map((item, index) => {
-          const shouldBreakPage = index > 0 && index % 15 === 0; // แบ่งหน้าทุก 15 รายการ
+          const shouldBreakPage = index > 0 && index % 3 === 0; // แบ่งหน้าทุก 3 รายการ
           
           return (
             <div key={item.id}>
