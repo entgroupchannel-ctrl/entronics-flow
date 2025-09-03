@@ -207,9 +207,14 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
             <div key={item.id}>
               {shouldBreakPage && (
                 <>
-                  <div className="print:break-before-page"></div>
+                  {/* แยกหน้าในหน้าจอ preview */}
+                  <div className="print:break-before-page border-t-4 border-dashed border-gray-400 mt-8 pt-8 relative">
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white px-4 text-sm text-gray-500 font-medium">
+                      หน้าที่ {Math.floor(index / 3) + 1}
+                    </div>
+                  </div>
                   {/* Header ซ้ำในหน้าใหม่ */}
-                  <div className="print:block hidden">
+                  <div className="print:block">
                     <div className="flex items-start justify-between mb-8">
                       <div className="flex items-start space-x-6">
                         <div className="w-28 h-20 bg-white border border-gray-200 flex items-center justify-center p-1">
