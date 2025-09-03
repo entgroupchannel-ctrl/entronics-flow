@@ -1032,7 +1032,7 @@ export default function QuotationForm() {
                             
 
                             <div>
-                              <Textarea placeholder="รายละเอียดสินค้าจะแสดงที่นี่เมื่อเลือกสินค้า..." value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} className="text-sm text-left min-h-[60px] max-h-[200px] resize-y w-full mt-1" rows={3} />
+                              <Textarea placeholder="รายละเอียดสินค้าจะแสดงที่นี่เมื่อเลือกสินค้า..." value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} className="text-sm text-left min-h-[60px] max-h-[400px] resize-y w-full mt-1" rows={3} />
                             </div>
                           </div>
                         </TableCell>
