@@ -388,7 +388,7 @@ export default function QuotationForm() {
       product_id: product.id,
       product_name: product.name,
       product_sku: product.sku,
-      description: `ชื่อสินค้า: ${product.name}${product.brand ? '\nแบรนด์: ' + product.brand : ''}${product.sku ? '\nรหัสสินค้า (SKU): ' + product.sku : ''}${product.category ? '\nหมวดหมู่: ' + product.category : ''}${product.price ? '\nราคาต่อหน่วย: ' + product.price.toLocaleString('th-TH') + ' บาท' : ''}${product.brand || product.category ? '\n\nรายละเอียดเพิ่มเติม: ' : ''}`,
+      description: `ชื่อสินค้า: ${product.name}${product.brand ? '\nแบรนด์: ' + product.brand : ''}${product.sku ? '\nรหัสสินค้า (SKU): ' + product.sku : ''}${product.category ? '\nหมวดหมู่: ' + product.category : ''}${product.price ? '\nราคาต่อหน่วย: ' + product.price.toLocaleString('th-TH') + ' บาท' : ''}\n\nรายละเอียดเพิ่มเติม: `,
       quantity: 1,
       unit_price: product.price,
       discount_amount: 0,
