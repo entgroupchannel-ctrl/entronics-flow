@@ -142,21 +142,25 @@ export default function Settings() {
   };
 
   const loadInvitations = async () => {
-    const { data, error } = await supabase
-      .from('user_invitations')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('user_invitations')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโหลดข้อมูลคำเชิญได้",
-        variant: "destructive",
-      });
-      return;
+      if (error) {
+        console.error('Error loading invitations:', error);
+        // Set empty array instead of showing error, table might not exist
+        setInvitations([]);
+        return;
+      }
+
+      setInvitations(data || []);
+    } catch (error) {
+      console.error('Unexpected error loading invitations:', error);
+      // Set empty array to prevent UI crash
+      setInvitations([]);
     }
-
-    setInvitations(data || []);
   };
 
   const loadSystemSettings = async () => {
