@@ -188,7 +188,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
       </div>
 
       {/* Items Table */}
-      <div className="bg-blue-500 text-white text-center py-2 mb-4">
+      <div className="bg-blue-500 text-white text-center py-2 mb-4 print:break-inside-avoid">
         <div className="grid grid-cols-12 gap-2 px-4 text-sm font-bold">
           <div className="col-span-1">ลำดับ</div>
           <div className="col-span-5">รายการ</div>
@@ -200,22 +200,79 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
       </div>
 
       <div className="border border-gray-300 mb-6">
-        {quotationData.items.map((item, index) => <div key={item.id} className="border-b border-gray-200 p-3">
-            <div className="grid grid-cols-12 gap-2 text-sm">
-              <div className="col-span-1 text-center">{index + 1}</div>
-              <div className="col-span-5">
-                <div className="font-medium">{item.product_name}</div>
-                {item.product_sku && <div className="text-xs text-gray-600">SKU: {item.product_sku}</div>}
-                {item.description && <div className="text-xs text-gray-600 mt-1 whitespace-pre-line">
-                    {item.description}
-                  </div>}
+        {quotationData.items.map((item, index) => {
+          const shouldBreakPage = index > 0 && index % 15 === 0; // แบ่งหน้าทุก 15 รายการ
+          
+          return (
+            <div key={item.id}>
+              {shouldBreakPage && (
+                <>
+                  <div className="print:break-before-page"></div>
+                  {/* Header ซ้ำในหน้าใหม่ */}
+                  <div className="print:block hidden">
+                    <div className="flex items-start justify-between mb-8">
+                      <div className="flex items-start space-x-6">
+                        <div className="w-28 h-20 bg-white border border-gray-200 flex items-center justify-center p-1">
+                          <img src="/lovable-uploads/eb7e09fe-1705-4cc7-8c88-1adea20831c2.png" alt="ENT Group Logo" className="max-w-full max-h-full object-contain" />
+                        </div>
+                        <div className="space-y-1 text-sm">
+                          <h1 className="font-bold text-lg">{companyInfo.name}</h1>
+                          <div className="text-gray-600 whitespace-pre-line">
+                            {companyInfo.address}
+                          </div>
+                          <div className="text-gray-600">
+                            เลขประจำตัวผู้เสียภาษี {companyInfo.taxId}
+                          </div>
+                          <div className="text-gray-600">
+                            โทร. {companyInfo.phone} โทรสาร {companyInfo.fax}
+                          </div>
+                          <div className="text-gray-600">
+                            เบอร์มือถือ {companyInfo.mobile}
+                          </div>
+                          <div className="text-gray-600">
+                            {companyInfo.website} / {companyInfo.email}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-500 text-white text-center py-3 mb-6">
+                      <h2 className="text-xl font-bold tracking-wider">ใบเสนอราคา / Q U O T A T I O N (ต่อ)</h2>
+                    </div>
+
+                    <div className="bg-blue-500 text-white text-center py-2 mb-4">
+                      <div className="grid grid-cols-12 gap-2 px-4 text-sm font-bold">
+                        <div className="col-span-1">ลำดับ</div>
+                        <div className="col-span-5">รายการ</div>
+                        <div className="col-span-1">จำนวน</div>
+                        <div className="col-span-2">ราคาต่อหน่วย</div>
+                        <div className="col-span-1">ส่วนลด</div>
+                        <div className="col-span-2">จำนวนเงิน</div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+              
+              <div className="border-b border-gray-200 p-3 print:break-inside-avoid">
+                <div className="grid grid-cols-12 gap-2 text-sm">
+                  <div className="col-span-1 text-center">{index + 1}</div>
+                  <div className="col-span-5">
+                    <div className="font-medium">{item.product_name}</div>
+                    {item.product_sku && <div className="text-xs text-gray-600">SKU: {item.product_sku}</div>}
+                    {item.description && <div className="text-xs text-gray-600 mt-1 whitespace-pre-line">
+                        {item.description}
+                      </div>}
+                  </div>
+                  <div className="col-span-1 text-center">{item.quantity}</div>
+                  <div className="col-span-2 text-right">{formatCurrency(item.unit_price)}</div>
+                  <div className="col-span-1 text-right">{formatCurrency(item.discount_amount)}</div>
+                  <div className="col-span-2 text-right">{formatCurrency(item.line_total)}</div>
+                </div>
               </div>
-              <div className="col-span-1 text-center">{item.quantity}</div>
-              <div className="col-span-2 text-right">{formatCurrency(item.unit_price)}</div>
-              <div className="col-span-1 text-right">{formatCurrency(item.discount_amount)}</div>
-              <div className="col-span-2 text-right">{formatCurrency(item.line_total)}</div>
             </div>
-          </div>)}
+          );
+        })}
 
         {/* Summary Section */}
         <div className="p-4 bg-gray-50">
