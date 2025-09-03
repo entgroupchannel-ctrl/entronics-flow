@@ -265,9 +265,25 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
                   <div className="col-span-5">
                     <div className="font-medium">{item.product_name}</div>
                     {item.product_sku && <div className="text-xs text-gray-600">SKU: {item.product_sku}</div>}
-                    {item.description && <div className="text-xs text-gray-600 mt-1 whitespace-pre-line">
-                        {item.description}
-                      </div>}
+                    {item.description && (
+                      <div className="text-xs text-gray-600 mt-1 whitespace-pre-line break-words max-h-32 overflow-hidden">
+                        {item.description.length > 300 ? (
+                          <>
+                            {item.description.substring(0, 300)}...
+                            {item.description.length > 300 && (
+                              <div className="mt-2 p-2 bg-gray-50 border-l-4 border-blue-500">
+                                <div className="text-xs text-blue-600 font-medium mb-1">รายละเอียดเพิ่มเติม:</div>
+                                <div className="whitespace-pre-line break-words">
+                                  {item.description.substring(300)}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          item.description
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="col-span-1 text-center">{item.quantity}</div>
                   <div className="col-span-2 text-right">{formatCurrency(item.unit_price)}</div>
