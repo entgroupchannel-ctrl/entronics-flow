@@ -19,6 +19,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { PurchaseOrderAttachments } from "./PurchaseOrderAttachments";
+import { TempAttachments } from "./TempAttachments";
 import { PaymentTermsSection } from "./PaymentTermsSection";
 
 const purchaseOrderSchema = z.object({
@@ -79,6 +80,7 @@ export function PurchaseOrderForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAllQuotations, setShowAllQuotations] = useState(false);
   const [paymentTermsData, setPaymentTermsData] = useState<any>({});
+  const [tempAttachments, setTempAttachments] = useState<Array<{file: File; id: string}>>([]);
 
   const form = useForm<PurchaseOrderFormData>({
     resolver: zodResolver(purchaseOrderSchema),
@@ -277,6 +279,11 @@ export function PurchaseOrderForm({
           .single();
 
         if (error) throw error;
+
+        // Upload temp attachments if any
+        if (tempAttachments.length > 0) {
+          await uploadTempAttachments(newPO.id);
+        }
       }
 
       onSuccess();
@@ -289,6 +296,46 @@ export function PurchaseOrderForm({
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const uploadTempAttachments = async (purchaseOrderId: string) => {
+    try {
+      for (const attachment of tempAttachments) {
+        const file = attachment.file;
+        
+        // Create unique file path
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${purchaseOrderId}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+
+        // Upload file to storage
+        const { error: uploadError, data: uploadData } = await supabase.storage
+          .from("purchase-orders")
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        // Save attachment record
+        const { error: dbError } = await supabase
+          .from("purchase_order_attachments")
+          .insert({
+            purchase_order_id: purchaseOrderId,
+            file_name: file.name,
+            file_path: uploadData.path,
+            file_size: file.size,
+            file_type: file.type,
+            uploaded_by: user?.id,
+          });
+
+        if (dbError) throw dbError;
+      }
+    } catch (error: any) {
+      console.error("Error uploading attachments:", error);
+      toast({
+        title: "คำเตือน",
+        description: "บันทึก PO สำเร็จแต่ไม่สามารถอัปโหลดไฟล์แนบได้: " + error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -612,7 +659,14 @@ export function PurchaseOrderForm({
         />
 
         {/* Attachments Section */}
-        <PurchaseOrderAttachments purchaseOrderId={editingPO?.id || ""} />
+        {editingPO ? (
+          <PurchaseOrderAttachments purchaseOrderId={editingPO.id} />
+        ) : (
+          <TempAttachments
+            attachments={tempAttachments}
+            onAttachmentsChange={setTempAttachments}
+          />
+        )}
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-4">
