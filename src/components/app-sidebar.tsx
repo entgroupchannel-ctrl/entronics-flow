@@ -13,7 +13,9 @@ import {
   Wrench,
   Building2,
   CreditCard,
-  Globe
+  Globe,
+  Calculator,
+  PieChart
 } from "lucide-react";
 
 import {
@@ -25,29 +27,34 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
 
 const mainItems = [
-  { title: "หน้าหลัก", url: "/", icon: Home },
-  { title: "ลูกค้า", url: "/customers", icon: Users },
+  { title: "แดชบอร์ด / Dashboard", url: "/", icon: Home },
+];
+
+const salesItems = [
+  { title: "เอกสารการขาย / Sale Docs", url: "/quotations", icon: FileText },
   { title: "ใบเสนอราคา", url: "/quotations", icon: FileText },
-  { title: "ใบแจ้งหนี้", url: "/invoices", icon: Receipt },
-  { title: "ใบกำกับภาษี", url: "/tax-invoices", icon: FileText },
-  { title: "ใบเสร็จ", url: "/receipts", icon: Receipt },
+  { title: "ใบวางบิล/ใบแจ้งหนี้", url: "/invoices", icon: Receipt },
+  { title: "การชำระเงิน/ใบกำกับภาษี", url: "/tax-invoices", icon: Calculator },
+  { title: "ใบส่งสินค้า/ใบกำกับภาษี", url: "/receipts", icon: Receipt },
+  { title: "การชำระเงิน", url: "/payment-records", icon: CreditCard },
 ];
 
 const operationItems = [
-  { title: "คลังสินค้า", url: "/inventory", icon: Package },
-  { title: "จัดส่ง", url: "/delivery", icon: TruckIcon },
-  { title: "บริการ", url: "/service-request", icon: Wrench },
-  { title: "แดชบอร์ดบริการ", url: "/service-dashboard", icon: BarChart3 },
+  { title: "ใบเสร็จรับเงิน", url: "/receipts", icon: Receipt },
+  { title: "แจ้งซ่อม / Service Ticket", url: "/service-request", icon: Wrench },
+  { title: "ระบบจัดส่งสินค้า / Delivery", url: "/delivery", icon: TruckIcon },
+  { title: "รายชื่อลูกค้า / Customers", url: "/customers", icon: Users },
+  { title: "คลังสินค้า / Inventory", url: "/inventory", icon: Package },
 ];
 
 const financialItems = [
-  { title: "การเงิน", url: "/financial", icon: DollarSign },
-  { title: "บันทึกการชำระ", url: "/payment-records", icon: CreditCard },
-  { title: "โอนเงินต่างประเทศ", url: "/international-transfer", icon: Globe },
+  { title: "การเงิน / Financial", url: "/financial", icon: DollarSign },
+  { title: "วิเคราะห์ข้อมูล / Analytics", url: "/analytics", icon: PieChart },
 ];
 
 const managementItems = [
@@ -57,7 +64,6 @@ const managementItems = [
 
 const reportItems = [
   { title: "รายงาน", url: "/reports", icon: FileSpreadsheet },
-  { title: "วิเคราะห์", url: "/analytics", icon: BarChart3 },
   { title: "เอกสารขาย", url: "/sales-documents", icon: FileText },
 ];
 
@@ -84,10 +90,25 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarContent>
-        {/* Main Menu */}
+      <SidebarHeader className="border-b border-border">
+        <div className="flex items-center gap-2 px-2 py-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
+            <Building2 className="h-4 w-4" />
+          </div>
+          {state !== "collapsed" && (
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold">ENT GROUP</span>
+              <span className="text-xs text-muted-foreground">Industrial PC ERP</span>
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
+      <SidebarContent className="px-2">
+        {/* Main Dashboard */}
         <SidebarGroup>
-          <SidebarGroupLabel>เมนูหลัก</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            การดำเนินงาน
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
@@ -97,9 +118,19 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Sales Documents */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {salesItems.map((item) => (
+                <MenuItem key={item.title} item={item} />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {/* Operations */}
         <SidebarGroup>
-          <SidebarGroupLabel>การดำเนินงาน</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {operationItems.map((item) => (
@@ -111,19 +142,21 @@ export function AppSidebar() {
 
         {/* Financial */}
         <SidebarGroup>
-          <SidebarGroupLabel>การเงิน</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {financialItems.map((item) => (
                 <MenuItem key={item.title} item={item} />
               ))}
+              <MenuItem item={{ title: "โอนเงินต่างประเทศ", url: "/international-transfer", icon: Globe }} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
         {/* Management */}
         <SidebarGroup>
-          <SidebarGroupLabel>การจัดการ</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            การจัดการ
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {managementItems.map((item) => (
@@ -135,7 +168,9 @@ export function AppSidebar() {
 
         {/* Reports */}
         <SidebarGroup>
-          <SidebarGroupLabel>รายงาน</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            รายงาน
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {reportItems.map((item) => (
@@ -144,7 +179,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
         {/* Settings */}
         <SidebarGroup>
           <SidebarGroupContent>
