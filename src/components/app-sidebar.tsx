@@ -42,7 +42,6 @@ const mainItems = [
 ];
 
 const salesItems = [
-  { title: "เอกสารการขาย / Sale Docs", url: "/sales-documents", icon: FileText },
   { title: "ใบเสนอราคา", url: "/quotations", icon: FileText },
   { title: "ใบวางบิล/ใบแจ้งหนี้", url: "/invoices", icon: Receipt },
   { title: "การชำระเงิน/ใบกำกับภาษี", url: "/tax-invoices", icon: Calculator },
