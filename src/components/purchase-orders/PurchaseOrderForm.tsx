@@ -228,6 +228,9 @@ export function PurchaseOrderForm({
   };
 
   const onSubmit = async (data: PurchaseOrderFormData) => {
+    console.log("onSubmit function called!");
+    console.log("Form errors:", form.formState.errors);
+    
     if (!user) {
       toast({
         title: "ข้อผิดพลาด",
