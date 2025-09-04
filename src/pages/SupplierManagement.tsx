@@ -245,16 +245,7 @@ export default function SupplierManagement() {
                     </select>
                   </div>
                   
-                  {/* For now, show form for first approved supplier as demo */}
-                  {suppliers.filter(s => s.supplier_registration_status === 'approved')[0] && (
-                    <SupplierDocumentForm 
-                      supplierId={suppliers.filter(s => s.supplier_registration_status === 'approved')[0].id}
-                      onSuccess={() => toast({
-                        title: "สำเร็จ",
-                        description: "อัปโหลดเอกสารเรียบร้อยแล้ว",
-                      })}
-                    />
-                  )}
+                  <SupplierDocumentForm suppliers={suppliers || []} />
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
@@ -290,6 +281,7 @@ export default function SupplierManagement() {
             </CardContent>
           </Card>
         </TabsContent>
+
       </Tabs>
     </div>
   );
