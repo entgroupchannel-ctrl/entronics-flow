@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, TrendingUp, CreditCard, Wallet } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DollarSign, TrendingUp, CreditCard, Wallet, FileBarChart, Globe } from "lucide-react";
+import { InternationalTransferReport } from "@/components/financial/InternationalTransferReport";
 
 const Financial = () => {
   return (
@@ -58,20 +61,37 @@ const Financial = () => {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>ระบบการเงิน</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12">
-            <DollarSign className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">ระบบการเงินกำลังพัฒนา</h3>
-            <p className="text-muted-foreground">
-              ระบบจัดการข้อมูลทางการเงินจะพร้อมใช้งานเร็วๆ นี้
-            </p>
-          </div>
-        </CardContent>
+      {/* Main Content with Tabs */}
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="overview">ภาพรวม</TabsTrigger>
+          <TabsTrigger value="international-transfer">
+            <Globe className="h-4 w-4 mr-2" />
+            รายงานการโอนเงินต่างประเทศ
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>ระบบการเงิน</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <DollarSign className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">ระบบการเงินกำลังพัฒนา</h3>
+                <p className="text-muted-foreground">
+                  ระบบจัดการข้อมูลทางการเงินจะพร้อมใช้งานเร็วๆ นี้
+                </p>
+              </div>
+            </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="international-transfer" className="space-y-4">
+          <InternationalTransferReport />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
