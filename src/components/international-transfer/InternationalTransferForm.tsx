@@ -120,14 +120,15 @@ export function InternationalTransferForm({
     },
   });
 
-  // Query for suppliers
+  // Query for approved suppliers only
   const { data: suppliers } = useQuery({
-    queryKey: ["suppliers"],
+    queryKey: ["approved-suppliers"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("customers")
-        .select("id, name, bank_name, bank_account, swift_code, supplier_code, tax_id, phone, email")
+        .select("id, name, bank_name, bank_account, swift_code, supplier_code, tax_id, phone, email, supplier_country, business_type")
         .eq("customer_type", "ผู้จัดจำหน่าย")
+        .eq("supplier_registration_status", "approved")
         .order("name");
 
       if (error) throw error;
@@ -274,6 +275,8 @@ export function InternationalTransferForm({
                           <div className="flex flex-col">
                             <span className="font-medium">{supplier.name}</span>
                             <span className="text-sm text-muted-foreground">
+                              {supplier.supplier_country && `${supplier.supplier_country} • `}
+                              {supplier.business_type && `${supplier.business_type} • `}
                               {supplier.bank_name && supplier.bank_account && 
                                 `${supplier.bank_name} - ${supplier.bank_account}`
                               }

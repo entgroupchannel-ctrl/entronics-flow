@@ -652,6 +652,9 @@ export type Database = {
           banking_routing_number: string | null
           banking_swift_code: string | null
           business_license_url: string | null
+          business_registration_number: string | null
+          business_type: string | null
+          certifications: string[] | null
           citizen_id: string | null
           compliance_status: string | null
           contact_email_finance: string | null
@@ -667,6 +670,7 @@ export type Database = {
           delivery_rating: number | null
           district: string | null
           email: string | null
+          established_year: number | null
           facebook: string | null
           hq_branch: string | null
           id: string
@@ -679,6 +683,7 @@ export type Database = {
           last_order_date: string | null
           last_synced_at: string | null
           line_id: string | null
+          main_products: string[] | null
           minimum_contact_frequency: number | null
           minimum_order_amount: number | null
           name: string
@@ -692,14 +697,20 @@ export type Database = {
           price_rating: number | null
           province: string | null
           quality_rating: number | null
+          reference_contacts: Json | null
           source_system: string | null
           status: string | null
           sub_district: string | null
+          supplier_application_date: string | null
+          supplier_approved_by: string | null
+          supplier_approved_date: string | null
           supplier_category: string | null
           supplier_code: string | null
           supplier_country: string | null
           supplier_currency: string | null
           supplier_notes: string | null
+          supplier_registration_status: string | null
+          supplier_rejection_reason: string | null
           swift_code: string | null
           sync_status: string | null
           tax_certificate_url: string | null
@@ -722,6 +733,9 @@ export type Database = {
           banking_routing_number?: string | null
           banking_swift_code?: string | null
           business_license_url?: string | null
+          business_registration_number?: string | null
+          business_type?: string | null
+          certifications?: string[] | null
           citizen_id?: string | null
           compliance_status?: string | null
           contact_email_finance?: string | null
@@ -737,6 +751,7 @@ export type Database = {
           delivery_rating?: number | null
           district?: string | null
           email?: string | null
+          established_year?: number | null
           facebook?: string | null
           hq_branch?: string | null
           id?: string
@@ -749,6 +764,7 @@ export type Database = {
           last_order_date?: string | null
           last_synced_at?: string | null
           line_id?: string | null
+          main_products?: string[] | null
           minimum_contact_frequency?: number | null
           minimum_order_amount?: number | null
           name: string
@@ -762,14 +778,20 @@ export type Database = {
           price_rating?: number | null
           province?: string | null
           quality_rating?: number | null
+          reference_contacts?: Json | null
           source_system?: string | null
           status?: string | null
           sub_district?: string | null
+          supplier_application_date?: string | null
+          supplier_approved_by?: string | null
+          supplier_approved_date?: string | null
           supplier_category?: string | null
           supplier_code?: string | null
           supplier_country?: string | null
           supplier_currency?: string | null
           supplier_notes?: string | null
+          supplier_registration_status?: string | null
+          supplier_rejection_reason?: string | null
           swift_code?: string | null
           sync_status?: string | null
           tax_certificate_url?: string | null
@@ -792,6 +814,9 @@ export type Database = {
           banking_routing_number?: string | null
           banking_swift_code?: string | null
           business_license_url?: string | null
+          business_registration_number?: string | null
+          business_type?: string | null
+          certifications?: string[] | null
           citizen_id?: string | null
           compliance_status?: string | null
           contact_email_finance?: string | null
@@ -807,6 +832,7 @@ export type Database = {
           delivery_rating?: number | null
           district?: string | null
           email?: string | null
+          established_year?: number | null
           facebook?: string | null
           hq_branch?: string | null
           id?: string
@@ -819,6 +845,7 @@ export type Database = {
           last_order_date?: string | null
           last_synced_at?: string | null
           line_id?: string | null
+          main_products?: string[] | null
           minimum_contact_frequency?: number | null
           minimum_order_amount?: number | null
           name?: string
@@ -832,14 +859,20 @@ export type Database = {
           price_rating?: number | null
           province?: string | null
           quality_rating?: number | null
+          reference_contacts?: Json | null
           source_system?: string | null
           status?: string | null
           sub_district?: string | null
+          supplier_application_date?: string | null
+          supplier_approved_by?: string | null
+          supplier_approved_date?: string | null
           supplier_category?: string | null
           supplier_code?: string | null
           supplier_country?: string | null
           supplier_currency?: string | null
           supplier_notes?: string | null
+          supplier_registration_status?: string | null
+          supplier_rejection_reason?: string | null
           swift_code?: string | null
           sync_status?: string | null
           tax_certificate_url?: string | null
