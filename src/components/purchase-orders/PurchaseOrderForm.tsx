@@ -748,7 +748,15 @@ export function PurchaseOrderForm({
             onClick={() => {
               console.log("Submit button clicked!");
               console.log("Form is valid:", form.formState.isValid);
-              console.log("Form errors:", form.formState.errors);
+              console.log("Form errors details:", JSON.stringify(form.formState.errors, null, 2));
+              
+              // Show validation errors if any
+              if (!form.formState.isValid) {
+                Object.keys(form.formState.errors).forEach(field => {
+                  const error = form.formState.errors[field as keyof typeof form.formState.errors];
+                  console.log(`Field ${field} error:`, error?.message);
+                });
+              }
             }}
           >
             {isSubmitting ? "กำลังบันทึก..." : editingPO ? "อัปเดต" : "บันทึก"}
