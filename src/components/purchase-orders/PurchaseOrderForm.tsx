@@ -556,7 +556,7 @@ export function PurchaseOrderForm({
                     <FormLabel>สถานะ PO</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="text-right">
                           <SelectValue placeholder="เลือกสถานะ" />
                         </SelectTrigger>
                       </FormControl>
@@ -615,7 +615,7 @@ export function PurchaseOrderForm({
                   <FormItem>
                     <FormLabel>เงื่อนไขการชำระเงิน</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input className="text-right" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -629,7 +629,7 @@ export function PurchaseOrderForm({
                   <FormItem>
                     <FormLabel>ที่อยู่จัดส่ง</FormLabel>
                     <FormControl>
-                      <Textarea {...field} rows={3} />
+                      <Textarea className="text-right" {...field} rows={3} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -643,7 +643,7 @@ export function PurchaseOrderForm({
                   <FormItem>
                     <FormLabel>คำแนะนำพิเศษ</FormLabel>
                     <FormControl>
-                      <Textarea {...field} rows={3} />
+                      <Textarea className="text-right" {...field} rows={3} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -657,7 +657,7 @@ export function PurchaseOrderForm({
                   <FormItem>
                     <FormLabel>หมายเหตุ</FormLabel>
                     <FormControl>
-                      <Textarea {...field} rows={3} />
+                      <Textarea className="text-right" {...field} rows={3} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
