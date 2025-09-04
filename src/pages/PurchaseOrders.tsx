@@ -132,11 +132,15 @@ export default function PurchaseOrders() {
   // Show full screen form for new PO
   if (showForm && isFullScreen) {
     return (
-        <div className="container mx-auto px-4 py-8 space-y-6">
-          <div className="flex justify-between items-center">
+      <Layout>
+        <div className="p-6 space-y-6">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={handleCancel}>
+              ← กลับ
+            </Button>
             <div>
-              <h1 className="text-3xl font-bold">เพิ่ม Purchase Order ใหม่</h1>
-              <p className="text-muted-foreground">กรอกข้อมูลใบสั่งซื้อจากลูกค้า</p>
+              <h1 className="text-2xl font-bold">เพิ่ม Purchase Order ใหม่</h1>
+              <p className="text-sm text-muted-foreground">กรอกข้อมูลใบสั่งซื้อจากลูกค้า</p>
             </div>
           </div>
           
@@ -146,112 +150,128 @@ export default function PurchaseOrders() {
             onCancel={handleCancel}
           />
         </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="container mx-auto px-6 py-8 space-y-6">
-        <div className="flex justify-between items-start">
-          <div className="text-left">
-            <h1 className="text-3xl font-bold text-left">Purchase Orders</h1>
-            <p className="text-muted-foreground text-left mt-1">จัดการใบสั่งซื้อที่ได้รับจากลูกค้า</p>
+    <Layout>
+      <div className="p-6 space-y-6">
+        {/* Header Section */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">Purchase Orders</h1>
+            <p className="text-sm text-muted-foreground">จัดการใบสั่งซื้อจากลูกค้า</p>
           </div>
-          <Button onClick={handleNewPO}>
+          <Button onClick={handleNewPO} className="h-9 px-3">
             <Plus className="w-4 h-4 mr-2" />
             เพิ่ม PO ใหม่
           </Button>
         </div>
 
+        {/* PO Table */}
         <Card>
-          <CardHeader>
-            <CardTitle>รายการ Purchase Orders</CardTitle>
-            <CardDescription>
-              ใบสั่งซื้อทั้งหมดที่ได้รับจากลูกค้า
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {isLoading ? (
               <div className="text-center py-8">กำลังโหลด...</div>
+            ) : purchaseOrders?.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="mb-4">ยังไม่มี Purchase Orders</div>
+                <Button onClick={handleNewPO} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  เพิ่ม PO แรก
+                </Button>
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>เลขที่ PO (ระบบ)</TableHead>
-                      <TableHead>เลขที่ PO (ลูกค้า)</TableHead>
-                      <TableHead>ลูกค้า</TableHead>
-                      <TableHead>พนักงานขาย</TableHead>
-                      <TableHead>วันที่</TableHead>
-                      <TableHead>วันส่งมอบ</TableHead>
-                      <TableHead>จำนวนเงิน</TableHead>
-                      <TableHead>เอกสารแนบ</TableHead>
-                       <TableHead>สถานะ</TableHead>
-                       <TableHead>แหล่งที่มา</TableHead>
-                      <TableHead className="text-right">จัดการ</TableHead>
+                    <TableRow className="bg-muted/30">
+                      <TableHead className="w-[120px]">เลขที่ PO</TableHead>
+                      <TableHead className="w-[200px]">ลูกค้า</TableHead>
+                      <TableHead className="w-[120px]">วันที่</TableHead>
+                      <TableHead className="w-[120px]">ส่งมอบ</TableHead>
+                      <TableHead className="w-[100px] text-right">ยอดเงิน</TableHead>
+                      <TableHead className="w-[80px] text-center">แนบ</TableHead>
+                      <TableHead className="w-[100px]">สถานะ</TableHead>
+                      <TableHead className="w-[80px] text-center">จัดการ</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {purchaseOrders?.map((po) => (
-                      <TableRow key={po.id}>
-                        <TableCell className="font-medium">{po.po_number}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {po.customer_po_number || "-"}
-                        </TableCell>
-                        <TableCell>{po.customer_name}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {po.sales_person_name || "-"}
+                      <TableRow key={po.id} className="hover:bg-muted/50">
+                        <TableCell className="font-medium">
+                          <div>
+                            <div className="font-semibold">{po.po_number}</div>
+                            {po.customer_po_number && (
+                              <div className="text-xs text-muted-foreground">
+                                {po.customer_po_number}
+                              </div>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
-                          {format(new Date(po.po_date), "dd/MM/yyyy", { locale: th })}
+                          <div>
+                            <div className="font-medium">{po.customer_name}</div>
+                            {po.sales_person_name && (
+                              <div className="text-xs text-muted-foreground">
+                                โดย {po.sales_person_name}
+                              </div>
+                            )}
+                          </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-sm">
+                          {format(new Date(po.po_date), "dd/MM/yy", { locale: th })}
+                        </TableCell>
+                        <TableCell className="text-sm">
                           {po.delivery_date
-                            ? format(new Date(po.delivery_date), "dd/MM/yyyy", { locale: th })
+                            ? format(new Date(po.delivery_date), "dd/MM/yy", { locale: th })
                             : "-"
                           }
                         </TableCell>
-                        <TableCell>
-                          ฿{po.total_amount?.toLocaleString() || "0"}
+                        <TableCell className="text-right font-medium">
+                          ฿{(po.total_amount || 0).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {po.attachment_count > 0 && (
+                            <Badge variant="secondary" className="h-6 w-6 p-0 rounded-full">
+                              {po.attachment_count}
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Paperclip className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm">{po.attachment_count || 0}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
+                          <div className="space-y-1">
                             {getStatusBadge(po.status)}
                             {po.payment_terms_type && po.payment_terms_type !== 'credit' && (
-                              <span className="text-xs text-blue-600">
+                              <div className="text-xs text-blue-600">
                                 {po.payment_terms_type === 'advance' && 'ชำระล่วงหน้า'}
-                                {po.payment_terms_type === 'cod' && 'เก็บเงินปลายทาง'}
-                                {po.payment_terms_type === 'installment' && `ผ่อน ${po.installment_count || 1} งวด`}
-                                {po.payment_terms_type === 'partial_advance' && `มัดจำ ${po.advance_payment_percentage || 0}%`}
-                              </span>
+                                {po.payment_terms_type === 'cod' && 'COD'}
+                                {po.payment_terms_type === 'installment' && `ผ่อน ${po.installment_count}งวด`}
+                                {po.payment_terms_type === 'partial_advance' && `มัดจำ ${po.advance_payment_percentage}%`}
+                              </div>
+                            )}
+                            {po.source_system === 'crm' && (
+                              <Badge variant="outline" className="text-xs h-5">CRM</Badge>
                             )}
                           </div>
-                         </TableCell>
-                         <TableCell>
-                           <Badge variant={po.source_system === 'crm' ? 'default' : 'secondary'}>
-                             {po.source_system === 'crm' ? 'ระบบ CRM' : 'บันทึกเอง'}
-                           </Badge>
-                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="sm"
+                              className="h-8 w-8 p-0"
                               onClick={() => handleEdit(po)}
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit className="w-3 h-3" />
                             </Button>
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="sm"
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                               onClick={() => handleDelete(po.id)}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3 h-3" />
                             </Button>
                           </div>
                         </TableCell>
@@ -259,24 +279,16 @@ export default function PurchaseOrders() {
                     ))}
                   </TableBody>
                 </Table>
-                
-                {purchaseOrders?.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    ยังไม่มี Purchase Orders
-                  </div>
-                )}
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Dialog for editing existing PO */}
+        {/* Edit Dialog */}
         <Dialog open={showForm && !isFullScreen} onOpenChange={setShowForm}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
-                แก้ไข Purchase Order
-              </DialogTitle>
+              <DialogTitle>แก้ไข Purchase Order</DialogTitle>
             </DialogHeader>
             <PurchaseOrderForm
               editingPO={editingPO}
@@ -286,5 +298,6 @@ export default function PurchaseOrders() {
           </DialogContent>
         </Dialog>
       </div>
+    </Layout>
   );
 }
