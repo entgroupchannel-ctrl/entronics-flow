@@ -449,7 +449,7 @@ export function InternationalTransferForm({
         transfer_request_document_url: uploadedDocuments.transferRequest || data.transfer_request_document_url,
       };
 
-      if (editingRequest) {
+      if (editingRequest && editingRequest.id) {
         const { error } = await supabase
           .from("international_transfer_requests")
           .update(submitData)
@@ -457,7 +457,15 @@ export function InternationalTransferForm({
 
         if (error) throw error;
       } else {
+        // Clean up undefined/null values for insert
         const insertData: any = { ...submitData };
+        
+        // Remove undefined fields to avoid database errors
+        Object.keys(insertData).forEach(key => {
+          if (insertData[key] === undefined || insertData[key] === null || insertData[key] === 'null') {
+            delete insertData[key];
+          }
+        });
         delete insertData.transfer_number;
         
         const { error } = await supabase

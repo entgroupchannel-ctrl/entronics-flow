@@ -81,22 +81,23 @@ export default function InternationalTransfer() {
     // Create a copy of the request without ID and status info
     const duplicatedRequest = {
       ...request,
-      id: null, // Remove ID to create new request
-      transfer_number: null, // Will be generated automatically
+      // Remove fields that should not be copied
+      id: undefined, // Remove ID to create new request
+      transfer_number: undefined, // Will be generated automatically
       status: "draft", // Reset to draft status
-      requested_by: null, // Will be set by form
-      created_at: null,
-      updated_at: null,
-      approved_by: null,
-      approved_at: null,
-      finance_approved_by: null,
-      finance_approved_at: null,
-      rejection_reason: null,
-      transfer_executed_at: null,
-      transfer_reference_number: null,
-      actual_transfer_amount: null,
-      actual_exchange_rate: null,
-      actual_transfer_date: null,
+      requested_by: undefined, // Will be set by form
+      created_at: undefined,
+      updated_at: undefined,
+      approved_by: undefined,
+      approved_at: undefined,
+      finance_approved_by: undefined,
+      finance_approved_at: undefined,
+      rejection_reason: undefined,
+      transfer_executed_at: undefined,
+      transfer_reference_number: undefined,
+      actual_transfer_amount: undefined,
+      actual_exchange_rate: undefined,
+      actual_transfer_date: undefined,
     };
     
     setEditingRequest(duplicatedRequest);
