@@ -30,9 +30,7 @@ const purchaseOrderSchema = z.object({
   customer_id: z.string().min(1, "กรุณาเลือกลูกค้า"),
   customer_name: z.string().min(1, "กรุณากรอกชื่อลูกค้า"),
   customer_company: z.string().optional(),
-  po_date: z.date({
-    required_error: "กรุณาเลือกวันที่ PO",
-  }),
+  po_date: z.date().default(() => new Date()),
   delivery_date: z.date().optional(),
   status: z.string().default("received"),
   total_amount: z.number().min(0, "กรุณากรอกจำนวนเงิน"),
