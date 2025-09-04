@@ -14,12 +14,7 @@ export function Layout({ children }: LayoutProps) {
         <AppSidebar />
         
         <main className="flex-1 flex flex-col">
-          <header className="h-12 flex items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
-            <SidebarTrigger className="mr-4 p-2 hover:bg-accent rounded-md border border-border" />
-            <div className="flex-1">
-              <Header />
-            </div>
-          </header>
+          <Header />
           
           <div className="flex-1 overflow-auto">
             {children}
