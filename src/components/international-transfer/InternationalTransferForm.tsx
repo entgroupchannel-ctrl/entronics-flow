@@ -504,10 +504,13 @@ export function InternationalTransferForm({
                     <FormLabel>เทียบเท่าบาท</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.01"
+                        type="text"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                        value={field.value ? Number(field.value).toLocaleString() : ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/,/g, '');
+                          field.onChange(parseFloat(value) || 0);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
