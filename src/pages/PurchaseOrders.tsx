@@ -17,6 +17,7 @@ export default function PurchaseOrders() {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [editingPO, setEditingPO] = useState<any>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const { data: purchaseOrders, isLoading, refetch } = useQuery({
     queryKey: ["purchase-orders"],
@@ -106,6 +107,7 @@ export default function PurchaseOrders() {
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditingPO(null);
+    setIsFullScreen(false);
     refetch();
     toast({
       title: "สำเร็จ",
@@ -116,12 +118,42 @@ export default function PurchaseOrders() {
   const handleEdit = (po: any) => {
     setEditingPO(po);
     setShowForm(true);
+    setIsFullScreen(false);
   };
 
   const handleNewPO = () => {
     setEditingPO(null);
     setShowForm(true);
+    setIsFullScreen(true);
   };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditingPO(null);
+    setIsFullScreen(false);
+  };
+
+  // Show full screen form for new PO
+  if (showForm && isFullScreen) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8 space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold">เพิ่ม Purchase Order ใหม่</h1>
+              <p className="text-muted-foreground">กรอกข้อมูลใบสั่งซื้อจากลูกค้า</p>
+            </div>
+          </div>
+          
+          <PurchaseOrderForm
+            editingPO={editingPO}
+            onSuccess={handleFormSuccess}
+            onCancel={handleCancel}
+          />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -239,17 +271,18 @@ export default function PurchaseOrders() {
           </CardContent>
         </Card>
 
-        <Dialog open={showForm} onOpenChange={setShowForm}>
+        {/* Dialog for editing existing PO */}
+        <Dialog open={showForm && !isFullScreen} onOpenChange={setShowForm}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingPO ? "แก้ไข Purchase Order" : "เพิ่ม Purchase Order ใหม่"}
+                แก้ไข Purchase Order
               </DialogTitle>
             </DialogHeader>
             <PurchaseOrderForm
               editingPO={editingPO}
               onSuccess={handleFormSuccess}
-              onCancel={() => setShowForm(false)}
+              onCancel={handleCancel}
             />
           </DialogContent>
         </Dialog>
