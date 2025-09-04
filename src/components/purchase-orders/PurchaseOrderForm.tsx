@@ -466,19 +466,6 @@ export function PurchaseOrderForm({
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="customer_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ชื่อลูกค้า *</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
