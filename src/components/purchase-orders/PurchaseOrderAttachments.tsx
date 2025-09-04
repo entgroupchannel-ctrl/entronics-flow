@@ -6,7 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Upload, File, Download, Trash2, FileText, Image } from "lucide-react";
+import { Upload, File, Download, Trash2, FileText, Image, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -29,6 +30,7 @@ export function PurchaseOrderAttachments({ purchaseOrderId }: PurchaseOrderAttac
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
+  const [selectedPreview, setSelectedPreview] = useState<Attachment | null>(null);
 
   const { data: attachments, isLoading } = useQuery({
     queryKey: ["po-attachments", purchaseOrderId],
@@ -191,6 +193,14 @@ export function PurchaseOrderAttachments({ purchaseOrderId }: PurchaseOrderAttac
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const canPreview = (attachment: Attachment) => {
+    return attachment.file_type.startsWith('image/') || attachment.file_type === 'application/pdf';
+  };
+
+  const openPreview = (attachment: Attachment) => {
+    setSelectedPreview(attachment);
+  };
+
   if (!purchaseOrderId) {
     return (
       <Card>
@@ -254,6 +264,15 @@ export function PurchaseOrderAttachments({ purchaseOrderId }: PurchaseOrderAttac
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  {canPreview(attachment) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openPreview(attachment)}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -275,6 +294,39 @@ export function PurchaseOrderAttachments({ purchaseOrderId }: PurchaseOrderAttac
         ) : (
           <p className="text-center py-4 text-muted-foreground">ยังไม่มีเอกสารแนบ</p>
         )}
+
+        {/* Preview Dialog */}
+        <Dialog open={!!selectedPreview} onOpenChange={() => setSelectedPreview(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5" />
+                ตัวอย่างไฟล์: {selectedPreview?.file_name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex justify-center items-center min-h-[400px]">
+              {selectedPreview?.file_type.startsWith('image/') ? (
+                <img 
+                  src={`https://coezszrbeaweaoufkpsq.supabase.co/storage/v1/object/public/purchase-orders/${selectedPreview.file_path}`}
+                  alt={selectedPreview.file_name}
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                />
+              ) : selectedPreview?.file_type === 'application/pdf' ? (
+                <iframe
+                  src={`https://coezszrbeaweaoufkpsq.supabase.co/storage/v1/object/public/purchase-orders/${selectedPreview.file_path}`}
+                  className="w-full h-[70vh] rounded-lg"
+                  title={selectedPreview.file_name}
+                />
+              ) : (
+                <div className="text-center">
+                  <File className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-lg font-medium">ไม่สามารถแสดงตัวอย่างได้</p>
+                  <p className="text-muted-foreground">รูปแบบไฟล์นี้ไม่รองรับการแสดงตัวอย่าง</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );

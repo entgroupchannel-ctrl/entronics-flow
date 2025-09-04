@@ -3,13 +3,15 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Upload, File, X, FileText, Image } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Upload, File, X, FileText, Image, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
 interface TempAttachment {
   file: File;
   id: string;
+  previewUrl?: string;
 }
 
 interface TempAttachmentsProps {
@@ -20,6 +22,7 @@ interface TempAttachmentsProps {
 export function TempAttachments({ attachments, onAttachmentsChange }: TempAttachmentsProps) {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [selectedPreview, setSelectedPreview] = useState<TempAttachment | null>(null);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -41,9 +44,13 @@ export function TempAttachments({ attachments, onAttachmentsChange }: TempAttach
           continue;
         }
 
+        // Create preview URL for images
+        const previewUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined;
+        
         newAttachments.push({
           file,
           id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          previewUrl,
         });
       }
 
@@ -69,11 +76,23 @@ export function TempAttachments({ attachments, onAttachmentsChange }: TempAttach
   };
 
   const handleRemove = (attachmentId: string) => {
+    const attachment = attachments.find(att => att.id === attachmentId);
+    if (attachment?.previewUrl) {
+      URL.revokeObjectURL(attachment.previewUrl);
+    }
     onAttachmentsChange(attachments.filter(att => att.id !== attachmentId));
     toast({
       title: "ลบไฟล์เรียบร้อยแล้ว",
       description: "ไฟล์ถูกลบออกจากรายการแนบ",
     });
+  };
+
+  const canPreview = (file: File) => {
+    return file.type.startsWith('image/') || file.type === 'application/pdf';
+  };
+
+  const openPreview = (attachment: TempAttachment) => {
+    setSelectedPreview(attachment);
   };
 
   const getFileIcon = (fileType: string) => {
@@ -141,6 +160,15 @@ export function TempAttachments({ attachments, onAttachmentsChange }: TempAttach
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  {canPreview(attachment.file) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openPreview(attachment)}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -157,6 +185,43 @@ export function TempAttachments({ attachments, onAttachmentsChange }: TempAttach
             แนบเอกสาร PO จากลูกค้าได้ทันที ไม่ต้องบันทึกก่อน
           </p>
         )}
+
+        {/* Preview Dialog */}
+        <Dialog open={!!selectedPreview} onOpenChange={() => setSelectedPreview(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5" />
+                ตัวอย่างไฟล์: {selectedPreview?.file.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex justify-center items-center min-h-[400px]">
+              {selectedPreview?.file.type.startsWith('image/') && selectedPreview.previewUrl ? (
+                <img 
+                  src={selectedPreview.previewUrl} 
+                  alt={selectedPreview.file.name}
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                />
+              ) : selectedPreview?.file.type === 'application/pdf' ? (
+                <div className="w-full h-[70vh] flex items-center justify-center bg-muted rounded-lg">
+                  <div className="text-center">
+                    <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-lg font-medium">PDF Preview</p>
+                    <p className="text-muted-foreground">
+                      ไฟล์ PDF จะแสดงหลังจากบันทึก PO แล้ว
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <File className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-lg font-medium">ไม่สามารถแสดงตัวอย่างได้</p>
+                  <p className="text-muted-foreground">รูปแบบไฟล์นี้ไม่รองรับการแสดงตัวอย่าง</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
