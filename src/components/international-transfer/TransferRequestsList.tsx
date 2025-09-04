@@ -305,28 +305,38 @@ export function TransferRequestsList({
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {/* Quick approval buttons for pending requests */}
+                          {/* Prominent approval buttons for pending requests */}
                           {request.status === 'pending' && (
-                            <>
+                            <div className="flex gap-2 mr-2">
                               <Button
                                 size="sm"
-                                variant="outline"
                                 onClick={() => handleStatusUpdate(request, 'approved')}
-                                className="text-green-600 border-green-600 hover:bg-green-50"
+                                className="bg-green-600 hover:bg-green-700 text-white"
                               >
-                                <Check className="h-3 w-3 mr-1" />
+                                <Check className="h-4 w-4 mr-1" />
                                 อนุมัติ
                               </Button>
                               <Button
                                 size="sm"
-                                variant="outline"
+                                variant="destructive"
                                 onClick={() => handleStatusUpdate(request, 'rejected')}
-                                className="text-red-600 border-red-600 hover:bg-red-50"
                               >
-                                <X className="h-3 w-3 mr-1" />
+                                <X className="h-4 w-4 mr-1" />
                                 ปฏิเสธ
                               </Button>
-                            </>
+                            </div>
+                          )}
+                          
+                          {/* Transfer completion button for approved requests */}
+                          {request.status === 'approved' && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleStatusUpdate(request, 'transferred')}
+                              className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
+                            >
+                              <Download className="h-4 w-4 mr-1" />
+                              ทำการโอน
+                            </Button>
                           )}
                           
                           {/* More actions dropdown */}
