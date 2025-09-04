@@ -48,6 +48,7 @@ const purchaseOrderSchema = z.object({
   delivery_address: z.string().optional(),
   special_instructions: z.string().optional(),
   notes: z.string().optional(),
+  source_system: z.string().default("manual"),
 });
 
 type PurchaseOrderFormData = z.infer<typeof purchaseOrderSchema>;
@@ -110,6 +111,7 @@ export function PurchaseOrderForm({
       delivery_address: editingPO.delivery_address || "",
       special_instructions: editingPO.special_instructions || "",
       notes: editingPO.notes || "",
+      source_system: editingPO.source_system || "manual",
     } : {
       po_number: "",
       customer_po_number: "",
@@ -256,6 +258,7 @@ export function PurchaseOrderForm({
         payment_terms_type: data.payment_terms_type || 'cash',
         notes: data.notes || undefined,
         created_by: editingPO ? editingPO.created_by : user.id,
+        source_system: data.source_system || 'manual',
       };
 
       if (editingPO) {
@@ -585,10 +588,42 @@ export function PurchaseOrderForm({
                     </div>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="source_system"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>แหล่งที่มาของ PO</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="เลือกแหล่งที่มา" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="manual">
+                            <div className="flex flex-col">
+                              <span className="font-medium">บันทึกเอง</span>
+                              <span className="text-xs text-muted-foreground">บันทึกโดยเจ้าหน้าที่</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="crm">
+                            <div className="flex flex-col">
+                              <span className="font-medium">ระบบ CRM</span>
+                              <span className="text-xs text-muted-foreground">รับมาจากระบบ CRM</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
 
           <Card>
             <CardHeader>

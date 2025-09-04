@@ -185,7 +185,8 @@ export default function PurchaseOrders() {
                       <TableHead>วันส่งมอบ</TableHead>
                       <TableHead>จำนวนเงิน</TableHead>
                       <TableHead>เอกสารแนบ</TableHead>
-                      <TableHead>สถานะ</TableHead>
+                       <TableHead>สถานะ</TableHead>
+                       <TableHead>แหล่งที่มา</TableHead>
                       <TableHead className="text-right">จัดการ</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -230,7 +231,12 @@ export default function PurchaseOrders() {
                               </span>
                             )}
                           </div>
-                        </TableCell>
+                         </TableCell>
+                         <TableCell>
+                           <Badge variant={po.source_system === 'crm' ? 'default' : 'secondary'}>
+                             {po.source_system === 'crm' ? 'ระบบ CRM' : 'บันทึกเอง'}
+                           </Badge>
+                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button
