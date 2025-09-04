@@ -27,7 +27,7 @@ export function Header() {
 
   return (
     <header className="h-16 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-      <div className="flex h-full items-center justify-between px-6">
+      <div className="flex h-full items-center px-6">
         {/* Search - only show on relevant pages */}
         {showSearch && (
           <div className="flex items-center space-x-4 flex-1 max-w-lg">
@@ -41,8 +41,11 @@ export function Header() {
           </div>
         )}
 
+        {/* Spacer to push actions to the right when no search */}
+        {!showSearch && <div className="flex-1" />}
+
         {/* Actions */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 ml-auto">
           {/* Notifications */}
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-4 w-4" />
