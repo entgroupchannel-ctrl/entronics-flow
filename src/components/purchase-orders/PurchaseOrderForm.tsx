@@ -358,41 +358,73 @@ export function PurchaseOrderForm({
                       ใบเสนอราคาอ้างอิง {!showAllQuotations && "(2 เดือนล่าสุด)"}
                       {showAllQuotations && "(ทั้งหมด)"}
                     </FormLabel>
-                    <div className="space-y-2">
+                     <div className="space-y-2">
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="min-h-[60px]">
-                            <SelectValue placeholder="เลือกใบเสนอราคา" />
+                          <SelectTrigger className="min-h-[80px] p-3">
+                            <SelectValue placeholder="เลือกใบเสนอราคา">
+                              {field.value && quotations?.find(q => q.id === field.value) && (
+                                <div className="flex flex-col gap-1 text-left w-full">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-blue-600">
+                                      {quotations.find(q => q.id === field.value)?.quotation_number}
+                                    </span>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-2">
+                                      <span>{quotations.find(q => q.id === field.value)?.customer_name}</span>
+                                      <span>•</span>
+                                      <span className="text-green-600 font-medium">
+                                        ฿{quotations.find(q => q.id === field.value)?.total_amount?.toLocaleString()}
+                                      </span>
+                                      <span>•</span>
+                                      <Badge 
+                                        variant={quotations.find(q => q.id === field.value)?.status === 'approved' ? 'default' : 'secondary'}
+                                        className="text-xs"
+                                      >
+                                        {quotations.find(q => q.id === field.value)?.status === 'approved' ? 'approved' : 
+                                         quotations.find(q => q.id === field.value)?.status}
+                                      </Badge>
+                                      <span>•</span>
+                                      <span className="text-blue-600 text-xs">
+                                        พนักงานขาย: {quotations.find(q => q.id === field.value)?.sales_person_name}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </SelectValue>
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="max-w-[400px]">
+                        <SelectContent className="max-w-[600px]">
                           {quotations?.map((quotation) => (
                             <SelectItem 
                               key={quotation.id} 
                               value={quotation.id}
-                              className="py-3"
+                              className="py-4 min-h-[80px]"
                             >
                               <div className="flex flex-col gap-1 text-left w-full">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-primary">{quotation.quotation_number}</span>
-                                  <Badge 
-                                    variant={quotation.status === 'approved' ? 'default' : 'secondary'}
-                                    className="text-xs"
-                                  >
-                                    {quotation.status === 'approved' ? 'อนุมัติแล้ว' : 
-                                     quotation.status === 'pending' ? 'รออนุมัติ' : quotation.status}
-                                  </Badge>
+                                  <span className="font-bold text-blue-600 text-base">{quotation.quotation_number}</span>
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <span className="font-medium">{quotation.customer_name}</span>
-                                    <span className="text-xs">•</span>
-                                    <span className="font-medium text-green-600">
+                                    <span>•</span>
+                                    <span className="font-bold text-green-600">
                                       ฿{quotation.total_amount?.toLocaleString()}
                                     </span>
-                                  </div>
-                                  <div className="text-xs text-blue-600 mt-1">
-                                    พนักงานขาย: {quotation.sales_person_name || 'ไม่ระบุ'}
+                                    <span>•</span>
+                                    <Badge 
+                                      variant={quotation.status === 'approved' ? 'default' : 'secondary'}
+                                      className="text-xs"
+                                    >
+                                      {quotation.status}
+                                    </Badge>
+                                    <span>•</span>
+                                    <span className="text-blue-600 text-xs">
+                                      พนักงานขาย: {quotation.sales_person_name || 'ไม่ระบุ'}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -400,7 +432,7 @@ export function PurchaseOrderForm({
                           ))}
                           {quotations?.length === 0 && !showAllQuotations && (
                             <SelectItem value="no-results" disabled>
-                              <div className="flex items-center gap-2 text-muted-foreground">
+                              <div className="flex items-center gap-2 text-muted-foreground py-4">
                                 <span>ไม่พบใบเสนอราคาใน 2 เดือนล่าสุด</span>
                               </div>
                             </SelectItem>
