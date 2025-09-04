@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { PurchaseOrderAttachments } from "./PurchaseOrderAttachments";
 
 const purchaseOrderSchema = z.object({
   po_number: z.string().optional(),
@@ -712,6 +713,9 @@ export function PurchaseOrderForm({
             </div>
           </CardContent>
         </Card>
+
+        {/* Attachments Section */}
+        <PurchaseOrderAttachments purchaseOrderId={editingPO?.id || ""} />
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-4">

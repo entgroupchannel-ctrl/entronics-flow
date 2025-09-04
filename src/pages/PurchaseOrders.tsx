@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Eye, Edit, Trash2 } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Paperclip } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Layout } from "@/components/layout/Layout";
 import { PurchaseOrderForm } from "@/components/purchase-orders/PurchaseOrderForm";
@@ -32,25 +32,36 @@ export default function PurchaseOrders() {
       
       if (error) throw error;
       
-      // Get sales person info separately to avoid foreign key issues
+      // Get sales person info and attachments count
       if (poData && poData.length > 0) {
         const salesPersonIds = [...new Set(poData.map(po => po.sales_person_id).filter(Boolean))];
+        const poIds = poData.map(po => po.id);
         
+        // Get sales person names
+        let profilesData = [];
         if (salesPersonIds.length > 0) {
-          const { data: profilesData } = await supabase
+          const { data: profiles } = await supabase
             .from("profiles")
             .select("user_id, full_name")
             .in("user_id", salesPersonIds);
-          
-          // Merge profile data with PO data
-          return poData.map(po => ({
-            ...po,
-            sales_person_name: profilesData?.find(p => p.user_id === po.sales_person_id)?.full_name || null
-          }));
+          profilesData = profiles || [];
         }
+        
+        // Get attachments count for each PO
+        const { data: attachmentCounts } = await supabase
+          .from("purchase_order_attachments")
+          .select("purchase_order_id")
+          .in("purchase_order_id", poIds);
+        
+        // Merge data
+        return poData.map(po => ({
+          ...po,
+          sales_person_name: profilesData?.find(p => p.user_id === po.sales_person_id)?.full_name || null,
+          attachment_count: attachmentCounts?.filter(a => a.purchase_order_id === po.id).length || 0
+        }));
       }
       
-      return poData?.map(po => ({ ...po, sales_person_name: null })) || [];
+      return poData?.map(po => ({ ...po, sales_person_name: null, attachment_count: 0 })) || [];
     },
   });
 
@@ -148,6 +159,7 @@ export default function PurchaseOrders() {
                       <TableHead>วันที่</TableHead>
                       <TableHead>วันส่งมอบ</TableHead>
                       <TableHead>จำนวนเงิน</TableHead>
+                      <TableHead>เอกสารแนบ</TableHead>
                       <TableHead>สถานะ</TableHead>
                       <TableHead className="text-right">จัดการ</TableHead>
                     </TableRow>
@@ -174,6 +186,12 @@ export default function PurchaseOrders() {
                         </TableCell>
                         <TableCell>
                           ฿{po.total_amount?.toLocaleString() || "0"}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Paperclip className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{po.attachment_count || 0}</span>
+                          </div>
                         </TableCell>
                         <TableCell>{getStatusBadge(po.status)}</TableCell>
                         <TableCell className="text-right">
