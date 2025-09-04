@@ -6,30 +6,17 @@ const corsHeaders = {
 };
 
 interface SupplierData {
-  supplier_code: string;
-  name: string;
-  business_registration_number?: string;
-  business_type?: string;
-  established_year?: number;
+  company_name: string;
+  company_name_en?: string;
   contact_person?: string;
-  phone?: string;
   email?: string;
-  website?: string;
+  phone?: string;
   address?: string;
-  supplier_country?: string;
-  supplier_category?: string;
-  supplier_currency?: string;
-  bank_name?: string;
-  bank_account?: string;
-  swift_code?: string;
-  bank_address?: string;
-  main_products?: string[];
-  certifications?: string[];
-  is_preferred_supplier?: boolean;
-  compliance_status?: string;
-  quality_rating?: number;
-  delivery_rating?: number;
-  price_rating?: number;
+  city?: string;
+  country?: string;
+  supplier_grade?: string;
+  payment_terms?: string;
+  delivery_time_days?: number;
 }
 
 interface SyncRequest {
@@ -90,62 +77,78 @@ Deno.serve(async (req) => {
     // Process each supplier
     for (const supplierData of body.suppliers) {
       try {
-        if (!supplierData.name || !supplierData.supplier_code) {
+        if (!supplierData.company_name) {
           results.skipped++;
           results.errors.push({
-            supplier_code: supplierData.supplier_code || 'unknown',
-            error: 'Missing required fields: name and supplier_code'
+            company_name: supplierData.company_name || 'unknown',
+            error: 'Missing required field: company_name'
           });
           continue;
         }
 
-        // Check if supplier already exists
-        const { data: existingSupplier, error: checkError } = await supabase
+        // Check if supplier already exists (by company_name or email)
+        let existingSupplier = null;
+        let checkError = null;
+
+        // First try to find by company_name
+        const { data: supplierByName, error: nameError } = await supabase
           .from('customers')
           .select('id, updated_at')
-          .eq('supplier_code', supplierData.supplier_code)
+          .eq('name', supplierData.company_name)
           .eq('customer_type', 'ผู้จำหน่าย')
-          .single();
+          .maybeSingle();
 
-        if (checkError && checkError.code !== 'PGRST116') {
-          console.error('Error checking existing supplier:', checkError);
-          results.errors.push({
-            supplier_code: supplierData.supplier_code,
-            error: checkError.message
-          });
-          continue;
+        if (nameError) {
+          console.error('Error checking existing supplier by name:', nameError);
+        } else if (supplierByName) {
+          existingSupplier = supplierByName;
         }
 
+        // If not found by name and email is provided, try email
+        if (!existingSupplier && supplierData.email) {
+          const { data: supplierByEmail, error: emailError } = await supabase
+            .from('customers')
+            .select('id, updated_at')
+            .eq('email', supplierData.email)
+            .eq('customer_type', 'ผู้จำหน่าย')
+            .maybeSingle();
+
+          if (emailError) {
+            console.error('Error checking existing supplier by email:', emailError);
+          } else if (supplierByEmail) {
+            existingSupplier = supplierByEmail;
+          }
+        }
+
+        // Generate supplier_code if not provided
+        const supplierCode = `SUP${Date.now()}${Math.floor(Math.random() * 1000)}`;
+
         const supplierRecord = {
-          name: supplierData.name,
-          supplier_code: supplierData.supplier_code,
-          business_registration_number: supplierData.business_registration_number,
-          business_type: supplierData.business_type,
-          established_year: supplierData.established_year,
+          name: supplierData.company_name,
+          supplier_code: supplierCode,
           contact_person: supplierData.contact_person,
           phone: supplierData.phone,
           email: supplierData.email,
-          website: supplierData.website,
           address: supplierData.address,
-          supplier_country: supplierData.supplier_country,
-          supplier_category: supplierData.supplier_category,
-          supplier_currency: supplierData.supplier_currency || 'USD',
-          bank_name: supplierData.bank_name,
-          bank_account: supplierData.bank_account,
-          swift_code: supplierData.swift_code,
-          bank_address: supplierData.bank_address,
-          main_products: supplierData.main_products || [],
-          certifications: supplierData.certifications || [],
-          is_preferred_supplier: supplierData.is_preferred_supplier || false,
-          compliance_status: supplierData.compliance_status || 'pending',
-          quality_rating: supplierData.quality_rating,
-          delivery_rating: supplierData.delivery_rating,
-          price_rating: supplierData.price_rating,
+          supplier_country: supplierData.country || 'Thailand',
+          supplier_currency: 'THB',
+          payment_terms: supplierData.payment_terms,
           customer_type: 'ผู้จำหน่าย',
           source_system: 'erp',
           last_synced_at: new Date().toISOString(),
           sync_status: 'synced',
-          supplier_registration_status: 'approved' // ERP suppliers are pre-approved
+          supplier_registration_status: 'approved', // ERP suppliers are pre-approved
+          compliance_status: 'approved',
+          // Map supplier_grade to ratings
+          quality_rating: supplierData.supplier_grade === 'A' ? 5 : 
+                         supplierData.supplier_grade === 'B' ? 4 : 
+                         supplierData.supplier_grade === 'C' ? 3 : null,
+          delivery_rating: supplierData.supplier_grade === 'A' ? 5 : 
+                          supplierData.supplier_grade === 'B' ? 4 : 
+                          supplierData.supplier_grade === 'C' ? 3 : null,
+          price_rating: supplierData.supplier_grade === 'A' ? 5 : 
+                       supplierData.supplier_grade === 'B' ? 4 : 
+                       supplierData.supplier_grade === 'C' ? 3 : null
         };
 
         if (existingSupplier) {
@@ -161,12 +164,12 @@ Deno.serve(async (req) => {
           if (updateError) {
             console.error('Error updating supplier:', updateError);
             results.errors.push({
-              supplier_code: supplierData.supplier_code,
+              company_name: supplierData.company_name,
               error: updateError.message
             });
           } else {
             results.updated++;
-            console.log(`Updated supplier: ${supplierData.name}`);
+            console.log(`Updated supplier: ${supplierData.company_name}`);
           }
         } else {
           // Create new supplier
@@ -177,19 +180,19 @@ Deno.serve(async (req) => {
           if (insertError) {
             console.error('Error creating supplier:', insertError);
             results.errors.push({
-              supplier_code: supplierData.supplier_code,
+              company_name: supplierData.company_name,
               error: insertError.message
             });
           } else {
             results.created++;
-            console.log(`Created supplier: ${supplierData.name}`);
+            console.log(`Created supplier: ${supplierData.company_name}`);
           }
         }
 
       } catch (error) {
         console.error('Error processing supplier:', error);
         results.errors.push({
-          supplier_code: supplierData.supplier_code || 'unknown',
+          company_name: supplierData.company_name || 'unknown',
           error: error.message
         });
       }
