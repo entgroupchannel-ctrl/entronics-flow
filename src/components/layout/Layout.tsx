@@ -9,8 +9,6 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col w-full">
-      <Header />
-      
       {/* System Banner */}
       <div className="flex justify-center py-2">
         <img 
@@ -20,6 +18,7 @@ export function Layout({ children }: LayoutProps) {
         />
       </div>
       
+      <Header />
       <TopNavigation />
       
       <main className="flex-1 overflow-auto">
