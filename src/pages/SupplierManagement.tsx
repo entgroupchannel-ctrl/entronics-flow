@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Building2, TrendingUp, Users, Star, Shield, Clock, Globe } from "lucide-react";
+import { Plus, Building2, TrendingUp, Users, Star, Shield, Clock, Globe, FileText } from "lucide-react";
 import { SupplierRegistrationForm } from "@/components/supplier/SupplierRegistrationForm";
 import { SupplierApprovalList } from "@/components/supplier/SupplierApprovalList";
 import { SupplierList } from "@/components/supplier/SupplierList";
 import { SupplierPaymentHistory } from "@/components/supplier/SupplierPaymentHistory";
 import { InternationalTransferReport } from "@/components/financial/InternationalTransferReport";
 import { SupplierTransferManagement } from "@/components/supplier/SupplierTransferManagement";
+import { SupplierDocumentForm } from "@/components/supplier/SupplierDocumentForm";
 import { useToast } from "@/hooks/use-toast";
 
 export default function SupplierManagement() {
@@ -169,6 +170,7 @@ export default function SupplierManagement() {
           <TabsTrigger value="form">
             {editingSupplier ? "แก้ไข Supplier" : "ลงทะเบียน Supplier"}
           </TabsTrigger>
+          <TabsTrigger value="documents">เอกสาร PI/CI/AWB</TabsTrigger>
           <TabsTrigger value="payments">ประวัติการจ่าย</TabsTrigger>
           <TabsTrigger value="transfers">การโอนเงินต่างประเทศ</TabsTrigger>
         </TabsList>
@@ -205,6 +207,62 @@ export default function SupplierManagement() {
                 onSuccess={handleFormSuccess}
                 onCancel={() => setActiveTab("list")}
               />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="documents" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                จัดการเอกสาร PI/CI/AWB
+              </CardTitle>
+              <CardDescription>
+                อัปโหลดและจัดการเอกสาร Proforma Invoice, Commercial Invoice, Air Waybill และเอกสารที่เกี่ยวข้อง
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {suppliers && suppliers.filter(s => s.supplier_registration_status === 'approved').length > 0 ? (
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-sm font-medium">เลือก Supplier</label>
+                    <select 
+                      className="w-full mt-1 p-2 border rounded-md"
+                      onChange={(e) => {
+                        const supplierId = e.target.value;
+                        if (supplierId) {
+                          // Update the form to show for selected supplier
+                        }
+                      }}
+                    >
+                      <option value="">เลือก Supplier...</option>
+                      {suppliers.filter(s => s.supplier_registration_status === 'approved').map(supplier => (
+                        <option key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* For now, show form for first approved supplier as demo */}
+                  {suppliers.filter(s => s.supplier_registration_status === 'approved')[0] && (
+                    <SupplierDocumentForm 
+                      supplierId={suppliers.filter(s => s.supplier_registration_status === 'approved')[0].id}
+                      onSuccess={() => toast({
+                        title: "สำเร็จ",
+                        description: "อัปโหลดเอกสารเรียบร้อยแล้ว",
+                      })}
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>ไม่มี Supplier ที่อนุมัติแล้ว</p>
+                  <p className="text-sm">กรุณาอนุมัติ Supplier ก่อนเพื่ออัปโหลดเอกสาร</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
