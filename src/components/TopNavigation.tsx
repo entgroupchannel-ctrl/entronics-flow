@@ -98,10 +98,6 @@ export function TopNavigation() {
             <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
               <Building2 className="h-4 w-4" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold">ENT GROUP</span>
-              <span className="text-xs text-muted-foreground">Industrial PC ERP</span>
-            </div>
           </div>
 
           {/* Navigation Menu */}
@@ -193,6 +189,12 @@ export function TopNavigation() {
 
             {/* Settings */}
             <MenuItem item={{ title: "ตั้งค่า", url: "/settings", icon: Settings }} />
+          </div>
+
+          {/* Company Name - moved to top right */}
+          <div className="flex flex-col items-end">
+            <span className="text-sm font-semibold">ENT GROUP</span>
+            <span className="text-xs text-muted-foreground">Industrial PC ERP</span>
           </div>
         </div>
       </div>
