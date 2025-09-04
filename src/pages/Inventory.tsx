@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -397,30 +395,20 @@ const Inventory = () => {
 
   if (loading || roleLoading) {
     return (
-      <div className="flex h-screen">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 p-6 flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-              <p className="mt-4 text-muted-foreground">กำลังโหลดข้อมูล...</p>
-            </div>
-          </main>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">กำลังโหลดข้อมูล...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="flex-1 p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold tracking-tight">การจัดการสินค้าคงคลัง</h1>
-          </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold tracking-tight">การจัดการสินค้าคงคลัง</h1>
+      </div>
 
           <Tabs defaultValue="reports" className="space-y-4">
             <TabsList className="grid w-full grid-cols-2">
@@ -1059,8 +1047,6 @@ const Inventory = () => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </main>
-      </div>
     </div>
   );
 };
