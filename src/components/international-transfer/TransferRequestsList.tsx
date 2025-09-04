@@ -46,7 +46,7 @@ interface TransferRequest {
   created_at: string;
   supplier?: { name: string; bank_name: string; bank_account: string };
   customer?: { name: string };
-  requested_by_profile?: { 
+  profiles?: { 
     full_name: string; 
     username?: string;
   } | null;
@@ -298,7 +298,7 @@ export function TransferRequestsList({
                         {getPriorityBadge(request.priority)}
                       </TableCell>
                       <TableCell>
-                        {request.requested_by_profile?.full_name || "ไม่ระบุ"}
+                        {request.profiles?.full_name || "ไม่ระบุ"}
                       </TableCell>
                       <TableCell>
                         {format(new Date(request.created_at), "dd MMM yyyy", { locale: th })}
