@@ -54,6 +54,7 @@ const operationItems = [
 
 const financialItems = [
   { title: "การเงิน / Financial", url: "/financial", icon: DollarSign },
+  { title: "โอนเงินต่างประเทศ", url: "/international-transfer", icon: Globe },
   { title: "วิเคราะห์ข้อมูล / Analytics", url: "/analytics", icon: PieChart },
 ];
 
@@ -147,7 +148,6 @@ export function AppSidebar() {
               {financialItems.map((item) => (
                 <MenuItem key={item.title} item={item} />
               ))}
-              <MenuItem item={{ title: "โอนเงินต่างประเทศ", url: "/international-transfer", icon: Globe }} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
