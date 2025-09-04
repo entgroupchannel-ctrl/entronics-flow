@@ -485,7 +485,7 @@ export function InternationalTransferForm({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Top Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pb-6 border-b">
+          <div className="flex flex-col sm:flex-row gap-3 pb-6 border-b sm:justify-end">
             <Button
               type="button"
               variant="outline"
