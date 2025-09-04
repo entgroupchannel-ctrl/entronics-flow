@@ -45,6 +45,7 @@ const mainItems = [
 const salesDocumentSubItems = [
   { title: "ใบเสนอราคา", url: "/quotations", icon: FileText },
   { title: "เอกสารยืนยันคำสั่งซื้อ", url: "/purchase-order-confirmations", icon: FileText },
+  { title: "Purchase Orders", url: "/purchase-orders", icon: ShoppingCart },
   { title: "ใบวางบิล/ใบแจ้งหนี้", url: "/invoices", icon: Receipt },
   { title: "การชำระเงิน/ใบกำกับภาษี", url: "/tax-invoices", icon: Calculator },
   { title: "ใบส่งสินค้า/ใบกำกับภาษี", url: "/receipts", icon: Receipt },
@@ -56,7 +57,6 @@ const salesItems = [
 ];
 
 const operationItems = [
-  { title: "Purchase Orders", url: "/purchase-orders", icon: ShoppingCart },
   { title: "แจ้งซ่อม / Service Ticket", url: "/service-request", icon: Wrench },
   { title: "ระบบจัดส่งสินค้า / Delivery", url: "/delivery", icon: TruckIcon },
   { title: "รายชื่อลูกค้า / Customers", url: "/customers", icon: Users },
