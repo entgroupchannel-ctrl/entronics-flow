@@ -260,7 +260,7 @@ export function PurchaseOrderForm({
         po_date: data.po_date.toISOString().split('T')[0],
         delivery_date: data.delivery_date ? data.delivery_date.toISOString().split('T')[0] : undefined,
         total_amount: data.total_amount || 0,
-        status: data.status,
+        status: data.source_system === 'CRM' ? 'confirmed' : data.status,
         payment_terms_type: data.payment_terms_type || 'cash',
         payment_method: data.payment_method || 'bank_transfer',
         notes: data.notes || undefined,
