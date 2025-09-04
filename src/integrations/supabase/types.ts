@@ -6191,6 +6191,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_po_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_quotation_number: {
         Args: Record<PropertyKey, never>
         Returns: string
