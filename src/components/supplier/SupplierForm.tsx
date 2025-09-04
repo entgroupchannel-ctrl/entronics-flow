@@ -224,7 +224,7 @@ export function SupplierForm({
     try {
       const submitData = {
         ...data,
-        customer_type: "ผู้จัดจำหน่าย",
+        customer_type: "ผู้จำหน่าย",
         created_by: editingSupplier ? editingSupplier.created_by : user.id,
       };
 

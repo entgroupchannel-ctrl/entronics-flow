@@ -127,7 +127,7 @@ export function InternationalTransferForm({
       const { data, error } = await supabase
         .from("customers")
         .select("id, name, bank_name, bank_account, swift_code, supplier_code, tax_id, phone, email, supplier_country, business_type")
-        .eq("customer_type", "ผู้จัดจำหน่าย")
+        .eq("customer_type", "ผู้จำหน่าย")
         .eq("supplier_registration_status", "approved")
         .order("name");
 
