@@ -157,11 +157,11 @@ export default function PurchaseOrders() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Purchase Orders</h1>
-            <p className="text-muted-foreground">จัดการใบสั่งซื้อที่ได้รับจากลูกค้า</p>
+      <div className="container mx-auto px-6 py-8 space-y-6">
+        <div className="flex justify-between items-start">
+          <div className="text-left">
+            <h1 className="text-3xl font-bold text-left">Purchase Orders</h1>
+            <p className="text-muted-foreground text-left mt-1">จัดการใบสั่งซื้อที่ได้รับจากลูกค้า</p>
           </div>
           <Button onClick={handleNewPO}>
             <Plus className="w-4 h-4 mr-2" />
