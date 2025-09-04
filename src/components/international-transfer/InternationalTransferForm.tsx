@@ -339,7 +339,7 @@ export function InternationalTransferForm({
     }
   }, [watchTransferAmount, watchExchangeRate, form]);
 
-  // Document upload handlers - Upload to Google Drive
+  // Document upload handlers - Upload to Supabase Storage
   const handleDocumentUpload = async (file: File, docType: 'pi' | 'ci' | 'awb' | 'packingList' | 'transferRequest') => {
     if (!file) return;
 
@@ -347,39 +347,43 @@ export function InternationalTransferForm({
     setUploadingStates(prev => ({ ...prev, [docType]: true }));
 
     try {
-      // Create form data for Google Drive upload
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('docType', docType);
-      formData.append('transferId', editingRequest?.id || 'temp_' + Date.now());
+      // Create file path
+      const fileExtension = file.name.split('.').pop();
+      const fileName = `${docType}_${Date.now()}.${fileExtension}`;
+      const filePath = `international-transfers/${fileName}`;
 
-      // Upload to Google Drive via Edge Function
-      const { data, error } = await supabase.functions.invoke('upload-to-drive', {
-        body: formData
-      });
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file, {
+          upsert: false
+        });
 
       if (error) throw error;
 
-      if (!data.success) {
-        throw new Error(data.error || 'Upload failed');
-      }
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
 
-      // Update local state with Google Drive URL
+      const publicUrl = urlData.publicUrl;
+
+      // Update local state with Supabase Storage URL
       setUploadedDocuments(prev => ({
         ...prev,
-        [docType]: data.file.viewLink
+        [docType]: publicUrl
       }));
 
-      // Update form values with Google Drive URLs
-      if (docType === 'pi') form.setValue('pi_document_url', data.file.viewLink);
-      if (docType === 'ci') form.setValue('ci_document_url', data.file.viewLink);
-      if (docType === 'awb') form.setValue('awb_document_url', data.file.viewLink);
-      if (docType === 'packingList') form.setValue('packing_list_url', data.file.viewLink);
-      if (docType === 'transferRequest') form.setValue('transfer_request_document_url', data.file.viewLink);
+      // Update form values with Supabase Storage URLs
+      if (docType === 'pi') form.setValue('pi_document_url', publicUrl);
+      if (docType === 'ci') form.setValue('ci_document_url', publicUrl);
+      if (docType === 'awb') form.setValue('awb_document_url', publicUrl);
+      if (docType === 'packingList') form.setValue('packing_list_url', publicUrl);
+      if (docType === 'transferRequest') form.setValue('transfer_request_document_url', publicUrl);
 
       toast({
         title: "สำเร็จ",
-        description: `อัปโหลดเอกสาร ${getDocumentTypeLabel(docType)} ไป Google Drive เรียบร้อยแล้ว`,
+        description: `อัปโหลดเอกสาร ${getDocumentTypeLabel(docType)} เรียบร้อยแล้ว`,
       });
     } catch (error: any) {
       console.error('Upload error:', error);
