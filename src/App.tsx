@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Layout } from "@/components/layout/Layout";
 import Index from "./pages/Index";
 import Inventory from "./pages/Inventory";
 import Customers from "./pages/Customers";
@@ -193,7 +194,9 @@ const App = () => (
             } />
             <Route path="/supplier-management" element={
               <ProtectedRoute>
-                <SupplierManagement />
+                <Layout>
+                  <SupplierManagement />
+                </Layout>
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
