@@ -1444,6 +1444,7 @@ export type Database = {
         Row: {
           actual_exchange_rate: number | null
           actual_transfer_amount: number | null
+          actual_transfer_date: string | null
           approved_at: string | null
           approved_by: string | null
           attachment_urls: string[] | null
@@ -1478,15 +1479,19 @@ export type Database = {
           supplier_swift_code: string | null
           thb_equivalent: number | null
           transfer_amount: number
+          transfer_confirmation_url: string | null
+          transfer_evidence_urls: string[] | null
           transfer_executed_at: string | null
           transfer_fee: number | null
           transfer_number: string
           transfer_reference_number: string | null
+          transfer_slip_url: string | null
           updated_at: string
         }
         Insert: {
           actual_exchange_rate?: number | null
           actual_transfer_amount?: number | null
+          actual_transfer_date?: string | null
           approved_at?: string | null
           approved_by?: string | null
           attachment_urls?: string[] | null
@@ -1521,15 +1526,19 @@ export type Database = {
           supplier_swift_code?: string | null
           thb_equivalent?: number | null
           transfer_amount: number
+          transfer_confirmation_url?: string | null
+          transfer_evidence_urls?: string[] | null
           transfer_executed_at?: string | null
           transfer_fee?: number | null
           transfer_number: string
           transfer_reference_number?: string | null
+          transfer_slip_url?: string | null
           updated_at?: string
         }
         Update: {
           actual_exchange_rate?: number | null
           actual_transfer_amount?: number | null
+          actual_transfer_date?: string | null
           approved_at?: string | null
           approved_by?: string | null
           attachment_urls?: string[] | null
@@ -1564,10 +1573,13 @@ export type Database = {
           supplier_swift_code?: string | null
           thb_equivalent?: number | null
           transfer_amount?: number
+          transfer_confirmation_url?: string | null
+          transfer_evidence_urls?: string[] | null
           transfer_executed_at?: string | null
           transfer_fee?: number | null
           transfer_number?: string
           transfer_reference_number?: string | null
+          transfer_slip_url?: string | null
           updated_at?: string
         }
         Relationships: [

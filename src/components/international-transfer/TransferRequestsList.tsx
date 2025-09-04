@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TransferCompletionDialog } from "./TransferCompletionDialog";
 
 interface TransferRequest {
   id: string;
@@ -71,6 +72,8 @@ export function TransferRequestsList({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [selectedTransferRequest, setSelectedTransferRequest] = useState<TransferRequest | null>(null);
 
   // Filter requests based on search and filters
   const filteredRequests = requests.filter((request) => {
@@ -342,7 +345,10 @@ export function TransferRequestsList({
                           {request.status === 'approved' && (
                             <Button
                               size="sm"
-                              onClick={() => handleStatusUpdate(request, 'transferred')}
+                              onClick={() => {
+                                setSelectedTransferRequest(request);
+                                setTransferDialogOpen(true);
+                              }}
                               className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
                             >
                               <Download className="h-4 w-4 mr-1" />
@@ -435,6 +441,19 @@ export function TransferRequestsList({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Transfer Completion Dialog */}
+      {selectedTransferRequest && (
+        <TransferCompletionDialog
+          open={transferDialogOpen}
+          onOpenChange={setTransferDialogOpen}
+          request={selectedTransferRequest}
+          onSuccess={() => {
+            onRefresh();
+            setSelectedTransferRequest(null);
+          }}
+        />
+      )}
     </div>
   );
 }
