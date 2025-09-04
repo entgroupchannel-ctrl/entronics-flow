@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +16,9 @@ import { useToast } from "@/hooks/use-toast";
 export default function InternationalTransfer() {
   const [activeTab, setActiveTab] = useState("list");
   const [editingRequest, setEditingRequest] = useState(null);
+  const [currentView, setCurrentView] = useState('international-transfer');
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: transferRequests, isLoading, refetch } = useQuery({
     queryKey: ["international-transfer-requests"],
@@ -64,104 +69,118 @@ export default function InternationalTransfer() {
     });
   };
 
+  const handleMenuClick = (path: string) => {
+    navigate(path);
+  };
+
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">โอนเงินต่างประเทศ</h1>
-          <p className="text-muted-foreground">
-            จัดการคำขอโอนเงินไปยัง Supplier ต่างประเทศ
-          </p>
-        </div>
-        <Button onClick={handleNewRequest} className="gap-2">
-          <Plus className="h-4 w-4" />
-          สร้างคำขอใหม่
-        </Button>
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">คำขอทั้งหมด</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">รออนุมัติ</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">อนุมัติแล้ว</CardTitle>
-            <Badge variant="secondary" className="h-4 w-4 bg-green-100 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">มูลค่ารวม</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold">
-              ${stats.totalAmount.toLocaleString()}
+    <div className="flex min-h-screen w-full">
+      <Sidebar 
+        onMenuClick={handleMenuClick}
+        currentView={currentView}
+        onLogoClick={() => navigate('/')}
+      />
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <main className="flex-1 p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold">โอนเงินต่างประเทศ</h1>
+              <p className="text-muted-foreground">
+                จัดการคำขอโอนเงินไปยัง Supplier ต่างประเทศ
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Button onClick={handleNewRequest} className="gap-2">
+              <Plus className="h-4 w-4" />
+              สร้างคำขอใหม่
+            </Button>
+          </div>
 
-      {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="list">รายการคำขอ</TabsTrigger>
-          <TabsTrigger value="form">
-            {editingRequest ? "แก้ไขคำขอ" : "สร้างคำขอใหม่"}
-          </TabsTrigger>
-        </TabsList>
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">คำขอทั้งหมด</CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total}</div>
+              </CardContent>
+            </Card>
 
-        <TabsContent value="list" className="space-y-4">
-          <TransferRequestsList
-            requests={transferRequests || []}
-            isLoading={isLoading}
-            onEdit={handleEditRequest}
-            onRefresh={refetch}
-          />
-        </TabsContent>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">รออนุมัติ</CardTitle>
+                <Clock className="h-4 w-4 text-yellow-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+              </CardContent>
+            </Card>
 
-        <TabsContent value="form" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {editingRequest ? "แก้ไขคำขอโอนเงิน" : "สร้างคำขอโอนเงินใหม่"}
-              </CardTitle>
-              <CardDescription>
-                กรอกข้อมูลสำหรับการโอนเงินไปยัง Supplier ต่างประเทศ
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <InternationalTransferForm
-                editingRequest={editingRequest}
-                onSuccess={handleFormSuccess}
-                onCancel={() => setActiveTab("list")}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">อนุมัติแล้ว</CardTitle>
+                <Badge variant="secondary" className="h-4 w-4 bg-green-100 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">มูลค่ารวม</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg font-bold">
+                  ${stats.totalAmount.toLocaleString()}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content */}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList>
+              <TabsTrigger value="list">รายการคำขอ</TabsTrigger>
+              <TabsTrigger value="form">
+                {editingRequest ? "แก้ไขคำขอ" : "สร้างคำขอใหม่"}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="list" className="space-y-4">
+              <TransferRequestsList
+                requests={transferRequests || []}
+                isLoading={isLoading}
+                onEdit={handleEditRequest}
+                onRefresh={refetch}
               />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+
+            <TabsContent value="form" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {editingRequest ? "แก้ไขคำขอโอนเงิน" : "สร้างคำขอโอนเงินใหม่"}
+                  </CardTitle>
+                  <CardDescription>
+                    กรอกข้อมูลสำหรับการโอนเงินไปยัง Supplier ต่างประเทศ
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <InternationalTransferForm
+                    editingRequest={editingRequest}
+                    onSuccess={handleFormSuccess}
+                    onCancel={() => setActiveTab("list")}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </main>
+      </div>
     </div>
   );
 }
