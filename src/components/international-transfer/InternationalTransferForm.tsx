@@ -83,6 +83,19 @@ export function InternationalTransferForm({
     packingList: null,
     transferRequest: null,
   });
+  const [uploadingStates, setUploadingStates] = useState<{
+    pi: boolean;
+    ci: boolean;
+    awb: boolean;
+    packingList: boolean;
+    transferRequest: boolean;
+  }>({
+    pi: false,
+    ci: false,
+    awb: false,
+    packingList: false,
+    transferRequest: false,
+  });
 
   const form = useForm<TransferFormData>({
     resolver: zodResolver(transferFormSchema),
@@ -326,47 +339,58 @@ export function InternationalTransferForm({
     }
   }, [watchTransferAmount, watchExchangeRate, form]);
 
-  // Document upload handlers
+  // Document upload handlers - Upload to Google Drive
   const handleDocumentUpload = async (file: File, docType: 'pi' | 'ci' | 'awb' | 'packingList' | 'transferRequest') => {
     if (!file) return;
 
+    // Set uploading state
+    setUploadingStates(prev => ({ ...prev, [docType]: true }));
+
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${docType}-${Date.now()}.${fileExt}`;
-      const filePath = `transfer-documents/${fileName}`;
+      // Create form data for Google Drive upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('docType', docType);
+      formData.append('transferId', editingRequest?.id || 'temp_' + Date.now());
 
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, file);
+      // Upload to Google Drive via Edge Function
+      const { data, error } = await supabase.functions.invoke('upload-to-drive', {
+        body: formData
+      });
 
-      if (uploadError) throw uploadError;
+      if (error) throw error;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('documents')
-        .getPublicUrl(filePath);
+      if (!data.success) {
+        throw new Error(data.error || 'Upload failed');
+      }
 
+      // Update local state with Google Drive URL
       setUploadedDocuments(prev => ({
         ...prev,
-        [docType]: publicUrl
+        [docType]: data.file.viewLink
       }));
 
-      // Update form values
-      if (docType === 'pi') form.setValue('pi_document_url', publicUrl);
-      if (docType === 'ci') form.setValue('ci_document_url', publicUrl);
-      if (docType === 'awb') form.setValue('awb_document_url', publicUrl);
-      if (docType === 'packingList') form.setValue('packing_list_url', publicUrl);
-      if (docType === 'transferRequest') form.setValue('transfer_request_document_url', publicUrl);
+      // Update form values with Google Drive URLs
+      if (docType === 'pi') form.setValue('pi_document_url', data.file.viewLink);
+      if (docType === 'ci') form.setValue('ci_document_url', data.file.viewLink);
+      if (docType === 'awb') form.setValue('awb_document_url', data.file.viewLink);
+      if (docType === 'packingList') form.setValue('packing_list_url', data.file.viewLink);
+      if (docType === 'transferRequest') form.setValue('transfer_request_document_url', data.file.viewLink);
 
       toast({
         title: "สำเร็จ",
-        description: `อัปโหลดเอกสาร ${getDocumentTypeLabel(docType)} เรียบร้อยแล้ว`,
+        description: `อัปโหลดเอกสาร ${getDocumentTypeLabel(docType)} ไป Google Drive เรียบร้อยแล้ว`,
       });
     } catch (error: any) {
+      console.error('Upload error:', error);
       toast({
         title: "ข้อผิดพลาด",
         description: `ไม่สามารถอัปโหลดเอกสารได้: ${error.message}`,
         variant: "destructive",
       });
+    } finally {
+      // Clear uploading state
+      setUploadingStates(prev => ({ ...prev, [docType]: false }));
     }
   };
 
@@ -1192,19 +1216,27 @@ export function InternationalTransferForm({
                     {/* PI Document */}
                     <div className="space-y-2">
                       <Label htmlFor="pi-upload">Proforma Invoice (PI)</Label>
-                      {uploadedDocuments.pi ? (
+                      {uploadingStates.pi ? (
+                        <div className="flex items-center justify-center p-4 border rounded-lg bg-blue-50 border-blue-200">
+                          <div className="flex items-center gap-2 text-sm text-blue-700">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
+                            กำลังอัปโหลดไป Google Drive...
+                          </div>
+                        </div>
+                      ) : uploadedDocuments.pi ? (
                         <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
                           <div className="flex items-center gap-2 text-sm text-green-700">
                             <FileUp className="h-4 w-4" />
-                            PI Document uploaded
+                            PI Document uploaded to Google Drive
                           </div>
                           <div className="flex gap-1">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => window.open(uploadedDocuments.pi!, '_blank')}
+                              className="text-blue-600 hover:text-blue-700"
                             >
-                              ดู
+                              เปิดใน Drive
                             </Button>
                             <Button
                               size="sm"
@@ -1224,6 +1256,7 @@ export function InternationalTransferForm({
                             const file = e.target.files?.[0];
                             if (file) handleDocumentUpload(file, 'pi');
                           }}
+                          disabled={uploadingStates.pi}
                         />
                       )}
                     </div>
@@ -1385,6 +1418,7 @@ export function InternationalTransferForm({
                     </div>
                   </div>
                   <div className="text-sm text-muted-foreground">
+                    <strong>📁 Google Drive Integration:</strong> ไฟล์จะถูกอัปโหลดไป Google Drive และสามารถแชร์ได้<br/>
                     <strong>หมายเหตุ:</strong> ใบคำขอโอนเงินต่างประเทศเป็นเอกสารบังคับที่ต้องแนบ<br/>
                     รองรับไฟล์: PDF, JPG, PNG, DOC, DOCX (ขนาดไม่เกิน 10MB)
                   </div>
