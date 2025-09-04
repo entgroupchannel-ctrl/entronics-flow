@@ -88,7 +88,7 @@ export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [currentView, setCurrentView] = useState('settings');
+  
   const [loading, setLoading] = useState(true);
   const [invitations, setInvitations] = useState<UserInvitation[]>([]);
   const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
