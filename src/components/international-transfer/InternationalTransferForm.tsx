@@ -1522,6 +1522,5 @@ export function InternationalTransferForm({
         </form>
       </Form>
     </div>
-  </div>
-);
+  );
 };
