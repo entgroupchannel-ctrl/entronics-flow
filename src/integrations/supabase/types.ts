@@ -1448,7 +1448,10 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           attachment_urls: string[] | null
+          awb_document_url: string | null
           bank_charges: number | null
+          certificate_urls: string[] | null
+          ci_document_url: string | null
           created_at: string
           currency: string
           customer_id: string | null
@@ -1463,8 +1466,10 @@ export type Database = {
           invoice_reference: string | null
           notes: string | null
           other_charges: number | null
+          packing_list_url: string | null
           payment_deadline: string | null
           payment_purpose: string
+          pi_document_url: string | null
           priority: string
           purchase_order_number: string | null
           rejection_reason: string | null
@@ -1495,7 +1500,10 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           attachment_urls?: string[] | null
+          awb_document_url?: string | null
           bank_charges?: number | null
+          certificate_urls?: string[] | null
+          ci_document_url?: string | null
           created_at?: string
           currency?: string
           customer_id?: string | null
@@ -1510,8 +1518,10 @@ export type Database = {
           invoice_reference?: string | null
           notes?: string | null
           other_charges?: number | null
+          packing_list_url?: string | null
           payment_deadline?: string | null
           payment_purpose: string
+          pi_document_url?: string | null
           priority?: string
           purchase_order_number?: string | null
           rejection_reason?: string | null
@@ -1542,7 +1552,10 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           attachment_urls?: string[] | null
+          awb_document_url?: string | null
           bank_charges?: number | null
+          certificate_urls?: string[] | null
+          ci_document_url?: string | null
           created_at?: string
           currency?: string
           customer_id?: string | null
@@ -1557,8 +1570,10 @@ export type Database = {
           invoice_reference?: string | null
           notes?: string | null
           other_charges?: number | null
+          packing_list_url?: string | null
           payment_deadline?: string | null
           payment_purpose?: string
+          pi_document_url?: string | null
           priority?: string
           purchase_order_number?: string | null
           rejection_reason?: string | null

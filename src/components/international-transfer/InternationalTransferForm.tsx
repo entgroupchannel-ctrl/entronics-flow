@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Search, X, CheckSquare, Square } from "lucide-react";
+import { Calendar as CalendarIcon, Search, X, CheckSquare, Square, FileUp, Trash2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 const transferFormSchema = z.object({
@@ -43,6 +44,10 @@ const transferFormSchema = z.object({
   bank_charges: z.number().default(500),
   other_charges: z.number().default(0),
   notes: z.string().optional(),
+  pi_document_url: z.string().optional(),
+  ci_document_url: z.string().optional(),
+  awb_document_url: z.string().optional(),
+  packing_list_url: z.string().optional(),
 });
 
 type TransferFormData = z.infer<typeof transferFormSchema>;
@@ -64,6 +69,17 @@ export function InternationalTransferForm({
   const [selectedPOs, setSelectedPOs] = useState<string[]>([]);
   const [searchPO, setSearchPO] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [uploadedDocuments, setUploadedDocuments] = useState<{
+    pi: string | null;
+    ci: string | null;
+    awb: string | null;
+    packingList: string | null;
+  }>({
+    pi: null,
+    ci: null,
+    awb: null,
+    packingList: null,
+  });
 
   const form = useForm<TransferFormData>({
     resolver: zodResolver(transferFormSchema),
@@ -307,6 +323,72 @@ export function InternationalTransferForm({
     }
   }, [watchTransferAmount, watchExchangeRate, form]);
 
+  // Document upload handlers
+  const handleDocumentUpload = async (file: File, docType: 'pi' | 'ci' | 'awb' | 'packingList') => {
+    if (!file) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${docType}-${Date.now()}.${fileExt}`;
+      const filePath = `transfer-documents/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      setUploadedDocuments(prev => ({
+        ...prev,
+        [docType]: publicUrl
+      }));
+
+      // Update form values
+      if (docType === 'pi') form.setValue('pi_document_url', publicUrl);
+      if (docType === 'ci') form.setValue('ci_document_url', publicUrl);
+      if (docType === 'awb') form.setValue('awb_document_url', publicUrl);
+      if (docType === 'packingList') form.setValue('packing_list_url', publicUrl);
+
+      toast({
+        title: "สำเร็จ",
+        description: `อัปโหลดเอกสาร ${getDocumentTypeLabel(docType)} เรียบร้อยแล้ว`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "ข้อผิดพลาด",
+        description: `ไม่สามารถอัปโหลดเอกสารได้: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const removeDocument = (docType: 'pi' | 'ci' | 'awb' | 'packingList') => {
+    setUploadedDocuments(prev => ({
+      ...prev,
+      [docType]: null
+    }));
+
+    // Clear form values
+    if (docType === 'pi') form.setValue('pi_document_url', undefined);
+    if (docType === 'ci') form.setValue('ci_document_url', undefined);
+    if (docType === 'awb') form.setValue('awb_document_url', undefined);
+    if (docType === 'packingList') form.setValue('packing_list_url', undefined);
+  };
+
+  const getDocumentTypeLabel = (type: string) => {
+    const types = {
+      pi: "Proforma Invoice (PI)",
+      ci: "Commercial Invoice (CI)",
+      awb: "Air Waybill (AWB)",
+      packingList: "Packing List"
+    };
+    return types[type] || type;
+  };
+
   const onSubmit = async (data: TransferFormData) => {
     if (!user) {
       toast({
@@ -326,6 +408,10 @@ export function InternationalTransferForm({
         status: editingRequest ? editingRequest.status : "draft",
         payment_deadline: data.payment_deadline?.toISOString().split('T')[0] || null,
         requested_transfer_date: data.requested_transfer_date.toISOString().split('T')[0],
+        pi_document_url: uploadedDocuments.pi || data.pi_document_url,
+        ci_document_url: uploadedDocuments.ci || data.ci_document_url,
+        awb_document_url: uploadedDocuments.awb || data.awb_document_url,
+        packing_list_url: uploadedDocuments.packingList || data.packing_list_url,
       };
 
       if (editingRequest) {
@@ -1082,6 +1168,178 @@ export function InternationalTransferForm({
                         </FormItem>
                       )}
                     />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Document Upload Section */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <FileUp className="h-5 w-5" />
+                    เอกสารแนบ (PI, CI, AWB)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* PI Document */}
+                    <div className="space-y-2">
+                      <Label htmlFor="pi-upload">Proforma Invoice (PI)</Label>
+                      {uploadedDocuments.pi ? (
+                        <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
+                          <div className="flex items-center gap-2 text-sm text-green-700">
+                            <FileUp className="h-4 w-4" />
+                            PI Document uploaded
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(uploadedDocuments.pi!, '_blank')}
+                            >
+                              ดู
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => removeDocument('pi')}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Input
+                          id="pi-upload"
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, 'pi');
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    {/* CI Document */}
+                    <div className="space-y-2">
+                      <Label htmlFor="ci-upload">Commercial Invoice (CI)</Label>
+                      {uploadedDocuments.ci ? (
+                        <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
+                          <div className="flex items-center gap-2 text-sm text-green-700">
+                            <FileUp className="h-4 w-4" />
+                            CI Document uploaded
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(uploadedDocuments.ci!, '_blank')}
+                            >
+                              ดู
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => removeDocument('ci')}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Input
+                          id="ci-upload"
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, 'ci');
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    {/* AWB Document */}
+                    <div className="space-y-2">
+                      <Label htmlFor="awb-upload">Air Waybill (AWB)</Label>
+                      {uploadedDocuments.awb ? (
+                        <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
+                          <div className="flex items-center gap-2 text-sm text-green-700">
+                            <FileUp className="h-4 w-4" />
+                            AWB Document uploaded
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(uploadedDocuments.awb!, '_blank')}
+                            >
+                              ดู
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => removeDocument('awb')}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Input
+                          id="awb-upload"
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, 'awb');
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    {/* Packing List */}
+                    <div className="space-y-2">
+                      <Label htmlFor="packing-upload">Packing List (ถ้ามี)</Label>
+                      {uploadedDocuments.packingList ? (
+                        <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
+                          <div className="flex items-center gap-2 text-sm text-green-700">
+                            <FileUp className="h-4 w-4" />
+                            Packing List uploaded
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(uploadedDocuments.packingList!, '_blank')}
+                            >
+                              ดู
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => removeDocument('packingList')}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Input
+                          id="packing-upload"
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, 'packingList');
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    รองรับไฟล์: PDF, JPG, PNG, DOC, DOCX (ขนาดไม่เกิน 10MB)
                   </div>
                 </CardContent>
               </Card>
