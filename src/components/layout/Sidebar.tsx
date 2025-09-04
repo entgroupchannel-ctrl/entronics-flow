@@ -20,7 +20,8 @@ import {
   ChevronRight,
   CreditCard,
   RefreshCw,
-  Receipt
+  Receipt,
+  Building
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -112,7 +113,15 @@ const menuItems = [
     title: "คลังสินค้า / Inventory",
     icon: Package,
     href: "/inventory",
-    view: "inventory"
+    view: "inventory",
+    submenu: [
+      {
+        title: "จัดการ Supplier",
+        icon: Building,
+        href: "/supplier-management",
+        view: "supplier-management"
+      }
+    ]
   },
   {
     title: "การเงิน / Financial",
@@ -158,7 +167,8 @@ export function Sidebar({ className, onMenuClick, currentView, onLogoClick }: Si
   const [collapsed, setCollapsed] = useState(false); // เปิดไซด์บาร์เป็นค่าเริ่มต้น
   const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({
     'sales-documents': true, // เปิดเมนูเอกสารการขายไว้เป็น default
-    'tax-invoices': true // เปิดเมนูใบส่งสินค้า/ใบกำกับภาษีไว้เป็น default
+    'tax-invoices': true, // เปิดเมนูใบส่งสินค้า/ใบกำกับภาษีไว้เป็น default
+    'inventory': false // เปิดเมนูคลังสินค้าเมื่อมี submenu
   });
   const location = useLocation();
   const navigate = useNavigate();
