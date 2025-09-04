@@ -246,6 +246,9 @@ export function PurchaseOrderForm({
         salesPersonId = selectedQuotation?.created_by;
       }
 
+      console.log("Form data:", data);
+      console.log("User:", user);
+
       const purchaseOrderData = {
         po_number: data.po_number || undefined,
         customer_id: data.customer_id,
@@ -260,6 +263,8 @@ export function PurchaseOrderForm({
         created_by: editingPO ? editingPO.created_by : user.id,
         source_system: data.source_system || 'manual',
       };
+
+      console.log("Purchase order data to save:", purchaseOrderData);
 
       if (editingPO) {
         // Update existing PO
