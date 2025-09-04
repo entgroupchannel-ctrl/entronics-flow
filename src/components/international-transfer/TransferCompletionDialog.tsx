@@ -31,7 +31,7 @@ export function TransferCompletionDialog({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [transferDate, setTransferDate] = useState(
-    new Date().toISOString().split('T')[0]
+    new Date().toISOString().slice(0, 16) // Format: YYYY-MM-DDTHH:mm for datetime-local
   );
   const [notes, setNotes] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
@@ -97,7 +97,7 @@ export function TransferCompletionDialog({
 
       const updateData: any = {
         status: 'transferred',
-        transfer_executed_at: new Date().toISOString(),
+        transfer_executed_at: new Date(transferDate).toISOString(),
         actual_transfer_date: transferDate,
         transfer_evidence_urls: uploadedFiles,
         updated_at: new Date().toISOString(),
@@ -146,12 +146,12 @@ export function TransferCompletionDialog({
         <div className="space-y-6">
           {/* Transfer Date */}
           <div className="space-y-2">
-            <Label htmlFor="transfer-date">วันที่โอนเงินจริง</Label>
+            <Label htmlFor="transfer-date">วันที่และเวลาที่โอนเงินจริง</Label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="transfer-date"
-                type="date"
+                type="datetime-local"
                 value={transferDate}
                 onChange={(e) => setTransferDate(e.target.value)}
                 className="pl-10"
