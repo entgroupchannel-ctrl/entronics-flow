@@ -25,7 +25,13 @@ async function getGoogleAccessToken(): Promise<string> {
     throw new Error('Google Service Account Key not configured');
   }
 
-  const credentials = JSON.parse(serviceAccountKey);
+  let credentials;
+  try {
+    credentials = JSON.parse(serviceAccountKey);
+  } catch (error) {
+    console.error('Invalid Google Service Account Key format:', error);
+    throw new Error('Google Service Account Key is not valid JSON. Please ensure you copied the entire service account key file content.');
+  }
   
   // Create JWT for Google OAuth
   const header = {
