@@ -1491,8 +1491,10 @@ export function InternationalTransferForm({
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </div>
 
-              {/* Submit Section */}
+          {/* Submit Section */}
               <div className="flex flex-col sm:flex-row gap-3 pt-6">
                 <Button
                   type="button"
@@ -1520,7 +1522,5 @@ export function InternationalTransferForm({
             </form>
           </Form>
         </div>
-      </div>
-    </div>
-  );
-};
+      );
+    };
