@@ -24,11 +24,7 @@ export default function PurchaseOrders() {
     queryFn: async () => {
       const { data: poData, error } = await supabase
         .from("purchase_orders")
-        .select(`
-          *,
-          customer:customers(name),
-          quotation:quotations(quotation_number)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
       
       if (error) throw error;
