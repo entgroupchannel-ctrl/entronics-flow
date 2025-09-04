@@ -13,7 +13,6 @@ export function Header() {
 
   // Pages that should show the search input
   const searchablePages = [
-    '/',
     '/customers',
     '/inventory', 
     '/quotations',
