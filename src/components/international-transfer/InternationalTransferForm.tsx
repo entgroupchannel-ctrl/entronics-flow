@@ -38,10 +38,6 @@ const transferFormSchema = z.object({
     required_error: "กรุณาเลือกวันที่ต้องการโอน",
   }),
   priority: z.string().default("normal"),
-  customer_id: z.string().optional(),
-  customer_payment_status: z.string().default("pending"),
-  customer_paid_amount: z.number().default(0),
-  customer_remaining_amount: z.number().default(0),
   transfer_fee: z.number().default(0),
   bank_charges: z.number().default(0),
   other_charges: z.number().default(0),
@@ -84,10 +80,6 @@ export function InternationalTransferForm({
       payment_deadline: editingRequest.payment_deadline ? new Date(editingRequest.payment_deadline) : undefined,
       requested_transfer_date: new Date(editingRequest.requested_transfer_date),
       priority: editingRequest.priority || "normal",
-      customer_id: editingRequest.customer_id || "",
-      customer_payment_status: editingRequest.customer_payment_status || "pending",
-      customer_paid_amount: editingRequest.customer_paid_amount || 0,
-      customer_remaining_amount: editingRequest.customer_remaining_amount || 0,
       transfer_fee: editingRequest.transfer_fee || 0,
       bank_charges: editingRequest.bank_charges || 0,
       other_charges: editingRequest.other_charges || 0,
@@ -109,10 +101,6 @@ export function InternationalTransferForm({
       payment_deadline: undefined,
       requested_transfer_date: new Date(),
       priority: "normal",
-      customer_id: "",
-      customer_payment_status: "pending",
-      customer_paid_amount: 0,
-      customer_remaining_amount: 0,
       transfer_fee: 0,
       bank_charges: 0,
       other_charges: 0,
@@ -151,19 +139,6 @@ export function InternationalTransferForm({
     },
   });
 
-  // Query for customers
-  const { data: customers } = useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("customers")
-        .select("id, name")
-        .eq("customer_type", "ลูกค้า")
-        .limit(20);
-      if (error) throw error;
-      return data || [];
-    },
-  });
 
   const currencies = [
     { value: "USD", label: "USD - ดอลลาร์สหรัฐ" },
@@ -655,107 +630,6 @@ export function InternationalTransferForm({
                 </FormItem>
               )}
             />
-          </CardContent>
-        </Card>
-
-        {/* Customer Payment Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>ข้อมูลลูกค้า</CardTitle>
-            <CardDescription>สถานะการจ่ายเงินของลูกค้า</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="customer_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ลูกค้า</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="เลือกลูกค้า" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {customers?.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="customer_payment_status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>สถานะการจ่ายเงิน</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {paymentStatusOptions.map((status) => (
-                          <SelectItem key={status.value} value={status.value}>
-                            {status.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="customer_paid_amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ยอดที่ลูกค้าจ่ายแล้ว</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="customer_remaining_amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ยอดคงเหลือ</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
           </CardContent>
         </Card>
 
