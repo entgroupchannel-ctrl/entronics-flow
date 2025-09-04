@@ -136,29 +136,35 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <Collapsible defaultOpen={isSalesDocumentActive}>
+              <Collapsible defaultOpen={isSalesDocumentActive} className="group">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="w-full">
-                      <FileText className="h-4 w-4" />
-                      {state !== "collapsed" && <span>เอกสารการขาย / Sale Docs</span>}
-                      {state !== "collapsed" && <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />}
+                    <SidebarMenuButton className="w-full justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        {state !== "collapsed" && <span>เอกสารการขาย / Sale Docs</span>}
+                      </div>
+                      {state !== "collapsed" && (
+                        <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                      )}
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {salesDocumentSubItems.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink to={subItem.url} end className={getNavCls}>
-                              <subItem.icon className="h-4 w-4" />
-                              <span>{subItem.title}</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
+                  {state !== "collapsed" && (
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {salesDocumentSubItems.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton asChild>
+                              <NavLink to={subItem.url} end className={getNavCls}>
+                                <subItem.icon className="h-4 w-4" />
+                                <span>{subItem.title}</span>
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  )}
                 </SidebarMenuItem>
               </Collapsible>
             </SidebarMenu>
