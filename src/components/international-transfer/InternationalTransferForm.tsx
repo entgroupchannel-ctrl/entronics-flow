@@ -1016,7 +1016,9 @@ export function InternationalTransferForm({
                               </div>
                             </div>
                           </FormControl>
-                          <FormDescription className="text-xs">Default: ฿500</FormDescription>
+                          <FormDescription className="text-xs text-muted-foreground">
+                            ค่าเริ่มต้น: ฿500 (สามารถแก้ไขได้)
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1045,7 +1047,9 @@ export function InternationalTransferForm({
                               </div>
                             </div>
                           </FormControl>
-                          <FormDescription className="text-xs">Default: ฿500</FormDescription>
+                          <FormDescription className="text-xs text-muted-foreground">
+                            ค่าเริ่มต้น: ฿500 (สามารถแก้ไขได้)
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
