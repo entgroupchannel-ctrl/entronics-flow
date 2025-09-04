@@ -32,7 +32,7 @@ export function SupplierApprovalList({ onSupplierUpdate }: SupplierApprovalListP
       const { data, error } = await supabase
         .from("customers")
         .select("*")
-        .eq("customer_type", "ผู้จัดจำหน่าย")
+        .eq("customer_type", "ผู้จำหน่าย")
         .in("supplier_registration_status", ["pending", "draft"])
         .order("supplier_application_date", { ascending: false });
 
