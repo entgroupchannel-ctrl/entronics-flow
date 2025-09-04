@@ -48,20 +48,24 @@ async function getGoogleAccessToken(): Promise<string> {
     iat: now
   };
 
-  // For simplicity, we'll use a direct API call with the service account
-  // In production, you might want to implement proper JWT signing
-  const response = await fetch('https://oauth2.googleapis.com/token', {
+  // Use Google OAuth with service account credentials
+  const authUrl = 'https://oauth2.googleapis.com/token';
+  const authData = {
+    grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+    assertion: await createJWT(credentials)
+  };
+
+  const response = await fetch(authUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: new URLSearchParams({
-      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-      assertion: await createJWT(header, payload, credentials.private_key)
-    })
+    body: new URLSearchParams(authData)
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('OAuth response error:', errorText);
     throw new Error(`Failed to get access token: ${response.statusText}`);
   }
 
@@ -69,16 +73,61 @@ async function getGoogleAccessToken(): Promise<string> {
   return authResponse.access_token;
 }
 
-async function createJWT(header: any, payload: any, privateKey: string): Promise<string> {
-  // Simple JWT creation - in production you'd want a proper JWT library
+async function createJWT(credentials: any): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  
+  const header = {
+    alg: "RS256",
+    typ: "JWT",
+    kid: credentials.private_key_id
+  };
+
+  const payload = {
+    iss: credentials.client_email,
+    scope: "https://www.googleapis.com/auth/drive.file",
+    aud: "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now
+  };
+
+  // Import the crypto module for JWT signing
+  const crypto = await import("https://deno.land/std@0.208.0/crypto/mod.ts");
+  
   const encoder = new TextEncoder();
+  const headerB64 = btoa(JSON.stringify(header))
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const payloadB64 = btoa(JSON.stringify(payload))
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
   
-  const headerB64 = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  const payloadB64 = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const data = `${headerB64}.${payloadB64}`;
   
-  // For demo purposes - you'd implement proper RSA signing here
-  // This is a simplified version
-  return `${headerB64}.${payloadB64}.signature`;
+  // Clean up the private key
+  const privateKeyPem = credentials.private_key
+    .replace(/-----BEGIN PRIVATE KEY-----/, '')
+    .replace(/-----END PRIVATE KEY-----/, '')
+    .replace(/\s/g, '');
+  
+  // Convert base64 to binary
+  const privateKeyBinary = Uint8Array.from(atob(privateKeyPem), c => c.charCodeAt(0));
+  
+  // Import the private key
+  const key = await crypto.importKey(
+    "pkcs8",
+    privateKeyBinary,
+    {
+      name: "RSASSA-PKCS1-v1_5",
+      hash: "SHA-256",
+    },
+    false,
+    ["sign"]
+  );
+  
+  // Sign the data
+  const signature = await crypto.sign("RSASSA-PKCS1-v1_5", key, encoder.encode(data));
+  const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  
+  return `${data}.${signatureB64}`;
 }
 
 async function uploadToGoogleDrive(
