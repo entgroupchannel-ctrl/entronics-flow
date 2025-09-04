@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+
 import { useAuth } from "@/hooks/useAuth";
 
 export function Header() {
@@ -12,9 +12,6 @@ export function Header() {
   return (
     <header className="h-16 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="flex h-full items-center justify-between px-6">
-        {/* Sidebar Toggle */}
-        <SidebarTrigger className="mr-4 p-2 hover:bg-accent rounded-md border border-border" />
-        
         {/* Search */}
         <div className="flex items-center space-x-4 flex-1 max-w-lg">
           <div className="relative flex-1">
