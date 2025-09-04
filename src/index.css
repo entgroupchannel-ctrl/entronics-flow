@@ -7,7 +7,7 @@
   :root {
     /* Core Brand Colors */
     --background: 210 50% 90%;
-    --foreground: 217 30% 20%;
+    --foreground: 217 30% 15%;
     --primary: 217 65% 65%;
     --primary-dark: 217 70% 55%;
     --primary-light: 217 60% 75%;
@@ -28,7 +28,7 @@
     
     /* Professional Grays */
     --muted: 217 40% 96%;
-    --muted-foreground: 217 25% 45%;
+    --muted-foreground: 217 25% 35%;
     --border: 217 30% 88%;
     
     /* Status Colors */

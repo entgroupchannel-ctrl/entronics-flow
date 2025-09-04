@@ -82,7 +82,7 @@ export function AppSidebar() {
   const isActive = (path: string) => currentPath === path;
   
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-primary text-primary-foreground font-medium" : "text-foreground hover:bg-muted/50 hover:text-foreground";
+    isActive ? "bg-primary text-primary-foreground font-medium" : "text-gray-700 hover:bg-muted/50 hover:text-gray-800 font-medium";
 
   const MenuItem = ({ item }: { item: typeof mainItems[0] }) => (
     <SidebarMenuItem>
