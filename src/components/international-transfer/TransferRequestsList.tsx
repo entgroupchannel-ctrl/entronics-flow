@@ -304,6 +304,32 @@ export function TransferRequestsList({
                         {format(new Date(request.created_at), "dd MMM yyyy", { locale: th })}
                       </TableCell>
                       <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {/* Quick approval buttons for pending requests */}
+                          {request.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleStatusUpdate(request, 'approved')}
+                                className="text-green-600 border-green-600 hover:bg-green-50"
+                              >
+                                <Check className="h-3 w-3 mr-1" />
+                                อนุมัติ
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleStatusUpdate(request, 'rejected')}
+                                className="text-red-600 border-red-600 hover:bg-red-50"
+                              >
+                                <X className="h-3 w-3 mr-1" />
+                                ปฏิเสธ
+                              </Button>
+                            </>
+                          )}
+                          
+                          {/* More actions dropdown */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -359,6 +385,7 @@ export function TransferRequestsList({
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
