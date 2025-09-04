@@ -110,7 +110,8 @@ export function PaymentTermsSection({ value = {}, onChange, totalAmount = 0, poD
     { value: 'cod', label: 'เก็บเงินปลายทาง' },
     { value: 'credit', label: 'เครดิต' },
     { value: 'installment', label: 'ผ่อนชำระ' },
-    { value: 'partial_advance', label: 'มัดจำ + เครดิต' }
+    { value: 'partial_advance', label: 'มัดจำ + เครดิต' },
+    { value: 'partial_delivery', label: 'รับเงินบางส่วน ส่งสินค้ารับส่วนที่เหลือ' }
   ];
 
   const currencyOptions = [
@@ -182,7 +183,7 @@ export function PaymentTermsSection({ value = {}, onChange, totalAmount = 0, poD
         </div>
 
         {/* Credit Terms */}
-        {(defaultValues.payment_terms_type === 'credit' || defaultValues.payment_terms_type === 'partial_advance') && (
+        {(defaultValues.payment_terms_type === 'credit' || defaultValues.payment_terms_type === 'partial_advance' || defaultValues.payment_terms_type === 'partial_delivery') && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>ระยะเวลาเครดิต (วัน)</Label>
@@ -207,12 +208,16 @@ export function PaymentTermsSection({ value = {}, onChange, totalAmount = 0, poD
         )}
 
         {/* Advance Payment */}
-        {(defaultValues.payment_terms_type === 'partial_advance') && (
+        {(defaultValues.payment_terms_type === 'partial_advance' || defaultValues.payment_terms_type === 'partial_delivery') && (
           <div className="space-y-4">
-            <Label className="text-base font-medium">การชำระเงินมัดจำ</Label>
+            <Label className="text-base font-medium">
+              {defaultValues.payment_terms_type === 'partial_delivery' ? 'การรับเงินล่วงหน้า' : 'การชำระเงินมัดจำ'}
+            </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>เปอร์เซ็นต์มัดจำ (%)</Label>
+                <Label>
+                  {defaultValues.payment_terms_type === 'partial_delivery' ? 'เปอร์เซ็นต์รับล่วงหน้า (%)' : 'เปอร์เซ็นต์มัดจำ (%)'}
+                </Label>
                 <Input
                   type="number"
                   value={defaultValues.advance_payment_percentage}
@@ -223,7 +228,9 @@ export function PaymentTermsSection({ value = {}, onChange, totalAmount = 0, poD
                 />
               </div>
               <div className="space-y-2">
-                <Label>จำนวนเงินมัดจำ</Label>
+                <Label>
+                  {defaultValues.payment_terms_type === 'partial_delivery' ? 'จำนวนเงินรับล่วงหน้า' : 'จำนวนเงินมัดจำ'}
+                </Label>
                 <Input
                   type="number"
                   value={defaultValues.advance_payment_amount}
@@ -233,6 +240,13 @@ export function PaymentTermsSection({ value = {}, onChange, totalAmount = 0, poD
                 />
               </div>
             </div>
+            {defaultValues.payment_terms_type === 'partial_delivery' && (
+              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-800">
+                  <strong>หมายเหตุ:</strong> รูปแบบนี้จะรับเงินบางส่วนก่อน จากนั้นส่งสินค้าและรับเงินส่วนที่เหลือตอนส่งมอบ
+                </p>
+              </div>
+            )}
           </div>
         )}
 
