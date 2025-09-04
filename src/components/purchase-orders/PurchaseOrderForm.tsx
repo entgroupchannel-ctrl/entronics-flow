@@ -56,11 +56,13 @@ interface QuotationWithSalesPerson {
   id: string;
   quotation_number: string;
   customer_name: string;
+  customer_id: string;
   total_amount: number;
   quotation_date: string;
   status: string;
   created_by: string;
   sales_person_name: string;
+  customer_address?: string;
 }
 
 interface PurchaseOrderFormProps {
@@ -160,6 +162,7 @@ export function PurchaseOrderForm({
           id, 
           quotation_number, 
           customer_name, 
+          customer_id,
           total_amount, 
           quotation_date, 
           status,
@@ -178,22 +181,32 @@ export function PurchaseOrderForm({
       
       if (error) throw error;
       
-      // Get sales person info for each quotation
+      // Get sales person info and customer addresses for each quotation
       if (quotationData && quotationData.length > 0) {
         const salesPersonIds = [...new Set(quotationData.map(q => q.created_by))];
+        const customerIds = [...new Set(quotationData.map(q => q.customer_id))];
+        
+        // Get sales person info
         const { data: profilesData } = await supabase
           .from("profiles")
           .select("user_id, full_name")
           .in("user_id", salesPersonIds);
         
-        // Merge profile data with quotation data
+        // Get customer addresses
+        const { data: customersData } = await supabase
+          .from("customers")
+          .select("id, address")
+          .in("id", customerIds);
+        
+        // Merge all data with quotation data
         return quotationData.map(quotation => ({
           ...quotation,
-          sales_person_name: profilesData?.find(p => p.user_id === quotation.created_by)?.full_name || 'ไม่ระบุ'
+          sales_person_name: profilesData?.find(p => p.user_id === quotation.created_by)?.full_name || 'ไม่ระบุ',
+          customer_address: customersData?.find(c => c.id === quotation.customer_id)?.address || ''
         }));
       }
       
-      return quotationData?.map(q => ({ ...q, sales_person_name: 'ไม่ระบุ' })) || [];
+      return quotationData?.map(q => ({ ...q, sales_person_name: 'ไม่ระบุ', customer_address: '' })) || [];
     },
   });
 
@@ -364,6 +377,10 @@ export function PurchaseOrderForm({
                         if (selectedQuotation) {
                           form.setValue("customer_name", selectedQuotation.customer_name);
                           form.setValue("total_amount", selectedQuotation.total_amount || 0);
+                          // Set delivery address from customer address
+                          if (selectedQuotation.customer_address) {
+                            form.setValue("delivery_address", selectedQuotation.customer_address);
+                          }
                         }
                       }} value={field.value}>
                         <FormControl>
