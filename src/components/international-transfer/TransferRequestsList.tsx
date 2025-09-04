@@ -305,6 +305,17 @@ export function TransferRequestsList({
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {/* Send for approval button for draft requests */}
+                          {request.status === 'draft' && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleStatusUpdate(request, 'pending')}
+                              className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
+                            >
+                              ส่งขออนุมัติ
+                            </Button>
+                          )}
+                          
                           {/* Prominent approval buttons for pending requests */}
                           {request.status === 'pending' && (
                             <div className="flex gap-2 mr-2">
