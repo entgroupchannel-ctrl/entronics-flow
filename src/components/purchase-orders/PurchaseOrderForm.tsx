@@ -371,7 +371,12 @@ export function PurchaseOrderForm({
                               key={quotation.id} 
                               value={quotation.id}
                             >
-                              {quotation.quotation_number}
+                              <div className="flex flex-col text-left">
+                                <span className="font-medium">{quotation.quotation_number}</span>
+                                <span className="text-sm text-muted-foreground">
+                                  {quotation.customer_name}
+                                </span>
+                              </div>
                             </SelectItem>
                           ))}
                           {quotations?.length === 0 && !showAllQuotations && (
