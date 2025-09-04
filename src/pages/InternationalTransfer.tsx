@@ -25,7 +25,7 @@ export default function InternationalTransfer() {
         .from("international_transfer_requests")
         .select(`
           *,
-          profiles!requested_by(
+          profiles!international_transfer_requests_requested_by_fkey(
             full_name,
             username
           )
