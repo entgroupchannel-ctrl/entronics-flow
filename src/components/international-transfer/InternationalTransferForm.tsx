@@ -16,6 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 const transferFormSchema = z.object({
@@ -59,6 +60,7 @@ export function InternationalTransferForm({
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedPOs, setSelectedPOs] = useState<string[]>([]);
 
   const form = useForm<TransferFormData>({
     resolver: zodResolver(transferFormSchema),
@@ -162,6 +164,32 @@ export function InternationalTransferForm({
       form.setValue("supplier_bank_name", selectedSupplier.bank_name || "");
       form.setValue("supplier_account_number", selectedSupplier.bank_account || "");
       form.setValue("supplier_swift_code", selectedSupplier.swift_code || "");
+    }
+  };
+
+  const handlePOSelection = (poNumber: string, checked: boolean) => {
+    let updatedPOs: string[];
+    if (checked) {
+      updatedPOs = [...selectedPOs, poNumber];
+    } else {
+      updatedPOs = selectedPOs.filter(po => po !== poNumber);
+    }
+    setSelectedPOs(updatedPOs);
+
+    // Update form values
+    form.setValue("purchase_order_number", updatedPOs.join(", "));
+    
+    // Calculate total amount from selected POs
+    const selectedPOData = purchaseOrders?.filter(po => updatedPOs.includes(po.po_number)) || [];
+    const totalAmount = selectedPOData.reduce((sum, po) => sum + (po.total_amount || 0), 0);
+    form.setValue("transfer_amount", totalAmount);
+
+    // Generate payment purpose from selected POs
+    if (selectedPOData.length > 0) {
+      const purpose = `ชำระค่าสินค้า PO: ${updatedPOs.join(", ")} - ${selectedPOData.map(po => po.customer_name).join(", ")}`;
+      form.setValue("payment_purpose", purpose);
+    } else {
+      form.setValue("payment_purpose", "");
     }
   };
 
@@ -380,51 +408,51 @@ export function InternationalTransferForm({
                   <CardTitle className="text-lg">วัตถุประสงค์การชำระ</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="purchase_order_number"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>เลขที่ PO</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="เลือก PO" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {purchaseOrders?.map((po) => (
-                                <SelectItem key={po.id} value={po.po_number}>
-                                  <div className="flex flex-col text-left">
-                                    <span className="font-medium">{po.po_number}</span>
-                                    <span className="text-xs text-muted-foreground">
-                                      {po.customer_name}
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="invoice_reference"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>เลขที่ Invoice</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  {/* Multiple PO Selection */}
+                  <div className="space-y-3">
+                    <FormLabel>เลือก Purchase Orders</FormLabel>
+                    <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                      {purchaseOrders?.map((po) => (
+                        <div key={po.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
+                          <Checkbox
+                            id={po.id}
+                            checked={selectedPOs.includes(po.po_number)}
+                            onCheckedChange={(checked) => handlePOSelection(po.po_number, checked as boolean)}
+                          />
+                          <label htmlFor={po.id} className="flex-1 cursor-pointer">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <span className="font-medium text-sm">{po.po_number}</span>
+                                <p className="text-xs text-muted-foreground">{po.customer_name}</p>
+                              </div>
+                              <span className="text-sm font-medium">
+                                ฿{po.total_amount?.toLocaleString()}
+                              </span>
+                            </div>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    {selectedPOs.length > 0 && (
+                      <div className="text-sm text-muted-foreground">
+                        เลือกแล้ว: {selectedPOs.length} PO
+                      </div>
+                    )}
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name="invoice_reference"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>เลขที่ Invoice</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
