@@ -64,7 +64,6 @@ export function InternationalTransferForm({
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [supplierSearch, setSupplierSearch] = useState("");
 
   const form = useForm<TransferFormData>({
     resolver: zodResolver(transferFormSchema),
@@ -123,18 +122,14 @@ export function InternationalTransferForm({
 
   // Query for suppliers
   const { data: suppliers } = useQuery({
-    queryKey: ["suppliers", supplierSearch],
+    queryKey: ["suppliers"],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from("customers")
-        .select("id, name, bank_name, bank_account, tax_id, phone, email")
-        .eq("customer_type", "ผู้จัดจำหน่าย");
+        .select("id, name, bank_name, bank_account, swift_code, supplier_code, tax_id, phone, email")
+        .eq("customer_type", "ผู้จัดจำหน่าย")
+        .order("name");
 
-      if (supplierSearch) {
-        query = query.ilike("name", `%${supplierSearch}%`);
-      }
-
-      const { data, error } = await query.limit(10);
       if (error) throw error;
       return data || [];
     },
@@ -182,7 +177,7 @@ export function InternationalTransferForm({
     form.setValue("supplier_name", supplier.name);
     form.setValue("supplier_bank_name", supplier.bank_name || "");
     form.setValue("supplier_account_number", supplier.bank_account || "");
-    setSupplierSearch(supplier.name);
+    form.setValue("supplier_swift_code", supplier.swift_code || "");
   };
 
   const onSubmit = async (data: TransferFormData) => {
@@ -252,34 +247,46 @@ export function InternationalTransferForm({
             <CardDescription>ข้อมูลผู้รับโอนเงิน</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>ค้นหา Supplier</Label>
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="พิมพ์ชื่อ Supplier..."
-                  value={supplierSearch}
-                  onChange={(e) => setSupplierSearch(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
-              {supplierSearch && suppliers && suppliers.length > 0 && (
-                <div className="border rounded-md max-h-40 overflow-y-auto">
-                  {suppliers.map((supplier) => (
-                    <div
-                      key={supplier.id}
-                      className="p-2 hover:bg-muted cursor-pointer border-b last:border-0"
-                      onClick={() => handleSupplierSelect(supplier)}
-                    >
-                      <div className="font-medium">{supplier.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {supplier.bank_name} - {supplier.bank_account}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            <FormField
+              control={form.control}
+              name="supplier_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>เลือก Supplier *</FormLabel>
+                  <Select 
+                    onValueChange={(value) => {
+                      const selectedSupplier = suppliers?.find(s => s.id === value);
+                      if (selectedSupplier) {
+                        handleSupplierSelect(selectedSupplier);
+                      }
+                      field.onChange(value);
+                    }} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="เลือก Supplier" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {suppliers?.map((supplier) => (
+                        <SelectItem key={supplier.id} value={supplier.id}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{supplier.name}</span>
+                            <span className="text-sm text-muted-foreground">
+                              {supplier.bank_name && supplier.bank_account && 
+                                `${supplier.bank_name} - ${supplier.bank_account}`
+                              }
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
