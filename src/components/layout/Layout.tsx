@@ -14,7 +14,7 @@ export function Layout({ children }: LayoutProps) {
       {/* System Banner */}
       <div className="flex justify-center py-2">
         <img 
-          src="/lovable-uploads/276be7a8-bb59-4695-b475-cb6088b9fbd6.png" 
+          src="/lovable-uploads/a9d8d639-27ef-41b4-8eaf-43eed6f2a03d.png" 
           alt="ระบบบริหารจัดการธุรกิจ ENT GROUP" 
           className="h-16 object-contain"
         />
