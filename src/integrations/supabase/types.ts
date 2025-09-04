@@ -14,6 +14,94 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          assigned_to: string | null
+          completed_at: string | null
+          contact_method: string | null
+          contact_person: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          next_action: string | null
+          opportunity_id: string | null
+          outcome: string | null
+          priority: string | null
+          scheduled_at: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          assigned_to?: string | null
+          completed_at?: string | null
+          contact_method?: string | null
+          contact_person?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          next_action?: string | null
+          opportunity_id?: string | null
+          outcome?: string | null
+          priority?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activity_type?: Database["public"]["Enums"]["activity_type"]
+          assigned_to?: string | null
+          completed_at?: string | null
+          contact_method?: string | null
+          contact_person?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          next_action?: string | null
+          opportunity_id?: string | null
+          outcome?: string | null
+          priority?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "activities_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcements: {
         Row: {
           created_at: string
@@ -95,6 +183,200 @@ export type Database = {
         }
         Relationships: []
       }
+      cart_items: {
+        Row: {
+          added_at: string
+          customer_id: string | null
+          estimated_delivery: string | null
+          id: string
+          notes: string | null
+          product_id: string | null
+          product_name: string
+          product_sku: string | null
+          quantity: number
+          shipped_at: string | null
+          status: string
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          added_at?: string
+          customer_id?: string | null
+          estimated_delivery?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          product_name: string
+          product_sku?: string | null
+          quantity?: number
+          shipped_at?: string | null
+          status?: string
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          added_at?: string
+          customer_id?: string | null
+          estimated_delivery?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          product_name?: string
+          product_sku?: string | null
+          quantity?: number
+          shipped_at?: string | null
+          status?: string
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_items_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_items_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      content_blocks: {
+        Row: {
+          block_data: Json
+          block_name: string
+          block_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_template: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          block_data?: Json
+          block_name: string
+          block_type: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_template?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          block_data?: Json
+          block_name?: string
+          block_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_template?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      content_sections: {
+        Row: {
+          content_data: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          is_visible: boolean | null
+          page_layout_id: string | null
+          position_order: number
+          section_name: string
+          section_type: string
+          updated_at: string
+        }
+        Insert: {
+          content_data?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_visible?: boolean | null
+          page_layout_id?: string | null
+          position_order?: number
+          section_name: string
+          section_type: string
+          updated_at?: string
+        }
+        Update: {
+          content_data?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_visible?: boolean | null
+          page_layout_id?: string | null
+          position_order?: number
+          section_name?: string
+          section_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_sections_page_layout_id_fkey"
+            columns: ["page_layout_id"]
+            isOneToOne: false
+            referencedRelation: "page_layouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_transactions: {
+        Row: {
+          amount: number
+          customer_id: string | null
+          description: string
+          id: string
+          processed_by: string | null
+          reference_id: string | null
+          status: string
+          transaction_date: string
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          customer_id?: string | null
+          description: string
+          id?: string
+          processed_by?: string | null
+          reference_id?: string | null
+          status?: string
+          transaction_date?: string
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          customer_id?: string | null
+          description?: string
+          id?: string
+          processed_by?: string | null
+          reference_id?: string | null
+          status?: string
+          transaction_date?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
       customer_contacts: {
         Row: {
           created_at: string
@@ -149,11 +431,176 @@ export type Database = {
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "customer_contacts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
         ]
+      }
+      customer_credit_profiles: {
+        Row: {
+          auto_approve_orders: boolean
+          available_credit: number
+          created_at: string
+          credit_limit: number
+          credit_status: string
+          customer_id: string | null
+          id: string
+          last_payment_date: string | null
+          next_payment_due: string | null
+          payment_terms_days: number
+          updated_at: string
+          used_credit: number
+        }
+        Insert: {
+          auto_approve_orders?: boolean
+          available_credit?: number
+          created_at?: string
+          credit_limit?: number
+          credit_status?: string
+          customer_id?: string | null
+          id?: string
+          last_payment_date?: string | null
+          next_payment_due?: string | null
+          payment_terms_days?: number
+          updated_at?: string
+          used_credit?: number
+        }
+        Update: {
+          auto_approve_orders?: boolean
+          available_credit?: number
+          created_at?: string
+          credit_limit?: number
+          credit_status?: string
+          customer_id?: string | null
+          id?: string
+          last_payment_date?: string | null
+          next_payment_due?: string | null
+          payment_terms_days?: number
+          updated_at?: string
+          used_credit?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_credit_profiles_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_credit_profiles_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      customer_loyalty_profiles: {
+        Row: {
+          annual_spent: number | null
+          available_points: number
+          created_at: string | null
+          customer_id: string
+          id: string
+          last_activity_date: string | null
+          lifetime_points: number
+          tier_level: string
+          tier_start_date: string | null
+          total_points: number
+          updated_at: string | null
+        }
+        Insert: {
+          annual_spent?: number | null
+          available_points?: number
+          created_at?: string | null
+          customer_id: string
+          id?: string
+          last_activity_date?: string | null
+          lifetime_points?: number
+          tier_level?: string
+          tier_start_date?: string | null
+          total_points?: number
+          updated_at?: string | null
+        }
+        Update: {
+          annual_spent?: number | null
+          available_points?: number
+          created_at?: string | null
+          customer_id?: string
+          id?: string
+          last_activity_date?: string | null
+          lifetime_points?: number
+          tier_level?: string
+          tier_start_date?: string | null
+          total_points?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_loyalty_profiles_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_loyalty_profiles_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      customer_reward_usage: {
+        Row: {
+          created_at: string
+          customer_id: string
+          discount_amount: number | null
+          id: string
+          notes: string | null
+          order_id: string | null
+          reward_id: string
+          status: string
+          updated_at: string
+          used_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          discount_amount?: number | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          reward_id: string
+          status?: string
+          updated_at?: string
+          used_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          discount_amount?: number | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          reward_id?: string
+          status?: string
+          updated_at?: string
+          used_at?: string
+        }
+        Relationships: []
       }
       customers: {
         Row: {
           address: string | null
+          annual_revenue_target: number | null
+          assigned_sales_person: string | null
           bank_account: string | null
           bank_address: string | null
           bank_branch: string | null
@@ -170,9 +617,16 @@ export type Database = {
           facebook: string | null
           hq_branch: string | null
           id: string
+          is_key_account: boolean | null
+          key_account_notes: string | null
+          key_account_tier: string | null
+          key_account_weight: number | null
+          last_contact_date: string | null
           last_synced_at: string | null
           line_id: string | null
+          minimum_contact_frequency: number | null
           name: string
+          next_required_contact: string | null
           notes: string | null
           person_type: string | null
           phone: string | null
@@ -189,6 +643,8 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          annual_revenue_target?: number | null
+          assigned_sales_person?: string | null
           bank_account?: string | null
           bank_address?: string | null
           bank_branch?: string | null
@@ -205,9 +661,16 @@ export type Database = {
           facebook?: string | null
           hq_branch?: string | null
           id?: string
+          is_key_account?: boolean | null
+          key_account_notes?: string | null
+          key_account_tier?: string | null
+          key_account_weight?: number | null
+          last_contact_date?: string | null
           last_synced_at?: string | null
           line_id?: string | null
+          minimum_contact_frequency?: number | null
           name: string
+          next_required_contact?: string | null
           notes?: string | null
           person_type?: string | null
           phone?: string | null
@@ -224,6 +687,8 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          annual_revenue_target?: number | null
+          assigned_sales_person?: string | null
           bank_account?: string | null
           bank_address?: string | null
           bank_branch?: string | null
@@ -240,9 +705,16 @@ export type Database = {
           facebook?: string | null
           hq_branch?: string | null
           id?: string
+          is_key_account?: boolean | null
+          key_account_notes?: string | null
+          key_account_tier?: string | null
+          key_account_weight?: number | null
+          last_contact_date?: string | null
           last_synced_at?: string | null
           line_id?: string | null
+          minimum_contact_frequency?: number | null
           name?: string
+          next_required_contact?: string | null
           notes?: string | null
           person_type?: string | null
           phone?: string | null
@@ -256,6 +728,54 @@ export type Database = {
           tax_id?: string | null
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      datasheets: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          file_path: string
+          file_size: number | null
+          file_type: string
+          id: string
+          language: string | null
+          name: string
+          subcategory: string | null
+          tags: string[] | null
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          id?: string
+          language?: string | null
+          name: string
+          subcategory?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          language?: string | null
+          name?: string
+          subcategory?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          version?: string | null
         }
         Relationships: []
       }
@@ -719,6 +1239,215 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_attendance: {
+        Row: {
+          address: string | null
+          check_in_time: string | null
+          check_out_time: string | null
+          created_at: string
+          employee_id: string
+          id: string
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          notes: string | null
+          total_hours: number | null
+          updated_at: string
+          work_date: string
+        }
+        Insert: {
+          address?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          notes?: string | null
+          total_hours?: number | null
+          updated_at?: string
+          work_date?: string
+        }
+        Update: {
+          address?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          notes?: string | null
+          total_hours?: number | null
+          updated_at?: string
+          work_date?: string
+        }
+        Relationships: []
+      }
+      international_transfer_requests: {
+        Row: {
+          actual_exchange_rate: number | null
+          actual_transfer_amount: number | null
+          approved_at: string | null
+          approved_by: string | null
+          attachment_urls: string[] | null
+          bank_charges: number | null
+          created_at: string
+          currency: string
+          customer_id: string | null
+          customer_paid_amount: number | null
+          customer_payment_status: string | null
+          customer_remaining_amount: number | null
+          exchange_rate: number | null
+          finance_approved_at: string | null
+          finance_approved_by: string | null
+          id: string
+          internal_notes: string | null
+          invoice_reference: string | null
+          notes: string | null
+          other_charges: number | null
+          payment_deadline: string | null
+          payment_purpose: string
+          priority: string
+          purchase_order_number: string | null
+          rejection_reason: string | null
+          requested_by: string | null
+          requested_transfer_date: string
+          status: string
+          supplier_account_number: string
+          supplier_bank_address: string | null
+          supplier_bank_name: string
+          supplier_id: string | null
+          supplier_name: string
+          supplier_swift_code: string | null
+          thb_equivalent: number | null
+          transfer_amount: number
+          transfer_executed_at: string | null
+          transfer_fee: number | null
+          transfer_number: string
+          transfer_reference_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_exchange_rate?: number | null
+          actual_transfer_amount?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          attachment_urls?: string[] | null
+          bank_charges?: number | null
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          customer_paid_amount?: number | null
+          customer_payment_status?: string | null
+          customer_remaining_amount?: number | null
+          exchange_rate?: number | null
+          finance_approved_at?: string | null
+          finance_approved_by?: string | null
+          id?: string
+          internal_notes?: string | null
+          invoice_reference?: string | null
+          notes?: string | null
+          other_charges?: number | null
+          payment_deadline?: string | null
+          payment_purpose: string
+          priority?: string
+          purchase_order_number?: string | null
+          rejection_reason?: string | null
+          requested_by?: string | null
+          requested_transfer_date: string
+          status?: string
+          supplier_account_number: string
+          supplier_bank_address?: string | null
+          supplier_bank_name: string
+          supplier_id?: string | null
+          supplier_name: string
+          supplier_swift_code?: string | null
+          thb_equivalent?: number | null
+          transfer_amount: number
+          transfer_executed_at?: string | null
+          transfer_fee?: number | null
+          transfer_number: string
+          transfer_reference_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_exchange_rate?: number | null
+          actual_transfer_amount?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          attachment_urls?: string[] | null
+          bank_charges?: number | null
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          customer_paid_amount?: number | null
+          customer_payment_status?: string | null
+          customer_remaining_amount?: number | null
+          exchange_rate?: number | null
+          finance_approved_at?: string | null
+          finance_approved_by?: string | null
+          id?: string
+          internal_notes?: string | null
+          invoice_reference?: string | null
+          notes?: string | null
+          other_charges?: number | null
+          payment_deadline?: string | null
+          payment_purpose?: string
+          priority?: string
+          purchase_order_number?: string | null
+          rejection_reason?: string | null
+          requested_by?: string | null
+          requested_transfer_date?: string
+          status?: string
+          supplier_account_number?: string
+          supplier_bank_address?: string | null
+          supplier_bank_name?: string
+          supplier_id?: string | null
+          supplier_name?: string
+          supplier_swift_code?: string | null
+          thb_equivalent?: number | null
+          transfer_amount?: number
+          transfer_executed_at?: string | null
+          transfer_fee?: number | null
+          transfer_number?: string
+          transfer_reference_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "international_transfer_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "international_transfer_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "international_transfer_requests_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "international_transfer_requests_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
       invoice_items: {
         Row: {
           created_at: string
@@ -859,6 +1588,1007 @@ export type Database = {
         }
         Relationships: []
       }
+      key_account_activities: {
+        Row: {
+          activity_date: string
+          activity_type: string
+          compliance_notes: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          is_mandatory: boolean | null
+          kpi_weight: number | null
+          next_action: string | null
+          next_action_date: string | null
+          outcome_rating: number | null
+          sales_person_id: string
+          title: string
+          updated_at: string
+          was_on_time: boolean | null
+        }
+        Insert: {
+          activity_date?: string
+          activity_type: string
+          compliance_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_mandatory?: boolean | null
+          kpi_weight?: number | null
+          next_action?: string | null
+          next_action_date?: string | null
+          outcome_rating?: number | null
+          sales_person_id: string
+          title: string
+          updated_at?: string
+          was_on_time?: boolean | null
+        }
+        Update: {
+          activity_date?: string
+          activity_type?: string
+          compliance_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_mandatory?: boolean | null
+          kpi_weight?: number | null
+          next_action?: string | null
+          next_action_date?: string | null
+          outcome_rating?: number | null
+          sales_person_id?: string
+          title?: string
+          updated_at?: string
+          was_on_time?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_account_activities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "key_account_activities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      key_account_kpis: {
+        Row: {
+          calls_actual: number | null
+          calls_target: number | null
+          contact_frequency_met: boolean | null
+          created_at: string
+          customer_id: string
+          days_since_last_contact: number | null
+          emails_actual: number | null
+          emails_target: number | null
+          id: string
+          last_meeting_date: string | null
+          meetings_actual: number | null
+          meetings_target: number | null
+          month: number
+          proposals_actual: number | null
+          proposals_target: number | null
+          revenue_actual: number | null
+          revenue_target: number | null
+          sales_person_id: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          calls_actual?: number | null
+          calls_target?: number | null
+          contact_frequency_met?: boolean | null
+          created_at?: string
+          customer_id: string
+          days_since_last_contact?: number | null
+          emails_actual?: number | null
+          emails_target?: number | null
+          id?: string
+          last_meeting_date?: string | null
+          meetings_actual?: number | null
+          meetings_target?: number | null
+          month?: number
+          proposals_actual?: number | null
+          proposals_target?: number | null
+          revenue_actual?: number | null
+          revenue_target?: number | null
+          sales_person_id: string
+          updated_at?: string
+          year?: number
+        }
+        Update: {
+          calls_actual?: number | null
+          calls_target?: number | null
+          contact_frequency_met?: boolean | null
+          created_at?: string
+          customer_id?: string
+          days_since_last_contact?: number | null
+          emails_actual?: number | null
+          emails_target?: number | null
+          id?: string
+          last_meeting_date?: string | null
+          meetings_actual?: number | null
+          meetings_target?: number | null
+          month?: number
+          proposals_actual?: number | null
+          proposals_target?: number | null
+          revenue_actual?: number | null
+          revenue_target?: number | null
+          sales_person_id?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_account_kpis_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "key_account_kpis_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      key_account_transfer_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          completed_at: string | null
+          created_at: string
+          current_sales_person: string | null
+          customer_id: string
+          id: string
+          reason: string | null
+          rejection_reason: string | null
+          request_type: string
+          requested_by: string
+          requested_sales_person: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_sales_person?: string | null
+          customer_id: string
+          id?: string
+          reason?: string | null
+          rejection_reason?: string | null
+          request_type?: string
+          requested_by: string
+          requested_sales_person: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_sales_person?: string | null
+          customer_id?: string
+          id?: string
+          reason?: string | null
+          rejection_reason?: string | null
+          request_type?: string
+          requested_by?: string
+          requested_sales_person?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      loyalty_campaigns: {
+        Row: {
+          bonus_points: number | null
+          campaign_type: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          end_date: string
+          id: string
+          is_active: boolean | null
+          minimum_purchase: number | null
+          multiplier: number | null
+          name: string
+          start_date: string
+          target_tier: string | null
+          terms_conditions: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bonus_points?: number | null
+          campaign_type: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          minimum_purchase?: number | null
+          multiplier?: number | null
+          name: string
+          start_date: string
+          target_tier?: string | null
+          terms_conditions?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bonus_points?: number | null
+          campaign_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          minimum_purchase?: number | null
+          multiplier?: number | null
+          name?: string
+          start_date?: string
+          target_tier?: string | null
+          terms_conditions?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      loyalty_points_transactions: {
+        Row: {
+          created_at: string | null
+          customer_id: string
+          description: string
+          expiry_date: string | null
+          id: string
+          points_amount: number
+          processed_by: string | null
+          reference_id: string | null
+          reference_type: string | null
+          transaction_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id: string
+          description: string
+          expiry_date?: string | null
+          id?: string
+          points_amount: number
+          processed_by?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_type: string
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string
+          description?: string
+          expiry_date?: string | null
+          id?: string
+          points_amount?: number
+          processed_by?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_points_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_points_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      loyalty_redemptions: {
+        Row: {
+          created_at: string | null
+          customer_id: string
+          expires_at: string | null
+          id: string
+          notes: string | null
+          points_used: number
+          processed_by: string | null
+          redeemed_at: string | null
+          redemption_code: string
+          reward_id: string
+          status: string
+          updated_at: string | null
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          points_used: number
+          processed_by?: string | null
+          redeemed_at?: string | null
+          redemption_code: string
+          reward_id: string
+          status?: string
+          updated_at?: string | null
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          points_used?: number
+          processed_by?: string | null
+          redeemed_at?: string | null
+          redemption_code?: string
+          reward_id?: string
+          status?: string
+          updated_at?: string | null
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_redemptions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_redemptions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "loyalty_redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "loyalty_rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loyalty_rewards: {
+        Row: {
+          available_quantity: number | null
+          category: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          minimum_tier: string | null
+          name: string
+          points_required: number
+          reward_type: string
+          reward_value: number | null
+          stock_quantity: number | null
+          terms_conditions: string | null
+          updated_at: string | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          available_quantity?: number | null
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          minimum_tier?: string | null
+          name: string
+          points_required: number
+          reward_type: string
+          reward_value?: number | null
+          stock_quantity?: number | null
+          terms_conditions?: string | null
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          available_quantity?: number | null
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          minimum_tier?: string | null
+          name?: string
+          points_required?: number
+          reward_type?: string
+          reward_value?: number | null
+          stock_quantity?: number | null
+          terms_conditions?: string | null
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
+      media_library: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          folder_path: string | null
+          id: string
+          mime_type: string | null
+          original_name: string
+          tags: string[] | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          folder_path?: string | null
+          id?: string
+          mime_type?: string | null
+          original_name: string
+          tags?: string[] | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          folder_path?: string | null
+          id?: string
+          mime_type?: string | null
+          original_name?: string
+          tags?: string[] | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      meeting_attendees: {
+        Row: {
+          attendance_status: string | null
+          attendee_type: string
+          company: string | null
+          created_at: string
+          email: string | null
+          employee_id: string | null
+          id: string
+          invitation_status: string
+          meeting_id: string
+          name: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          attendance_status?: string | null
+          attendee_type?: string
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          employee_id?: string | null
+          id?: string
+          invitation_status?: string
+          meeting_id: string
+          name?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attendance_status?: string | null
+          attendee_type?: string
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          employee_id?: string | null
+          id?: string
+          invitation_status?: string
+          meeting_id?: string
+          name?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_attendees_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_reminders: {
+        Row: {
+          created_at: string
+          id: string
+          meeting_id: string
+          recipient_email: string | null
+          recipient_id: string | null
+          reminder_time: string
+          reminder_type: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meeting_id: string
+          recipient_email?: string | null
+          recipient_id?: string | null
+          reminder_time: string
+          reminder_type?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meeting_id?: string
+          recipient_email?: string | null
+          recipient_id?: string | null
+          reminder_time?: string
+          reminder_type?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_reminders_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meetings: {
+        Row: {
+          agenda: string | null
+          created_at: string
+          created_by: string
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          description: string | null
+          duration_minutes: number | null
+          end_date: string
+          follow_up_actions: string | null
+          id: string
+          location: string | null
+          meeting_method: string
+          meeting_notes: string | null
+          meeting_type: string
+          meeting_url: string | null
+          opportunity_id: string | null
+          organizer_id: string
+          preparation_notes: string | null
+          priority: string
+          reminder_date: string | null
+          reminder_sent: boolean | null
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agenda?: string | null
+          created_at?: string
+          created_by: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          end_date: string
+          follow_up_actions?: string | null
+          id?: string
+          location?: string | null
+          meeting_method?: string
+          meeting_notes?: string | null
+          meeting_type?: string
+          meeting_url?: string | null
+          opportunity_id?: string | null
+          organizer_id: string
+          preparation_notes?: string | null
+          priority?: string
+          reminder_date?: string | null
+          reminder_sent?: boolean | null
+          start_date: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agenda?: string | null
+          created_at?: string
+          created_by?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          end_date?: string
+          follow_up_actions?: string | null
+          id?: string
+          location?: string | null
+          meeting_method?: string
+          meeting_notes?: string | null
+          meeting_type?: string
+          meeting_url?: string | null
+          opportunity_id?: string | null
+          organizer_id?: string
+          preparation_notes?: string | null
+          priority?: string
+          reminder_date?: string | null
+          reminder_sent?: boolean | null
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string
+          data: Json | null
+          expires_at: string | null
+          id: string
+          message: string
+          priority: string
+          read_at: string | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string
+          data?: Json | null
+          expires_at?: string | null
+          id?: string
+          message: string
+          priority?: string
+          read_at?: string | null
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string
+          data?: Json | null
+          expires_at?: string | null
+          id?: string
+          message?: string
+          priority?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      opportunities: {
+        Row: {
+          address: string | null
+          assigned_to: string | null
+          business_type: string | null
+          company_name: string
+          created_at: string
+          created_by: string | null
+          customer_code: string | null
+          customer_id: string | null
+          description: string | null
+          email: string | null
+          expected_close_date: string | null
+          id: string
+          notes: string | null
+          phone: string[] | null
+          priority: string | null
+          probability: number
+          source: string | null
+          stage: string
+          updated_at: string
+          value: number
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          assigned_to?: string | null
+          business_type?: string | null
+          company_name: string
+          created_at?: string
+          created_by?: string | null
+          customer_code?: string | null
+          customer_id?: string | null
+          description?: string | null
+          email?: string | null
+          expected_close_date?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string[] | null
+          priority?: string | null
+          probability?: number
+          source?: string | null
+          stage?: string
+          updated_at?: string
+          value?: number
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          assigned_to?: string | null
+          business_type?: string | null
+          company_name?: string
+          created_at?: string
+          created_by?: string | null
+          customer_code?: string | null
+          customer_id?: string | null
+          description?: string | null
+          email?: string | null
+          expected_close_date?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string[] | null
+          priority?: string | null
+          probability?: number
+          source?: string | null
+          stage?: string
+          updated_at?: string
+          value?: number
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      page_layouts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          layout_data: Json
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          layout_data?: Json
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          layout_data?: Json
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      partner_product_registrations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          dealer_name: string | null
+          id: string
+          notes: string | null
+          product_model: string | null
+          product_name: string
+          purchase_date: string
+          purchase_order_number: string | null
+          registration_code: string | null
+          serial_number: string
+          updated_at: string
+          warranty_end_date: string | null
+          warranty_period_days: number | null
+          warranty_start_date: string
+          warranty_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          dealer_name?: string | null
+          id?: string
+          notes?: string | null
+          product_model?: string | null
+          product_name: string
+          purchase_date: string
+          purchase_order_number?: string | null
+          registration_code?: string | null
+          serial_number: string
+          updated_at?: string
+          warranty_end_date?: string | null
+          warranty_period_days?: number | null
+          warranty_start_date?: string
+          warranty_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          dealer_name?: string | null
+          id?: string
+          notes?: string | null
+          product_model?: string | null
+          product_name?: string
+          purchase_date?: string
+          purchase_order_number?: string | null
+          registration_code?: string | null
+          serial_number?: string
+          updated_at?: string
+          warranty_end_date?: string | null
+          warranty_period_days?: number | null
+          warranty_start_date?: string
+          warranty_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_product_registrations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_product_registrations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      partner_shared_documents: {
+        Row: {
+          category: string
+          created_at: string
+          customer_id: string
+          description: string | null
+          download_count: number | null
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          is_active: boolean
+          shared_by: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          download_count?: number | null
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          is_active?: boolean
+          shared_by?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          download_count?: number | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          is_active?: boolean
+          shared_by?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_shared_documents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_shared_documents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
       payment_records: {
         Row: {
           amount_received: number
@@ -926,6 +2656,174 @@ export type Database = {
             columns: ["tax_invoice_id"]
             isOneToOne: false
             referencedRelation: "tax_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_campaigns: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          product_id: string
+          special_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          product_id: string
+          special_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          special_price?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_inquiries: {
+        Row: {
+          created_at: string
+          created_by: string
+          customer_id: string | null
+          description: string | null
+          id: string
+          inquiry_number: string | null
+          max_budget: number | null
+          opportunity_id: string | null
+          priority: string
+          product_category: string
+          product_name: string
+          quantity: number
+          required_delivery_date: string | null
+          requirements: string | null
+          sent_to_suppliers: string[] | null
+          specifications: Json
+          status: string
+          target_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          customer_id?: string | null
+          description?: string | null
+          id?: string
+          inquiry_number?: string | null
+          max_budget?: number | null
+          opportunity_id?: string | null
+          priority?: string
+          product_category: string
+          product_name: string
+          quantity: number
+          required_delivery_date?: string | null
+          requirements?: string | null
+          sent_to_suppliers?: string[] | null
+          specifications?: Json
+          status?: string
+          target_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          customer_id?: string | null
+          description?: string | null
+          id?: string
+          inquiry_number?: string | null
+          max_budget?: number | null
+          opportunity_id?: string | null
+          priority?: string
+          product_category?: string
+          product_name?: string
+          quantity?: number
+          required_delivery_date?: string | null
+          requirements?: string | null
+          sent_to_suppliers?: string[] | null
+          specifications?: Json
+          status?: string
+          target_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_inquiries_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_inquiries_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "product_inquiries_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_positions: {
+        Row: {
+          created_at: string
+          height: number | null
+          id: string
+          is_featured: boolean | null
+          position_x: number | null
+          position_y: number | null
+          product_data: Json | null
+          product_id: string | null
+          section_id: string | null
+          updated_at: string
+          width: number | null
+          z_index: number | null
+        }
+        Insert: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          is_featured?: boolean | null
+          position_x?: number | null
+          position_y?: number | null
+          product_data?: Json | null
+          product_id?: string | null
+          section_id?: string | null
+          updated_at?: string
+          width?: number | null
+          z_index?: number | null
+        }
+        Update: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          is_featured?: boolean | null
+          position_x?: number | null
+          position_y?: number | null
+          product_data?: Json | null
+          product_id?: string | null
+          section_id?: string | null
+          updated_at?: string
+          width?: number | null
+          z_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_positions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "content_sections"
             referencedColumns: ["id"]
           },
         ]
@@ -998,7 +2896,12 @@ export type Database = {
       products: {
         Row: {
           brand: string | null
+          campaign_description: string | null
+          campaign_eligible: boolean | null
+          campaign_end_date: string | null
+          campaign_start_date: string | null
           category: string | null
+          china_factory_promo: boolean | null
           created_at: string
           description: string | null
           id: string
@@ -1006,6 +2909,7 @@ export type Database = {
           item_condition: string | null
           last_synced_at: string | null
           name: string
+          original_china_price: number | null
           price: number
           repair_notes: string | null
           repair_order_id: string | null
@@ -1013,6 +2917,7 @@ export type Database = {
           service_request_id: string | null
           sku: string
           source_system: string | null
+          special_campaign_price: number | null
           status: string
           stock: number
           sync_status: string | null
@@ -1020,7 +2925,12 @@ export type Database = {
         }
         Insert: {
           brand?: string | null
+          campaign_description?: string | null
+          campaign_eligible?: boolean | null
+          campaign_end_date?: string | null
+          campaign_start_date?: string | null
           category?: string | null
+          china_factory_promo?: boolean | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1028,6 +2938,7 @@ export type Database = {
           item_condition?: string | null
           last_synced_at?: string | null
           name: string
+          original_china_price?: number | null
           price?: number
           repair_notes?: string | null
           repair_order_id?: string | null
@@ -1035,6 +2946,7 @@ export type Database = {
           service_request_id?: string | null
           sku: string
           source_system?: string | null
+          special_campaign_price?: number | null
           status?: string
           stock?: number
           sync_status?: string | null
@@ -1042,7 +2954,12 @@ export type Database = {
         }
         Update: {
           brand?: string | null
+          campaign_description?: string | null
+          campaign_eligible?: boolean | null
+          campaign_end_date?: string | null
+          campaign_start_date?: string | null
           category?: string | null
+          china_factory_promo?: boolean | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1050,6 +2967,7 @@ export type Database = {
           item_condition?: string | null
           last_synced_at?: string | null
           name?: string
+          original_china_price?: number | null
           price?: number
           repair_notes?: string | null
           repair_order_id?: string | null
@@ -1057,6 +2975,7 @@ export type Database = {
           service_request_id?: string | null
           sku?: string
           source_system?: string | null
+          special_campaign_price?: number | null
           status?: string
           stock?: number
           sync_status?: string | null
@@ -1111,6 +3030,63 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      purchase_order_items: {
+        Row: {
+          created_at: string
+          discount_amount: number | null
+          id: string
+          line_total: number
+          notes: string | null
+          product_name: string
+          product_sku: string | null
+          purchase_order_id: string
+          quantity: number
+          supplier_product_id: string | null
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          discount_amount?: number | null
+          id?: string
+          line_total?: number
+          notes?: string | null
+          product_name: string
+          product_sku?: string | null
+          purchase_order_id: string
+          quantity?: number
+          supplier_product_id?: string | null
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          discount_amount?: number | null
+          id?: string
+          line_total?: number
+          notes?: string | null
+          product_name?: string
+          product_sku?: string | null
+          purchase_order_id?: string
+          quantity?: number
+          supplier_product_id?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_items_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_supplier_product_id_fkey"
+            columns: ["supplier_product_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       purchase_orders: {
         Row: {
@@ -1268,6 +3244,8 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          bonus_eligible: boolean | null
+          bonus_reason: string | null
           created_at: string
           created_by: string | null
           customer_address: string | null
@@ -1280,6 +3258,7 @@ export type Database = {
           discount_percentage: number
           erp_reference_id: string | null
           id: string
+          is_repeat_customer: boolean | null
           next_document_type: string | null
           notes: string | null
           parent_quotation_id: string | null
@@ -1307,6 +3286,8 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          bonus_eligible?: boolean | null
+          bonus_reason?: string | null
           created_at?: string
           created_by?: string | null
           customer_address?: string | null
@@ -1319,6 +3300,7 @@ export type Database = {
           discount_percentage?: number
           erp_reference_id?: string | null
           id?: string
+          is_repeat_customer?: boolean | null
           next_document_type?: string | null
           notes?: string | null
           parent_quotation_id?: string | null
@@ -1346,6 +3328,8 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          bonus_eligible?: boolean | null
+          bonus_reason?: string | null
           created_at?: string
           created_by?: string | null
           customer_address?: string | null
@@ -1358,6 +3342,7 @@ export type Database = {
           discount_percentage?: number
           erp_reference_id?: string | null
           id?: string
+          is_repeat_customer?: boolean | null
           next_document_type?: string | null
           notes?: string | null
           parent_quotation_id?: string | null
@@ -1389,6 +3374,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "customers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
           },
           {
             foreignKeyName: "quotations_parent_quotation_id_fkey"
@@ -1552,6 +3544,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "receipts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+          {
             foreignKeyName: "receipts_invoice_id_fkey"
             columns: ["invoice_id"]
             isOneToOne: false
@@ -1639,6 +3638,299 @@ export type Database = {
           repair_number?: string
           status?: string
           total_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rfq: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          created_by: string | null
+          customer_email: string
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          delivery_date: string | null
+          external_rfq_id: string | null
+          id: string
+          notes: string | null
+          project_name: string | null
+          rfq_number: string
+          status: string
+          sync_status: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email: string
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          delivery_date?: string | null
+          external_rfq_id?: string | null
+          id?: string
+          notes?: string | null
+          project_name?: string | null
+          rfq_number: string
+          status?: string
+          sync_status?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          delivery_date?: string | null
+          external_rfq_id?: string | null
+          id?: string
+          notes?: string | null
+          project_name?: string | null
+          rfq_number?: string
+          status?: string
+          sync_status?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rfq_items: {
+        Row: {
+          created_at: string
+          id: string
+          model: string
+          product_id: string
+          product_name: string
+          quantity: number
+          rfq_id: string
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          model: string
+          product_id: string
+          product_name: string
+          quantity: number
+          rfq_id: string
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          model?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          rfq_id?: string
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfq_items_rfq_id_fkey"
+            columns: ["rfq_id"]
+            isOneToOne: false
+            referencedRelation: "rfq"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_performance: {
+        Row: {
+          achievement_percent: number | null
+          average_deal_size: number | null
+          closing_rate: number | null
+          commission_amount: number | null
+          conversion_rate: number | null
+          created_at: string
+          id: string
+          invoices_paid: number | null
+          monthly_target: number | null
+          period_month: number
+          period_year: number
+          quotations_approved: number | null
+          quotations_created: number | null
+          quotations_value: number | null
+          receipts_value: number | null
+          sales_person_id: string
+          updated_at: string
+        }
+        Insert: {
+          achievement_percent?: number | null
+          average_deal_size?: number | null
+          closing_rate?: number | null
+          commission_amount?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          id?: string
+          invoices_paid?: number | null
+          monthly_target?: number | null
+          period_month?: number
+          period_year?: number
+          quotations_approved?: number | null
+          quotations_created?: number | null
+          quotations_value?: number | null
+          receipts_value?: number | null
+          sales_person_id: string
+          updated_at?: string
+        }
+        Update: {
+          achievement_percent?: number | null
+          average_deal_size?: number | null
+          closing_rate?: number | null
+          commission_amount?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          id?: string
+          invoices_paid?: number | null
+          monthly_target?: number | null
+          period_month?: number
+          period_year?: number
+          quotations_approved?: number | null
+          quotations_created?: number | null
+          quotations_value?: number | null
+          receipts_value?: number | null
+          sales_person_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sales_receipts: {
+        Row: {
+          bank_name: string | null
+          commission_amount: number | null
+          commission_rate: number | null
+          created_at: string
+          customer_id: string | null
+          customer_name: string
+          erp_invoice_id: string | null
+          erp_receipt_id: string | null
+          id: string
+          notes: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          quotation_id: string | null
+          receipt_date: string
+          receipt_number: string
+          sales_person_id: string | null
+          source_system: string | null
+          status: string
+          subtotal: number
+          sync_status: string | null
+          synced_from_erp_at: string | null
+          total_amount: number
+          updated_at: string
+          vat_amount: number
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          bank_name?: string | null
+          commission_amount?: number | null
+          commission_rate?: number | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name: string
+          erp_invoice_id?: string | null
+          erp_receipt_id?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          quotation_id?: string | null
+          receipt_date?: string
+          receipt_number: string
+          sales_person_id?: string | null
+          source_system?: string | null
+          status?: string
+          subtotal?: number
+          sync_status?: string | null
+          synced_from_erp_at?: string | null
+          total_amount?: number
+          updated_at?: string
+          vat_amount?: number
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          bank_name?: string | null
+          commission_amount?: number | null
+          commission_rate?: number | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          erp_invoice_id?: string | null
+          erp_receipt_id?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          quotation_id?: string | null
+          receipt_date?: string
+          receipt_number?: string
+          sales_person_id?: string | null
+          source_system?: string | null
+          status?: string
+          subtotal?: number
+          sync_status?: string | null
+          synced_from_erp_at?: string | null
+          total_amount?: number
+          updated_at?: string
+          vat_amount?: number
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
+      sales_targets: {
+        Row: {
+          commission_target: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          quotation_target: number | null
+          revenue_target: number | null
+          sales_person_id: string
+          target_month: number | null
+          target_period: string | null
+          target_year: number
+          updated_at: string
+        }
+        Insert: {
+          commission_target?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          quotation_target?: number | null
+          revenue_target?: number | null
+          sales_person_id: string
+          target_month?: number | null
+          target_period?: string | null
+          target_year: number
+          updated_at?: string
+        }
+        Update: {
+          commission_target?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          quotation_target?: number | null
+          revenue_target?: number | null
+          sales_person_id?: string
+          target_month?: number | null
+          target_period?: string | null
+          target_year?: number
           updated_at?: string
         }
         Relationships: []
@@ -1834,6 +4126,13 @@ export type Database = {
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "service_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
         ]
       }
       service_status_history: {
@@ -1870,6 +4169,158 @@ export type Database = {
             columns: ["service_request_id"]
             isOneToOne: false
             referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_tickets: {
+        Row: {
+          actual_cost: number | null
+          assigned_technician: string | null
+          contact_email: string | null
+          contact_person: string | null
+          contact_phone: string | null
+          created_at: string
+          created_date: string
+          customer_id: string | null
+          customer_name: string
+          erp_ticket_id: string | null
+          estimated_cost: number | null
+          id: string
+          issue_description: string
+          last_synced_at: string | null
+          parts_used: Json | null
+          priority: string
+          product_model: string | null
+          resolution_notes: string | null
+          resolved_date: string | null
+          serial_number: string | null
+          service_location: string | null
+          service_type: string | null
+          status: string
+          sync_status: string | null
+          ticket_number: string
+          updated_at: string
+          warranty_expire_date: string | null
+          warranty_status: string | null
+        }
+        Insert: {
+          actual_cost?: number | null
+          assigned_technician?: string | null
+          contact_email?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_date?: string
+          customer_id?: string | null
+          customer_name: string
+          erp_ticket_id?: string | null
+          estimated_cost?: number | null
+          id?: string
+          issue_description: string
+          last_synced_at?: string | null
+          parts_used?: Json | null
+          priority?: string
+          product_model?: string | null
+          resolution_notes?: string | null
+          resolved_date?: string | null
+          serial_number?: string | null
+          service_location?: string | null
+          service_type?: string | null
+          status?: string
+          sync_status?: string | null
+          ticket_number: string
+          updated_at?: string
+          warranty_expire_date?: string | null
+          warranty_status?: string | null
+        }
+        Update: {
+          actual_cost?: number | null
+          assigned_technician?: string | null
+          contact_email?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_date?: string
+          customer_id?: string | null
+          customer_name?: string
+          erp_ticket_id?: string | null
+          estimated_cost?: number | null
+          id?: string
+          issue_description?: string
+          last_synced_at?: string | null
+          parts_used?: Json | null
+          priority?: string
+          product_model?: string | null
+          resolution_notes?: string | null
+          resolved_date?: string | null
+          serial_number?: string | null
+          service_location?: string | null
+          service_type?: string | null
+          status?: string
+          sync_status?: string | null
+          ticket_number?: string
+          updated_at?: string
+          warranty_expire_date?: string | null
+          warranty_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_tickets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_tickets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      special_bonuses: {
+        Row: {
+          awarded_at: string
+          awarded_by: string
+          bonus_amount: number
+          bonus_reason: string | null
+          created_at: string
+          id: string
+          quotation_id: string | null
+          sales_person_id: string
+          updated_at: string
+        }
+        Insert: {
+          awarded_at?: string
+          awarded_by: string
+          bonus_amount?: number
+          bonus_reason?: string | null
+          created_at?: string
+          id?: string
+          quotation_id?: string | null
+          sales_person_id: string
+          updated_at?: string
+        }
+        Update: {
+          awarded_at?: string
+          awarded_by?: string
+          bonus_amount?: number
+          bonus_reason?: string | null
+          created_at?: string
+          id?: string
+          quotation_id?: string | null
+          sales_person_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "special_bonuses_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
             referencedColumns: ["id"]
           },
         ]
@@ -1961,6 +4412,737 @@ export type Database = {
           user_id?: string | null
           vehicle_plate?: string | null
           vehicle_type?: string | null
+        }
+        Relationships: []
+      }
+      supplier_documents: {
+        Row: {
+          created_at: string
+          document_date: string | null
+          document_number: string | null
+          document_type: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          metadata: Json | null
+          purchase_order_id: string | null
+          status: string | null
+          supplier_id: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_date?: string | null
+          document_number?: string | null
+          document_type: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          metadata?: Json | null
+          purchase_order_id?: string | null
+          status?: string | null
+          supplier_id: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_date?: string | null
+          document_number?: string | null
+          document_type?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          metadata?: Json | null
+          purchase_order_id?: string | null
+          status?: string | null
+          supplier_id?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_documents_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_documents_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_evaluations: {
+        Row: {
+          comments: string | null
+          communication_score: number
+          created_at: string
+          delivery_score: number
+          evaluation_date: string
+          evaluator_id: string
+          id: string
+          inquiry_id: string | null
+          overall_score: number
+          price_score: number
+          quality_score: number
+          recommendations: string | null
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          comments?: string | null
+          communication_score: number
+          created_at?: string
+          delivery_score: number
+          evaluation_date?: string
+          evaluator_id: string
+          id?: string
+          inquiry_id?: string | null
+          overall_score: number
+          price_score: number
+          quality_score: number
+          recommendations?: string | null
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          comments?: string | null
+          communication_score?: number
+          created_at?: string
+          delivery_score?: number
+          evaluation_date?: string
+          evaluator_id?: string
+          id?: string
+          inquiry_id?: string | null
+          overall_score?: number
+          price_score?: number
+          quality_score?: number
+          recommendations?: string | null
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_evaluations_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "product_inquiries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_evaluations_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_products: {
+        Row: {
+          brand: string | null
+          category: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          minimum_order_qty: number | null
+          model: string | null
+          product_name: string
+          product_sku: string | null
+          specifications: Json | null
+          stock_quantity: number | null
+          supplier_id: string
+          unit_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          minimum_order_qty?: number | null
+          model?: string | null
+          product_name: string
+          product_sku?: string | null
+          specifications?: Json | null
+          stock_quantity?: number | null
+          supplier_id: string
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          minimum_order_qty?: number | null
+          model?: string | null
+          product_name?: string
+          product_sku?: string | null
+          specifications?: Json | null
+          stock_quantity?: number | null
+          supplier_id?: string
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_promotions: {
+        Row: {
+          applicable_products: string[] | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_amount: number | null
+          discount_percentage: number | null
+          end_date: string
+          id: string
+          minimum_amount: number | null
+          minimum_quantity: number | null
+          promotion_title: string
+          promotion_type: string
+          start_date: string
+          status: string
+          supplier_id: string
+          terms_conditions: Json | null
+          updated_at: string
+        }
+        Insert: {
+          applicable_products?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          end_date: string
+          id?: string
+          minimum_amount?: number | null
+          minimum_quantity?: number | null
+          promotion_title: string
+          promotion_type?: string
+          start_date: string
+          status?: string
+          supplier_id: string
+          terms_conditions?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          applicable_products?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          end_date?: string
+          id?: string
+          minimum_amount?: number | null
+          minimum_quantity?: number | null
+          promotion_title?: string
+          promotion_type?: string
+          start_date?: string
+          status?: string
+          supplier_id?: string
+          terms_conditions?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_promotions_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_registration_documents: {
+        Row: {
+          document_name: string
+          document_type: string
+          file_size: number | null
+          file_url: string
+          id: string
+          supplier_registration_id: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          document_name: string
+          document_type: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          supplier_registration_id: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          document_name?: string
+          document_type?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          supplier_registration_id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_registration_documents_registration_id_fkey"
+            columns: ["supplier_registration_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_registration_history: {
+        Row: {
+          action: string
+          id: string
+          new_value: string | null
+          notes: string | null
+          old_value: string | null
+          performed_at: string
+          performed_by: string | null
+          step_number: number | null
+          supplier_registration_id: string
+        }
+        Insert: {
+          action: string
+          id?: string
+          new_value?: string | null
+          notes?: string | null
+          old_value?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          step_number?: number | null
+          supplier_registration_id: string
+        }
+        Update: {
+          action?: string
+          id?: string
+          new_value?: string | null
+          notes?: string | null
+          old_value?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          step_number?: number | null
+          supplier_registration_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_registration_history_registration_id_fkey"
+            columns: ["supplier_registration_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_registration_steps: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          required_fields: string[] | null
+          step_description: string | null
+          step_name: string
+          step_number: number
+          step_title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          required_fields?: string[] | null
+          step_description?: string | null
+          step_name: string
+          step_number: number
+          step_title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          required_fields?: string[] | null
+          step_description?: string | null
+          step_name?: string
+          step_number?: number
+          step_title?: string
+        }
+        Relationships: []
+      }
+      supplier_registrations: {
+        Row: {
+          annual_revenue: number | null
+          approved_at: string | null
+          business_license_expiry: string | null
+          business_license_number: string | null
+          business_plan_summary: string | null
+          company_address: string | null
+          company_email: string | null
+          company_name: string
+          company_phone: string | null
+          company_type: string
+          contact_person_email: string
+          contact_person_name: string
+          contact_person_phone: string | null
+          contact_person_position: string | null
+          created_at: string
+          created_by: string | null
+          current_brands: string[] | null
+          current_step: number
+          established_year: number | null
+          expected_annual_sales: number | null
+          financial_support_needed: boolean | null
+          id: string
+          marketing_support_needed: boolean | null
+          number_of_employees: number | null
+          registration_status: string
+          rejected_at: string | null
+          rejection_reason: string | null
+          requested_support_types: string[] | null
+          reviewed_at: string | null
+          sales_channels: string[] | null
+          submitted_at: string | null
+          target_market: string[] | null
+          tax_id: string | null
+          technical_support_needed: boolean | null
+          training_support_needed: boolean | null
+          updated_at: string
+          website: string | null
+          why_partner_with_entgroup: string | null
+        }
+        Insert: {
+          annual_revenue?: number | null
+          approved_at?: string | null
+          business_license_expiry?: string | null
+          business_license_number?: string | null
+          business_plan_summary?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_name: string
+          company_phone?: string | null
+          company_type?: string
+          contact_person_email: string
+          contact_person_name: string
+          contact_person_phone?: string | null
+          contact_person_position?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_brands?: string[] | null
+          current_step?: number
+          established_year?: number | null
+          expected_annual_sales?: number | null
+          financial_support_needed?: boolean | null
+          id?: string
+          marketing_support_needed?: boolean | null
+          number_of_employees?: number | null
+          registration_status?: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          requested_support_types?: string[] | null
+          reviewed_at?: string | null
+          sales_channels?: string[] | null
+          submitted_at?: string | null
+          target_market?: string[] | null
+          tax_id?: string | null
+          technical_support_needed?: boolean | null
+          training_support_needed?: boolean | null
+          updated_at?: string
+          website?: string | null
+          why_partner_with_entgroup?: string | null
+        }
+        Update: {
+          annual_revenue?: number | null
+          approved_at?: string | null
+          business_license_expiry?: string | null
+          business_license_number?: string | null
+          business_plan_summary?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_name?: string
+          company_phone?: string | null
+          company_type?: string
+          contact_person_email?: string
+          contact_person_name?: string
+          contact_person_phone?: string | null
+          contact_person_position?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_brands?: string[] | null
+          current_step?: number
+          established_year?: number | null
+          expected_annual_sales?: number | null
+          financial_support_needed?: boolean | null
+          id?: string
+          marketing_support_needed?: boolean | null
+          number_of_employees?: number | null
+          registration_status?: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          requested_support_types?: string[] | null
+          reviewed_at?: string | null
+          sales_channels?: string[] | null
+          submitted_at?: string | null
+          target_market?: string[] | null
+          tax_id?: string | null
+          technical_support_needed?: boolean | null
+          training_support_needed?: boolean | null
+          updated_at?: string
+          website?: string | null
+          why_partner_with_entgroup?: string | null
+        }
+        Relationships: []
+      }
+      supplier_responses: {
+        Row: {
+          compliance_certificates: string[] | null
+          created_at: string
+          delivery_time_days: number | null
+          id: string
+          inquiry_id: string
+          minimum_order_quantity: number | null
+          notes: string | null
+          payment_terms: string | null
+          product_specifications: Json | null
+          quantity_available: number | null
+          response_date: string | null
+          response_status: string
+          sample_available: boolean | null
+          supplier_id: string
+          total_price: number | null
+          unit_price: number | null
+          updated_at: string
+          valid_until: string | null
+          warranty_period_days: number | null
+        }
+        Insert: {
+          compliance_certificates?: string[] | null
+          created_at?: string
+          delivery_time_days?: number | null
+          id?: string
+          inquiry_id: string
+          minimum_order_quantity?: number | null
+          notes?: string | null
+          payment_terms?: string | null
+          product_specifications?: Json | null
+          quantity_available?: number | null
+          response_date?: string | null
+          response_status?: string
+          sample_available?: boolean | null
+          supplier_id: string
+          total_price?: number | null
+          unit_price?: number | null
+          updated_at?: string
+          valid_until?: string | null
+          warranty_period_days?: number | null
+        }
+        Update: {
+          compliance_certificates?: string[] | null
+          created_at?: string
+          delivery_time_days?: number | null
+          id?: string
+          inquiry_id?: string
+          minimum_order_quantity?: number | null
+          notes?: string | null
+          payment_terms?: string | null
+          product_specifications?: Json | null
+          quantity_available?: number | null
+          response_date?: string | null
+          response_status?: string
+          sample_available?: boolean | null
+          supplier_id?: string
+          total_price?: number | null
+          unit_price?: number | null
+          updated_at?: string
+          valid_until?: string | null
+          warranty_period_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_responses_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "product_inquiries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_responses_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_support_offerings: {
+        Row: {
+          benefits: string[] | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          requirements: string[] | null
+          support_description: string | null
+          support_name: string
+          support_type: string
+        }
+        Insert: {
+          benefits?: string[] | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          requirements?: string[] | null
+          support_description?: string | null
+          support_name: string
+          support_type: string
+        }
+        Update: {
+          benefits?: string[] | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          requirements?: string[] | null
+          support_description?: string | null
+          support_name?: string
+          support_type?: string
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          address: string | null
+          business_license: string | null
+          certification_ce: boolean | null
+          certification_fcc: boolean | null
+          certification_iso: string | null
+          city: string | null
+          company_name: string
+          company_name_en: string | null
+          contact_person: string
+          country: string | null
+          created_at: string
+          created_by: string | null
+          delivery_time_days: number | null
+          email: string
+          id: string
+          is_active: boolean | null
+          minimum_order_quantity: number | null
+          notes: string | null
+          payment_terms: string | null
+          phone: string | null
+          price_competitiveness: number | null
+          product_categories: string[] | null
+          province: string | null
+          quality_score: number | null
+          reliability_score: number | null
+          response_time_hours: number | null
+          specializations: string[] | null
+          successful_orders: number | null
+          supplier_grade: string
+          total_orders: number | null
+          updated_at: string
+          user_id: string | null
+          wechat: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_license?: string | null
+          certification_ce?: boolean | null
+          certification_fcc?: boolean | null
+          certification_iso?: string | null
+          city?: string | null
+          company_name: string
+          company_name_en?: string | null
+          contact_person: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_time_days?: number | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+          minimum_order_quantity?: number | null
+          notes?: string | null
+          payment_terms?: string | null
+          phone?: string | null
+          price_competitiveness?: number | null
+          product_categories?: string[] | null
+          province?: string | null
+          quality_score?: number | null
+          reliability_score?: number | null
+          response_time_hours?: number | null
+          specializations?: string[] | null
+          successful_orders?: number | null
+          supplier_grade?: string
+          total_orders?: number | null
+          updated_at?: string
+          user_id?: string | null
+          wechat?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_license?: string | null
+          certification_ce?: boolean | null
+          certification_fcc?: boolean | null
+          certification_iso?: string | null
+          city?: string | null
+          company_name?: string
+          company_name_en?: string | null
+          contact_person?: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_time_days?: number | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          minimum_order_quantity?: number | null
+          notes?: string | null
+          payment_terms?: string | null
+          phone?: string | null
+          price_competitiveness?: number | null
+          product_categories?: string[] | null
+          province?: string | null
+          quality_score?: number | null
+          reliability_score?: number | null
+          response_time_hours?: number | null
+          specializations?: string[] | null
+          successful_orders?: number | null
+          supplier_grade?: string
+          total_orders?: number | null
+          updated_at?: string
+          user_id?: string | null
+          wechat?: string | null
         }
         Relationships: []
       }
@@ -2360,7 +5542,31 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      key_account_performance: {
+        Row: {
+          annual_revenue_target: number | null
+          calls_actual: number | null
+          calls_target: number | null
+          contact_frequency_met: boolean | null
+          contact_status: string | null
+          customer_id: string | null
+          customer_name: string | null
+          days_since_last_contact: number | null
+          key_account_tier: string | null
+          key_account_weight: number | null
+          last_contact_date: string | null
+          meetings_achievement_percent: number | null
+          meetings_actual: number | null
+          meetings_target: number | null
+          minimum_contact_frequency: number | null
+          next_required_contact: string | null
+          revenue_achievement_percent: number | null
+          revenue_actual: number | null
+          revenue_target: number | null
+          sales_person_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_invitation: {
@@ -2375,6 +5581,22 @@ export type Database = {
         Args: { request_id: string }
         Returns: string
       }
+      award_purchase_points: {
+        Args: {
+          customer_uuid: string
+          purchase_amount: number
+          reference_id_param?: string
+        }
+        Returns: number
+      }
+      calculate_loyalty_tier: {
+        Args: { annual_spent: number }
+        Returns: string
+      }
+      calculate_tiered_commission: {
+        Args: { monthly_target?: number; sales_amount: number }
+        Returns: number
+      }
       can_issue_receipt_for_tax_invoice: {
         Args: { tax_invoice_id_param: string }
         Returns: boolean
@@ -2387,11 +5609,46 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      check_repeat_customer: {
+        Args: { customer_id_param: string }
+        Returns: boolean
+      }
+      complete_key_account_transfer: {
+        Args: { request_id: string }
+        Returns: boolean
+      }
+      create_activity_notification: {
+        Args: {
+          p_activity_id: string
+          p_message: string
+          p_opportunity_id: string
+          p_priority?: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
+      create_opportunity_notification: {
+        Args: {
+          p_message: string
+          p_opportunity_id: string
+          p_priority?: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       generate_claim_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
       generate_delivery_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_inquiry_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -2423,6 +5680,73 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_transfer_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_key_account_performance_for_user: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          annual_revenue_target: number
+          calls_actual: number
+          calls_target: number
+          contact_frequency_met: boolean
+          contact_status: string
+          customer_id: string
+          customer_name: string
+          days_since_last_contact: number
+          key_account_tier: string
+          key_account_weight: number
+          last_contact_date: string
+          meetings_achievement_percent: number
+          meetings_actual: number
+          meetings_target: number
+          minimum_contact_frequency: number
+          next_required_contact: string
+          recent_activities_count: number
+          revenue_achievement_percent: number
+          revenue_actual: number
+          revenue_target: number
+          sales_person_id: string
+        }[]
+      }
+      get_orphaned_key_accounts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          annual_revenue_target: number
+          customer_id: string
+          customer_name: string
+          days_without_contact: number
+          key_account_tier: string
+          key_account_weight: number
+          last_contact_date: string
+          last_sales_person_name: string
+        }[]
+      }
+      get_recent_key_account_activities_count: {
+        Args: { customer_id_param: string }
+        Returns: number
+      }
+      get_team_sales_performance: {
+        Args: { target_month?: number; target_year?: number }
+        Returns: {
+          achievement_percent: number
+          closing_rate: number
+          commission_amount: number
+          conversion_rate: number
+          invoices_paid: number
+          monthly_target: number
+          period_month: number
+          period_year: number
+          quotations_approved: number
+          quotations_created: number
+          quotations_value: number
+          receipts_value: number
+          sales_person_email: string
+          sales_person_id: string
+          sales_person_name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2434,6 +5758,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      link_receipt_to_quotation: {
+        Args: { quotation_number_param: string; receipt_uuid: string }
+        Returns: boolean
+      }
       log_user_action: {
         Args: {
           action_name: string
@@ -2443,8 +5771,39 @@ export type Database = {
         }
         Returns: string
       }
+      mark_all_notifications_read: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      mark_notification_read: {
+        Args: { notification_id: string }
+        Returns: boolean
+      }
+      recalculate_sales_metrics: {
+        Args: {
+          sales_person_uuid: string
+          target_month: number
+          target_year: number
+        }
+        Returns: undefined
+      }
+      redeem_loyalty_points: {
+        Args: {
+          customer_uuid: string
+          processed_by_param: string
+          reward_uuid: string
+        }
+        Returns: string
+      }
     }
     Enums: {
+      activity_type:
+        | "call"
+        | "email"
+        | "meeting"
+        | "task"
+        | "note"
+        | "follow_up"
       app_role: "admin" | "accountant" | "user" | "sales"
       priority_level: "low" | "medium" | "high" | "urgent"
       process_type: "standard" | "downpayment" | "conversion" | "purchase_order"
@@ -2606,6 +5965,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activity_type: ["call", "email", "meeting", "task", "note", "follow_up"],
       app_role: ["admin", "accountant", "user", "sales"],
       priority_level: ["low", "medium", "high", "urgent"],
       process_type: ["standard", "downpayment", "conversion", "purchase_order"],

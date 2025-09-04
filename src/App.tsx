@@ -31,6 +31,7 @@ import StaffManagement from "./pages/StaffManagement";
 import Receipts from "./pages/Receipts";
 import ReceiptForm from "./pages/ReceiptForm";
 import PaymentRecords from "./pages/PaymentRecords";
+import InternationalTransfer from "./pages/InternationalTransfer";
 
 const queryClient = new QueryClient();
 
@@ -182,6 +183,11 @@ const App = () => (
             <Route path="/payment-records" element={
               <ProtectedRoute>
                 <PaymentRecords />
+              </ProtectedRoute>
+            } />
+            <Route path="/international-transfer" element={
+              <ProtectedRoute>
+                <InternationalTransfer />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

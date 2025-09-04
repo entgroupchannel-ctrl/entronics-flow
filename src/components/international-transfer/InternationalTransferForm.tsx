@@ -1,0 +1,823 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon, Search } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { cn } from "@/lib/utils";
+
+const transferFormSchema = z.object({
+  supplier_id: z.string().min(1, "กรุณาเลือก Supplier"),
+  supplier_name: z.string().min(1, "กรุณากรอกชื่อ Supplier"),
+  supplier_bank_name: z.string().min(1, "กรุณากรอกชื่อธนาคาร"),
+  supplier_bank_address: z.string().optional(),
+  supplier_account_number: z.string().min(1, "กรุณากรอกเลขที่บัญชี"),
+  supplier_swift_code: z.string().optional(),
+  transfer_amount: z.number().min(0.01, "กรุณากรอกจำนวนเงิน"),
+  currency: z.string().min(1, "กรุณาเลือกสกุลเงิน"),
+  exchange_rate: z.number().optional(),
+  thb_equivalent: z.number().optional(),
+  purchase_order_number: z.string().optional(),
+  invoice_reference: z.string().optional(),
+  payment_purpose: z.string().min(1, "กรุณากรอกวัตถุประสงค์การจ่าย"),
+  payment_deadline: z.date().optional(),
+  requested_transfer_date: z.date({
+    required_error: "กรุณาเลือกวันที่ต้องการโอน",
+  }),
+  priority: z.string().default("normal"),
+  customer_id: z.string().optional(),
+  customer_payment_status: z.string().default("pending"),
+  customer_paid_amount: z.number().default(0),
+  customer_remaining_amount: z.number().default(0),
+  transfer_fee: z.number().default(0),
+  bank_charges: z.number().default(0),
+  other_charges: z.number().default(0),
+  notes: z.string().optional(),
+});
+
+type TransferFormData = z.infer<typeof transferFormSchema>;
+
+interface InternationalTransferFormProps {
+  editingRequest?: any;
+  onSuccess: () => void;
+  onCancel: () => void;
+}
+
+export function InternationalTransferForm({
+  editingRequest,
+  onSuccess,
+  onCancel,
+}: InternationalTransferFormProps) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [supplierSearch, setSupplierSearch] = useState("");
+
+  const form = useForm<TransferFormData>({
+    resolver: zodResolver(transferFormSchema),
+    defaultValues: editingRequest ? {
+      supplier_id: editingRequest.supplier_id || "",
+      supplier_name: editingRequest.supplier_name || "",
+      supplier_bank_name: editingRequest.supplier_bank_name || "",
+      supplier_bank_address: editingRequest.supplier_bank_address || "",
+      supplier_account_number: editingRequest.supplier_account_number || "",
+      supplier_swift_code: editingRequest.supplier_swift_code || "",
+      transfer_amount: editingRequest.transfer_amount || 0,
+      currency: editingRequest.currency || "USD",
+      exchange_rate: editingRequest.exchange_rate || undefined,
+      thb_equivalent: editingRequest.thb_equivalent || undefined,
+      purchase_order_number: editingRequest.purchase_order_number || "",
+      invoice_reference: editingRequest.invoice_reference || "",
+      payment_purpose: editingRequest.payment_purpose || "",
+      payment_deadline: editingRequest.payment_deadline ? new Date(editingRequest.payment_deadline) : undefined,
+      requested_transfer_date: new Date(editingRequest.requested_transfer_date),
+      priority: editingRequest.priority || "normal",
+      customer_id: editingRequest.customer_id || "",
+      customer_payment_status: editingRequest.customer_payment_status || "pending",
+      customer_paid_amount: editingRequest.customer_paid_amount || 0,
+      customer_remaining_amount: editingRequest.customer_remaining_amount || 0,
+      transfer_fee: editingRequest.transfer_fee || 0,
+      bank_charges: editingRequest.bank_charges || 0,
+      other_charges: editingRequest.other_charges || 0,
+      notes: editingRequest.notes || "",
+    } : {
+      supplier_id: "",
+      supplier_name: "",
+      supplier_bank_name: "",
+      supplier_bank_address: "",
+      supplier_account_number: "",
+      supplier_swift_code: "",
+      transfer_amount: 0,
+      currency: "USD",
+      exchange_rate: undefined,
+      thb_equivalent: undefined,
+      purchase_order_number: "",
+      invoice_reference: "",
+      payment_purpose: "",
+      payment_deadline: undefined,
+      requested_transfer_date: new Date(),
+      priority: "normal",
+      customer_id: "",
+      customer_payment_status: "pending",
+      customer_paid_amount: 0,
+      customer_remaining_amount: 0,
+      transfer_fee: 0,
+      bank_charges: 0,
+      other_charges: 0,
+      notes: "",
+    },
+  });
+
+  // Query for suppliers
+  const { data: suppliers } = useQuery({
+    queryKey: ["suppliers", supplierSearch],
+    queryFn: async () => {
+      let query = supabase
+        .from("customers")
+        .select("id, name, bank_name, bank_account, tax_id, phone, email")
+        .eq("customer_type", "ผู้จัดจำหน่าย");
+
+      if (supplierSearch) {
+        query = query.ilike("name", `%${supplierSearch}%`);
+      }
+
+      const { data, error } = await query.limit(10);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Query for customers
+  const { data: customers } = useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("customers")
+        .select("id, name")
+        .eq("customer_type", "ลูกค้า")
+        .limit(20);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const currencies = [
+    { value: "USD", label: "USD - ดอลลาร์สหรัฐ" },
+    { value: "EUR", label: "EUR - ยูโร" },
+    { value: "GBP", label: "GBP - ปอนด์อังกฤษ" },
+    { value: "JPY", label: "JPY - เยนญี่ปุ่น" },
+    { value: "CNY", label: "CNY - หยวนจีน" },
+    { value: "SGD", label: "SGD - ดอลลาร์สิงคโปร์" },
+  ];
+
+  const priorityOptions = [
+    { value: "low", label: "ต่ำ" },
+    { value: "normal", label: "ปกติ" },
+    { value: "high", label: "สูง" },
+    { value: "urgent", label: "เร่งด่วน" },
+  ];
+
+  const paymentStatusOptions = [
+    { value: "pending", label: "รอการจ่ายเงิน" },
+    { value: "partial", label: "จ่ายบางส่วน" },
+    { value: "paid", label: "จ่ายครบแล้ว" },
+    { value: "overdue", label: "เกินกำหนด" },
+  ];
+
+  const handleSupplierSelect = (supplier: any) => {
+    form.setValue("supplier_id", supplier.id);
+    form.setValue("supplier_name", supplier.name);
+    form.setValue("supplier_bank_name", supplier.bank_name || "");
+    form.setValue("supplier_account_number", supplier.bank_account || "");
+    setSupplierSearch(supplier.name);
+  };
+
+  const onSubmit = async (data: TransferFormData) => {
+    if (!user) {
+      toast({
+        title: "ข้อผิดพลาด",
+        description: "กรุณาเข้าสู่ระบบก่อน",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const submitData = {
+        ...data,
+        requested_by: user.id,
+        status: editingRequest ? editingRequest.status : "draft",
+        payment_deadline: data.payment_deadline?.toISOString().split('T')[0] || null,
+        requested_transfer_date: data.requested_transfer_date.toISOString().split('T')[0],
+      };
+
+      // Remove transfer_number for new records (will be generated by trigger)
+      if (!editingRequest) {
+        delete (submitData as any).transfer_number;
+      }
+
+      if (editingRequest) {
+        const { error } = await supabase
+          .from("international_transfer_requests")
+          .update(submitData)
+          .eq("id", editingRequest.id);
+
+        if (error) throw error;
+      } else {
+        const insertData: any = { ...submitData };
+        delete insertData.transfer_number;
+        
+        const { error } = await supabase
+          .from("international_transfer_requests")
+          .insert(insertData);
+
+        if (error) throw error;
+      }
+
+      onSuccess();
+    } catch (error: any) {
+      console.error("Error submitting transfer request:", error);
+      toast({
+        title: "ข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกคำขอโอนเงินได้: " + error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Supplier Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>ข้อมูล Supplier</CardTitle>
+            <CardDescription>ข้อมูลผู้รับโอนเงิน</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>ค้นหา Supplier</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="พิมพ์ชื่อ Supplier..."
+                  value={supplierSearch}
+                  onChange={(e) => setSupplierSearch(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+              {supplierSearch && suppliers && suppliers.length > 0 && (
+                <div className="border rounded-md max-h-40 overflow-y-auto">
+                  {suppliers.map((supplier) => (
+                    <div
+                      key={supplier.id}
+                      className="p-2 hover:bg-muted cursor-pointer border-b last:border-0"
+                      onClick={() => handleSupplierSelect(supplier)}
+                    >
+                      <div className="font-medium">{supplier.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {supplier.bank_name} - {supplier.bank_account}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="supplier_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ชื่อ Supplier *</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="supplier_bank_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ชื่อธนาคาร *</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="supplier_account_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>เลขที่บัญชี *</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="supplier_swift_code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SWIFT Code</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="supplier_bank_address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ที่อยู่ธนาคาร</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} rows={2} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Transfer Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>รายละเอียดการโอน</CardTitle>
+            <CardDescription>ข้อมูลการโอนเงิน</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="transfer_amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>จำนวนเงิน *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>สกุลเงิน *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {currencies.map((currency) => (
+                          <SelectItem key={currency.value} value={currency.value}>
+                            {currency.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ความสำคัญ</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {priorityOptions.map((priority) => (
+                          <SelectItem key={priority.value} value={priority.value}>
+                            {priority.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="exchange_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>อัตราแลกเปลี่ยน</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormDescription>อัตราแลกเปลี่ยนต่อ 1 บาท</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="thb_equivalent"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>เทียบเท่าบาท</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="requested_transfer_date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>วันที่ต้องการโอน *</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "dd/MM/yyyy")
+                            ) : (
+                              <span>เลือกวันที่</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="payment_deadline"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>กำหนดจ่าย</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "dd/MM/yyyy")
+                            ) : (
+                              <span>เลือกวันที่</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Reference Documents */}
+        <Card>
+          <CardHeader>
+            <CardTitle>เอกสารอ้างอิง</CardTitle>
+            <CardDescription>เอกสารที่เกี่ยวข้องกับการโอนเงิน</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="purchase_order_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>เลขที่ PO</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="invoice_reference"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>เลขที่ Invoice อ้างอิง</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="payment_purpose"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>วัตถุประสงค์การจ่าย *</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    ระบุรายละเอียดสินค้าหรือบริการที่ชำระเงิน
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Customer Payment Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>ข้อมูลลูกค้า</CardTitle>
+            <CardDescription>สถานะการจ่ายเงินของลูกค้า</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="customer_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ลูกค้า</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="เลือกลูกค้า" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {customers?.map((customer) => (
+                          <SelectItem key={customer.id} value={customer.id}>
+                            {customer.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="customer_payment_status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>สถานะการจ่ายเงิน</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {paymentStatusOptions.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="customer_paid_amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ยอดที่ลูกค้าจ่ายแล้ว</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="customer_remaining_amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ยอดคงเหลือ</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Fees and Charges */}
+        <Card>
+          <CardHeader>
+            <CardTitle>ค่าธรรมเนียม</CardTitle>
+            <CardDescription>ค่าใช้จ่ายในการโอนเงิน</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="transfer_fee"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ค่าธรรมเนียมโอน</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="bank_charges"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ค่าธรรมเนียมธนาคาร</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="other_charges"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ค่าใช้จ่ายอื่นๆ</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Notes */}
+        <Card>
+          <CardHeader>
+            <CardTitle>หมายเหตุ</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>หมายเหตุเพิ่มเติม</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} rows={3} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            ยกเลิก
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "กำลังบันทึก..." : editingRequest ? "อัปเดต" : "สร้างคำขอ"}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
