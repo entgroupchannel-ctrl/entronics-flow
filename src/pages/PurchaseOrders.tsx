@@ -121,7 +121,8 @@ export default function PurchaseOrders() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>เลขที่ PO</TableHead>
+                      <TableHead>เลขที่ PO (ระบบ)</TableHead>
+                      <TableHead>เลขที่ PO (ลูกค้า)</TableHead>
                       <TableHead>ลูกค้า</TableHead>
                       <TableHead>วันที่</TableHead>
                       <TableHead>วันส่งมอบ</TableHead>
@@ -134,6 +135,9 @@ export default function PurchaseOrders() {
                     {purchaseOrders?.map((po) => (
                       <TableRow key={po.id}>
                         <TableCell className="font-medium">{po.po_number}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {po.customer_po_number || "-"}
+                        </TableCell>
                         <TableCell>{po.customer_name}</TableCell>
                         <TableCell>
                           {format(new Date(po.po_date), "dd/MM/yyyy", { locale: th })}

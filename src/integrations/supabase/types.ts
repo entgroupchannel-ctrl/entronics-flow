@@ -3318,6 +3318,7 @@ export type Database = {
           customer_company: string | null
           customer_id: string | null
           customer_name: string
+          customer_po_number: string | null
           delivery_date: string | null
           id: string
           notes: string | null
@@ -3333,6 +3334,7 @@ export type Database = {
           customer_company?: string | null
           customer_id?: string | null
           customer_name: string
+          customer_po_number?: string | null
           delivery_date?: string | null
           id?: string
           notes?: string | null
@@ -3348,6 +3350,7 @@ export type Database = {
           customer_company?: string | null
           customer_id?: string | null
           customer_name?: string
+          customer_po_number?: string | null
           delivery_date?: string | null
           id?: string
           notes?: string | null

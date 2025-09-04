@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 const purchaseOrderSchema = z.object({
   po_number: z.string().optional(),
+  customer_po_number: z.string().optional(),
   quotation_id: z.string().optional(),
   customer_id: z.string().min(1, "กรุณาเลือกลูกค้า"),
   customer_name: z.string().min(1, "กรุณากรอกชื่อลูกค้า"),
@@ -79,6 +80,8 @@ export function PurchaseOrderForm({
     resolver: zodResolver(purchaseOrderSchema),
     defaultValues: editingPO ? {
       po_number: editingPO.po_number || "",
+      customer_po_number: editingPO.customer_po_number || "",
+      quotation_id: editingPO.quotation_id || "",
       customer_id: editingPO.customer_id || "",
       customer_name: editingPO.customer_name || "",
       customer_company: editingPO.customer_company || "",
@@ -91,6 +94,8 @@ export function PurchaseOrderForm({
       notes: editingPO.notes || "",
     } : {
       po_number: "",
+      customer_po_number: "",
+      quotation_id: "",
       customer_id: "",
       customer_name: "",
       customer_company: "",
@@ -205,6 +210,7 @@ export function PurchaseOrderForm({
       
       const purchaseOrderData = {
         po_number: data.po_number || undefined,
+        customer_po_number: data.customer_po_number || undefined,
         customer_id: data.customer_id,
         customer_name: data.customer_name,
         customer_company: data.customer_company || undefined,
@@ -351,6 +357,34 @@ export function PurchaseOrderForm({
                         </Button>
                       )}
                     </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="customer_po_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>หมายเลข PO จากลูกค้า</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="กรอกหมายเลข PO จากระบบลูกค้า" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="customer_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ชื่อลูกค้า *</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
