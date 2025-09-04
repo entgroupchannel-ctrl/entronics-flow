@@ -111,7 +111,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2">
         {/* Main Dashboard */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-foreground/70 uppercase tracking-wider">
+          <SidebarGroupLabel className="text-xs font-semibold text-gray-800 uppercase tracking-wider">
             การดำเนินงาน
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -158,7 +158,7 @@ export function AppSidebar() {
 
         {/* Management */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-foreground/70 uppercase tracking-wider">
+          <SidebarGroupLabel className="text-xs font-semibold text-gray-800 uppercase tracking-wider">
             การจัดการ
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -172,7 +172,7 @@ export function AppSidebar() {
 
         {/* Reports */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-foreground/70 uppercase tracking-wider">
+          <SidebarGroupLabel className="text-xs font-semibold text-gray-800 uppercase tracking-wider">
             รายงาน
           </SidebarGroupLabel>
           <SidebarGroupContent>
