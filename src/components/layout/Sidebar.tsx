@@ -125,6 +125,12 @@ const menuItems = [
         icon: CreditCard,
         href: "/payment-records",
         view: "payment-records"
+      },
+      {
+        title: "โอนต่างประเทศ",
+        icon: DollarSign,
+        href: "/international-transfer",
+        view: "international-transfer"
       }
     ]
   },
