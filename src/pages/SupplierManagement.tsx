@@ -24,6 +24,7 @@ export default function SupplierManagement() {
   const { data: suppliers, isLoading, refetch } = useQuery({
     queryKey: ["all-suppliers"],
     queryFn: async () => {
+      console.log("Fetching suppliers...");
       const { data, error } = await supabase
         .from("customers")
         .select("*")
@@ -39,8 +40,11 @@ export default function SupplierManagement() {
         });
         throw error;
       }
+      console.log("Suppliers fetched:", data?.length || 0, "items");
       return data || [];
     },
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always refetch
   });
 
   // Calculate statistics
