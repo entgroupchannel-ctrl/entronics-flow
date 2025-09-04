@@ -1495,32 +1495,33 @@ export function InternationalTransferForm({
           </div>
 
           {/* Submit Section */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onCancel}
-                  className="flex-1 sm:flex-initial"
-                >
-                  ยกเลิก
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="flex-1 sm:flex-initial"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      กำลังบันทึก...
-                    </div>
-                  ) : (
-                    editingRequest ? 'อัปเดตคำขอ' : 'สร้างคำขอ'
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </div>
-      );
-    };
+          <div className="flex flex-col sm:flex-row gap-3 pt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              className="flex-1 sm:flex-initial"
+            >
+              ยกเลิก
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="flex-1 sm:flex-initial"
+            >
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  กำลังบันทึก...
+                </div>
+              ) : (
+                editingRequest ? 'อัปเดตคำขอ' : 'สร้างคำขอ'
+              )}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  </div>
+);
+};
