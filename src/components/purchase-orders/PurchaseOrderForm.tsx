@@ -19,6 +19,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { PurchaseOrderAttachments } from "./PurchaseOrderAttachments";
+import { PaymentTermsSection } from "./PaymentTermsSection";
 
 const purchaseOrderSchema = z.object({
   po_number: z.string().optional(),
@@ -33,6 +34,16 @@ const purchaseOrderSchema = z.object({
   delivery_date: z.date().optional(),
   status: z.string().default("received"),
   payment_terms: z.string().default("30 วัน"),
+  payment_method: z.string().default("bank_transfer"),
+  payment_terms_type: z.string().default("credit"),
+  payment_due_days: z.number().default(30),
+  advance_payment_percentage: z.number().default(0),
+  advance_payment_amount: z.number().default(0),
+  cash_discount_percentage: z.number().default(0),
+  cash_discount_days: z.number().default(0),
+  installment_count: z.number().default(1),
+  payment_currency: z.string().default("THB"),
+  late_payment_fee_percentage: z.number().default(0),
   delivery_address: z.string().optional(),
   special_instructions: z.string().optional(),
   notes: z.string().optional(),
@@ -78,6 +89,7 @@ export function PurchaseOrderForm({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAllQuotations, setShowAllQuotations] = useState(false);
+  const [paymentTermsData, setPaymentTermsData] = useState<any>({});
   const [items, setItems] = useState<PurchaseOrderItem[]>([
     {
       item_sequence: 1,
@@ -101,6 +113,16 @@ export function PurchaseOrderForm({
       delivery_date: editingPO.delivery_date ? new Date(editingPO.delivery_date) : undefined,
       status: editingPO.status || "received",
       payment_terms: editingPO.payment_terms || "30 วัน",
+      payment_method: editingPO.payment_method || "bank_transfer",
+      payment_terms_type: editingPO.payment_terms_type || "credit",
+      payment_due_days: editingPO.payment_due_days || 30,
+      advance_payment_percentage: editingPO.advance_payment_percentage || 0,
+      advance_payment_amount: editingPO.advance_payment_amount || 0,
+      cash_discount_percentage: editingPO.cash_discount_percentage || 0,
+      cash_discount_days: editingPO.cash_discount_days || 0,
+      installment_count: editingPO.installment_count || 1,
+      payment_currency: editingPO.payment_currency || "THB",
+      late_payment_fee_percentage: editingPO.late_payment_fee_percentage || 0,
       delivery_address: editingPO.delivery_address || "",
       special_instructions: editingPO.special_instructions || "",
       notes: editingPO.notes || "",
@@ -115,6 +137,16 @@ export function PurchaseOrderForm({
       delivery_date: undefined,
       status: "received",
       payment_terms: "30 วัน",
+      payment_method: "bank_transfer",
+      payment_terms_type: "credit",
+      payment_due_days: 30,
+      advance_payment_percentage: 0,
+      advance_payment_amount: 0,
+      cash_discount_percentage: 0,
+      cash_discount_days: 0,
+      installment_count: 1,
+      payment_currency: "THB",
+      late_payment_fee_percentage: 0,
       delivery_address: "",
       special_instructions: "",
       notes: "",
@@ -264,6 +296,17 @@ export function PurchaseOrderForm({
         status: data.status,
         total_amount: totalAmount,
         payment_terms: data.payment_terms,
+        payment_method: paymentTermsData.payment_method || data.payment_method,
+        payment_terms_type: paymentTermsData.payment_terms_type || data.payment_terms_type,
+        payment_due_days: paymentTermsData.payment_due_days || data.payment_due_days,
+        advance_payment_percentage: paymentTermsData.advance_payment_percentage || data.advance_payment_percentage,
+        advance_payment_amount: paymentTermsData.advance_payment_amount || data.advance_payment_amount,
+        cash_discount_percentage: paymentTermsData.cash_discount_percentage || data.cash_discount_percentage,
+        cash_discount_days: paymentTermsData.cash_discount_days || data.cash_discount_days,
+        installment_count: paymentTermsData.installment_count || data.installment_count,
+        payment_currency: paymentTermsData.payment_currency || data.payment_currency,
+        late_payment_fee_percentage: paymentTermsData.late_payment_fee_percentage || data.late_payment_fee_percentage,
+        payment_schedule: JSON.stringify(paymentTermsData.payment_schedule || []),
         delivery_address: data.delivery_address || undefined,
         special_instructions: data.special_instructions || undefined,
         notes: data.notes || undefined,
@@ -713,6 +756,14 @@ export function PurchaseOrderForm({
             </div>
           </CardContent>
         </Card>
+
+        {/* Payment Terms Section */}
+        <PaymentTermsSection 
+          value={paymentTermsData}
+          onChange={setPaymentTermsData}
+          totalAmount={getTotalAmount()}
+          poDate={form.watch("po_date")}
+        />
 
         {/* Attachments Section */}
         <PurchaseOrderAttachments purchaseOrderId={editingPO?.id || ""} />

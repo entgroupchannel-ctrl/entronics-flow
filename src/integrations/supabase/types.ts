@@ -3355,8 +3355,65 @@ export type Database = {
           },
         ]
       }
+      purchase_order_payment_schedules: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string | null
+          due_date: string
+          id: string
+          installment_number: number
+          paid_amount: number | null
+          paid_date: string | null
+          payment_reference: string | null
+          purchase_order_id: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description?: string | null
+          due_date: string
+          id?: string
+          installment_number: number
+          paid_amount?: number | null
+          paid_date?: string | null
+          payment_reference?: string | null
+          purchase_order_id: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string | null
+          due_date?: string
+          id?: string
+          installment_number?: number
+          paid_amount?: number | null
+          paid_date?: string | null
+          payment_reference?: string | null
+          purchase_order_id?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_payment_schedules_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchase_orders: {
         Row: {
+          advance_payment_amount: number | null
+          advance_payment_percentage: number | null
+          cash_discount_days: number | null
+          cash_discount_percentage: number | null
           created_at: string
           created_by: string | null
           customer_company: string | null
@@ -3365,7 +3422,15 @@ export type Database = {
           customer_po_number: string | null
           delivery_date: string | null
           id: string
+          installment_count: number | null
+          late_payment_fee_percentage: number | null
           notes: string | null
+          payment_currency: string | null
+          payment_due_days: number | null
+          payment_method: string | null
+          payment_schedule: Json | null
+          payment_status: string | null
+          payment_terms_type: string | null
           po_date: string
           po_number: string
           sales_person_id: string | null
@@ -3374,6 +3439,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          advance_payment_amount?: number | null
+          advance_payment_percentage?: number | null
+          cash_discount_days?: number | null
+          cash_discount_percentage?: number | null
           created_at?: string
           created_by?: string | null
           customer_company?: string | null
@@ -3382,7 +3451,15 @@ export type Database = {
           customer_po_number?: string | null
           delivery_date?: string | null
           id?: string
+          installment_count?: number | null
+          late_payment_fee_percentage?: number | null
           notes?: string | null
+          payment_currency?: string | null
+          payment_due_days?: number | null
+          payment_method?: string | null
+          payment_schedule?: Json | null
+          payment_status?: string | null
+          payment_terms_type?: string | null
           po_date?: string
           po_number: string
           sales_person_id?: string | null
@@ -3391,6 +3468,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          advance_payment_amount?: number | null
+          advance_payment_percentage?: number | null
+          cash_discount_days?: number | null
+          cash_discount_percentage?: number | null
           created_at?: string
           created_by?: string | null
           customer_company?: string | null
@@ -3399,7 +3480,15 @@ export type Database = {
           customer_po_number?: string | null
           delivery_date?: string | null
           id?: string
+          installment_count?: number | null
+          late_payment_fee_percentage?: number | null
           notes?: string | null
+          payment_currency?: string | null
+          payment_due_days?: number | null
+          payment_method?: string | null
+          payment_schedule?: Json | null
+          payment_status?: string | null
+          payment_terms_type?: string | null
           po_date?: string
           po_number?: string
           sales_person_id?: string | null

@@ -193,7 +193,19 @@ export default function PurchaseOrders() {
                             <span className="text-sm">{po.attachment_count || 0}</span>
                           </div>
                         </TableCell>
-                        <TableCell>{getStatusBadge(po.status)}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            {getStatusBadge(po.status)}
+                            {po.payment_terms_type && po.payment_terms_type !== 'credit' && (
+                              <span className="text-xs text-blue-600">
+                                {po.payment_terms_type === 'advance' && 'ชำระล่วงหน้า'}
+                                {po.payment_terms_type === 'cod' && 'เก็บเงินปลายทาง'}
+                                {po.payment_terms_type === 'installment' && `ผ่อน ${po.installment_count || 1} งวด`}
+                                {po.payment_terms_type === 'partial_advance' && `มัดจำ ${po.advance_payment_percentage || 0}%`}
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button
