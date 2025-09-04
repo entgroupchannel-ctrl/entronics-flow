@@ -338,29 +338,32 @@ const Quotations = () => {
   return (
     <div className="container mx-auto p-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <FileText className="w-8 h-8 text-blue-600" />
-                  <div>
-                    <h1 className="text-2xl font-bold text-foreground">ใบเสนอราคา / Quotation</h1>
-                    <p className="text-sm text-muted-foreground">รายงานและจัดการใบเสนอราคา</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Button onClick={() => navigate('/quotations/import')} variant="outline" className="flex items-center gap-2">
-                    <Upload className="w-4 h-4" />
-                    นำเข้าข้อมูล
-                  </Button>
-                  <Button onClick={createNewQuotation} className="bg-primary hover:bg-primary/90">
-                    <Plus className="w-4 h-4 mr-2" />
-                    สร้างใบเสนอราคา
-                  </Button>
-                </div>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="quotations">รายการใบเสนอราคา</TabsTrigger>
+          <TabsTrigger value="workflow">การดำเนินการ</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="quotations" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <FileText className="w-8 h-8 text-blue-600" />
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">ใบเสนอราคา / Quotation</h1>
+                <p className="text-sm text-muted-foreground">รายงานและจัดการใบเสนอราคา</p>
               </div>
-
-
-              <TabsContent value="quotations" className="space-y-6">
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Button onClick={() => navigate('/quotations/import')} variant="outline" className="flex items-center gap-2">
+                <Upload className="w-4 h-4" />
+                นำเข้าข้อมูล
+              </Button>
+              <Button onClick={createNewQuotation} className="bg-primary hover:bg-primary/90">
+                <Plus className="w-4 h-4 mr-2" />
+                สร้างใบเสนอราคา
+              </Button>
+            </div>
+          </div>
                 {/* Search and Filter Section */}
                 <Card>
                   <CardContent className="p-4">
@@ -683,6 +686,25 @@ const Quotations = () => {
                       ถัดไป
                     </Button>
                   </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="workflow" className="space-y-6">
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-3">
+                    <History className="w-8 h-8 text-blue-600" />
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground">การดำเนินการใบเสนอราคา</h2>
+                      <p className="text-sm text-muted-foreground">ติดตามสถานะและการอนุมัติ</p>
+                    </div>
+                  </div>
+                  <Card>
+                    <CardContent className="p-6">
+                      <p className="text-muted-foreground">
+                        หากต้องการติดตามสถานะการอนุมัติของใบเสนอราคา กรุณาเลือกใบเสนอราคาในแท็บ "รายการใบเสนอราคา"
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
               </TabsContent>
             </Tabs>
