@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -59,7 +58,6 @@ interface Staff {
 }
 
 const StaffManagement = () => {
-  const [currentView, setCurrentView] = useState('staff-management');
   const { toast } = useToast();
   const [staff, setStaff] = useState<Staff[]>([]);
   const [filteredStaff, setFilteredStaff] = useState<Staff[]>([]);
@@ -411,19 +409,12 @@ const StaffManagement = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar 
-        currentView={currentView} 
-        onMenuClick={(view) => setCurrentView(view)}
-      />
-      
-      <div className="flex-1 flex flex-col">
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">จัดการพนักงานขับรถ</h1>
-              <p className="text-muted-foreground">เพิ่ม แก้ไข และจัดการข้อมูลพนักงานขับรถ</p>
-            </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">จัดการพนักงานขับรถ</h1>
+          <p className="text-muted-foreground">เพิ่ม แก้ไข และจัดการข้อมูลพนักงานขับรถ</p>
+        </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={resetForm}>
@@ -686,8 +677,6 @@ const StaffManagement = () => {
               />
             </DialogContent>
           </Dialog>
-        </main>
-      </div>
     </div>
   );
 
