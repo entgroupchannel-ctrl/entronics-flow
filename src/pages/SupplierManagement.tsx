@@ -181,7 +181,7 @@ export default function SupplierManagement() {
 
         <TabsContent value="list" className="space-y-4">
           <SupplierList
-            suppliers={suppliers?.filter(s => s.supplier_registration_status === 'approved') || []}
+            suppliers={suppliers || []}
             isLoading={isLoading}
             onEdit={handleEditSupplier}
             onRefresh={refetch}
