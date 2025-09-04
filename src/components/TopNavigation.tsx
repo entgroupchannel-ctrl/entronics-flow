@@ -34,7 +34,7 @@ const mainItems = [
 const salesItems = [
   { title: "เอกสารการขาย / Sale Docs", url: "/sales-documents", icon: FileText },
   { title: "ใบเสนอราคา", url: "/quotations", icon: FileText },
-  { title: "Purchase Orders", url: "/purchase-orders", icon: Receipt },
+  { title: "ใบสั่งสินค้า (PO)", url: "/purchase-orders", icon: Receipt },
   { title: "ใบวางบิล/ใบแจ้งหนี้", url: "/invoices", icon: Receipt },
   { title: "การชำระเงิน/ใบกำกับภาษี", url: "/tax-invoices", icon: Calculator },
   { title: "ใบส่งสินค้า/ใบกำกับภาษี", url: "/receipts", icon: Receipt },
