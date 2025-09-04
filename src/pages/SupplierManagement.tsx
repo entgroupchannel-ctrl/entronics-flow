@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Building2, TrendingUp, Users, Star, Shield, Clock } from "lucide-react";
+import { Plus, Building2, TrendingUp, Users, Star, Shield, Clock, Globe } from "lucide-react";
 import { SupplierRegistrationForm } from "@/components/supplier/SupplierRegistrationForm";
 import { SupplierApprovalList } from "@/components/supplier/SupplierApprovalList";
 import { SupplierList } from "@/components/supplier/SupplierList";
 import { SupplierPaymentHistory } from "@/components/supplier/SupplierPaymentHistory";
+import { InternationalTransferReport } from "@/components/financial/InternationalTransferReport";
+import { SupplierTransferManagement } from "@/components/supplier/SupplierTransferManagement";
 import { useToast } from "@/hooks/use-toast";
 
 export default function SupplierManagement() {
@@ -168,6 +170,7 @@ export default function SupplierManagement() {
             {editingSupplier ? "แก้ไข Supplier" : "ลงทะเบียน Supplier"}
           </TabsTrigger>
           <TabsTrigger value="payments">ประวัติการจ่าย</TabsTrigger>
+          <TabsTrigger value="transfers">การโอนเงินต่างประเทศ</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="space-y-4">
@@ -211,6 +214,23 @@ export default function SupplierManagement() {
             suppliers={suppliers?.filter(s => s.supplier_registration_status === 'approved') || []}
             onRefresh={refetch}
           />
+        </TabsContent>
+
+        <TabsContent value="transfers" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                การโอนเงินต่างประเทศ
+              </CardTitle>
+              <CardDescription>
+                รายงานและจัดการการโอนเงินให้กับ Supplier ต่างประเทศ
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SupplierTransferManagement suppliers={suppliers || []} />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
