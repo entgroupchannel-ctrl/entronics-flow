@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plus, X } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, X, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -64,6 +64,7 @@ export function PurchaseOrderForm({
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAllQuotations, setShowAllQuotations] = useState(false);
   const [items, setItems] = useState<PurchaseOrderItem[]>([
     {
       item_sequence: 1,
@@ -117,19 +118,23 @@ export function PurchaseOrderForm({
     },
   });
 
-  // Query for recent quotations (last 2 months)
+  // Query for recent quotations (last 2 months or all)
   const { data: quotations } = useQuery({
-    queryKey: ["recent-quotations"],
+    queryKey: ["quotations", showAllQuotations],
     queryFn: async () => {
-      const twoMonthsAgo = new Date();
-      twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
-      
-      const { data, error } = await supabase
+      let query = supabase
         .from("quotations")
         .select("id, quotation_number, customer_name, total_amount, quotation_date, status")
-        .gte("quotation_date", twoMonthsAgo.toISOString().split('T')[0])
         .in("status", ["approved", "pending"])
         .order("quotation_date", { ascending: false });
+
+      if (!showAllQuotations) {
+        const twoMonthsAgo = new Date();
+        twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+        query = query.gte("quotation_date", twoMonthsAgo.toISOString().split('T')[0]);
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       return data || [];
@@ -322,26 +327,61 @@ export function PurchaseOrderForm({
                 name="quotation_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ใบเสนอราคาอ้างอิง (2 เดือนล่าสุด)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="เลือกใบเสนอราคา" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {quotations?.map((quotation) => (
-                          <SelectItem key={quotation.id} value={quotation.id}>
-                            <div className="flex flex-col text-left">
-                              <span className="font-medium">{quotation.quotation_number}</span>
-                              <span className="text-sm text-muted-foreground">
-                                {quotation.customer_name} • ฿{quotation.total_amount?.toLocaleString()} • {quotation.status}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>
+                      ใบเสนอราคาอ้างอิง {!showAllQuotations && "(2 เดือนล่าสุด)"}
+                      {showAllQuotations && "(ทั้งหมด)"}
+                    </FormLabel>
+                    <div className="space-y-2">
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="เลือกใบเสนอราคา" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {quotations?.map((quotation) => (
+                            <SelectItem key={quotation.id} value={quotation.id}>
+                              <div className="flex flex-col text-left">
+                                <span className="font-medium">{quotation.quotation_number}</span>
+                                <span className="text-sm text-muted-foreground">
+                                  {quotation.customer_name} • ฿{quotation.total_amount?.toLocaleString()} • {quotation.status}
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                          {quotations?.length === 0 && !showAllQuotations && (
+                            <SelectItem value="no-results" disabled>
+                              ไม่พบใบเสนอราคาใน 2 เดือนล่าสุด
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      
+                      {!showAllQuotations && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowAllQuotations(true)}
+                          className="w-full"
+                        >
+                          <Search className="w-4 h-4 mr-2" />
+                          ค้นหาใบเสนอราคาทั้งหมด
+                        </Button>
+                      )}
+                      
+                      {showAllQuotations && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowAllQuotations(false)}
+                          className="w-full"
+                        >
+                          กลับไปแสดง 2 เดือนล่าสุด
+                        </Button>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
