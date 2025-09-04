@@ -33,6 +33,7 @@ const purchaseOrderSchema = z.object({
   }),
   delivery_date: z.date().optional(),
   status: z.string().default("received"),
+  total_amount: z.number().min(0, "กรุณากรอกจำนวนเงิน"),
   payment_terms: z.string().default("30 วัน"),
   payment_method: z.string().default("bank_transfer"),
   payment_terms_type: z.string().default("credit"),
@@ -50,18 +51,6 @@ const purchaseOrderSchema = z.object({
 });
 
 type PurchaseOrderFormData = z.infer<typeof purchaseOrderSchema>;
-
-interface PurchaseOrderItem {
-  id?: string;
-  item_sequence: number;
-  product_name: string;
-  product_sku?: string;
-  description?: string;
-  quantity: number;
-  unit_price: number;
-  line_total: number;
-  delivery_date?: Date;
-}
 
 interface QuotationWithSalesPerson {
   id: string;
@@ -90,15 +79,6 @@ export function PurchaseOrderForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAllQuotations, setShowAllQuotations] = useState(false);
   const [paymentTermsData, setPaymentTermsData] = useState<any>({});
-  const [items, setItems] = useState<PurchaseOrderItem[]>([
-    {
-      item_sequence: 1,
-      product_name: "",
-      quantity: 1,
-      unit_price: 0,
-      line_total: 0,
-    },
-  ]);
 
   const form = useForm<PurchaseOrderFormData>({
     resolver: zodResolver(purchaseOrderSchema),
@@ -112,6 +92,7 @@ export function PurchaseOrderForm({
       po_date: new Date(editingPO.po_date),
       delivery_date: editingPO.delivery_date ? new Date(editingPO.delivery_date) : undefined,
       status: editingPO.status || "received",
+      total_amount: editingPO.total_amount || 0,
       payment_terms: editingPO.payment_terms || "30 วัน",
       payment_method: editingPO.payment_method || "bank_transfer",
       payment_terms_type: editingPO.payment_terms_type || "credit",
@@ -136,6 +117,7 @@ export function PurchaseOrderForm({
       po_date: new Date(),
       delivery_date: undefined,
       status: "received",
+      total_amount: 0,
       payment_terms: "30 วัน",
       payment_method: "bank_transfer",
       payment_terms_type: "credit",
@@ -229,39 +211,6 @@ export function PurchaseOrderForm({
     }
   };
 
-  const addItem = () => {
-    setItems([...items, {
-      item_sequence: items.length + 1,
-      product_name: "",
-      quantity: 1,
-      unit_price: 0,
-      line_total: 0,
-    }]);
-  };
-
-  const removeItem = (index: number) => {
-    if (items.length > 1) {
-      const newItems = items.filter((_, i) => i !== index);
-      setItems(newItems.map((item, i) => ({ ...item, item_sequence: i + 1 })));
-    }
-  };
-
-  const updateItem = (index: number, field: keyof PurchaseOrderItem, value: any) => {
-    const newItems = [...items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    
-    // Calculate line total
-    if (field === "quantity" || field === "unit_price") {
-      newItems[index].line_total = newItems[index].quantity * newItems[index].unit_price;
-    }
-    
-    setItems(newItems);
-  };
-
-  const getTotalAmount = () => {
-    return items.reduce((sum, item) => sum + item.line_total, 0);
-  };
-
   const onSubmit = async (data: PurchaseOrderFormData) => {
     if (!user) {
       toast({
@@ -274,8 +223,6 @@ export function PurchaseOrderForm({
 
     setIsSubmitting(true);
     try {
-      const totalAmount = getTotalAmount();
-      
       // Get sales person ID from selected quotation
       let salesPersonId = null;
       if (data.quotation_id) {
@@ -294,7 +241,7 @@ export function PurchaseOrderForm({
         po_date: data.po_date.toISOString().split('T')[0],
         delivery_date: data.delivery_date ? data.delivery_date.toISOString().split('T')[0] : undefined,
         status: data.status,
-        total_amount: totalAmount,
+        total_amount: data.total_amount,
         payment_terms: data.payment_terms,
         payment_method: paymentTermsData.payment_method || data.payment_method,
         payment_terms_type: paymentTermsData.payment_terms_type || data.payment_terms_type,
@@ -313,8 +260,6 @@ export function PurchaseOrderForm({
         created_by: editingPO ? editingPO.created_by : user.id,
       };
 
-      let poId = editingPO?.id;
-
       if (editingPO) {
         // Update existing PO
         const { error } = await supabase
@@ -332,36 +277,7 @@ export function PurchaseOrderForm({
           .single();
 
         if (error) throw error;
-        poId = newPO.id;
       }
-
-      // Handle items
-      if (editingPO) {
-        // Delete existing items first
-        await supabase
-          .from("purchase_order_items")
-          .delete()
-          .eq("purchase_order_id", poId);
-      }
-
-      // Insert new items
-      const itemsData = items.map(item => ({
-        purchase_order_id: poId,
-        item_sequence: item.item_sequence,
-        product_name: item.product_name,
-        product_sku: item.product_sku || null,
-        description: item.description || null,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        line_total: item.line_total,
-        delivery_date: item.delivery_date || null,
-      }));
-
-      const { error: itemsError } = await supabase
-        .from("purchase_order_items")
-        .insert(itemsData);
-
-      if (itemsError) throw itemsError;
 
       onSuccess();
     } catch (error: any) {
@@ -609,6 +525,27 @@ export function PurchaseOrderForm({
             <CardContent className="space-y-4">
               <FormField
                 control={form.control}
+                name="total_amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>จำนวนเงินรวม (บาท) *</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        {...field} 
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="payment_terms"
                 render={({ field }) => (
                   <FormItem>
@@ -666,102 +603,11 @@ export function PurchaseOrderForm({
           </Card>
         </div>
 
-        {/* Items Table */}
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>รายการสินค้า</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                <Plus className="w-4 h-4 mr-2" />
-                เพิ่มรายการ
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ลำดับ</TableHead>
-                    <TableHead>ชื่อสินค้า</TableHead>
-                    <TableHead>SKU</TableHead>
-                    <TableHead>จำนวน</TableHead>
-                    <TableHead>ราคาต่อหน่วย</TableHead>
-                    <TableHead>รวม</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item.item_sequence}</TableCell>
-                      <TableCell>
-                        <Input
-                          value={item.product_name}
-                          onChange={(e) => updateItem(index, "product_name", e.target.value)}
-                          placeholder="ชื่อสินค้า"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          value={item.product_sku || ""}
-                          onChange={(e) => updateItem(index, "product_sku", e.target.value)}
-                          placeholder="SKU"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(index, "quantity", parseInt(e.target.value) || 0)}
-                          min="1"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.unit_price}
-                          onChange={(e) => updateItem(index, "unit_price", parseFloat(e.target.value) || 0)}
-                          min="0"
-                          step="0.01"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        ฿{item.line_total.toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        {items.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeItem(index)}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            
-            <div className="flex justify-end mt-4">
-              <div className="text-right">
-                <div className="text-lg font-semibold">
-                  ยอดรวม: ฿{getTotalAmount().toLocaleString()}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Payment Terms Section */}
         <PaymentTermsSection 
           value={paymentTermsData}
           onChange={setPaymentTermsData}
-          totalAmount={getTotalAmount()}
+          totalAmount={form.watch("total_amount") || 0}
           poDate={form.watch("po_date")}
         />
 
