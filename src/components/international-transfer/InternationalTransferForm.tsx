@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -170,6 +170,46 @@ export function InternationalTransferForm({
     form.setValue("supplier_account_number", supplier.bank_account || "");
     form.setValue("supplier_swift_code", supplier.swift_code || "");
   };
+
+  // Function to fetch exchange rate
+  const fetchExchangeRate = async (currency: string) => {
+    try {
+      // Using a free API for exchange rates
+      const response = await fetch(`https://api.exchangerate-api.com/v4/latest/THB`);
+      const data = await response.json();
+      const rate = data.rates[currency];
+      if (rate) {
+        return 1 / rate; // Convert from THB to foreign currency
+      }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+    return null;
+  };
+
+  // Watch for currency changes and update exchange rate
+  const watchCurrency = form.watch("currency");
+  const watchTransferAmount = form.watch("transfer_amount");
+  const watchExchangeRate = form.watch("exchange_rate");
+
+  // Auto-fetch exchange rate when currency changes
+  useEffect(() => {
+    if (watchCurrency && watchCurrency !== "THB") {
+      fetchExchangeRate(watchCurrency).then(rate => {
+        if (rate) {
+          form.setValue("exchange_rate", Number(rate.toFixed(4)));
+        }
+      });
+    }
+  }, [watchCurrency, form]);
+
+  // Auto-calculate THB equivalent
+  useEffect(() => {
+    if (watchTransferAmount && watchExchangeRate) {
+      const thbAmount = watchTransferAmount * watchExchangeRate;
+      form.setValue("thb_equivalent", Number(thbAmount.toFixed(2)));
+    }
+  }, [watchTransferAmount, watchExchangeRate, form]);
 
   const onSubmit = async (data: TransferFormData) => {
     if (!user) {
