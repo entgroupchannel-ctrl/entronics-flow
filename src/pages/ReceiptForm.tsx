@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Trash2, Plus, Save, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Sidebar } from "@/components/layout/Sidebar";
+
 
 interface ReceiptItem {
   id?: string;
@@ -492,10 +492,7 @@ export default function ReceiptForm() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 space-y-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">
@@ -823,8 +820,6 @@ export default function ReceiptForm() {
               </div>
             </CardContent>
           </Card>
-        </div>
-      </div>
     </div>
   );
 }

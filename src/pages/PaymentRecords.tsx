@@ -12,7 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Plus, Eye, CheckCircle, XCircle, Upload, Receipt, RotateCcw, Trash2, MoreHorizontal, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Sidebar } from "@/components/layout/Sidebar";
+
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -561,20 +561,14 @@ export default function PaymentRecords() {
 
   if (loading) {
     return (
-      <div className="flex h-screen">
-        <Sidebar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">กำลังโหลด...</div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">กำลังโหลด...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-background relative">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 space-y-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">รายการชำระเงิน</h1>
@@ -1334,8 +1328,6 @@ export default function PaymentRecords() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
-      </div>
     </div>
   );
 }

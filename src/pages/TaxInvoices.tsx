@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
-import { Sidebar } from "@/components/layout/Sidebar";
+
 
 interface TaxInvoice {
   id: string;
@@ -462,10 +462,7 @@ export default function TaxInvoices() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
           {/* Header */}
           <div className="flex justify-between items-start">
             <div>
@@ -765,8 +762,6 @@ export default function TaxInvoices() {
               </div>
             </div>
             )}
-          </div>
-        </div>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -992,6 +987,6 @@ export default function TaxInvoices() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    );
-  }
+    </div>
+  );
+}

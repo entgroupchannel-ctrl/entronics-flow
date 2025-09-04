@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -74,27 +72,19 @@ export default function InternationalTransfer() {
   };
 
   return (
-    <div className="flex min-h-screen w-full">
-      <Sidebar 
-        onMenuClick={handleMenuClick}
-        currentView={currentView}
-        onLogoClick={() => navigate('/')}
-      />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="flex-1 p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">โอนเงินต่างประเทศ</h1>
-              <p className="text-muted-foreground">
-                จัดการคำขอโอนเงินไปยัง Supplier ต่างประเทศ
-              </p>
-            </div>
-            <Button onClick={handleNewRequest} className="gap-2">
-              <Plus className="h-4 w-4" />
-              สร้างคำขอใหม่
-            </Button>
-          </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">โอนเงินต่างประเทศ</h1>
+          <p className="text-muted-foreground">
+            จัดการคำขอโอนเงินไปยัง Supplier ต่างประเทศ
+          </p>
+        </div>
+        <Button onClick={handleNewRequest} className="gap-2">
+          <Plus className="h-4 w-4" />
+          สร้างคำขอใหม่
+        </Button>
+      </div>
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -179,8 +169,6 @@ export default function InternationalTransfer() {
               </Card>
             </TabsContent>
           </Tabs>
-        </main>
-      </div>
     </div>
   );
 }

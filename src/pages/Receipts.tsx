@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
-import { Sidebar } from "@/components/layout/Sidebar";
+
 
 interface ReceiptInterface {
   id: string;
@@ -428,35 +428,30 @@ export default function Receipts() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Receipt className="w-8 h-8 text-primary" />
-                <h1 className="text-2xl font-bold text-foreground">ใบเสร็จรับเงิน</h1>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Button 
-                  onClick={() => navigate('/payment-records')} 
-                  variant="outline"
-                  className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  การชำระเงิน
-                </Button>
-                
-                <Button onClick={() => navigate('/receipts/new')} className="bg-primary hover:bg-primary/90">
-                  <Plus className="w-4 h-4 mr-2" />
-                  สร้างใบเสร็จรับเงิน
-                </Button>
-              </div>
-            </div>
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Receipt className="w-8 h-8 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">ใบเสร็จรับเงิน</h1>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => navigate('/payment-records')} 
+            variant="outline"
+            className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            การชำระเงิน
+          </Button>
+          
+          <Button onClick={() => navigate('/receipts/new')} className="bg-primary hover:bg-primary/90">
+            <Plus className="w-4 h-4 mr-2" />
+            สร้างใบเสร็จรับเงิน
+          </Button>
+        </div>
+      </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -730,9 +725,6 @@ export default function Receipts() {
                 </div>
               </div>
             )}
-          </div>
-        </main>
-      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

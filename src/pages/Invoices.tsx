@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
-import { Sidebar } from "@/components/layout/Sidebar";
+
 import InvoiceStatusDropdown from "@/components/invoices/InvoiceStatusDropdown";
 
 interface Invoice {
@@ -219,24 +219,19 @@ export default function Invoices() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <FileText className="w-8 h-8 text-primary" />
-                <h1 className="text-2xl font-bold text-foreground">ใบแจ้งหนี้ / ใบวางบิล</h1>
-              </div>
-              
-              <Button onClick={() => navigate('/invoices/new')} className="bg-primary hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
-                สร้างใบแจ้งหนี้
-              </Button>
-            </div>
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <FileText className="w-8 h-8 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">ใบแจ้งหนี้ / ใบวางบิล</h1>
+        </div>
+        
+        <Button onClick={() => navigate('/invoices/new')} className="bg-primary hover:bg-primary/90">
+          <Plus className="w-4 h-4 mr-2" />
+          สร้างใบแจ้งหนี้
+        </Button>
+      </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -659,11 +654,9 @@ export default function Invoices() {
                   </Button>
                 </div>
               </div>
-            )}
-          </div>
-        </main>
+          )}
 
-        {/* Delete Confirmation Dialog */}
+          {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent className="sm:max-w-md">
             <AlertDialogHeader>
@@ -703,7 +696,6 @@ export default function Invoices() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
     </div>
   );
 }
