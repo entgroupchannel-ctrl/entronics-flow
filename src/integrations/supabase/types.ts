@@ -1490,6 +1490,7 @@ export type Database = {
           transfer_fee: number | null
           transfer_number: string
           transfer_reference_number: string | null
+          transfer_request_document_url: string | null
           transfer_slip_url: string | null
           updated_at: string
         }
@@ -1542,6 +1543,7 @@ export type Database = {
           transfer_fee?: number | null
           transfer_number: string
           transfer_reference_number?: string | null
+          transfer_request_document_url?: string | null
           transfer_slip_url?: string | null
           updated_at?: string
         }
@@ -1594,6 +1596,7 @@ export type Database = {
           transfer_fee?: number | null
           transfer_number?: string
           transfer_reference_number?: string | null
+          transfer_request_document_url?: string | null
           transfer_slip_url?: string | null
           updated_at?: string
         }

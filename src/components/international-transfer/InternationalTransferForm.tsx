@@ -48,6 +48,7 @@ const transferFormSchema = z.object({
   ci_document_url: z.string().optional(),
   awb_document_url: z.string().optional(),
   packing_list_url: z.string().optional(),
+  transfer_request_document_url: z.string().optional(),
 });
 
 type TransferFormData = z.infer<typeof transferFormSchema>;
@@ -74,11 +75,13 @@ export function InternationalTransferForm({
     ci: string | null;
     awb: string | null;
     packingList: string | null;
+    transferRequest: string | null;
   }>({
     pi: null,
     ci: null,
     awb: null,
     packingList: null,
+    transferRequest: null,
   });
 
   const form = useForm<TransferFormData>({
@@ -324,7 +327,7 @@ export function InternationalTransferForm({
   }, [watchTransferAmount, watchExchangeRate, form]);
 
   // Document upload handlers
-  const handleDocumentUpload = async (file: File, docType: 'pi' | 'ci' | 'awb' | 'packingList') => {
+  const handleDocumentUpload = async (file: File, docType: 'pi' | 'ci' | 'awb' | 'packingList' | 'transferRequest') => {
     if (!file) return;
 
     try {
@@ -352,6 +355,7 @@ export function InternationalTransferForm({
       if (docType === 'ci') form.setValue('ci_document_url', publicUrl);
       if (docType === 'awb') form.setValue('awb_document_url', publicUrl);
       if (docType === 'packingList') form.setValue('packing_list_url', publicUrl);
+      if (docType === 'transferRequest') form.setValue('transfer_request_document_url', publicUrl);
 
       toast({
         title: "สำเร็จ",
@@ -366,7 +370,7 @@ export function InternationalTransferForm({
     }
   };
 
-  const removeDocument = (docType: 'pi' | 'ci' | 'awb' | 'packingList') => {
+  const removeDocument = (docType: 'pi' | 'ci' | 'awb' | 'packingList' | 'transferRequest') => {
     setUploadedDocuments(prev => ({
       ...prev,
       [docType]: null
@@ -377,6 +381,7 @@ export function InternationalTransferForm({
     if (docType === 'ci') form.setValue('ci_document_url', undefined);
     if (docType === 'awb') form.setValue('awb_document_url', undefined);
     if (docType === 'packingList') form.setValue('packing_list_url', undefined);
+    if (docType === 'transferRequest') form.setValue('transfer_request_document_url', undefined);
   };
 
   const getDocumentTypeLabel = (type: string) => {
@@ -384,7 +389,8 @@ export function InternationalTransferForm({
       pi: "Proforma Invoice (PI)",
       ci: "Commercial Invoice (CI)",
       awb: "Air Waybill (AWB)",
-      packingList: "Packing List"
+      packingList: "Packing List",
+      transferRequest: "ใบคำขอโอนเงินต่างประเทศ"
     };
     return types[type] || type;
   };
@@ -412,6 +418,7 @@ export function InternationalTransferForm({
         ci_document_url: uploadedDocuments.ci || data.ci_document_url,
         awb_document_url: uploadedDocuments.awb || data.awb_document_url,
         packing_list_url: uploadedDocuments.packingList || data.packing_list_url,
+        transfer_request_document_url: uploadedDocuments.transferRequest || data.transfer_request_document_url,
       };
 
       if (editingRequest) {
@@ -1337,8 +1344,48 @@ export function InternationalTransferForm({
                         />
                       )}
                     </div>
+
+                    {/* Transfer Request Document */}
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="transfer-request-upload">ใบคำขอโอนเงินต่างประเทศ *</Label>
+                      {uploadedDocuments.transferRequest ? (
+                        <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
+                          <div className="flex items-center gap-2 text-sm text-green-700">
+                            <FileUp className="h-4 w-4" />
+                            ใบคำขอโอนเงินต่างประเทศ uploaded
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(uploadedDocuments.transferRequest!, '_blank')}
+                            >
+                              ดู
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => removeDocument('transferRequest')}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Input
+                          id="transfer-request-upload"
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, 'transferRequest');
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                   <div className="text-sm text-muted-foreground">
+                    <strong>หมายเหตุ:</strong> ใบคำขอโอนเงินต่างประเทศเป็นเอกสารบังคับที่ต้องแนบ<br/>
                     รองรับไฟล์: PDF, JPG, PNG, DOC, DOCX (ขนาดไม่เกิน 10MB)
                   </div>
                 </CardContent>
