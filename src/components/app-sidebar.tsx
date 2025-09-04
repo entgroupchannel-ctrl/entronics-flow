@@ -16,7 +16,8 @@ import {
   Globe,
   Calculator,
   PieChart,
-  ShoppingCart
+  ShoppingCart,
+  ChevronRight
 } from "lucide-react";
 
 import {
@@ -28,22 +29,30 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const mainItems = [
   { title: "แดชบอร์ด / Dashboard", url: "/", icon: Home },
 ];
 
-const salesItems = [
-  { title: "เอกสารการขาย / Sale Docs", url: "/sales-documents", icon: FileText },
+// Define sales document sub-items
+const salesDocumentSubItems = [
   { title: "ใบเสนอราคา", url: "/quotations", icon: FileText },
   { title: "เอกสารยืนยันคำสั่งซื้อ", url: "/purchase-order-confirmations", icon: FileText },
   { title: "ใบวางบิล/ใบแจ้งหนี้", url: "/invoices", icon: Receipt },
   { title: "การชำระเงิน/ใบกำกับภาษี", url: "/tax-invoices", icon: Calculator },
   { title: "ใบส่งสินค้า/ใบกำกับภาษี", url: "/receipts", icon: Receipt },
   { title: "การชำระเงิน", url: "/payment-records", icon: CreditCard },
+];
+
+const salesItems = [
+  { title: "เอกสารการขาย / Sale Docs", url: "/sales-documents", icon: FileText, hasSubMenu: true },
 ];
 
 const operationItems = [
@@ -90,6 +99,9 @@ export function AppSidebar() {
     </SidebarMenuItem>
   );
 
+  // Check if any sales document sub-item is active to keep the menu open
+  const isSalesDocumentActive = salesDocumentSubItems.some(item => isActive(item.url));
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-border">
@@ -124,9 +136,31 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {salesItems.map((item) => (
-                <MenuItem key={item.title} item={item} />
-              ))}
+              <Collapsible defaultOpen={isSalesDocumentActive}>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton className="w-full">
+                      <FileText className="h-4 w-4" />
+                      {state !== "collapsed" && <span>เอกสารการขาย / Sale Docs</span>}
+                      {state !== "collapsed" && <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {salesDocumentSubItems.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild>
+                            <NavLink to={subItem.url} end className={getNavCls}>
+                              <subItem.icon className="h-4 w-4" />
+                              <span>{subItem.title}</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
