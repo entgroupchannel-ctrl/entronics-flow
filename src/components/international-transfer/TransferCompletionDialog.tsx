@@ -161,7 +161,7 @@ export function TransferCompletionDialog({
 
           {/* File Uploads */}
           <div className="space-y-4">
-            <div>
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
               <Label>หลักฐานการโอนเงิน / สลิป</Label>
               <div className="mt-2">
                 <Button
