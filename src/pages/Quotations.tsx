@@ -38,7 +38,7 @@ interface Quotation {
   }>;
 }
 
-export default function Quotations() {
+const Quotations = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [quotations, setQuotations] = useState<Quotation[]>([]);
@@ -780,4 +780,6 @@ export default function Quotations() {
         </AlertDialog>
       </div>
     );
-  }
+  };
+  
+  export default Quotations;

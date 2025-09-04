@@ -31,6 +31,8 @@ const Index = () => {
             value="34.6%"
             description="เปรียบเทียบยอดขายปีนี้กับปีที่แล้ว"
             icon={TrendingUp}
+            change="+34.6%"
+            changeType="positive"
           />
           <MetricCard
             title="การดำเนินการด่วน"
