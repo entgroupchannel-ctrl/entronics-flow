@@ -143,60 +143,37 @@ export function TransferCompletionDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Transfer Information Card */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-6 rounded-xl border border-blue-200/50 dark:border-blue-800/50">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Clock className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-blue-900 dark:text-blue-100">วันที่และเวลาการโอน</h3>
-                <p className="text-sm text-blue-700 dark:text-blue-300">กรุณาระบุเวลาที่ทำการโอนเงินจริง</p>
-              </div>
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-4 rounded-lg border border-blue-200/50 dark:border-blue-800/50">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="h-4 w-4 text-blue-600" />
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">วันที่และเวลาการโอน</h3>
             </div>
             <div className="relative">
-              <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600" />
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-600" />
               <Input
                 id="transfer-date"
                 type="datetime-local"
                 value={transferDate}
                 onChange={(e) => setTransferDate(e.target.value)}
-                className="pl-12 h-12 bg-white dark:bg-gray-900 border-blue-200 dark:border-blue-800 focus:border-blue-500 focus:ring-blue-500/20"
+                className="pl-10 h-10 bg-white dark:bg-gray-900 border-blue-200 dark:border-blue-800 focus:border-blue-500"
               />
             </div>
           </div>
 
-          {/* File Upload Section */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                <Upload className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-green-900 dark:text-green-100">เอกสารประกอบการโอน</h3>
-                <p className="text-sm text-green-700 dark:text-green-300">อัปโหลดหลักฐานการโอนเงิน</p>
-              </div>
-            </div>
-
+          {/* File Upload Section - 2 Columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Transfer Slip Upload */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-                    <FileText className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <div>
-                    <Label className="text-base font-medium">สลิปการโอนเงิน</Label>
-                    <p className="text-sm text-muted-foreground">หลักฐานการโอนเงินจากธนาคาร</p>
-                  </div>
+            <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="h-4 w-4 text-orange-600" />
+                <div>
+                  <Label className="font-medium">สลิปการโอนเงิน</Label>
+                  {uploadedFiles.some(f => f.includes('transfer_slip')) && (
+                    <Check className="h-4 w-4 text-green-600 inline ml-2" />
+                  )}
                 </div>
-                {uploadedFiles.some(f => f.includes('transfer_slip')) && (
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span className="text-sm text-green-600 font-medium">อัปโหลดแล้ว</span>
-                  </div>
-                )}
               </div>
               
               <Button
@@ -204,28 +181,23 @@ export function TransferCompletionDialog({
                 variant="outline"
                 onClick={() => transferSlipRef.current?.click()}
                 disabled={loading}
-                className="w-full h-12 border-dashed border-2 hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 transition-colors"
+                className="w-full h-10 border-dashed border-2 hover:border-orange-400 text-sm"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                เลือกไฟล์สลิปโอนเงิน
+                เลือกไฟล์สลิป
               </Button>
               
               {uploadedFiles.filter(f => f.includes('transfer_slip')).length > 0 && (
-                <div className="mt-3 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="mt-2 p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                        สลิปโอนเงิน - อัปโหลดสำเร็จ
-                      </span>
-                    </div>
+                    <span className="text-xs text-green-800 dark:text-green-200">อัปโหลดสำเร็จ</span>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => window.open(uploadedFiles.find(f => f.includes('transfer_slip')), '_blank')}
-                      className="text-green-600 hover:text-green-700"
+                      className="h-6 px-2 text-green-600"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
@@ -241,23 +213,15 @@ export function TransferCompletionDialog({
             </div>
 
             {/* Confirmation Document Upload */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                    <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <Label className="text-base font-medium">เอกสารยืนยันการโอน</Label>
-                    <p className="text-sm text-muted-foreground">เอกสารอื่น ๆ ที่เกี่ยวข้องกับการโอน</p>
-                  </div>
+            <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="h-4 w-4 text-purple-600" />
+                <div>
+                  <Label className="font-medium">เอกสารยืนยัน</Label>
+                  {uploadedFiles.some(f => f.includes('confirmation')) && (
+                    <Check className="h-4 w-4 text-green-600 inline ml-2" />
+                  )}
                 </div>
-                {uploadedFiles.some(f => f.includes('confirmation')) && (
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span className="text-sm text-green-600 font-medium">อัปโหลดแล้ว</span>
-                  </div>
-                )}
               </div>
               
               <Button
@@ -265,28 +229,23 @@ export function TransferCompletionDialog({
                 variant="outline"
                 onClick={() => confirmationRef.current?.click()}
                 disabled={loading}
-                className="w-full h-12 border-dashed border-2 hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/20 transition-colors"
+                className="w-full h-10 border-dashed border-2 hover:border-purple-400 text-sm"
               >
                 <FileText className="h-4 w-4 mr-2" />
-                เลือกเอกสารยืนยัน
+                เลือกเอกสาร
               </Button>
               
               {uploadedFiles.filter(f => f.includes('confirmation')).length > 0 && (
-                <div className="mt-3 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="mt-2 p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                        เอกสารยืนยัน - อัปโหลดสำเร็จ
-                      </span>
-                    </div>
+                    <span className="text-xs text-green-800 dark:text-green-200">อัปโหลดสำเร็จ</span>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => window.open(uploadedFiles.find(f => f.includes('confirmation')), '_blank')}
-                      className="text-green-600 hover:text-green-700"
+                      className="h-6 px-2 text-green-600"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
@@ -303,23 +262,18 @@ export function TransferCompletionDialog({
           </div>
 
           {/* Notes Section */}
-          <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                <FileText className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-              </div>
-              <div>
-                <Label htmlFor="notes" className="text-base font-medium">หมายเหตุเพิ่มเติม</Label>
-                <p className="text-sm text-muted-foreground">ข้อมูลเพิ่มเติมเกี่ยวกับการโอนเงิน (ถ้ามี)</p>
-              </div>
-            </div>
+          <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+            <Label htmlFor="notes" className="flex items-center gap-2 mb-2 font-medium">
+              <FileText className="h-4 w-4 text-gray-600" />
+              หมายเหตุเพิ่มเติม
+            </Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="กรอกหมายเหตุเพิ่มเติมเกี่ยวกับการโอนเงิน..."
-              rows={4}
-              className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500/20"
+              placeholder="กรอกหมายเหตุเพิ่มเติม..."
+              rows={2}
+              className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 resize-none"
             />
           </div>
         </div>
