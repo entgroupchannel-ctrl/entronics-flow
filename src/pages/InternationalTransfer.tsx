@@ -23,13 +23,7 @@ export default function InternationalTransfer() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("international_transfer_requests")
-        .select(`
-          *,
-          profiles!international_transfer_requests_requested_by_fkey(
-            full_name,
-            username
-          )
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -41,7 +35,27 @@ export default function InternationalTransfer() {
         });
         throw error;
       }
-      return (data || []) as any[];
+      
+      // Get profile data for creators
+      if (data && data.length > 0) {
+        const userIds = [...new Set(data.map(req => req.requested_by).filter(Boolean))];
+        if (userIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("user_id, full_name, username")
+            .in("user_id", userIds);
+          
+          // Attach profile data to requests
+          const requestsWithProfiles = data.map(request => ({
+            ...request,
+            profiles: profiles?.find(p => p.user_id === request.requested_by) || null
+          }));
+          
+          return requestsWithProfiles;
+        }
+      }
+      
+      return data || [];
     },
   });
 
