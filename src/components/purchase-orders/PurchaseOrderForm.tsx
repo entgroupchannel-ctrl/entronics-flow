@@ -32,7 +32,7 @@ const purchaseOrderSchema = z.object({
   customer_company: z.string().optional(),
   po_date: z.date().default(() => new Date()),
   delivery_date: z.date().optional(),
-  status: z.string().default("received"),
+  status: z.string().default("draft"),
   total_amount: z.number().min(0, "กรุณากรอกจำนวนเงิน"),
   payment_terms: z.string().default("30 วัน"),
   payment_method: z.string().default("bank_transfer"),
@@ -95,7 +95,7 @@ export function PurchaseOrderForm({
       customer_company: editingPO.customer_company || "",
       po_date: new Date(editingPO.po_date),
       delivery_date: editingPO.delivery_date ? new Date(editingPO.delivery_date) : undefined,
-      status: editingPO.status || "received",
+      status: editingPO.status || "draft",
       total_amount: editingPO.total_amount || 0,
       payment_terms: editingPO.payment_terms || "30 วัน",
       payment_method: editingPO.payment_method || "bank_transfer",
@@ -121,7 +121,7 @@ export function PurchaseOrderForm({
       customer_company: "",
       po_date: new Date(),
       delivery_date: undefined,
-      status: "received",
+      status: "draft",
       total_amount: 0,
       payment_terms: "30 วัน",
       payment_method: "bank_transfer",
@@ -213,9 +213,9 @@ export function PurchaseOrderForm({
   });
 
   const statusOptions = [
-    { value: "received", label: "ได้รับแล้ว", description: "รับ PO จากลูกค้าแล้ว รอการดำเนินการ" },
-    { value: "processing", label: "กำลังดำเนินการ", description: "อยู่ระหว่างจัดเตรียมสินค้าหรือบริการ" },
-    { value: "completed", label: "เสร็จสิ้น", description: "ดำเนินการเสร็จแล้ว ส่งมอบครบถ้วน" },
+    { value: "draft", label: "ฉบับร่าง", description: "ยังไม่ได้ส่งให้ลูกค้า" },
+    { value: "sent", label: "ส่งแล้ว", description: "ส่ง PO ให้ลูกค้าแล้ว" },
+    { value: "confirmed", label: "ยืนยันแล้ว", description: "ลูกค้ายืนยัน PO แล้ว" },
     { value: "cancelled", label: "ยกเลิก", description: "ยกเลิก PO นี้แล้ว" },
   ];
 
