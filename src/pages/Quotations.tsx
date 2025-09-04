@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from 'date-fns';
-import { Sidebar } from "@/components/layout/Sidebar";
+
 import QuotationWorkflow from "@/components/quotations/QuotationWorkflow";
 
 interface Quotation {
@@ -336,15 +336,8 @@ export default function Quotations() {
   // This function is no longer needed as we're using tabs
 
   return (
-    <div className="flex h-screen">
-      {/* Remove fixed width to allow sidebar to resize itself */}
-      <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
-      
-      <div className="flex-1 flex flex-col">
-        <div className="h-16 border-b border-border bg-card" />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+    <div className="container mx-auto p-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <FileText className="w-8 h-8 text-blue-600" />
@@ -693,8 +686,6 @@ export default function Quotations() {
                 </div>
               </TabsContent>
             </Tabs>
-          </div>
-        </main>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -788,6 +779,5 @@ export default function Quotations() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </div>
-  );
-}
+    );
+  }
