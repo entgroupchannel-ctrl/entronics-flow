@@ -36,7 +36,7 @@ const mainItems = [
 ];
 
 const salesItems = [
-  { title: "เอกสารการขาย / Sale Docs", url: "/quotations", icon: FileText },
+  { title: "เอกสารการขาย / Sale Docs", url: "/sales-documents", icon: FileText },
   { title: "ใบเสนอราคา", url: "/quotations", icon: FileText },
   { title: "ใบวางบิล/ใบแจ้งหนี้", url: "/invoices", icon: Receipt },
   { title: "การชำระเงิน/ใบกำกับภาษี", url: "/tax-invoices", icon: Calculator },
@@ -45,7 +45,6 @@ const salesItems = [
 ];
 
 const operationItems = [
-  { title: "ใบเสร็จรับเงิน", url: "/receipts", icon: Receipt },
   { title: "แจ้งซ่อม / Service Ticket", url: "/service-request", icon: Wrench },
   { title: "ระบบจัดส่งสินค้า / Delivery", url: "/delivery", icon: TruckIcon },
   { title: "รายชื่อลูกค้า / Customers", url: "/customers", icon: Users },
@@ -55,7 +54,6 @@ const operationItems = [
 const financialItems = [
   { title: "การเงิน / Financial", url: "/financial", icon: DollarSign },
   { title: "โอนเงินต่างประเทศ", url: "/international-transfer", icon: Globe },
-  { title: "วิเคราะห์ข้อมูล / Analytics", url: "/analytics", icon: PieChart },
 ];
 
 const managementItems = [
@@ -64,8 +62,8 @@ const managementItems = [
 ];
 
 const reportItems = [
+  { title: "วิเคราะห์ข้อมูล / Analytics", url: "/analytics", icon: PieChart },
   { title: "รายงาน", url: "/reports", icon: FileSpreadsheet },
-  { title: "เอกสารขาย", url: "/sales-documents", icon: FileText },
 ];
 
 export function AppSidebar() {
