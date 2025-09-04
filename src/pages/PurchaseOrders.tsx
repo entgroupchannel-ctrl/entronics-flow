@@ -21,16 +21,36 @@ export default function PurchaseOrders() {
   const { data: purchaseOrders, isLoading, refetch } = useQuery({
     queryKey: ["purchase-orders"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: poData, error } = await supabase
         .from("purchase_orders")
         .select(`
           *,
-          customer:customers(name)
+          customer:customers(name),
+          quotation:quotations(quotation_number)
         `)
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      
+      // Get sales person info separately to avoid foreign key issues
+      if (poData && poData.length > 0) {
+        const salesPersonIds = [...new Set(poData.map(po => po.sales_person_id).filter(Boolean))];
+        
+        if (salesPersonIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("user_id, full_name")
+            .in("user_id", salesPersonIds);
+          
+          // Merge profile data with PO data
+          return poData.map(po => ({
+            ...po,
+            sales_person_name: profilesData?.find(p => p.user_id === po.sales_person_id)?.full_name || null
+          }));
+        }
+      }
+      
+      return poData?.map(po => ({ ...po, sales_person_name: null })) || [];
     },
   });
 
@@ -124,6 +144,7 @@ export default function PurchaseOrders() {
                       <TableHead>เลขที่ PO (ระบบ)</TableHead>
                       <TableHead>เลขที่ PO (ลูกค้า)</TableHead>
                       <TableHead>ลูกค้า</TableHead>
+                      <TableHead>พนักงานขาย</TableHead>
                       <TableHead>วันที่</TableHead>
                       <TableHead>วันส่งมอบ</TableHead>
                       <TableHead>จำนวนเงิน</TableHead>
@@ -139,6 +160,9 @@ export default function PurchaseOrders() {
                           {po.customer_po_number || "-"}
                         </TableCell>
                         <TableCell>{po.customer_name}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {po.sales_person_name || "-"}
+                        </TableCell>
                         <TableCell>
                           {format(new Date(po.po_date), "dd/MM/yyyy", { locale: th })}
                         </TableCell>

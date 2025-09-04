@@ -3324,6 +3324,7 @@ export type Database = {
           notes: string | null
           po_date: string
           po_number: string
+          sales_person_id: string | null
           status: string
           total_amount: number | null
           updated_at: string
@@ -3340,6 +3341,7 @@ export type Database = {
           notes?: string | null
           po_date?: string
           po_number: string
+          sales_person_id?: string | null
           status?: string
           total_amount?: number | null
           updated_at?: string
@@ -3356,6 +3358,7 @@ export type Database = {
           notes?: string | null
           po_date?: string
           po_number?: string
+          sales_person_id?: string | null
           status?: string
           total_amount?: number | null
           updated_at?: string

@@ -51,6 +51,17 @@ interface PurchaseOrderItem {
   delivery_date?: Date;
 }
 
+interface QuotationWithSalesPerson {
+  id: string;
+  quotation_number: string;
+  customer_name: string;
+  total_amount: number;
+  quotation_date: string;
+  status: string;
+  created_by: string;
+  sales_person_name: string;
+}
+
 interface PurchaseOrderFormProps {
   editingPO?: any;
   onSuccess: () => void;
@@ -123,13 +134,21 @@ export function PurchaseOrderForm({
     },
   });
 
-  // Query for recent quotations (last 2 months or all)
+  // Query for recent quotations with sales person info
   const { data: quotations } = useQuery({
     queryKey: ["quotations", showAllQuotations],
-    queryFn: async () => {
+    queryFn: async (): Promise<QuotationWithSalesPerson[]> => {
       let query = supabase
         .from("quotations")
-        .select("id, quotation_number, customer_name, total_amount, quotation_date, status")
+        .select(`
+          id, 
+          quotation_number, 
+          customer_name, 
+          total_amount, 
+          quotation_date, 
+          status,
+          created_by
+        `)
         .in("status", ["approved", "pending"])
         .order("quotation_date", { ascending: false });
 
@@ -139,10 +158,26 @@ export function PurchaseOrderForm({
         query = query.gte("quotation_date", twoMonthsAgo.toISOString().split('T')[0]);
       }
       
-      const { data, error } = await query;
+      const { data: quotationData, error } = await query;
       
       if (error) throw error;
-      return data || [];
+      
+      // Get sales person info for each quotation
+      if (quotationData && quotationData.length > 0) {
+        const salesPersonIds = [...new Set(quotationData.map(q => q.created_by))];
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", salesPersonIds);
+        
+        // Merge profile data with quotation data
+        return quotationData.map(quotation => ({
+          ...quotation,
+          sales_person_name: profilesData?.find(p => p.user_id === quotation.created_by)?.full_name || 'ไม่ระบุ'
+        }));
+      }
+      
+      return quotationData?.map(q => ({ ...q, sales_person_name: 'ไม่ระบุ' })) || [];
     },
   });
 
@@ -208,9 +243,18 @@ export function PurchaseOrderForm({
     try {
       const totalAmount = getTotalAmount();
       
+      // Get sales person ID from selected quotation
+      let salesPersonId = null;
+      if (data.quotation_id) {
+        const selectedQuotation = quotations?.find(q => q.id === data.quotation_id);
+        salesPersonId = selectedQuotation?.created_by;
+      }
+
       const purchaseOrderData = {
         po_number: data.po_number || undefined,
         customer_po_number: data.customer_po_number || undefined,
+        quotation_id: data.quotation_id || null,
+        sales_person_id: salesPersonId,
         customer_id: data.customer_id,
         customer_name: data.customer_name,
         customer_company: data.customer_company || undefined,
@@ -320,6 +364,7 @@ export function PurchaseOrderForm({
                                 <span className="font-medium">{quotation.quotation_number}</span>
                                 <span className="text-sm text-muted-foreground">
                                   {quotation.customer_name} • ฿{quotation.total_amount?.toLocaleString()} • {quotation.status}
+                                  <span className="text-blue-600"> • พนักงานขาย: {quotation.sales_person_name}</span>
                                 </span>
                               </div>
                             </SelectItem>
