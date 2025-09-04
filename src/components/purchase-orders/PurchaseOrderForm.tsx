@@ -742,7 +742,15 @@ export function PurchaseOrderForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             ยกเลิก
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            onClick={() => {
+              console.log("Submit button clicked!");
+              console.log("Form is valid:", form.formState.isValid);
+              console.log("Form errors:", form.formState.errors);
+            }}
+          >
             {isSubmitting ? "กำลังบันทึก..." : editingPO ? "อัปเดต" : "บันทึก"}
           </Button>
         </div>
