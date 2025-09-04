@@ -50,147 +50,205 @@ const App = () => (
             <Route path="/invitation" element={<InvitationAccept />} />
             <Route path="/" element={
               <ProtectedRoute>
-                <Index />
+                <Layout>
+                  <Index />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/customers" element={
               <ProtectedRoute>
-                <Customers />
+                <Layout>
+                  <Customers />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/quotations" element={
               <ProtectedRoute>
-                <Quotations />
+                <Layout>
+                  <Quotations />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/quotations/new" element={
               <ProtectedRoute>
-                <QuotationForm />
+                <Layout>
+                  <QuotationForm />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/quotations/:id/edit" element={
               <ProtectedRoute>
-                <QuotationForm />
+                <Layout>
+                  <QuotationForm />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/quotations/import" element={
               <ProtectedRoute>
-                <QuotationImport />
+                <Layout>
+                  <QuotationImport />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/invoices" element={
               <ProtectedRoute>
-                <Invoices />
+                <Layout>
+                  <Invoices />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/invoices/new" element={
               <ProtectedRoute>
-                <InvoiceForm />
+                <Layout>
+                  <InvoiceForm />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/invoices/:id" element={
               <ProtectedRoute>
-                <InvoiceForm />
+                <Layout>
+                  <InvoiceForm />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/tax-invoices" element={
               <ProtectedRoute>
-                <TaxInvoices />
+                <Layout>
+                  <TaxInvoices />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/tax-invoices/new" element={
               <ProtectedRoute>
-                <TaxInvoiceForm />
+                <Layout>
+                  <TaxInvoiceForm />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/tax-invoices/:id" element={
               <ProtectedRoute>
-                <TaxInvoiceForm />
+                <Layout>
+                  <TaxInvoiceForm />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/tax-invoices/:id/edit" element={
               <ProtectedRoute>
-                <TaxInvoiceForm />
+                <Layout>
+                  <TaxInvoiceForm />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/inventory" element={
               <ProtectedRoute>
-                <Inventory />
+                <Layout>
+                  <Inventory />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/service-request" element={
               <ProtectedRoute>
-                <ServiceRequest />
+                <Layout>
+                  <ServiceRequest />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/service-dashboard" element={
               <ProtectedRoute>
-                <ServiceDashboard />
+                <Layout>
+                  <ServiceDashboard />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/delivery" element={
               <ProtectedRoute>
-                <Delivery />
+                <Layout>
+                  <Delivery />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
               <ProtectedRoute>
-                <Settings />
+                <Layout>
+                  <Settings />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/financial" element={
               <ProtectedRoute>
-                <Financial />
+                <Layout>
+                  <Financial />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/analytics" element={
               <ProtectedRoute>
-                <Analytics />
+                <Layout>
+                  <Analytics />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/reports" element={
               <ProtectedRoute>
-                <Reports />
+                <Layout>
+                  <Reports />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/sales-documents" element={
               <ProtectedRoute>
-                <SalesDocuments />
+                <Layout>
+                  <SalesDocuments />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/staff-management" element={
               <ProtectedRoute>
-                <StaffManagement />
+                <Layout>
+                  <StaffManagement />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/receipts" element={
               <ProtectedRoute>
-                <Receipts />
+                <Layout>
+                  <Receipts />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/receipts/new" element={
               <ProtectedRoute>
-                <ReceiptForm />
+                <Layout>
+                  <ReceiptForm />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/receipts/:id" element={
               <ProtectedRoute>
-                <ReceiptForm />
+                <Layout>
+                  <ReceiptForm />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/receipts/:id/edit" element={
               <ProtectedRoute>
-                <ReceiptForm />
+                <Layout>
+                  <ReceiptForm />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/payment-records" element={
               <ProtectedRoute>
-                <PaymentRecords />
+                <Layout>
+                  <PaymentRecords />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/international-transfer" element={
               <ProtectedRoute>
-                <InternationalTransfer />
+                <Layout>
+                  <InternationalTransfer />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/supplier-management" element={
@@ -202,7 +260,9 @@ const App = () => (
             } />
             <Route path="/purchase-orders" element={
               <ProtectedRoute>
-                <PurchaseOrders />
+                <Layout>
+                  <PurchaseOrders />
+                </Layout>
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
