@@ -72,8 +72,8 @@ export function TransferRequestsList({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
-  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
-  const [selectedTransferRequest, setSelectedTransferRequest] = useState<TransferRequest | null>(null);
+  const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
+  const [selectedRequestForCompletion, setSelectedRequestForCompletion] = useState<TransferRequest | null>(null);
 
   // Filter requests based on search and filters
   const filteredRequests = requests.filter((request) => {
@@ -346,8 +346,8 @@ export function TransferRequestsList({
                             <Button
                               size="sm"
                               onClick={() => {
-                                setSelectedTransferRequest(request);
-                                setTransferDialogOpen(true);
+                                setSelectedRequestForCompletion(request);
+                                setCompletionDialogOpen(true);
                               }}
                               className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
                             >
@@ -443,14 +443,14 @@ export function TransferRequestsList({
       </AlertDialog>
 
       {/* Transfer Completion Dialog */}
-      {selectedTransferRequest && (
+      {selectedRequestForCompletion && (
         <TransferCompletionDialog
-          open={transferDialogOpen}
-          onOpenChange={setTransferDialogOpen}
-          request={selectedTransferRequest}
+          open={completionDialogOpen}
+          onOpenChange={setCompletionDialogOpen}
+          request={selectedRequestForCompletion}
           onSuccess={() => {
             onRefresh();
-            setSelectedTransferRequest(null);
+            setSelectedRequestForCompletion(null);
           }}
         />
       )}

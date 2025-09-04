@@ -1,6 +1,4 @@
-import { useState } from "react";
-import { format } from "date-fns";
-import { Calendar, Upload, X, FileText } from "lucide-react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -15,17 +13,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Upload, FileText, Calendar } from "lucide-react";
 
 interface TransferCompletionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  request: {
-    id: string;
-    transfer_number: string;
-    supplier_name: string;
-    transfer_amount: number;
-    currency: string;
-  };
+  request: any;
   onSuccess: () => void;
 }
 
@@ -36,81 +29,56 @@ export function TransferCompletionDialog({
   onSuccess,
 }: TransferCompletionDialogProps) {
   const { toast } = useToast();
-  const [actualTransferDate, setActualTransferDate] = useState(
-    format(new Date(), "yyyy-MM-dd")
+  const [loading, setLoading] = useState(false);
+  const [transferDate, setTransferDate] = useState(
+    new Date().toISOString().split('T')[0]
   );
-  const [actualAmount, setActualAmount] = useState(request.transfer_amount);
-  const [actualExchangeRate, setActualExchangeRate] = useState<number | "">("");
   const [notes, setNotes] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{
-    name: string;
-    url: string;
-    type: string;
-  }>>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const transferSlipRef = useRef<HTMLInputElement>(null);
+  const confirmationRef = useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+  const uploadFile = async (file: File, fileType: string) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${request.transfer_number}_${fileType}_${Date.now()}.${fileExt}`;
+    const filePath = `${request.transfer_number}/${fileName}`;
 
-    setUploading(true);
+    const { error: uploadError, data } = await supabase.storage
+      .from('transfer-documents')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    return filePath;
+  };
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>, 
+    fileType: string
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${request.transfer_number}_${Date.now()}.${fileExt}`;
-        const filePath = `${request.id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('transfer-documents')
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('transfer-documents')
-          .getPublicUrl(filePath);
-
-        return {
-          name: file.name,
-          url: publicUrl,
-          type: file.type.startsWith('image/') ? 'image' : 'document',
-        };
-      });
-
-      const results = await Promise.all(uploadPromises);
-      setUploadedFiles(prev => [...prev, ...results]);
-
+      setLoading(true);
+      const filePath = await uploadFile(file, fileType);
+      setUploadedFiles(prev => [...prev, filePath]);
+      
       toast({
         title: "สำเร็จ",
-        description: `อัปโหลดเอกสาร ${files.length} ไฟล์เรียบร้อยแล้ว`,
+        description: `อัปโหลดไฟล์ ${fileType} เรียบร้อยแล้ว`,
       });
     } catch (error: any) {
-      console.error("Error uploading files:", error);
+      console.error("Error uploading file:", error);
       toast({
         title: "ข้อผิดพลาด",
-        description: "ไม่สามารถอัปโหลดเอกสารได้",
+        description: "ไม่สามารถอัปโหลดไฟล์ได้",
         variant: "destructive",
       });
     } finally {
-      setUploading(false);
-    }
-  };
-
-  const removeFile = async (index: number) => {
-    const file = uploadedFiles[index];
-    try {
-      // Extract file path from URL
-      const urlParts = file.url.split('/');
-      const filePath = urlParts.slice(-2).join('/'); // Get "id/filename"
-
-      await supabase.storage
-        .from('transfer-documents')
-        .remove([filePath]);
-
-      setUploadedFiles(prev => prev.filter((_, i) => i !== index));
-    } catch (error) {
-      console.error("Error removing file:", error);
+      setLoading(false);
     }
   };
 
@@ -118,26 +86,30 @@ export function TransferCompletionDialog({
     if (uploadedFiles.length === 0) {
       toast({
         title: "ข้อผิดพลาด",
-        description: "กรุณาอัปโหลดเอกสารประกอบการโอนเงิน",
+        description: "กรุณาอัปโหลดเอกสารอย่างน้อย 1 ไฟล์",
         variant: "destructive",
       });
       return;
     }
 
-    setSaving(true);
     try {
+      setLoading(true);
+
+      const updateData: any = {
+        status: 'transferred',
+        transfer_executed_at: new Date().toISOString(),
+        actual_transfer_date: transferDate,
+        transfer_evidence_urls: uploadedFiles,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (notes) {
+        updateData.internal_notes = notes;
+      }
+
       const { error } = await supabase
         .from("international_transfer_requests")
-        .update({
-          status: "transferred",
-          transfer_executed_at: new Date().toISOString(),
-          actual_transfer_date: actualTransferDate,
-          actual_transfer_amount: actualAmount,
-          actual_exchange_rate: actualExchangeRate || null,
-          transfer_evidence_urls: uploadedFiles.map(f => f.url),
-          internal_notes: notes,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq("id", request.id);
 
       if (error) throw error;
@@ -157,133 +129,101 @@ export function TransferCompletionDialog({
         variant: "destructive",
       });
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>ยืนยันการโอนเงิน</DialogTitle>
           <DialogDescription>
-            บันทึกข้อมูลการโอนเงินสำหรับคำขอ {request.transfer_number}
+            กรุณาอัปโหลดเอกสารประกอบการโอนเงิน สำหรับ {request?.transfer_number}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Transfer Summary */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-medium mb-2">ข้อมูลการโอน</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-600">Supplier:</span>
-                <p className="font-medium">{request.supplier_name}</p>
-              </div>
-              <div>
-                <span className="text-gray-600">จำนวนเงิน:</span>
-                <p className="font-medium">{request.transfer_amount.toLocaleString()} {request.currency}</p>
-              </div>
+          {/* Transfer Date */}
+          <div className="space-y-2">
+            <Label htmlFor="transfer-date">วันที่โอนเงินจริง</Label>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="transfer-date"
+                type="date"
+                value={transferDate}
+                onChange={(e) => setTransferDate(e.target.value)}
+                className="pl-10"
+              />
             </div>
           </div>
 
-          {/* Actual Transfer Details */}
+          {/* File Uploads */}
           <div className="space-y-4">
-            <h3 className="font-medium">ข้อมูลการโอนจริง</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="transferDate">วันที่โอนจริง</Label>
-                <Input
-                  id="transferDate"
-                  type="date"
-                  value={actualTransferDate}
-                  onChange={(e) => setActualTransferDate(e.target.value)}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="actualAmount">จำนวนเงินที่โอนจริง ({request.currency})</Label>
-                <Input
-                  id="actualAmount"
-                  type="number"
-                  step="0.01"
-                  value={actualAmount}
-                  onChange={(e) => setActualAmount(Number(e.target.value))}
+            <div>
+              <Label>หลักฐานการโอนเงิน / สลิป</Label>
+              <div className="mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => transferSlipRef.current?.click()}
+                  disabled={loading}
+                  className="w-full"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  อัปโหลดสลิปโอนเงิน
+                </Button>
+                <input
+                  ref={transferSlipRef}
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => handleFileUpload(e, "transfer_slip")}
+                  className="hidden"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="exchangeRate">อัตราแลกเปลี่ยนจริง (ไม่บังคับ)</Label>
-              <Input
-                id="exchangeRate"
-                type="number"
-                step="0.00001"
-                value={actualExchangeRate}
-                onChange={(e) => setActualExchangeRate(e.target.value ? Number(e.target.value) : "")}
-                placeholder="เช่น 35.25"
-              />
-            </div>
-          </div>
-
-          {/* File Upload */}
-          <div className="space-y-4">
-            <h3 className="font-medium">เอกสารประกอบการโอน</h3>
-            
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
-              <Label htmlFor="fileUpload" className="cursor-pointer">
-                <span className="text-blue-600 hover:text-blue-700">
-                  คลิกเพื่อเลือกไฟล์
-                </span>
-                <span className="text-gray-600"> หรือลากไฟล์มาวางที่นี่</span>
-              </Label>
-              <Input
-                id="fileUpload"
-                type="file"
-                multiple
-                accept="image/*,.pdf,.doc,.docx"
-                onChange={handleFileUpload}
-                className="hidden"
-                disabled={uploading}
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                รองรับไฟล์: รูปภาพ, PDF, Word (สูงสุด 10MB ต่อไฟล์)
-              </p>
+              <Label>เอกสารยืนยันการโอน</Label>
+              <div className="mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => confirmationRef.current?.click()}
+                  disabled={loading}
+                  className="w-full"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  อัปโหลดเอกสารยืนยัน
+                </Button>
+                <input
+                  ref={confirmationRef}
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => handleFileUpload(e, "confirmation")}
+                  className="hidden"
+                />
+              </div>
             </div>
 
-            {/* Uploaded Files */}
             {uploadedFiles.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">ไฟล์ที่อัปโหลดแล้ว:</h4>
-                {uploadedFiles.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                    <div className="flex items-center space-x-2">
-                      <FileText className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm">{file.name}</span>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => removeFile(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+              <div className="bg-green-50 p-3 rounded-md">
+                <p className="text-sm text-green-700">
+                  อัปโหลดไฟล์แล้ว: {uploadedFiles.length} ไฟล์
+                </p>
               </div>
             )}
           </div>
 
           {/* Notes */}
-          <div>
-            <Label htmlFor="notes">หมายเหตุ (ไม่บังคับ)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="notes">หมายเหตุเพิ่มเติม (ถ้ามี)</Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="บันทึกเพิ่มเติมเกี่ยวกับการโอนเงิน..."
+              placeholder="กรอกหมายเหตุเพิ่มเติมเกี่ยวกับการโอนเงิน..."
               rows={3}
             />
           </div>
@@ -293,15 +233,16 @@ export function TransferCompletionDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={saving}
+            disabled={loading}
           >
             ยกเลิก
           </Button>
           <Button
             onClick={handleComplete}
-            disabled={saving || uploading || uploadedFiles.length === 0}
+            disabled={loading || uploadedFiles.length === 0}
+            className="bg-green-600 hover:bg-green-700"
           >
-            {saving ? "กำลังบันทึก..." : "ยืนยันการโอน"}
+            {loading ? "กำลังบันทึก..." : "ยืนยันการโอน"}
           </Button>
         </DialogFooter>
       </DialogContent>
