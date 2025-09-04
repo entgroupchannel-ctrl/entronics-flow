@@ -10,8 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search, MoreHorizontal, Phone, Mail, MapPin, Upload, Download, FileSpreadsheet, Edit, Trash2 } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { Layout } from '@/components/layout/Layout';
 import { AddCustomerForm } from '@/components/customers/AddCustomerForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -37,7 +36,6 @@ interface Customer {
 }
 
 export default function Customers() {
-  const [currentView, setCurrentView] = useState('customers');
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("customers");
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -459,26 +457,18 @@ export default function Customers() {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-background">
-        <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 flex items-center justify-center">
-            <div>กำลังโหลด...</div>
-          </main>
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div>กำลังโหลด...</div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="flex-1 overflow-auto p-6">
-            <div className="space-y-6">
-              {/* Header */}
+    <Layout>
+      <main className="p-6 space-y-6">
+        {/* Header */}
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-3xl font-bold text-foreground">รายชื่อลูกค้า</h1>
@@ -916,11 +906,9 @@ export default function Customers() {
                       </div>
                     </form>
                   )}
-                </DialogContent>
-              </Dialog>
-            </div>
-        </main>
-      </div>
-    </div>
-  );
+                 </DialogContent>
+               </Dialog>
+       </main>
+     </Layout>
+   );
 }
