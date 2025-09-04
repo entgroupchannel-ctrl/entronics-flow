@@ -357,7 +357,15 @@ export function PurchaseOrderForm({
                       {showAllQuotations && "(ทั้งหมด)"}
                     </FormLabel>
                      <div className="space-y-4">
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value);
+                        // Auto-populate fields from selected quotation
+                        const selectedQuotation = quotations?.find(q => q.id === value);
+                        if (selectedQuotation) {
+                          form.setValue("customer_name", selectedQuotation.customer_name);
+                          form.setValue("total_amount", selectedQuotation.total_amount || 0);
+                        }
+                      }} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="เลือกใบเสนอราคา" />
