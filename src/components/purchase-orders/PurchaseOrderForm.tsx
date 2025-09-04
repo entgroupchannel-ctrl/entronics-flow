@@ -597,6 +597,7 @@ export function PurchaseOrderForm({
                         type="number"
                         min="0"
                         step="0.01"
+                        className="text-right"
                         {...field} 
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         value={field.value || ''}
