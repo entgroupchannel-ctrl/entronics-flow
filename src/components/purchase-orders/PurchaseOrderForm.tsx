@@ -293,37 +293,6 @@ export function PurchaseOrderForm({
             <CardContent className="space-y-4">
               <FormField
                 control={form.control}
-                name="customer_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ลูกค้า *</FormLabel>
-                    <Select 
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        handleCustomerSelect(value);
-                      }} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="เลือกลูกค้า" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {customers?.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="quotation_id"
                 render={({ field }) => (
                   <FormItem>
