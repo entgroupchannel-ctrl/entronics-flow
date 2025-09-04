@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,7 +76,6 @@ interface WarrantyItem {
 }
 
 const Delivery = () => {
-  const [currentView, setCurrentView] = useState('delivery');
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -918,15 +916,8 @@ const Delivery = () => {
   const deliveredOrders = deliveryOrders.filter(o => o.status === 'delivered').length;
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar 
-        currentView={currentView} 
-        onMenuClick={(view) => setCurrentView(view)}
-      />
-      
-      <div className="flex-1 flex flex-col">
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="flex justify-between items-center">
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
             <div className="p-1 rounded-lg">
               <div className="bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-sm">
                 <h1 className="text-3xl font-bold text-foreground">
@@ -1742,8 +1733,6 @@ const Delivery = () => {
               {assigningOrder && <AssignmentForm />}
             </DialogContent>
           </Dialog>
-        </main>
-      </div>
     </div>
   );
 
