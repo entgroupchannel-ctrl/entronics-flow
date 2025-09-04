@@ -358,19 +358,6 @@ export function TransferRequestsList({
                             </Button>
                           )}
                           
-                          {/* Duplicate button for rejected requests */}
-                          {request.status === 'rejected' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => onDuplicate(request)}
-                              className="mr-2"
-                            >
-                              <Copy className="h-4 w-4 mr-1" />
-                              สร้างซ้ำ
-                            </Button>
-                          )}
-                          
                           {/* More actions dropdown */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
