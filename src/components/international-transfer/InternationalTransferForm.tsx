@@ -143,7 +143,7 @@ export function InternationalTransferForm({
       const { data, error } = await supabase
         .from("purchase_orders")
         .select("id, po_number, customer_name, customer_company, total_amount, po_date, status")
-        .eq("status", "received")
+        .in("status", ["confirmed", "sent"])
         .order("created_at", { ascending: false });
       
       if (error) throw error;
