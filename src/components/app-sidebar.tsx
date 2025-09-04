@@ -39,6 +39,7 @@ const mainItems = [
 const salesItems = [
   { title: "เอกสารการขาย / Sale Docs", url: "/sales-documents", icon: FileText },
   { title: "ใบเสนอราคา", url: "/quotations", icon: FileText },
+  { title: "เอกสารยืนยันคำสั่งซื้อ", url: "/purchase-order-confirmations", icon: FileText },
   { title: "ใบวางบิล/ใบแจ้งหนี้", url: "/invoices", icon: Receipt },
   { title: "การชำระเงิน/ใบกำกับภาษี", url: "/tax-invoices", icon: Calculator },
   { title: "ใบส่งสินค้า/ใบกำกับภาษี", url: "/receipts", icon: Receipt },
