@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Layout } from "@/components/layout/Layout";
 import Index from "./pages/Index";
 import Inventory from "./pages/Inventory";
 import Customers from "./pages/Customers";
@@ -49,212 +48,152 @@ const App = () => (
             <Route path="/invitation" element={<InvitationAccept />} />
             <Route path="/" element={
               <ProtectedRoute>
-                <Layout>
-                  <Index />
-                </Layout>
+                <Index />
               </ProtectedRoute>
             } />
             <Route path="/customers" element={
               <ProtectedRoute>
-                <Layout>
-                  <Customers />
-                </Layout>
+                <Customers />
               </ProtectedRoute>
             } />
             <Route path="/quotations" element={
               <ProtectedRoute>
-                <Layout>
-                  <Quotations />
-                </Layout>
+                <Quotations />
               </ProtectedRoute>
             } />
             <Route path="/quotations/new" element={
               <ProtectedRoute>
-                <Layout>
-                  <QuotationForm />
-                </Layout>
+                <QuotationForm />
               </ProtectedRoute>
             } />
             <Route path="/quotations/:id/edit" element={
               <ProtectedRoute>
-                <Layout>
-                  <QuotationForm />
-                </Layout>
+                <QuotationForm />
               </ProtectedRoute>
             } />
             <Route path="/quotations/import" element={
               <ProtectedRoute>
-                <Layout>
-                  <QuotationImport />
-                </Layout>
+                <QuotationImport />
               </ProtectedRoute>
             } />
             <Route path="/invoices" element={
               <ProtectedRoute>
-                <Layout>
-                  <Invoices />
-                </Layout>
+                <Invoices />
               </ProtectedRoute>
             } />
             <Route path="/invoices/new" element={
               <ProtectedRoute>
-                <Layout>
-                  <InvoiceForm />
-                </Layout>
+                <InvoiceForm />
               </ProtectedRoute>
             } />
             <Route path="/invoices/:id" element={
               <ProtectedRoute>
-                <Layout>
-                  <InvoiceForm />
-                </Layout>
+                <InvoiceForm />
               </ProtectedRoute>
             } />
             <Route path="/tax-invoices" element={
               <ProtectedRoute>
-                <Layout>
-                  <TaxInvoices />
-                </Layout>
+                <TaxInvoices />
               </ProtectedRoute>
             } />
             <Route path="/tax-invoices/new" element={
               <ProtectedRoute>
-                <Layout>
-                  <TaxInvoiceForm />
-                </Layout>
+                <TaxInvoiceForm />
               </ProtectedRoute>
             } />
             <Route path="/tax-invoices/:id" element={
               <ProtectedRoute>
-                <Layout>
-                  <TaxInvoiceForm />
-                </Layout>
+                <TaxInvoiceForm />
               </ProtectedRoute>
             } />
             <Route path="/tax-invoices/:id/edit" element={
               <ProtectedRoute>
-                <Layout>
-                  <TaxInvoiceForm />
-                </Layout>
+                <TaxInvoiceForm />
               </ProtectedRoute>
             } />
             <Route path="/inventory" element={
               <ProtectedRoute>
-                <Layout>
-                  <Inventory />
-                </Layout>
+                <Inventory />
               </ProtectedRoute>
             } />
             <Route path="/service-request" element={
               <ProtectedRoute>
-                <Layout>
-                  <ServiceRequest />
-                </Layout>
+                <ServiceRequest />
               </ProtectedRoute>
             } />
             <Route path="/service-dashboard" element={
               <ProtectedRoute>
-                <Layout>
-                  <ServiceDashboard />
-                </Layout>
+                <ServiceDashboard />
               </ProtectedRoute>
             } />
             <Route path="/delivery" element={
               <ProtectedRoute>
-                <Layout>
-                  <Delivery />
-                </Layout>
+                <Delivery />
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
               <ProtectedRoute>
-                <Layout>
-                  <Settings />
-                </Layout>
+                <Settings />
               </ProtectedRoute>
             } />
             <Route path="/financial" element={
               <ProtectedRoute>
-                <Layout>
-                  <Financial />
-                </Layout>
+                <Financial />
               </ProtectedRoute>
             } />
             <Route path="/analytics" element={
               <ProtectedRoute>
-                <Layout>
-                  <Analytics />
-                </Layout>
+                <Analytics />
               </ProtectedRoute>
             } />
             <Route path="/reports" element={
               <ProtectedRoute>
-                <Layout>
-                  <Reports />
-                </Layout>
+                <Reports />
               </ProtectedRoute>
             } />
             <Route path="/sales-documents" element={
               <ProtectedRoute>
-                <Layout>
-                  <SalesDocuments />
-                </Layout>
+                <SalesDocuments />
               </ProtectedRoute>
             } />
             <Route path="/staff-management" element={
               <ProtectedRoute>
-                <Layout>
-                  <StaffManagement />
-                </Layout>
+                <StaffManagement />
               </ProtectedRoute>
             } />
             <Route path="/receipts" element={
               <ProtectedRoute>
-                <Layout>
-                  <Receipts />
-                </Layout>
+                <Receipts />
               </ProtectedRoute>
             } />
             <Route path="/receipts/new" element={
               <ProtectedRoute>
-                <Layout>
-                  <ReceiptForm />
-                </Layout>
+                <ReceiptForm />
               </ProtectedRoute>
             } />
             <Route path="/receipts/:id" element={
               <ProtectedRoute>
-                <Layout>
-                  <ReceiptForm />
-                </Layout>
+                <ReceiptForm />
               </ProtectedRoute>
             } />
             <Route path="/receipts/:id/edit" element={
               <ProtectedRoute>
-                <Layout>
-                  <ReceiptForm />
-                </Layout>
+                <ReceiptForm />
               </ProtectedRoute>
             } />
             <Route path="/payment-records" element={
               <ProtectedRoute>
-                <Layout>
-                  <PaymentRecords />
-                </Layout>
+                <PaymentRecords />
               </ProtectedRoute>
             } />
             <Route path="/international-transfer" element={
               <ProtectedRoute>
-                <Layout>
-                  <InternationalTransfer />
-                </Layout>
+                <InternationalTransfer />
               </ProtectedRoute>
             } />
             <Route path="/supplier-management" element={
               <ProtectedRoute>
-                <Layout>
-                  <SupplierManagement />
-                </Layout>
+                <SupplierManagement />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
