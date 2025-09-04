@@ -23,7 +23,13 @@ export default function InternationalTransfer() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("international_transfer_requests")
-        .select("*")
+        .select(`
+          *,
+          requested_by_profile:profiles!requested_by(
+            full_name,
+            username
+          )
+        `)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -35,7 +41,7 @@ export default function InternationalTransfer() {
         });
         throw error;
       }
-      return data || [];
+      return (data || []) as any[];
     },
   });
 

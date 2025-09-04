@@ -46,7 +46,10 @@ interface TransferRequest {
   created_at: string;
   supplier?: { name: string; bank_name: string; bank_account: string };
   customer?: { name: string };
-  requested_by_profile?: { full_name: string };
+  requested_by_profile?: { 
+    full_name: string; 
+    username?: string;
+  } | null;
 }
 
 interface TransferRequestsListProps {
