@@ -76,7 +76,7 @@ export function AppSidebar() {
   const isActive = (path: string) => currentPath === path;
   
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-primary text-primary-foreground font-medium" : "hover:bg-muted/50";
+    isActive ? "bg-primary text-primary-foreground font-medium" : "text-foreground hover:bg-muted/50 hover:text-foreground";
 
   const MenuItem = ({ item }: { item: typeof mainItems[0] }) => (
     <SidebarMenuItem>
@@ -107,7 +107,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2">
         {/* Main Dashboard */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          <SidebarGroupLabel className="text-xs font-medium text-foreground/70 uppercase tracking-wider">
             การดำเนินงาน
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -154,7 +154,7 @@ export function AppSidebar() {
 
         {/* Management */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          <SidebarGroupLabel className="text-xs font-medium text-foreground/70 uppercase tracking-wider">
             การจัดการ
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -168,7 +168,7 @@ export function AppSidebar() {
 
         {/* Reports */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          <SidebarGroupLabel className="text-xs font-medium text-foreground/70 uppercase tracking-wider">
             รายงาน
           </SidebarGroupLabel>
           <SidebarGroupContent>
