@@ -39,8 +39,8 @@ const transferFormSchema = z.object({
     required_error: "กรุณาเลือกวันที่ต้องการโอน",
   }),
   priority: z.string().default("normal"),
-  transfer_fee: z.number().default(0),
-  bank_charges: z.number().default(0),
+  transfer_fee: z.number().default(500),
+  bank_charges: z.number().default(500),
   other_charges: z.number().default(0),
   notes: z.string().optional(),
 });
@@ -105,8 +105,8 @@ export function InternationalTransferForm({
       payment_deadline: undefined,
       requested_transfer_date: new Date(),
       priority: "normal",
-      transfer_fee: 0,
-      bank_charges: 0,
+      transfer_fee: 500,
+      bank_charges: 500,
       other_charges: 0,
       notes: "",
     },
@@ -998,16 +998,25 @@ export function InternationalTransferForm({
                       name="transfer_fee"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm">ค่าโอน</FormLabel>
+                          <FormLabel className="text-sm">ค่าโอน (THB)</FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              {...field}
-                              className="text-sm"
-                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                            />
+                            <div className="relative">
+                              <Input
+                                type="text"
+                                {...field}
+                                value={field.value ? Number(field.value).toLocaleString() : ''}
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(/,/g, '');
+                                  field.onChange(parseFloat(value) || 0);
+                                }}
+                                className="text-sm pr-10"
+                              />
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
+                                ฿
+                              </div>
+                            </div>
                           </FormControl>
+                          <FormDescription className="text-xs">Default: ฿500</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1018,16 +1027,25 @@ export function InternationalTransferForm({
                       name="bank_charges"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm">ค่าธนาคาร</FormLabel>
+                          <FormLabel className="text-sm">ค่าธนาคาร (THB)</FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              {...field}
-                              className="text-sm"
-                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                            />
+                            <div className="relative">
+                              <Input
+                                type="text"
+                                {...field}
+                                value={field.value ? Number(field.value).toLocaleString() : ''}
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(/,/g, '');
+                                  field.onChange(parseFloat(value) || 0);
+                                }}
+                                className="text-sm pr-10"
+                              />
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
+                                ฿
+                              </div>
+                            </div>
                           </FormControl>
+                          <FormDescription className="text-xs">Default: ฿500</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1038,15 +1056,23 @@ export function InternationalTransferForm({
                       name="other_charges"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm">อื่นๆ</FormLabel>
+                          <FormLabel className="text-sm">อื่นๆ (THB)</FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              {...field}
-                              className="text-sm"
-                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                            />
+                            <div className="relative">
+                              <Input
+                                type="text"
+                                {...field}
+                                value={field.value ? Number(field.value).toLocaleString() : ''}
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(/,/g, '');
+                                  field.onChange(parseFloat(value) || 0);
+                                }}
+                                className="text-sm pr-10"
+                              />
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
+                                ฿
+                              </div>
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
