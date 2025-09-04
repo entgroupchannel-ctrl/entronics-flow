@@ -186,7 +186,7 @@ export function SupplierRegistrationForm({
         swift_code: data.swift_code,
         bank_address: data.bank_address,
         supplier_notes: data.supplier_notes,
-        customer_type: "ผู้จัดจำหน่าย",
+        customer_type: "ผู้จำหน่าย",
         supplier_registration_status: editingSupplier ? editingSupplier.supplier_registration_status : "pending",
         supplier_application_date: editingSupplier ? editingSupplier.supplier_application_date : new Date().toISOString(),
         created_by: user.id,

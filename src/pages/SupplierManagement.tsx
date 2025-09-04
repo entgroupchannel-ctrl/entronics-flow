@@ -24,7 +24,7 @@ export default function SupplierManagement() {
       const { data, error } = await supabase
         .from("customers")
         .select("*")
-        .eq("customer_type", "ผู้จัดจำหน่าย")
+        .eq("customer_type", "ผู้จำหน่าย")
         .order("created_at", { ascending: false });
 
       if (error) {
