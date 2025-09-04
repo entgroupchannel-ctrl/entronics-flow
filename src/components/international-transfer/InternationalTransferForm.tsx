@@ -136,6 +136,22 @@ export function InternationalTransferForm({
     },
   });
 
+  // Query for purchase orders
+  const { data: purchaseOrders } = useQuery({
+    queryKey: ["purchase-orders"],
+    queryFn: async () => {
+      // เพิ่ม query สำหรับ PO จากตาราง quotations หรือ invoices ตามที่มีในระบบ
+      const { data, error } = await supabase
+        .from("quotations")
+        .select("id, quotation_number, customer_name, total_amount, status")
+        .eq("status", "approved")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   // Query for customers
   const { data: customers } = useQuery({
     queryKey: ["customers"],
@@ -585,9 +601,25 @@ export function InternationalTransferForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>เลขที่ PO</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="เลือก PO ที่ได้รับ" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {purchaseOrders?.map((po) => (
+                          <SelectItem key={po.id} value={po.quotation_number}>
+                            <div className="flex flex-col text-left">
+                              <span className="font-medium">{po.quotation_number}</span>
+                              <span className="text-sm text-muted-foreground">
+                                {po.customer_name} • ฿{po.total_amount?.toLocaleString()}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
