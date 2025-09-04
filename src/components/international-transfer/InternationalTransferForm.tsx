@@ -543,26 +543,39 @@ export function InternationalTransferForm({
 
                     {/* Selected POs Summary */}
                     {selectedPOs.length > 0 && (
-                      <div className="bg-muted/50 rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">PO ที่เลือก</span>
-                          <span className="text-sm font-bold text-primary">
-                            รวม: ฿{totalSelectedAmount.toLocaleString()}
-                          </span>
+                      <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-medium text-primary">PO ที่เลือก ({selectedPOs.length} รายการ)</span>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-primary">
+                              ฿{totalSelectedAmount.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-muted-foreground">ยอดรวมทั้งหมด</div>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-1">
-                          {selectedPOs.map((poNumber) => (
-                            <Badge key={poNumber} variant="default" className="text-xs">
-                              {poNumber}
-                              <button
-                                type="button"
-                                onClick={() => removePO(poNumber)}
-                                className="ml-1 hover:bg-destructive rounded-full"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
-                          ))}
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap gap-1">
+                            {selectedPOs.map((poNumber) => {
+                              const poData = selectedPOData.find(po => po.po_number === poNumber);
+                              return (
+                                <div key={poNumber} className="flex items-center bg-background border rounded-md p-2 text-xs">
+                                  <div className="flex-1">
+                                    <div className="font-medium">{poNumber}</div>
+                                    <div className="text-muted-foreground">
+                                      ฿{poData?.total_amount?.toLocaleString()}
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => removePO(poNumber)}
+                                    className="ml-2 p-1 hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -751,13 +764,33 @@ export function InternationalTransferForm({
                         <FormItem>
                           <FormLabel>จำนวนเงิน *</FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                            />
+                            <div className="relative">
+                              <Input
+                                type="text"
+                                {...field}
+                                value={field.value ? Number(field.value).toLocaleString() : ''}
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(/,/g, '');
+                                  field.onChange(parseFloat(value) || 0);
+                                }}
+                                className={cn(
+                                  selectedPOs.length > 0 && "bg-primary/5 border-primary/30 font-medium"
+                                )}
+                              />
+                              {selectedPOs.length > 0 && (
+                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                                  <Badge variant="secondary" className="text-xs">
+                                    จาก PO
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
                           </FormControl>
+                          {selectedPOs.length > 0 && (
+                            <FormDescription className="text-xs text-primary">
+                              คำนวณจาก {selectedPOs.length} PO ที่เลือก
+                            </FormDescription>
+                          )}
                           <FormMessage />
                         </FormItem>
                       )}
@@ -842,15 +875,27 @@ export function InternationalTransferForm({
                         <FormItem>
                           <FormLabel>เทียบเท่าบาท</FormLabel>
                           <FormControl>
-                            <Input
-                              type="text"
-                              {...field}
-                              value={field.value ? Number(field.value).toLocaleString() : ''}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/,/g, '');
-                                field.onChange(parseFloat(value) || 0);
-                              }}
-                            />
+                            <div className="relative">
+                              <Input
+                                type="text"
+                                {...field}
+                                value={field.value ? Number(field.value).toLocaleString() : ''}
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(/,/g, '');
+                                  field.onChange(parseFloat(value) || 0);
+                                }}
+                                className={cn(
+                                  selectedPOs.length > 0 && "bg-primary/5 border-primary/30"
+                                )}
+                              />
+                              {selectedPOs.length > 0 && watchTransferAmount && watchExchangeRate && (
+                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                                  <Badge variant="outline" className="text-xs">
+                                    อัตโนมัติ
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
