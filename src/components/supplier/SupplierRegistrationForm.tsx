@@ -202,10 +202,13 @@ export function SupplierRegistrationForm({
 
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        console.log("Inserting new supplier:", submitData);
+        const { data: insertResult, error } = await supabase
           .from("customers")
-          .insert([submitData]);
+          .insert([submitData])
+          .select();
 
+        console.log("Insert result:", insertResult, "Error:", error);
         if (error) throw error;
       }
 
