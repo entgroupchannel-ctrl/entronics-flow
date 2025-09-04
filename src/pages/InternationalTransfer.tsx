@@ -25,14 +25,12 @@ export default function InternationalTransfer() {
         .from("international_transfer_requests")
         .select(`
           *,
-          profiles!international_transfer_requests_requested_by_fkey(
+          profiles!requested_by(
             full_name,
             username
           )
         `)
         .order("created_at", { ascending: false });
-      
-      console.log("Transfer requests with profiles:", data);
 
       if (error) {
         console.error("Error fetching transfer requests:", error);
