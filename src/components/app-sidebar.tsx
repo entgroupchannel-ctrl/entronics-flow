@@ -41,8 +41,8 @@ const mainItems = [
   { title: "แดชบอร์ด / Dashboard", url: "/", icon: Home },
 ];
 
-// Define sales document sub-items
-const salesDocumentSubItems = [
+const salesItems = [
+  { title: "เอกสารการขาย / Sale Docs", url: "/sales-documents", icon: FileText },
   { title: "ใบเสนอราคา", url: "/quotations", icon: FileText },
   { title: "เอกสารยืนยันคำสั่งซื้อ", url: "/purchase-order-confirmations", icon: FileText },
   { title: "Purchase Orders", url: "/purchase-orders", icon: ShoppingCart },
@@ -50,10 +50,6 @@ const salesDocumentSubItems = [
   { title: "การชำระเงิน/ใบกำกับภาษี", url: "/tax-invoices", icon: Calculator },
   { title: "ใบส่งสินค้า/ใบกำกับภาษี", url: "/receipts", icon: Receipt },
   { title: "การชำระเงิน", url: "/payment-records", icon: CreditCard },
-];
-
-const salesItems = [
-  { title: "เอกสารการขาย / Sale Docs", url: "/sales-documents", icon: FileText, hasSubMenu: true },
 ];
 
 const operationItems = [
@@ -99,9 +95,6 @@ export function AppSidebar() {
     </SidebarMenuItem>
   );
 
-  // Check if any sales document sub-item is active to keep the menu open
-  const isSalesDocumentActive = salesDocumentSubItems.some(item => isActive(item.url));
-
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-border">
@@ -136,37 +129,9 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <Collapsible defaultOpen={isSalesDocumentActive} className="group">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="w-full justify-between">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        {state !== "collapsed" && <span>เอกสารการขาย / Sale Docs</span>}
-                      </div>
-                      {state !== "collapsed" && (
-                        <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
-                      )}
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  {state !== "collapsed" && (
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        {salesDocumentSubItems.map((subItem) => (
-                          <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton asChild>
-                              <NavLink to={subItem.url} end className={getNavCls}>
-                                <subItem.icon className="h-4 w-4" />
-                                <span>{subItem.title}</span>
-                              </NavLink>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  )}
-                </SidebarMenuItem>
-              </Collapsible>
+              {salesItems.map((item) => (
+                <MenuItem key={item.title} item={item} />
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
