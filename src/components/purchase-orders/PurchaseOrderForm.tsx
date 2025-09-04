@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -360,25 +361,48 @@ export function PurchaseOrderForm({
                     <div className="space-y-2">
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="min-h-[60px]">
                             <SelectValue placeholder="เลือกใบเสนอราคา" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="max-w-[400px]">
                           {quotations?.map((quotation) => (
-                            <SelectItem key={quotation.id} value={quotation.id}>
-                              <div className="flex flex-col text-left">
-                                <span className="font-medium">{quotation.quotation_number}</span>
-                                <span className="text-sm text-muted-foreground">
-                                  {quotation.customer_name} • ฿{quotation.total_amount?.toLocaleString()} • {quotation.status}
-                                  <span className="text-blue-600"> • พนักงานขาย: {quotation.sales_person_name}</span>
-                                </span>
+                            <SelectItem 
+                              key={quotation.id} 
+                              value={quotation.id}
+                              className="py-3"
+                            >
+                              <div className="flex flex-col gap-1 text-left w-full">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-primary">{quotation.quotation_number}</span>
+                                  <Badge 
+                                    variant={quotation.status === 'approved' ? 'default' : 'secondary'}
+                                    className="text-xs"
+                                  >
+                                    {quotation.status === 'approved' ? 'อนุมัติแล้ว' : 
+                                     quotation.status === 'pending' ? 'รออนุมัติ' : quotation.status}
+                                  </Badge>
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium">{quotation.customer_name}</span>
+                                    <span className="text-xs">•</span>
+                                    <span className="font-medium text-green-600">
+                                      ฿{quotation.total_amount?.toLocaleString()}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-blue-600 mt-1">
+                                    พนักงานขาย: {quotation.sales_person_name || 'ไม่ระบุ'}
+                                  </div>
+                                </div>
                               </div>
                             </SelectItem>
                           ))}
                           {quotations?.length === 0 && !showAllQuotations && (
                             <SelectItem value="no-results" disabled>
-                              ไม่พบใบเสนอราคาใน 2 เดือนล่าสุด
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <span>ไม่พบใบเสนอราคาใน 2 เดือนล่าสุด</span>
+                              </div>
                             </SelectItem>
                           )}
                         </SelectContent>
