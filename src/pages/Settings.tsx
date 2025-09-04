@@ -1036,29 +1036,15 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="flex h-screen">
-        <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
-        <div className="flex-1 flex flex-col">
-          <div className="h-16 border-b border-border bg-card" />
-          <main className="flex-1 flex items-center justify-center">
-            <div>กำลังโหลด...</div>
-          </main>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div>กำลังโหลด...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen">
-      <Sidebar onMenuClick={setCurrentView} currentView={currentView} />
-      <div className="flex-1 flex flex-col">
-        <div className="h-16 border-b border-border bg-card" />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6">
-            {renderSettingsContent()}
-          </div>
-        </main>
-      </div>
+    <div className="container mx-auto p-6">
+      {renderSettingsContent()}
     </div>
   );
 }

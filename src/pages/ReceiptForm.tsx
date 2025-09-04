@@ -482,11 +482,8 @@ export default function ReceiptForm() {
 
   if (loading && id !== "new") {
     return (
-      <div className="flex h-screen">
-        <Sidebar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">กำลังโหลด...</div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">กำลังโหลด...</div>
       </div>
     );
   }

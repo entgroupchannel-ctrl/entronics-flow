@@ -777,12 +777,7 @@ export default function ServiceDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar 
-        currentView={currentView} 
-        onMenuClick={(view) => setCurrentView(view)}
-        onLogoClick={() => setIsCompanyInfoOpen(true)}
-      />
+    <div className="container mx-auto p-6 space-y-6">
       
       <div className="flex-1 flex flex-col">
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
