@@ -198,10 +198,10 @@ export function PurchaseOrderForm({
   });
 
   const statusOptions = [
-    { value: "received", label: "ได้รับแล้ว" },
-    { value: "processing", label: "กำลังดำเนินการ" },
-    { value: "completed", label: "เสร็จสิ้น" },
-    { value: "cancelled", label: "ยกเลิก" },
+    { value: "received", label: "ได้รับแล้ว", description: "รับ PO จากลูกค้าแล้ว รอการดำเนินการ" },
+    { value: "processing", label: "กำลังดำเนินการ", description: "อยู่ระหว่างจัดเตรียมสินค้าหรือบริการ" },
+    { value: "completed", label: "เสร็จสิ้น", description: "ดำเนินการเสร็จแล้ว ส่งมอบครบถ้วน" },
+    { value: "cancelled", label: "ยกเลิก", description: "ยกเลิก PO นี้แล้ว" },
   ];
 
   const handleCustomerSelect = (customerId: string) => {
@@ -553,7 +553,7 @@ export function PurchaseOrderForm({
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>สถานะ</FormLabel>
+                    <FormLabel>สถานะ PO</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -563,11 +563,17 @@ export function PurchaseOrderForm({
                       <SelectContent>
                         {statusOptions.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
-                            {option.label}
+                            <div className="flex flex-col">
+                              <span className="font-medium">{option.label}</span>
+                              <span className="text-xs text-muted-foreground">{option.description}</span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      สถานะการดำเนินงานของใบสั่งซื้อนี้
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
