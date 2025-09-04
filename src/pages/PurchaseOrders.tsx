@@ -136,7 +136,6 @@ export default function PurchaseOrders() {
   // Show full screen form for new PO
   if (showForm && isFullScreen) {
     return (
-      <Layout>
         <div className="container mx-auto px-4 py-8 space-y-6">
           <div className="flex justify-between items-center">
             <div>
@@ -151,13 +150,11 @@ export default function PurchaseOrders() {
             onCancel={handleCancel}
           />
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="container mx-auto px-6 py-8 space-y-6">
+    <div className="container mx-auto px-6 py-8 space-y-6">
         <div className="flex justify-between items-start">
           <div className="text-left">
             <h1 className="text-3xl font-bold text-left">Purchase Orders</h1>
@@ -287,6 +284,5 @@ export default function PurchaseOrders() {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
   );
 }
