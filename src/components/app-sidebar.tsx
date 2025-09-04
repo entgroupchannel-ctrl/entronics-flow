@@ -15,7 +15,8 @@ import {
   CreditCard,
   Globe,
   Calculator,
-  PieChart
+  PieChart,
+  ShoppingCart
 } from "lucide-react";
 
 import {
@@ -45,6 +46,7 @@ const salesItems = [
 ];
 
 const operationItems = [
+  { title: "Purchase Orders", url: "/purchase-orders", icon: ShoppingCart },
   { title: "แจ้งซ่อม / Service Ticket", url: "/service-request", icon: Wrench },
   { title: "ระบบจัดส่งสินค้า / Delivery", url: "/delivery", icon: TruckIcon },
   { title: "รายชื่อลูกค้า / Customers", url: "/customers", icon: Users },

@@ -140,11 +140,10 @@ export function InternationalTransferForm({
   const { data: purchaseOrders } = useQuery({
     queryKey: ["purchase-orders"],
     queryFn: async () => {
-      // เพิ่ม query สำหรับ PO จากตาราง quotations หรือ invoices ตามที่มีในระบบ
       const { data, error } = await supabase
-        .from("quotations")
-        .select("id, quotation_number, customer_name, total_amount, status")
-        .eq("status", "approved")
+        .from("purchase_orders")
+        .select("id, po_number, customer_name, customer_company, total_amount, po_date, status")
+        .eq("status", "received")
         .order("created_at", { ascending: false });
       
       if (error) throw error;
@@ -609,9 +608,9 @@ export function InternationalTransferForm({
                       </FormControl>
                       <SelectContent>
                         {purchaseOrders?.map((po) => (
-                          <SelectItem key={po.id} value={po.quotation_number}>
+                          <SelectItem key={po.id} value={po.po_number}>
                             <div className="flex flex-col text-left">
-                              <span className="font-medium">{po.quotation_number}</span>
+                              <span className="font-medium">{po.po_number}</span>
                               <span className="text-sm text-muted-foreground">
                                 {po.customer_name} • ฿{po.total_amount?.toLocaleString()}
                               </span>

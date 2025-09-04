@@ -34,6 +34,7 @@ import ReceiptForm from "./pages/ReceiptForm";
 import PaymentRecords from "./pages/PaymentRecords";
 import InternationalTransfer from "./pages/InternationalTransfer";
 import SupplierManagement from "./pages/SupplierManagement";
+import PurchaseOrders from "./pages/PurchaseOrders";
 
 const queryClient = new QueryClient();
 
@@ -197,6 +198,11 @@ const App = () => (
                 <Layout>
                   <SupplierManagement />
                 </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/purchase-orders" element={
+              <ProtectedRoute>
+                <PurchaseOrders />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
