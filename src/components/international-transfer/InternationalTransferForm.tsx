@@ -1208,153 +1208,263 @@ export function InternationalTransferForm({
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <FileUp className="h-5 w-5" />
-                    เอกสารแนบ (PI, CI, AWB)
+                    เอกสารแนบ
                   </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    เอกสารที่มี * เป็นเอกสารบังคับ
+                  </p>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* PI Document */}
+                <CardContent className="space-y-6">
+                  {/* Transfer Request Document - Move to top and make required */}
+                  <div className="space-y-2">
+                    <Label htmlFor="transfer-request-upload" className="text-base font-medium text-red-600">
+                      ใบคำขอโอนเงินต่างประเทศ * (บังคับ - อาจมีมากกว่า 1 แผ่น)
+                    </Label>
+                    {uploadingStates.transferRequest ? (
+                      <div className="flex items-center justify-center p-4 border rounded-lg bg-blue-50 border-blue-200">
+                        <div className="flex items-center gap-2 text-sm text-blue-700">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
+                          กำลังอัปโหลดไป Google Drive...
+                        </div>
+                      </div>
+                    ) : uploadedDocuments.transferRequest ? (
+                      <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
+                        <div className="flex items-center gap-2 text-sm text-green-700">
+                          <FileUp className="h-4 w-4" />
+                          ใบคำขอโอนเงินต่างประเทศ อัปโหลดแล้ว
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => window.open(uploadedDocuments.transferRequest!, '_blank')}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            เปิดใน Drive
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => removeDocument('transferRequest')}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Input
+                          id="transfer-request-upload"
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, 'transferRequest');
+                          }}
+                          disabled={uploadingStates.transferRequest}
+                          className="border-red-300 focus:border-red-500"
+                        />
+                        <p className="text-xs text-red-600">
+                          * เอกสารบังคับ: หากมีหลายหน้า กรุณาอัปโหลดทีละไฟล์ หรือรวมเป็น PDF
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <hr className="my-6 border-gray-200" />
+
+                  {/* Required Documents Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-red-600">เอกสารบังคับ *</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* PI Document */}
+                      <div className="space-y-2">
+                        <Label htmlFor="pi-upload" className="text-red-600 font-medium">
+                          Proforma Invoice (PI) *
+                        </Label>
+                        {uploadingStates.pi ? (
+                          <div className="flex items-center justify-center p-4 border rounded-lg bg-blue-50 border-blue-200">
+                            <div className="flex items-center gap-2 text-sm text-blue-700">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
+                              กำลังอัปโหลดไป Google Drive...
+                            </div>
+                          </div>
+                        ) : uploadedDocuments.pi ? (
+                          <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
+                            <div className="flex items-center gap-2 text-sm text-green-700">
+                              <FileUp className="h-4 w-4" />
+                              PI อัปโหลดแล้ว
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(uploadedDocuments.pi!, '_blank')}
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                เปิดใน Drive
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => removeDocument('pi')}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <Input
+                            id="pi-upload"
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleDocumentUpload(file, 'pi');
+                            }}
+                            disabled={uploadingStates.pi}
+                            className="border-red-300 focus:border-red-500"
+                          />
+                        )}
+                      </div>
+
+                      {/* CI Document */}
+                      <div className="space-y-2">
+                        <Label htmlFor="ci-upload" className="text-red-600 font-medium">
+                          Commercial Invoice (CI) *
+                        </Label>
+                        {uploadingStates.ci ? (
+                          <div className="flex items-center justify-center p-4 border rounded-lg bg-blue-50 border-blue-200">
+                            <div className="flex items-center gap-2 text-sm text-blue-700">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
+                              กำลังอัปโหลดไป Google Drive...
+                            </div>
+                          </div>
+                        ) : uploadedDocuments.ci ? (
+                          <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
+                            <div className="flex items-center gap-2 text-sm text-green-700">
+                              <FileUp className="h-4 w-4" />
+                              CI อัปโหลดแล้ว
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(uploadedDocuments.ci!, '_blank')}
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                เปิดใน Drive
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => removeDocument('ci')}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <Input
+                            id="ci-upload"
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleDocumentUpload(file, 'ci');
+                            }}
+                            disabled={uploadingStates.ci}
+                            className="border-red-300 focus:border-red-500"
+                          />
+                        )}
+                      </div>
+
+                      {/* AWB Document */}
+                      <div className="space-y-2">
+                        <Label htmlFor="awb-upload" className="text-red-600 font-medium">
+                          Air Waybill (AWB) *
+                        </Label>
+                        {uploadingStates.awb ? (
+                          <div className="flex items-center justify-center p-4 border rounded-lg bg-blue-50 border-blue-200">
+                            <div className="flex items-center gap-2 text-sm text-blue-700">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
+                              กำลังอัปโหลดไป Google Drive...
+                            </div>
+                          </div>
+                        ) : uploadedDocuments.awb ? (
+                          <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
+                            <div className="flex items-center gap-2 text-sm text-green-700">
+                              <FileUp className="h-4 w-4" />
+                              AWB อัปโหลดแล้ว
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(uploadedDocuments.awb!, '_blank')}
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                เปิดใน Drive
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => removeDocument('awb')}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <Input
+                            id="awb-upload"
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleDocumentUpload(file, 'awb');
+                            }}
+                            disabled={uploadingStates.awb}
+                            className="border-red-300 focus:border-red-500"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr className="my-6 border-gray-200" />
+
+                  {/* Optional Documents Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-gray-700">เอกสารเสริม (ถ้ามี)</h3>
+                    
+                    {/* Packing List */}
                     <div className="space-y-2">
-                      <Label htmlFor="pi-upload">Proforma Invoice (PI)</Label>
-                      {uploadingStates.pi ? (
+                      <Label htmlFor="packing-upload" className="text-gray-700">
+                        Packing List (ถ้ามี)
+                      </Label>
+                      {uploadingStates.packingList ? (
                         <div className="flex items-center justify-center p-4 border rounded-lg bg-blue-50 border-blue-200">
                           <div className="flex items-center gap-2 text-sm text-blue-700">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
                             กำลังอัปโหลดไป Google Drive...
                           </div>
                         </div>
-                      ) : uploadedDocuments.pi ? (
+                      ) : uploadedDocuments.packingList ? (
                         <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
                           <div className="flex items-center gap-2 text-sm text-green-700">
                             <FileUp className="h-4 w-4" />
-                            PI Document uploaded to Google Drive
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => window.open(uploadedDocuments.pi!, '_blank')}
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              เปิดใน Drive
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => removeDocument('pi')}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Input
-                          id="pi-upload"
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleDocumentUpload(file, 'pi');
-                          }}
-                          disabled={uploadingStates.pi}
-                        />
-                      )}
-                    </div>
-
-                    {/* CI Document */}
-                    <div className="space-y-2">
-                      <Label htmlFor="ci-upload">Commercial Invoice (CI)</Label>
-                      {uploadedDocuments.ci ? (
-                        <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
-                          <div className="flex items-center gap-2 text-sm text-green-700">
-                            <FileUp className="h-4 w-4" />
-                            CI Document uploaded
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => window.open(uploadedDocuments.ci!, '_blank')}
-                            >
-                              ดู
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => removeDocument('ci')}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Input
-                          id="ci-upload"
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleDocumentUpload(file, 'ci');
-                          }}
-                        />
-                      )}
-                    </div>
-
-                    {/* AWB Document */}
-                    <div className="space-y-2">
-                      <Label htmlFor="awb-upload">Air Waybill (AWB)</Label>
-                      {uploadedDocuments.awb ? (
-                        <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
-                          <div className="flex items-center gap-2 text-sm text-green-700">
-                            <FileUp className="h-4 w-4" />
-                            AWB Document uploaded
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => window.open(uploadedDocuments.awb!, '_blank')}
-                            >
-                              ดู
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => removeDocument('awb')}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Input
-                          id="awb-upload"
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleDocumentUpload(file, 'awb');
-                          }}
-                        />
-                      )}
-                    </div>
-
-                    {/* Packing List */}
-                    <div className="space-y-2">
-                      <Label htmlFor="packing-upload">Packing List (ถ้ามี)</Label>
-                      {uploadedDocuments.packingList ? (
-                        <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
-                          <div className="flex items-center gap-2 text-sm text-green-700">
-                            <FileUp className="h-4 w-4" />
-                            Packing List uploaded
+                            Packing List อัปโหลดแล้ว
                           </div>
                           <div className="flex gap-1">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => window.open(uploadedDocuments.packingList!, '_blank')}
+                              className="text-blue-600 hover:text-blue-700"
                             >
-                              ดู
+                              เปิดใน Drive
                             </Button>
                             <Button
                               size="sm"
@@ -1374,70 +1484,43 @@ export function InternationalTransferForm({
                             const file = e.target.files?.[0];
                             if (file) handleDocumentUpload(file, 'packingList');
                           }}
+                          disabled={uploadingStates.packingList}
                         />
                       )}
                     </div>
-
-                    {/* Transfer Request Document */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="transfer-request-upload">ใบคำขอโอนเงินต่างประเทศ *</Label>
-                      {uploadedDocuments.transferRequest ? (
-                        <div className="flex items-center justify-between p-2 border rounded-lg bg-green-50 border-green-200">
-                          <div className="flex items-center gap-2 text-sm text-green-700">
-                            <FileUp className="h-4 w-4" />
-                            ใบคำขอโอนเงินต่างประเทศ uploaded
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => window.open(uploadedDocuments.transferRequest!, '_blank')}
-                            >
-                              ดู
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => removeDocument('transferRequest')}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Input
-                          id="transfer-request-upload"
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleDocumentUpload(file, 'transferRequest');
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    <strong>📁 Google Drive Integration:</strong> ไฟล์จะถูกอัปโหลดไป Google Drive และสามารถแชร์ได้<br/>
-                    <strong>หมายเหตุ:</strong> ใบคำขอโอนเงินต่างประเทศเป็นเอกสารบังคับที่ต้องแนบ<br/>
-                    รองรับไฟล์: PDF, JPG, PNG, DOC, DOCX (ขนาดไม่เกิน 10MB)
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-              ยกเลิก
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "กำลังบันทึก..." : editingRequest ? "อัปเดต" : "สร้างคำขอ"}
-            </Button>
-          </div>
-        </form>
-      </Form>
+              {/* Submit Section */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onCancel}
+                  className="flex-1 sm:flex-initial"
+                >
+                  ยกเลิก
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="flex-1 sm:flex-initial"
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      กำลังบันทึก...
+                    </div>
+                  ) : (
+                    editingRequest ? 'อัปเดตคำขอ' : 'สร้างคำขอ'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
+      </div>
     </div>
   );
-}
+};
