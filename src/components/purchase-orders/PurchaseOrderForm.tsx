@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 const purchaseOrderSchema = z.object({
   po_number: z.string().optional(),
+  quotation_id: z.string().optional(),
   customer_id: z.string().min(1, "กรุณาเลือกลูกค้า"),
   customer_name: z.string().min(1, "กรุณากรอกชื่อลูกค้า"),
   customer_company: z.string().optional(),
@@ -111,6 +112,25 @@ export function PurchaseOrderForm({
         .select("id, name")
         .eq("customer_type", "ลูกค้า")
         .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Query for recent quotations (last 2 months)
+  const { data: quotations } = useQuery({
+    queryKey: ["recent-quotations"],
+    queryFn: async () => {
+      const twoMonthsAgo = new Date();
+      twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+      
+      const { data, error } = await supabase
+        .from("quotations")
+        .select("id, quotation_number, customer_name, total_amount, quotation_date, status")
+        .gte("quotation_date", twoMonthsAgo.toISOString().split('T')[0])
+        .in("status", ["approved", "pending"])
+        .order("quotation_date", { ascending: false });
+      
       if (error) throw error;
       return data || [];
     },
@@ -288,6 +308,36 @@ export function PurchaseOrderForm({
                         {customers?.map((customer) => (
                           <SelectItem key={customer.id} value={customer.id}>
                             {customer.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="quotation_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ใบเสนอราคาอ้างอิง (2 เดือนล่าสุด)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="เลือกใบเสนอราคา" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {quotations?.map((quotation) => (
+                          <SelectItem key={quotation.id} value={quotation.id}>
+                            <div className="flex flex-col text-left">
+                              <span className="font-medium">{quotation.quotation_number}</span>
+                              <span className="text-sm text-muted-foreground">
+                                {quotation.customer_name} • ฿{quotation.total_amount?.toLocaleString()} • {quotation.status}
+                              </span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
