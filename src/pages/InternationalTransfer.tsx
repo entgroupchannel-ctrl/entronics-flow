@@ -77,13 +77,39 @@ export default function InternationalTransfer() {
     setActiveTab("form");
   };
 
+  const handleDuplicateRequest = (request) => {
+    // Create a copy of the request without ID and status info
+    const duplicatedRequest = {
+      ...request,
+      id: null, // Remove ID to create new request
+      transfer_number: null, // Will be generated automatically
+      status: "draft", // Reset to draft status
+      requested_by: null, // Will be set by form
+      created_at: null,
+      updated_at: null,
+      approved_by: null,
+      approved_at: null,
+      finance_approved_by: null,
+      finance_approved_at: null,
+      rejection_reason: null,
+      transfer_executed_at: null,
+      transfer_reference_number: null,
+      actual_transfer_amount: null,
+      actual_exchange_rate: null,
+      actual_transfer_date: null,
+    };
+    
+    setEditingRequest(duplicatedRequest);
+    setActiveTab("form");
+  };
+
   const handleFormSuccess = () => {
     refetch();
     setActiveTab("list");
     setEditingRequest(null);
     toast({
       title: "สำเร็จ",
-      description: editingRequest ? "แก้ไขคำขอโอนเงินเรียบร้อยแล้ว" : "สร้างคำขอโอนเงินเรียบร้อยแล้ว",
+      description: editingRequest?.id ? "แก้ไขคำขอโอนเงินเรียบร้อยแล้ว" : "สร้างคำขอโอนเงินเรียบร้อยแล้ว",
     });
   };
 
@@ -165,6 +191,7 @@ export default function InternationalTransfer() {
                 requests={transferRequests || []}
                 isLoading={isLoading}
                 onEdit={handleEditRequest}
+                onDuplicate={handleDuplicateRequest}
                 onRefresh={refetch}
               />
             </TabsContent>
@@ -173,10 +200,13 @@ export default function InternationalTransfer() {
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    {editingRequest ? "แก้ไขคำขอโอนเงิน" : "สร้างคำขอโอนเงินใหม่"}
+                    {editingRequest?.id ? "แก้ไขคำขอโอนเงิน" : "สร้างคำขอโอนเงินใหม่"}
                   </CardTitle>
                   <CardDescription>
-                    กรอกข้อมูลสำหรับการโอนเงินไปยัง Supplier ต่างประเทศ
+                    {editingRequest && !editingRequest.id ? 
+                      "สร้างคำขอใหม่จากข้อมูลที่ถูกปฏิเสธ - กรุณาแก้ไขข้อมูลที่จำเป็น" : 
+                      "กรอกข้อมูลสำหรับการโอนเงินไปยัง Supplier ต่างประเทศ"
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

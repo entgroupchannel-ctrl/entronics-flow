@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
-import { MoreHorizontal, Eye, Edit, Trash2, Download, Check, X } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2, Download, Check, X, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,7 @@ interface TransferRequestsListProps {
   requests: TransferRequest[];
   isLoading: boolean;
   onEdit: (request: TransferRequest) => void;
+  onDuplicate: (request: TransferRequest) => void;
   onRefresh: () => void;
 }
 
@@ -64,6 +65,7 @@ export function TransferRequestsList({
   requests,
   isLoading,
   onEdit,
+  onDuplicate,
   onRefresh,
 }: TransferRequestsListProps) {
   const { toast } = useToast();
@@ -356,6 +358,19 @@ export function TransferRequestsList({
                             </Button>
                           )}
                           
+                          {/* Duplicate button for rejected requests */}
+                          {request.status === 'rejected' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => onDuplicate(request)}
+                              className="mr-2"
+                            >
+                              <Copy className="h-4 w-4 mr-1" />
+                              สร้างซ้ำ
+                            </Button>
+                          )}
+                          
                           {/* More actions dropdown */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -368,6 +383,13 @@ export function TransferRequestsList({
                               <Edit className="mr-2 h-4 w-4" />
                               แก้ไข
                             </DropdownMenuItem>
+                            
+                            {request.status === 'rejected' && (
+                              <DropdownMenuItem onClick={() => onDuplicate(request)}>
+                                <Copy className="mr-2 h-4 w-4" />
+                                สร้างซ้ำ
+                              </DropdownMenuItem>
+                            )}
                             
                             {request.status === 'pending' && (
                               <>
