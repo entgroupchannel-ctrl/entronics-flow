@@ -94,6 +94,13 @@ export type Database = {
             referencedColumns: ["customer_id"]
           },
           {
+            foreignKeyName: "activities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "activities_opportunity_id_fkey"
             columns: ["opportunity_id"]
             isOneToOne: false
@@ -244,6 +251,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "cart_items_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       content_blocks: {
@@ -375,6 +389,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "credit_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       customer_contacts: {
@@ -438,6 +459,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "customer_contacts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       customer_credit_profiles: {
@@ -498,6 +526,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "customer_credit_profiles_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       customer_loyalty_profiles: {
@@ -555,6 +590,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "customer_loyalty_profiles_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       customer_reward_usage: {
@@ -605,39 +647,65 @@ export type Database = {
           bank_address: string | null
           bank_branch: string | null
           bank_name: string | null
+          banking_correspondent_bank: string | null
+          banking_iban: string | null
+          banking_routing_number: string | null
+          banking_swift_code: string | null
+          business_license_url: string | null
           citizen_id: string | null
+          compliance_status: string | null
+          contact_email_finance: string | null
           contact_person: string | null
+          contact_person_finance: string | null
+          contact_phone_finance: string | null
           contact_position: string | null
           contact_type: string | null
           created_at: string
           created_by: string | null
+          credit_limit: number | null
           customer_type: string
+          delivery_rating: number | null
           district: string | null
           email: string | null
           facebook: string | null
           hq_branch: string | null
           id: string
           is_key_account: boolean | null
+          is_preferred_supplier: boolean | null
           key_account_notes: string | null
           key_account_tier: string | null
           key_account_weight: number | null
           last_contact_date: string | null
+          last_order_date: string | null
           last_synced_at: string | null
           line_id: string | null
           minimum_contact_frequency: number | null
+          minimum_order_amount: number | null
           name: string
           next_required_contact: string | null
           notes: string | null
+          payment_terms: string | null
           person_type: string | null
           phone: string | null
           postal_code: string | null
+          preferred_payment_method: string | null
+          price_rating: number | null
           province: string | null
+          quality_rating: number | null
           source_system: string | null
           status: string | null
           sub_district: string | null
+          supplier_category: string | null
+          supplier_code: string | null
+          supplier_country: string | null
+          supplier_currency: string | null
+          supplier_notes: string | null
           swift_code: string | null
           sync_status: string | null
+          tax_certificate_url: string | null
           tax_id: string | null
+          total_orders_count: number | null
+          total_orders_value: number | null
           updated_at: string
           website: string | null
         }
@@ -649,39 +717,65 @@ export type Database = {
           bank_address?: string | null
           bank_branch?: string | null
           bank_name?: string | null
+          banking_correspondent_bank?: string | null
+          banking_iban?: string | null
+          banking_routing_number?: string | null
+          banking_swift_code?: string | null
+          business_license_url?: string | null
           citizen_id?: string | null
+          compliance_status?: string | null
+          contact_email_finance?: string | null
           contact_person?: string | null
+          contact_person_finance?: string | null
+          contact_phone_finance?: string | null
           contact_position?: string | null
           contact_type?: string | null
           created_at?: string
           created_by?: string | null
+          credit_limit?: number | null
           customer_type?: string
+          delivery_rating?: number | null
           district?: string | null
           email?: string | null
           facebook?: string | null
           hq_branch?: string | null
           id?: string
           is_key_account?: boolean | null
+          is_preferred_supplier?: boolean | null
           key_account_notes?: string | null
           key_account_tier?: string | null
           key_account_weight?: number | null
           last_contact_date?: string | null
+          last_order_date?: string | null
           last_synced_at?: string | null
           line_id?: string | null
           minimum_contact_frequency?: number | null
+          minimum_order_amount?: number | null
           name: string
           next_required_contact?: string | null
           notes?: string | null
+          payment_terms?: string | null
           person_type?: string | null
           phone?: string | null
           postal_code?: string | null
+          preferred_payment_method?: string | null
+          price_rating?: number | null
           province?: string | null
+          quality_rating?: number | null
           source_system?: string | null
           status?: string | null
           sub_district?: string | null
+          supplier_category?: string | null
+          supplier_code?: string | null
+          supplier_country?: string | null
+          supplier_currency?: string | null
+          supplier_notes?: string | null
           swift_code?: string | null
           sync_status?: string | null
+          tax_certificate_url?: string | null
           tax_id?: string | null
+          total_orders_count?: number | null
+          total_orders_value?: number | null
           updated_at?: string
           website?: string | null
         }
@@ -693,39 +787,65 @@ export type Database = {
           bank_address?: string | null
           bank_branch?: string | null
           bank_name?: string | null
+          banking_correspondent_bank?: string | null
+          banking_iban?: string | null
+          banking_routing_number?: string | null
+          banking_swift_code?: string | null
+          business_license_url?: string | null
           citizen_id?: string | null
+          compliance_status?: string | null
+          contact_email_finance?: string | null
           contact_person?: string | null
+          contact_person_finance?: string | null
+          contact_phone_finance?: string | null
           contact_position?: string | null
           contact_type?: string | null
           created_at?: string
           created_by?: string | null
+          credit_limit?: number | null
           customer_type?: string
+          delivery_rating?: number | null
           district?: string | null
           email?: string | null
           facebook?: string | null
           hq_branch?: string | null
           id?: string
           is_key_account?: boolean | null
+          is_preferred_supplier?: boolean | null
           key_account_notes?: string | null
           key_account_tier?: string | null
           key_account_weight?: number | null
           last_contact_date?: string | null
+          last_order_date?: string | null
           last_synced_at?: string | null
           line_id?: string | null
           minimum_contact_frequency?: number | null
+          minimum_order_amount?: number | null
           name?: string
           next_required_contact?: string | null
           notes?: string | null
+          payment_terms?: string | null
           person_type?: string | null
           phone?: string | null
           postal_code?: string | null
+          preferred_payment_method?: string | null
+          price_rating?: number | null
           province?: string | null
+          quality_rating?: number | null
           source_system?: string | null
           status?: string | null
           sub_district?: string | null
+          supplier_category?: string | null
+          supplier_code?: string | null
+          supplier_country?: string | null
+          supplier_currency?: string | null
+          supplier_notes?: string | null
           swift_code?: string | null
           sync_status?: string | null
+          tax_certificate_url?: string | null
           tax_id?: string | null
+          total_orders_count?: number | null
+          total_orders_value?: number | null
           updated_at?: string
           website?: string | null
         }
@@ -1433,6 +1553,13 @@ export type Database = {
             referencedColumns: ["customer_id"]
           },
           {
+            foreignKeyName: "international_transfer_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "international_transfer_requests_supplier_id_fkey"
             columns: ["supplier_id"]
             isOneToOne: false
@@ -1445,6 +1572,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "international_transfer_requests_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1664,6 +1798,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "key_account_activities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       key_account_kpis: {
@@ -1747,6 +1888,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "key_account_kpis_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1907,6 +2055,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "loyalty_points_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       loyalty_redemptions: {
@@ -1969,6 +2124,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "loyalty_redemptions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "loyalty_redemptions_reward_id_fkey"
@@ -2410,6 +2572,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "opportunities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       page_layouts: {
@@ -2521,6 +2690,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "partner_product_registrations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       partner_shared_documents: {
@@ -2586,6 +2762,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "partner_shared_documents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2765,6 +2948,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "product_inquiries_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "product_inquiries_opportunity_id_fkey"
@@ -3383,6 +3573,13 @@ export type Database = {
             referencedColumns: ["customer_id"]
           },
           {
+            foreignKeyName: "quotations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "quotations_parent_quotation_id_fkey"
             columns: ["parent_quotation_id"]
             isOneToOne: false
@@ -3549,6 +3746,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "receipts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "receipts_invoice_id_fkey"
@@ -4133,6 +4337,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "service_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       service_status_history: {
@@ -4279,6 +4490,13 @@ export type Database = {
             referencedRelation: "key_account_performance"
             referencedColumns: ["customer_id"]
           },
+          {
+            foreignKeyName: "service_tickets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
         ]
       }
       special_bonuses: {
@@ -4415,6 +4633,33 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       supplier_documents: {
         Row: {
           created_at: string
@@ -4543,6 +4788,89 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_payment_history: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          exchange_rate: number | null
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string | null
+          reference_number: string | null
+          status: string | null
+          supplier_id: string | null
+          thb_amount: number | null
+          transfer_request_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          exchange_rate?: number | null
+          id?: string
+          notes?: string | null
+          payment_date: string
+          payment_method?: string | null
+          reference_number?: string | null
+          status?: string | null
+          supplier_id?: string | null
+          thb_amount?: number | null
+          transfer_request_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          exchange_rate?: number | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string | null
+          reference_number?: string | null
+          status?: string | null
+          supplier_id?: string | null
+          thb_amount?: number | null
+          transfer_request_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_payment_history_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_payment_history_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "key_account_performance"
+            referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "supplier_payment_history_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_payment_history_transfer_request_id_fkey"
+            columns: ["transfer_request_id"]
+            isOneToOne: false
+            referencedRelation: "international_transfer_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -5564,6 +5892,37 @@ export type Database = {
           revenue_actual: number | null
           revenue_target: number | null
           sales_person_id: string | null
+        }
+        Relationships: []
+      }
+      supplier_summary: {
+        Row: {
+          bank_account: string | null
+          bank_name: string | null
+          banking_swift_code: string | null
+          compliance_status: string | null
+          contact_email_finance: string | null
+          contact_person: string | null
+          contact_person_finance: string | null
+          created_at: string | null
+          delivery_rating: number | null
+          email: string | null
+          id: string | null
+          is_preferred_supplier: boolean | null
+          last_order_date: string | null
+          name: string | null
+          phone: string | null
+          price_rating: number | null
+          quality_rating: number | null
+          recent_transfer_amount: number | null
+          recent_transfer_count: number | null
+          supplier_category: string | null
+          supplier_code: string | null
+          supplier_country: string | null
+          supplier_currency: string | null
+          total_orders_count: number | null
+          total_orders_value: number | null
+          updated_at: string | null
         }
         Relationships: []
       }
