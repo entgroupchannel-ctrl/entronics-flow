@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Search, X, CheckSquare, Square } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const transferFormSchema = z.object({
@@ -61,6 +62,8 @@ export function InternationalTransferForm({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPOs, setSelectedPOs] = useState<string[]>([]);
+  const [searchPO, setSearchPO] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const form = useForm<TransferFormData>({
     resolver: zodResolver(transferFormSchema),
@@ -192,6 +195,47 @@ export function InternationalTransferForm({
       form.setValue("payment_purpose", "");
     }
   };
+
+  const handleSelectAll = () => {
+    const allPONumbers = filteredPOs?.map(po => po.po_number) || [];
+    setSelectedPOs(allPONumbers);
+    
+    // Update form values
+    form.setValue("purchase_order_number", allPONumbers.join(", "));
+    const totalAmount = filteredPOs?.reduce((sum, po) => sum + (po.total_amount || 0), 0) || 0;
+    form.setValue("transfer_amount", totalAmount);
+    
+    if (filteredPOs && filteredPOs.length > 0) {
+      const purpose = `ชำระค่าสินค้า PO: ${allPONumbers.join(", ")}`;
+      form.setValue("payment_purpose", purpose);
+    }
+  };
+
+  const handleClearAll = () => {
+    setSelectedPOs([]);
+    form.setValue("purchase_order_number", "");
+    form.setValue("transfer_amount", 0);
+    form.setValue("payment_purpose", "");
+  };
+
+  const removePO = (poNumber: string) => {
+    handlePOSelection(poNumber, false);
+  };
+
+  // Filter POs based on search and status
+  const filteredPOs = purchaseOrders?.filter(po => {
+    const matchesSearch = !searchPO || 
+      po.po_number.toLowerCase().includes(searchPO.toLowerCase()) ||
+      po.customer_name.toLowerCase().includes(searchPO.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || po.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  // Calculate summary
+  const selectedPOData = purchaseOrders?.filter(po => selectedPOs.includes(po.po_number)) || [];
+  const totalSelectedAmount = selectedPOData.reduce((sum, po) => sum + (po.total_amount || 0), 0);
 
   // Function to fetch exchange rate
   const fetchExchangeRate = async (currency: string) => {
@@ -408,36 +452,151 @@ export function InternationalTransferForm({
                   <CardTitle className="text-lg">วัตถุประสงค์การชำระ</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Multiple PO Selection */}
-                  <div className="space-y-3">
-                    <FormLabel>เลือก Purchase Orders</FormLabel>
-                    <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
-                      {purchaseOrders?.map((po) => (
-                        <div key={po.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
-                          <Checkbox
-                            id={po.id}
-                            checked={selectedPOs.includes(po.po_number)}
-                            onCheckedChange={(checked) => handlePOSelection(po.po_number, checked as boolean)}
-                          />
-                          <label htmlFor={po.id} className="flex-1 cursor-pointer">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <span className="font-medium text-sm">{po.po_number}</span>
-                                <p className="text-xs text-muted-foreground">{po.customer_name}</p>
-                              </div>
-                              <span className="text-sm font-medium">
-                                ฿{po.total_amount?.toLocaleString()}
-                              </span>
-                            </div>
-                          </label>
-                        </div>
-                      ))}
+                  {/* Enhanced PO Selection */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="text-base font-medium">เลือก Purchase Orders</FormLabel>
+                      {selectedPOs.length > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          เลือกแล้ว {selectedPOs.length} PO
+                        </Badge>
+                      )}
                     </div>
+
+                    {/* Search and Filter */}
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <Input
+                          placeholder="ค้นหา PO หรือชื่อลูกค้า..."
+                          value={searchPO}
+                          onChange={(e) => setSearchPO(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                      <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">ทั้งหมด</SelectItem>
+                          <SelectItem value="confirmed">Confirmed</SelectItem>
+                          <SelectItem value="sent">Sent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Bulk Actions */}
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSelectAll}
+                        disabled={!filteredPOs?.length}
+                      >
+                        <CheckSquare className="w-4 h-4 mr-1" />
+                        เลือกทั้งหมด
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleClearAll}
+                        disabled={selectedPOs.length === 0}
+                      >
+                        <Square className="w-4 h-4 mr-1" />
+                        ยกเลิกทั้งหมด
+                      </Button>
+                    </div>
+
+                    {/* Selected POs Summary */}
                     {selectedPOs.length > 0 && (
-                      <div className="text-sm text-muted-foreground">
-                        เลือกแล้ว: {selectedPOs.length} PO
+                      <div className="bg-muted/50 rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">PO ที่เลือก</span>
+                          <span className="text-sm font-bold text-primary">
+                            รวม: ฿{totalSelectedAmount.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {selectedPOs.map((poNumber) => (
+                            <Badge key={poNumber} variant="default" className="text-xs">
+                              {poNumber}
+                              <button
+                                type="button"
+                                onClick={() => removePO(poNumber)}
+                                className="ml-1 hover:bg-destructive rounded-full"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
+
+                    {/* PO Table */}
+                    <div className="border rounded-lg">
+                      <div className="max-h-64 overflow-y-auto">
+                        <table className="w-full text-sm">
+                          <thead className="sticky top-0 bg-muted/50 border-b">
+                            <tr>
+                              <th className="text-left p-3 w-12"></th>
+                              <th className="text-left p-3">PO Number</th>
+                              <th className="text-left p-3">ลูกค้า</th>
+                              <th className="text-left p-3">สถานะ</th>
+                              <th className="text-right p-3">มูลค่า</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredPOs?.map((po) => (
+                              <tr key={po.id} className="border-b hover:bg-muted/30">
+                                <td className="p-3">
+                                  <Checkbox
+                                    checked={selectedPOs.includes(po.po_number)}
+                                    onCheckedChange={(checked) => 
+                                      handlePOSelection(po.po_number, checked as boolean)
+                                    }
+                                  />
+                                </td>
+                                <td className="p-3">
+                                  <div className="font-medium">{po.po_number}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {format(new Date(po.po_date), "dd/MM/yyyy")}
+                                  </div>
+                                </td>
+                                <td className="p-3">
+                                  <div>{po.customer_name}</div>
+                                  {po.customer_company && (
+                                    <div className="text-xs text-muted-foreground">
+                                      {po.customer_company}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="p-3">
+                                  <Badge 
+                                    variant={po.status === 'confirmed' ? 'default' : 'secondary'}
+                                    className="text-xs"
+                                  >
+                                    {po.status === 'confirmed' ? 'ยืนยันแล้ว' : 'ส่งแล้ว'}
+                                  </Badge>
+                                </td>
+                                <td className="p-3 text-right font-medium">
+                                  ฿{po.total_amount?.toLocaleString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        
+                        {filteredPOs?.length === 0 && (
+                          <div className="text-center py-8 text-muted-foreground">
+                            {searchPO ? 'ไม่พบ PO ที่ค้นหา' : 'ไม่มี PO ที่สามารถเลือกได้'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   <FormField
