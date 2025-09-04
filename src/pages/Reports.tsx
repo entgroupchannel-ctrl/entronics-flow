@@ -1,29 +1,21 @@
-import React, { useState } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Download, Calendar, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Reports = () => {
-  const [currentView, setCurrentView] = useState('reports');
-  const [isCompanyInfoOpen, setIsCompanyInfoOpen] = useState(false);
-
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar onMenuClick={setCurrentView} currentView={currentView} onLogoClick={() => setIsCompanyInfoOpen(true)} />
-      
-      <div className="flex-1 flex flex-col">
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">รายงาน / Reports</h1>
-              <p className="text-muted-foreground">สร้างและจัดการรายงาน</p>
-            </div>
-            <Button>
-              <Download className="h-4 w-4 mr-2" />
-              ส่งออกรายงาน
-            </Button>
-          </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">รายงาน / Reports</h1>
+          <p className="text-muted-foreground">สร้างและจัดการรายงาน</p>
+        </div>
+        <Button>
+          <Download className="h-4 w-4 mr-2" />
+          ส่งออกรายงาน
+        </Button>
+      </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
@@ -185,8 +177,6 @@ const Reports = () => {
               </div>
             </CardContent>
           </Card>
-        </main>
-      </div>
     </div>
   );
 };
