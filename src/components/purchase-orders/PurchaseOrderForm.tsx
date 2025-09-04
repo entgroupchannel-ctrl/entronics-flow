@@ -370,6 +370,7 @@ export function PurchaseOrderForm({
                         // Auto-populate fields from selected quotation
                         const selectedQuotation = quotations?.find(q => q.id === value);
                         if (selectedQuotation) {
+                          form.setValue("customer_id", selectedQuotation.customer_id || "");
                           form.setValue("customer_name", selectedQuotation.customer_name);
                           form.setValue("total_amount", selectedQuotation.total_amount || 0);
                           // Set delivery address from customer address
