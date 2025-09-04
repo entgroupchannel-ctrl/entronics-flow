@@ -128,18 +128,44 @@ export function InternationalTransferForm({
     },
   });
 
-  // Query for purchase orders
+  // Query for purchase orders with usage check
   const { data: purchaseOrders } = useQuery({
     queryKey: ["purchase-orders"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get all POs
+      const { data: pos, error: poError } = await supabase
         .from("purchase_orders")
         .select("id, po_number, customer_name, customer_company, total_amount, po_date, status")
         .in("status", ["confirmed", "sent"])
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
-      return data || [];
+      if (poError) throw poError;
+
+      // Then get used PO numbers from transfer requests (excluding cancelled/rejected)
+      const { data: transferRequests, error: transferError } = await supabase
+        .from("international_transfer_requests")
+        .select("purchase_order_number, status")
+        .not("status", "in", '("cancelled","rejected")');
+      
+      if (transferError) throw transferError;
+
+      // Extract used PO numbers
+      const usedPONumbers = new Set<string>();
+      transferRequests?.forEach(request => {
+        if (request.purchase_order_number) {
+          // Handle multiple POs in one request (comma separated)
+          const poNumbers = request.purchase_order_number.split(',').map(po => po.trim());
+          poNumbers.forEach(po => usedPONumbers.add(po));
+        }
+      });
+
+      // Add usage status to POs
+      const posWithUsage = pos?.map(po => ({
+        ...po,
+        isUsed: usedPONumbers.has(po.po_number)
+      })) || [];
+
+      return posWithUsage;
     },
   });
 
@@ -197,15 +223,16 @@ export function InternationalTransferForm({
   };
 
   const handleSelectAll = () => {
-    const allPONumbers = filteredPOs?.map(po => po.po_number) || [];
+    const availablePOs = filteredPOs?.filter(po => !po.isUsed) || [];
+    const allPONumbers = availablePOs.map(po => po.po_number);
     setSelectedPOs(allPONumbers);
     
     // Update form values
     form.setValue("purchase_order_number", allPONumbers.join(", "));
-    const totalAmount = filteredPOs?.reduce((sum, po) => sum + (po.total_amount || 0), 0) || 0;
+    const totalAmount = availablePOs.reduce((sum, po) => sum + (po.total_amount || 0), 0);
     form.setValue("transfer_amount", totalAmount);
     
-    if (filteredPOs && filteredPOs.length > 0) {
+    if (availablePOs.length > 0) {
       const purpose = `ชำระค่าสินค้า PO: ${allPONumbers.join(", ")}`;
       form.setValue("payment_purpose", purpose);
     }
@@ -232,6 +259,10 @@ export function InternationalTransferForm({
     
     return matchesSearch && matchesStatus;
   });
+
+  // Separate available and used POs
+  const availablePOs = filteredPOs?.filter(po => !po.isUsed) || [];
+  const usedPOs = filteredPOs?.filter(po => po.isUsed) || [];
 
   // Calculate summary
   const selectedPOData = purchaseOrders?.filter(po => selectedPOs.includes(po.po_number)) || [];
@@ -493,10 +524,10 @@ export function InternationalTransferForm({
                         variant="outline"
                         size="sm"
                         onClick={handleSelectAll}
-                        disabled={!filteredPOs?.length}
+                        disabled={availablePOs.length === 0}
                       >
                         <CheckSquare className="w-4 h-4 mr-1" />
-                        เลือกทั้งหมด
+                        เลือกที่ใช้ได้ ({availablePOs.length})
                       </Button>
                       <Button
                         type="button"
@@ -547,10 +578,12 @@ export function InternationalTransferForm({
                               <th className="text-left p-3">ลูกค้า</th>
                               <th className="text-left p-3">สถานะ</th>
                               <th className="text-right p-3">มูลค่า</th>
+                              <th className="text-center p-3">สถานะการใช้งาน</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {filteredPOs?.map((po) => (
+                            {/* Available POs */}
+                            {availablePOs.map((po) => (
                               <tr key={po.id} className="border-b hover:bg-muted/30">
                                 <td className="p-3">
                                   <Checkbox
@@ -585,6 +618,54 @@ export function InternationalTransferForm({
                                 <td className="p-3 text-right font-medium">
                                   ฿{po.total_amount?.toLocaleString()}
                                 </td>
+                                <td className="p-3 text-center">
+                                  <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                                    ใช้ได้
+                                  </Badge>
+                                </td>
+                              </tr>
+                            ))}
+                            
+                            {/* Used POs (disabled) */}
+                            {usedPOs.map((po) => (
+                              <tr key={po.id} className="border-b bg-muted/20 opacity-60">
+                                <td className="p-3">
+                                  <Checkbox
+                                    disabled
+                                    checked={false}
+                                    className="opacity-50"
+                                  />
+                                </td>
+                                <td className="p-3">
+                                  <div className="font-medium text-muted-foreground">{po.po_number}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {format(new Date(po.po_date), "dd/MM/yyyy")}
+                                  </div>
+                                </td>
+                                <td className="p-3">
+                                  <div className="text-muted-foreground">{po.customer_name}</div>
+                                  {po.customer_company && (
+                                    <div className="text-xs text-muted-foreground">
+                                      {po.customer_company}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="p-3">
+                                  <Badge 
+                                    variant="outline"
+                                    className="text-xs opacity-50"
+                                  >
+                                    {po.status === 'confirmed' ? 'ยืนยันแล้ว' : 'ส่งแล้ว'}
+                                  </Badge>
+                                </td>
+                                <td className="p-3 text-right font-medium text-muted-foreground">
+                                  ฿{po.total_amount?.toLocaleString()}
+                                </td>
+                                <td className="p-3 text-center">
+                                  <Badge variant="destructive" className="text-xs">
+                                    ใช้แล้ว
+                                  </Badge>
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -593,6 +674,13 @@ export function InternationalTransferForm({
                         {filteredPOs?.length === 0 && (
                           <div className="text-center py-8 text-muted-foreground">
                             {searchPO ? 'ไม่พบ PO ที่ค้นหา' : 'ไม่มี PO ที่สามารถเลือกได้'}
+                          </div>
+                        )}
+
+                        {filteredPOs && filteredPOs.length > 0 && availablePOs.length === 0 && (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <div className="text-orange-600 font-medium">PO ทั้งหมดถูกใช้งานแล้ว</div>
+                            <div className="text-xs mt-1">ไม่สามารถเลือก PO ที่ถูกสร้างคำขอโอนเงินแล้ว</div>
                           </div>
                         )}
                       </div>
