@@ -35,6 +35,7 @@ import PaymentRecords from "./pages/PaymentRecords";
 import InternationalTransfer from "./pages/InternationalTransfer";
 import SupplierManagement from "./pages/SupplierManagement";
 import PurchaseOrders from "./pages/PurchaseOrders";
+import CustomerRegistration from "./pages/CustomerRegistration";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/customer-registration" element={<CustomerRegistration />} />
             <Route path="/invitation" element={<InvitationAccept />} />
             <Route path="/" element={
               <ProtectedRoute>
